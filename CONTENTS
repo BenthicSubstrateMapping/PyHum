@@ -1,0 +1,14 @@
+
+./pyhum.py =  python program to run
+./test.DAT = some test data header
+
+test data:
+
+./PyHum/test_data/B000.IDX 
+./PyHum/test_data/B000.SON
+./PyHum/test_data/B001.IDX
+./PyHum/test_data/B001.SON
+./PyHum/test_data/B002.IDX
+./PyHum/test_data/B002.SON
+./PyHum/test_data/B003.IDX
+./PyHum/test_data/B003.SON
