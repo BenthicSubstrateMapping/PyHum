@@ -586,9 +586,22 @@ elif len(data)==3:
       data_dwnhi = data3
    del data3
 
-# pickle raw data to file
-with open(base[0]+'.pkl', 'wb') as fid:
-    cPickle.dump([dat, data_port, data_star, data_dwnlow, data_dwnhi], fid) 
+if 'data_dwnlow' in locals():
+   if 'data_dwnhi' not in locals():
+      # pickle raw data to file
+      with open(base[0]+'.pkl', 'wb') as fid:
+         cPickle.dump([dat, data_port, data_star, data_dwnlow], fid) 
+   else:
+      with open(base[0]+'.pkl', 'wb') as fid:
+         cPickle.dump([dat, data_port, data_star, data_dwnlow, data_dwnhi], fid) 
+else:
+   if 'data_dwnhi' in locals():
+      # pickle raw data to file
+      with open(base[0]+'.pkl', 'wb') as fid:
+         cPickle.dump([dat, data_port, data_star, data_dwnhi], fid) 
+   else:
+      with open(base[0]+'.pkl', 'wb') as fid:
+         cPickle.dump([dat, data_port, data_star], fid) 
 
 # here we just want the number of data values in the first packet. 
 # The rest of the record will be cropped to this
