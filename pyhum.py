@@ -799,7 +799,7 @@ if flag==2:
 elif flag==3:
    with open(sonpath+base+'.pkl') as f:
       dat, data_port, data_star, data_dwnhi = cPickle.load(f)
-      del dat, data_star, data_port, data_dwnlow
+      del dat, data_star, data_port
 
 # if there is a high frequency downward looking sonar recorded, we parse that data too
 if 'data_dwnhi' in locals():
