@@ -490,8 +490,6 @@ dat = decode_humdat(humfile, trans, transWGS84)
 base = humfile.split('.DAT') # get base of file name for output
 base = base[0].split('/')[-1]
 
-print sonpath+base+'.pkl'
-
 # get the SON files from this directory
 sonfiles = glob.glob(sonpath+'*.SON')
 
@@ -666,7 +664,7 @@ elif flag==3:
 elif flag==4:
    with open(sonpath+base+'.pkl') as f:
       dat, data_port, data_star = cPickle.load(f)
-      del dat, data_port, data_star
+      del dat, data_port
 
 # now starboard side
 c_star = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_star)(data_star[i][0],packet) for i in ind)
@@ -702,7 +700,7 @@ elif flag==3:
 elif flag==4:
    with open(sonpath+base+'.pkl') as f:
       dat, data_port, data_star = cPickle.load(f)
-      del dat, data_star, data_star
+      del dat, data_star
 
 # now we deal with the meta data (coordinates, speeds, and depths)
 d = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_meta)(i) for i in ind)
