@@ -5,13 +5,12 @@ pyhum.py
 INFO:
 Python script to read Humminbird DAT and associated SON files, and export data
 
-Version: 1.0
 Author:  Daniel Buscombe
            Grand Canyon Monitoring and Research Center
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0      Revision: January, 2014
+Version: 1.1      Revision: January, 2014
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -488,7 +487,7 @@ if sonpath[-1]!=os.sep:
 # get dat header from DAT file
 dat = decode_humdat(humfile, trans, transWGS84) 
 
-base = humfile.split('.DAT') # get base of file name for output
+#base = humfile.split('.DAT') # get base of file name for output
 
 # get the SON files from this directory
 sonfiles = glob.glob(sonpath+'*.SON')
@@ -589,18 +588,22 @@ elif len(data)==3:
 if 'data_dwnlow' in locals():
    if 'data_dwnhi' not in locals():
       # pickle raw data to file
-      with open(base[0]+'.pkl', 'wb') as fid:
+      flag = 1
+      with open(sonpath+'.pkl', 'wb') as fid:
          cPickle.dump([dat, data_port, data_star, data_dwnlow], fid) 
    else:
-      with open(base[0]+'.pkl', 'wb') as fid:
+      flag = 2
+      with open(sonpath+'.pkl', 'wb') as fid:
          cPickle.dump([dat, data_port, data_star, data_dwnlow, data_dwnhi], fid) 
 else:
    if 'data_dwnhi' in locals():
+      flag = 3
       # pickle raw data to file
-      with open(base[0]+'.pkl', 'wb') as fid:
+      with open(sonpath+'.pkl', 'wb') as fid:
          cPickle.dump([dat, data_port, data_star, data_dwnhi], fid) 
    else:
-      with open(base[0]+'.pkl', 'wb') as fid:
+      flag = 4
+      with open(sonpath+'.pkl', 'wb') as fid:
          cPickle.dump([dat, data_port, data_star], fid) 
 
 # here we just want the number of data values in the first packet. 
@@ -617,12 +620,19 @@ start_time = np.asarray(dat[2],'float')
 verbosity=0
 print "Dealing out data into variables ..."
 
+# delete variables to save memory
+del data_star
+if 'data_dwnlow' in locals():
+   del data_dwnlow
+if 'data_dwnhi' in locals():
+   del data_dwnhi
+
 # dole out the raw data into port and starboard scans
 # first port side
 c_port = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_port)(data_port[i][0],packet) for i in ind)
 c_port = np.squeeze(c_port).T
 # pickle raw data
-with open(base[0]+'raw_port.pkl', 'wb') as fid:
+with open(sonpath+'raw_port.pkl', 'wb') as fid:
    cPickle.dump([c_port], fid) 
 
 # make a plot if requested 
@@ -634,12 +644,31 @@ if doplot==1:
    del fig
    plt.close()
 
-del c_port
+del c_port, data_port
+
+# we're only reading in the data we need for the next segment to save memory
+# get only the starboard data
+if flag==1:
+   with open(sonpath+'.pkl') as f:
+      dat, data_port, data_star, data_dwnlow = cPickle.load(f)
+      del dat, data_port, data_dwnlow
+elif flag==2:
+   with open(sonpath+'.pkl') as f:
+      dat, data_port, data_star, data_dwnlow, data_dwnhi = cPickle.load(f)
+      del dat, data_port, data_dwnlow, data_dwnhi
+elif flag==3:
+   with open(sonpath+'.pkl') as f:
+      dat, data_port, data_star, data_dwnhi = cPickle.load(f)
+      del dat, data_port, data_dwnhi
+elif flag==4:
+   with open(sonpath+'.pkl') as f:
+      dat, data_port, data_star = cPickle.load(f)
+      del dat, data_port, data_star
 
 # now starboard side
 c_star = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_star)(data_star[i][0],packet) for i in ind)
 c_star = np.squeeze(c_star).T
-with open(base[0]+'raw_star.pkl', 'wb') as fid:
+with open(sonpath+'raw_star.pkl', 'wb') as fid:
    cPickle.dump([c_star], fid)
 
 # make a plot if requested 
@@ -651,7 +680,26 @@ if doplot==1:
    del fig
    plt.close()
 
-del c_star
+del c_star, data_star
+
+# we're only reading in the data we need for the next segment to save memory
+# get only the port data
+if flag==1:
+   with open(sonpath+'.pkl') as f:
+      dat, data_port, data_star, data_dwnlow = cPickle.load(f)
+      del dat, data_star, data_dwnlow
+elif flag==2:
+   with open(sonpath+'.pkl') as f:
+      dat, data_port, data_star, data_dwnlow, data_dwnhi = cPickle.load(f)
+      del dat, data_star, data_dwnlow, data_dwnhi
+elif flag==3:
+   with open(sonpath+'.pkl') as f:
+      dat, data_port, data_star, data_dwnhi = cPickle.load(f)
+      del dat, data_star, data_dwnhi
+elif flag==4:
+   with open(sonpath+'.pkl') as f:
+      dat, data_port, data_star = cPickle.load(f)
+      del dat, data_star, data_star
 
 # now we deal with the meta data (coordinates, speeds, and depths)
 d = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_meta)(i) for i in ind)
@@ -676,27 +724,39 @@ if doplot==1:
    del fig
    plt.close()
 
-del d
+del d, data_port
 
 caltime = np.asarray(start_time + time_s,'float')
 dep_m = np.asarray(dep_m,'float')+draft
 
-with open(base[0]+'meta.pkl', 'wb') as fid:
+with open(sonpath+'meta.pkl', 'wb') as fid:
    cPickle.dump([np.asarray(lat,'float'),np.asarray(lon,'float'),np.asarray(spd,'float'),np.asarray(time_s,'float'),np.asarray(e,'float'),np.asarray(n,'float'),dep_m,caltime], fid) 
 
+
 # add meta data to port scan raw and rewrite file
-with open(base[0]+'raw_port.pkl') as f:
+with open(sonpath+'raw_port.pkl') as f:
    c_port = cPickle.load(f)
-with open(base[0]+'raw_port.pkl', 'wb') as fid:
+with open(sonpath+'raw_port.pkl', 'wb') as fid:
    cPickle.dump([c_port,np.asarray(lat,'float'),np.asarray(lon,'float'),np.asarray(spd,'float'),np.asarray(time_s,'float'),np.asarray(e,'float'),np.asarray(n,'float'),dep_m,caltime], fid) 
 del c_port
 
 # add meta data to star scan raw and rewrite file
-with open(base[0]+'raw_star.pkl') as f:
+with open(sonpath+'raw_star.pkl') as f:
    c_star = cPickle.load(f)
-with open(base[0]+'raw_star.pkl', 'wb') as fid:
+with open(sonpath+'raw_star.pkl', 'wb') as fid:
    cPickle.dump([c_star,np.asarray(lat,'float'),np.asarray(lon,'float'),np.asarray(spd,'float'),np.asarray(time_s,'float'),np.asarray(e,'float'),np.asarray(n,'float'),dep_m,caltime], fid) 
 del c_star
+
+# we're only reading in the data we need for the next segment to save memory
+# get only the low freq. data
+if flag==1:
+   with open(sonpath+'.pkl') as f:
+      dat, data_port, data_star, data_dwnlow = cPickle.load(f)
+      del dat, data_port, data_star
+elif flag==2:
+   with open(sonpath+'.pkl') as f:
+      dat, data_port, data_star, data_dwnlow, data_dwnhi = cPickle.load(f)
+      del dat, data_port, data_star, data_dwnhi
 
 # if there is a low frequency downward looking sonar recorded, we parse that data too
 if 'data_dwnlow' in locals():
@@ -704,9 +764,10 @@ if 'data_dwnlow' in locals():
    ind = range(0,len(data_dwnlow))
    ind = ind[1::2]
    c_low = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_low)(data_dwnlow[i][0],packet) for i in ind)
+   del data_dwnlow
    c_low = np.squeeze(c_low).T
 
-   with open(base[0]+'raw_low.pkl', 'wb') as fid:
+   with open(sonpath+'raw_low.pkl', 'wb') as fid:
       cPickle.dump([c_low], fid)
 
    # make a plot if requested 
@@ -720,12 +781,22 @@ if 'data_dwnlow' in locals():
 
    del c_low
 
-   with open(base[0]+'raw_low.pkl') as f:
+   with open(sonpath+'raw_low.pkl') as f:
       c_low = cPickle.load(f)
-   with open(base[0]+'raw_low.pkl', 'wb') as fid:
+   with open(sonpath+'raw_low.pkl', 'wb') as fid:
       cPickle.dump([c_low,np.asarray(lat,'float'),np.asarray(lon,'float'),np.asarray(spd,'float'),np.asarray(time_s,'float'),np.asarray(e,'float'),np.asarray(n,'float'),dep_m,caltime], fid) 
    del c_low
 
+# we're only reading in the data we need for the next segment to save memory
+# get only the high freq. data
+if flag==2:
+   with open(sonpath+'.pkl') as f:
+      dat, data_port, data_star, data_dwnlow, data_dwnhi = cPickle.load(f)
+      del dat, data_star, data_port, data_dwnlow
+elif flag==3:
+   with open(sonpath+'.pkl') as f:
+      dat, data_port, data_star, data_dwnhi = cPickle.load(f)
+      del dat, data_star, data_port, data_dwnlow
 
 # if there is a high frequency downward looking sonar recorded, we parse that data too
 if 'data_dwnhi' in locals():
@@ -733,9 +804,10 @@ if 'data_dwnhi' in locals():
    ind = range(0,len(data_dwnhi))
    ind = ind[1::2]
    c_hi = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_hi)(data_dwnhi[i][0],packet) for i in ind)
+   del data_dwnhi
    c_hi = np.squeeze(c_hi).T
 
-   with open(base[0]+'raw_hi.pkl', 'wb') as fid:
+   with open(sonpath+'raw_hi.pkl', 'wb') as fid:
       cPickle.dump([c_hi], fid)
 
    # make a plot if requested 
@@ -750,9 +822,9 @@ if 'data_dwnhi' in locals():
    del c_hi
 
    # add meta data to high sonar raw
-   with open(base[0]+'raw_hi.pkl') as f:
+   with open(sonpath+'raw_hi.pkl') as f:
       c_hi = cPickle.load(f)
-   with open(base[0]+'raw_hi.pkl', 'wb') as fid:
+   with open(sonpath+'raw_hi.pkl', 'wb') as fid:
       cPickle.dump([c_hi,np.asarray(lat,'float'),np.asarray(lon,'float'),np.asarray(spd,'float'),np.asarray(time_s,'float'),np.asarray(e,'float'),np.asarray(n,'float'),dep_m,caltime], fid) 
    del c_hi
 

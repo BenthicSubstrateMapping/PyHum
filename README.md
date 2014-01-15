@@ -3,13 +3,12 @@ pyhum.py
 INFO:
 Python script to read Humminbird DAT and associated SON files, and export data
 
-Version: 1.0
 Author:  Daniel Buscombe
            Grand Canyon Monitoring and Research Center
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0      Revision: January, 2014
+Version: 1.1      Revision: January, 2014
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
