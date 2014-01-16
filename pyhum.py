@@ -636,6 +636,8 @@ c_port = np.squeeze(c_port).T
 with open(sonpath+base+'raw_port.pkl', 'wb') as fid:
    cPickle.dump([c_port], fid) 
 
+del data_port
+
 # make a plot if requested 
 if doplot==1:
    fig = plt.figure()
@@ -645,7 +647,7 @@ if doplot==1:
    del fig
    plt.close()
 
-del c_port, data_port
+del c_port
 
 # we're only reading in the data we need for the next segment to save memory
 # get only the starboard data
@@ -672,6 +674,8 @@ c_star = np.squeeze(c_star).T
 with open(sonpath+base+'raw_star.pkl', 'wb') as fid:
    cPickle.dump([c_star], fid)
 
+del data_star
+
 # make a plot if requested 
 if doplot==1:
    fig = plt.figure()
@@ -681,7 +685,7 @@ if doplot==1:
    del fig
    plt.close()
 
-del c_star, data_star
+del c_star
 
 # we're only reading in the data we need for the next segment to save memory
 # get only the port data
@@ -707,6 +711,8 @@ d = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_meta)(i) for
 del ind
 lon, lat, spd, time_s, dep_m, e, n = zip(*d)
 
+del data_port
+
 # make a plot if requested 
 if doplot==1:
    # plot longitude vs latitude
@@ -725,7 +731,7 @@ if doplot==1:
    del fig
    plt.close()
 
-del d, data_port
+del d
 
 caltime = np.asarray(start_time + time_s,'float')
 dep_m = np.asarray(dep_m,'float')+draft
@@ -733,20 +739,26 @@ dep_m = np.asarray(dep_m,'float')+draft
 with open(sonpath+base+'meta.pkl', 'wb') as fid:
    cPickle.dump([np.asarray(lat,'float'),np.asarray(lon,'float'),np.asarray(spd,'float'),np.asarray(time_s,'float'),np.asarray(e,'float'),np.asarray(n,'float'),dep_m,caltime], fid) 
 
-
 # add meta data to port scan raw and rewrite file
-with open(sonpath+base+'raw_port.pkl') as f:
-   c_port = cPickle.load(f)
-with open(sonpath+base+'raw_port.pkl', 'wb') as fid:
-   cPickle.dump([c_port,np.asarray(lat,'float'),np.asarray(lon,'float'),np.asarray(spd,'float'),np.asarray(time_s,'float'),np.asarray(e,'float'),np.asarray(n,'float'),dep_m,caltime], fid) 
-del c_port
+try:
+   with open(sonpath+base+'raw_port.pkl') as f:
+      c_port = cPickle.load(f)
+   with open(sonpath+base+'raw_port.pkl', 'wb') as fid:
+      cPickle.dump([c_port,np.asarray(lat,'float'),np.asarray(lon,'float'),np.asarray(spd,'float'),np.asarray(time_s,'float'),np.asarray(e,'float'),np.asarray(n,'float'),dep_m,caltime], fid) 
+   del c_port
+except:
+   print "meta data not written to %s" % (sonpath+base+'raw_port.pkl')
 
-# add meta data to star scan raw and rewrite file
-with open(sonpath+base+'raw_star.pkl') as f:
-   c_star = cPickle.load(f)
-with open(sonpath+base+'raw_star.pkl', 'wb') as fid:
-   cPickle.dump([c_star,np.asarray(lat,'float'),np.asarray(lon,'float'),np.asarray(spd,'float'),np.asarray(time_s,'float'),np.asarray(e,'float'),np.asarray(n,'float'),dep_m,caltime], fid) 
-del c_star
+try:
+   # add meta data to star scan raw and rewrite file
+   with open(sonpath+base+'raw_star.pkl') as f:
+      c_star = cPickle.load(f)
+   with open(sonpath+base+'raw_star.pkl', 'wb') as fid:
+      cPickle.dump([c_star,np.asarray(lat,'float'),np.asarray(lon,'float'),np.asarray(spd,'float'),np.asarray(time_s,'float'),np.asarray(e,'float'),np.asarray(n,'float'),dep_m,caltime], fid) 
+   del c_star
+except:
+   print "meta data not written to %s" % (sonpath+base+'raw_star.pkl')
+
 
 # we're only reading in the data we need for the next segment to save memory
 # get only the low freq. data
