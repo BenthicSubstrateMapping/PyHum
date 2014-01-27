@@ -8,7 +8,7 @@ Author:  Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.1      Revision: January, 2014
+Version: 1.2      Revision: January, 2014
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -50,17 +50,15 @@ python pyhum.py -i ./test.DAT -s ./test_data/ -p 0
 
 OUTPUTS:
 Several files are created which contain the raw and parsed data. They are prefixed by the root of the input file (*) followed by:
-1) *.pkl = all raw data
-2) *raw_port.pkl = port side scan, longitude, latitude, depth (m), speed (mph), easting (m), northing (m), time (unix epoch)
-3) *raw_star.pkl = starboard side scan, longitude, latitude, depth (m), speed (mph), easting (m), northing (m), time (unix epoch)
-4) *raw_low.pkl = low freq. downward sonar, longitude, latitude, depth (m), speed (mph), easting (m), northing (m), time (unix epoch)
-5) *raw_hi.pkl = high freq. downward sonar, longitude, latitude, depth (m), speed (mph), easting (m), northing (m), time (unix epoch)
-6) *meta.pkl = longitude, latitude, depth (m), speed (mph), easting (m), northing (m), time (unix epoch)
+1) *.mat = all raw data
+2) *raw_port.mat = port side scan, longitude, latitude, depth (m), speed (mph), easting (m), northing (m), time (unix epoch)
+3) *raw_star.mat = starboard side scan, longitude, latitude, depth (m), speed (mph), easting (m), northing (m), time (unix epoch)
+4) *raw_low.mat = low freq. downward sonar, longitude, latitude, depth (m), speed (mph), easting (m), northing (m), time (unix epoch)
+5) *raw_hi.mat = high freq. downward sonar, longitude, latitude, depth (m), speed (mph), easting (m), northing (m), time (unix epoch)
+6) *meta.mat = longitude, latitude, depth (m), speed (mph), easting (m), northing (m), time (unix epoch)
 
-These are python pickled data format. To read use, for example:
-
-with open('testraw_hi.pkl') as f:
-      c_hi,lon,lat,spd,e,n,time = cPickle.load(f)
+These are python .mat data format. To read use, for example:
+data = loadmat('testraw_hi.pkl')
 
 If doplot =1 (see above) the program will also create some rudimentary plots of the data (mainly to check everything is ok). These are stored in the same directory as the .son files and are hopefully self explanatory
 
