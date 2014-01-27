@@ -60,14 +60,14 @@ Several files are created which contain the raw and parsed data. They are prefix
 6) *meta.mat = longitude, latitude, depth (m), speed (mph), easting (m), northing (m), time (unix epoch)
 
 These are python .mat data format. To read use, for example:
-data = loadmat('testraw_hi.pkl')
+data = loadmat('testraw_hi.mat')
 
 If doplot =1 (see above) the program will also create some rudimentary plots of the data (mainly to check everything is ok). These are stored in the same directory as the .son files and are hopefully self explanatory
 
 PYTHON LIBRARIES YOU MAY NEED TO INSTALL:
 1) Joblib: http://pythonhosted.org/joblib/
 2) Pyproj: http://code.google.com/p/pyproj/
-3) cPickle: http://docs.python.org/release/2.5/lib/module-cPickle.html
+3) SciPy: http://www.scipy.org/scipylib/download.html
 4) Numpy: http://www.scipy.org/scipylib/download.html
 5) Matplotlib: http://matplotlib.org/downloads.html
 
