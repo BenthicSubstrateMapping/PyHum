@@ -23,7 +23,7 @@ http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 
 thanks to Barb Fagetter (blueseas@oceanecology.ca) for format info
 
-This software has been tested with Python 2.7 on Linux Fedora and Windows 7.
+This software has been tested with Python 2.7 on Linux Fedora 16, Ubuntu 12.4, and Windows 7.
 This software has been used only with Humminbird 998 series instruments. 
 
 SYNTAX:
