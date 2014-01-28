@@ -467,13 +467,13 @@ if not doplot:
 
 ##############################################################
 
-# for debugging
-#humfile = 'test.DAT'
-#sonpath = './test_data/'
-#cs2cs_args = "epsg:26949"
-#doplot = 1
-#numproc = 8
-#draft = 0
+## for debugging
+humfile = 'test.DAT'
+sonpath = './test_data/'
+cs2cs_args = "epsg:26949"
+doplot = 1
+numproc = 8
+draft = 0
 
 # get the transformation matrix of desired output coordinates
 try:
@@ -746,7 +746,8 @@ if 'data_dwnlow' in locals():
    # make an index of every other record
    ind = range(0,len(data_dwnlow))
    ind = ind[1::2]
-   c_low = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_low)(data_dwnlow[i][0][0],packet) for i in ind)
+   c_low = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_low)(data_dwnlow[i][0],packet) for i in ind)
+
    del data_dwnlow
    c_low = np.squeeze(c_low).T
    savemat(sonpath+base+'raw_low.mat', mdict={'c_low': c_low})
