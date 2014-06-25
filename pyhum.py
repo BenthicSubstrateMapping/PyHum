@@ -1,4 +1,3 @@
-
 """
 pyhum.py
 
@@ -10,7 +9,7 @@ Author:  Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.3      Revision: April, 2014
+Version: 1.4      Revision: June, 2014
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -23,8 +22,8 @@ http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 
 thanks to Barb Fagetter (blueseas@oceanecology.ca) for format info
 
-This software has been tested with Python 2.7 on Linux Fedora 16, Ubuntu 12.4, and Windows 7.
-This software has been used only with Humminbird 998 series instruments. 
+This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4, and Windows 7.
+This software has (so far) been used only with Humminbird 998 series instruments. 
 
 SYNTAX:
 python pyhum.py -i datfile -s sonpath
@@ -96,11 +95,23 @@ from tkFileDialog import askopenfilename, askdirectory
 import random as rand
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.lib.stride_tricks import as_strided as ast
 
+import matplotlib.colors as colors
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+rc('text', usetex=True)
+
+# suppress divide and invalid warnings
+np.seterr(divide='ignore')
+np.seterr(invalid='ignore')
 # =========================================================
 # =============== begin subfunctions ======================
 # ========================================================
-####################################################################
+
+# =========================================================
 def fread(file, num, typ):
     dat = arr(typ)
     dat.fromfile(file, num)
@@ -111,7 +122,7 @@ def fread(file, num, typ):
     else: 
         return(dat)
 
-####################################################################
+# =========================================================
 def decode_humdat(humfile, trans, transWGS84): 
 
     dat=[] #pre-allocate list
@@ -178,7 +189,7 @@ def decode_humdat(humfile, trans, transWGS84):
 
     return dat
 
-####################################################################
+# =========================================================
 def gethead(fid,trans, transWGS84): #cs2cs_args):
     hd = fread(fid, 3, 'B')
 
@@ -255,7 +266,7 @@ def gethead(fid,trans, transWGS84): #cs2cs_args):
 
     return head
 
-####################################################################
+# =========================================================
 def KnuthMorrisPratt(text, pattern):
 # Knuth-Morris-Pratt string matching
 # David Eppstein, UC Irvine, 1 Mar 2002
@@ -291,7 +302,7 @@ the match that caused the yield.'''
         if matchLen == len(pattern):
             yield startPos
 
-####################################################################
+# =========================================================
 def decode_son(sonfile, headbytes, trans, transWGS84):
     if os.name=='posix':
         fid = open(sonfile,'r')
@@ -328,8 +339,7 @@ def decode_son(sonfile, headbytes, trans, transWGS84):
         data.append(int_list) # grab the sonar data
     return data
 
-
-####################################################################
+# =========================================================
 def get_scans_hi(hi,packet): 
    # a function to obtain high frequency scans 
 
@@ -339,7 +349,7 @@ def get_scans_hi(hi,packet):
    c_hi = d[:packet]
    return c_hi
 
-####################################################################
+# =========================================================
 def get_scans_low(low,packet): 
    # a function to obtain low frequency scans 
 
@@ -349,7 +359,7 @@ def get_scans_low(low,packet):
    c_low = d[:packet] 
    return c_low 
 
-####################################################################
+# =========================================================
 def get_scans_port(port,packet):
    # a function to obtain port scans 
 
@@ -359,7 +369,7 @@ def get_scans_port(port,packet):
    c_port = d[:packet] 
    return c_port 
 
-####################################################################
+# =========================================================
 def get_scans_star(star,packet): 
    # a function to obtain starboard scans 
 
@@ -369,23 +379,91 @@ def get_scans_star(star,packet):
    c_star = d[:packet] 
    return c_star
 
-####################################################################
+# =========================================================
 def get_scans_meta(k): 
    # a function to obtain other data
    # lat, lon, spd, time_s, dep_m, e, n 
 
    return get_meta(k,15), get_meta(k,14), get_meta(k,7), get_meta(k,1)/1000, get_meta(k,8), get_meta(k,17), get_meta(k,16) 
 
-####################################################################
+# =========================================================
 def get_meta(k,index):
    # function to return the indexth value from the kth data packet
 
    tmp=np.squeeze(data_port[k-1])
    return float(tmp[index])
 
-####################################################################
+# =========================================================
 def custom_save(figdirec,root):
     plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
+
+# =========================================================
+def norm_shape(shape):
+    '''
+    Normalize numpy array shapes so they're always expressed as a tuple, 
+    even for one-dimensional shapes.
+    '''
+    try:
+        i = int(shape)
+        return (i,)
+    except TypeError:
+        # shape was not a number
+        pass
+ 
+    try:
+        t = tuple(shape)
+        return t
+    except TypeError:
+        # shape was not iterable
+        pass
+     
+    raise TypeError('shape must be an int, or a tuple of ints')
+
+# =========================================================
+# Return a sliding window over a in any number of dimensions
+def sliding_window(a,ws,ss = None,flatten = True):
+    '''
+    Return a sliding window over a in any number of dimensions
+    '''
+    if None is ss:
+        # ss was not provided. the windows will not overlap in any direction.
+        ss = ws
+    ws = norm_shape(ws)
+    ss = norm_shape(ss)
+    # convert ws, ss, and a.shape to numpy arrays
+    ws = np.array(ws)
+    ss = np.array(ss)
+    shape = np.array(a.shape)
+    # ensure that ws, ss, and a.shape all have the same number of dimensions
+    ls = [len(shape),len(ws),len(ss)]
+    if 1 != len(set(ls)):
+        raise ValueError(\
+        'a.shape, ws and ss must all have the same length. They were %s' % str(ls))
+     
+    # ensure that ws is smaller than a in every dimension
+    if np.any(ws > shape):
+        raise ValueError(\
+        'ws cannot be larger than a in any dimension.\
+ a.shape was %s and ws was %s' % (str(a.shape),str(ws)))
+    # how many slices will there be in each dimension?
+    newshape = norm_shape(((shape - ws) // ss) + 1)
+    # the shape of the strided array will be the number of slices in each dimension
+    # plus the shape of the window (tuple addition)
+    newshape += norm_shape(ws)
+    # the strides tuple will be the array's strides multiplied by step size, plus
+    # the array's strides (tuple addition)
+    newstrides = norm_shape(np.array(a.strides) * ss) + a.strides
+    a = ast(a,shape = newshape,strides = newstrides)
+    if not flatten:
+        return a
+    # Collapse strided so that it has one more dimension than the window.  I.e.,
+    # the new array is a flat list of slices.
+    meat = len(ws) if ws.shape else 0
+    firstdim = (np.product(newshape[:-meat]),) if ws.shape else ()
+    dim = firstdim + (newshape[-meat:])
+    # remove any dimensions with size 1
+    dim = filter(lambda i : i != 1,dim)
+    return a.reshape(dim), newshape
 
 # =========================================================
 # =============== begin program ======================
@@ -407,18 +485,18 @@ if __name__ == '__main__': # protecting code for parallel processing
     # get list of input arguments and pre-allocate arrays
     argv = sys.argv[1:]
     humfile = ''; sonpath = ''
-    cs2cs_args = ''; numproc = ''
+    cs2cs_args = ''; 
     draft = ''; doplot = ''
 
     # parse inputs to variables
     try:
-       opts, args = getopt.getopt(argv,"hi:s:c:n:d:p:")
+       opts, args = getopt.getopt(argv,"hi:s:c:d:p:")
     except getopt.GetoptError:
-         print 'pyhum.py -i <.DAT file> -s <sonpath (/where/*.SON/are/)> -c <cs2cs coordinate trandform arguments> -n <number of available processors> -d <draft (m)> -p <do plots, 0=no or 1=yes>'
+         print 'pyhum.py -i <.DAT file> -s <sonpath (/where/*.SON/are/)> -c <cs2cs coordinate trandform arguments> -d <draft (m)> -p <do plots, 0=no or 1=yes>'
          sys.exit(2)
     for opt, arg in opts:
        if opt == '-h':
-         print 'pyhum.py -i <.DAT file> -s <sonpath (/where/*.SON/are/)> -c <cs2cs coordinate trandform arguments> -n <number of available processors> -d <draft (m)> -p <do plots, 0=no or 1=yes>'
+         print 'pyhum.py -i <.DAT file> -s <sonpath (/where/*.SON/are/)> -c <cs2cs coordinate trandform arguments> -d <draft (m)> -p <do plots, 0=no or 1=yes>'
          sys.exit()
        elif opt in ("-i"):
           humfile = arg
@@ -426,8 +504,6 @@ if __name__ == '__main__': # protecting code for parallel processing
           sonpath = arg
        elif opt in ("-c"):
           cs2cs_args = arg
-       elif opt in ("-n"):
-          numproc = arg
        elif opt in ("-d"):
           draft = arg
        elif opt in ("-p"):
@@ -437,7 +513,7 @@ if __name__ == '__main__': # protecting code for parallel processing
     if not humfile:
        print 'An input file is required!!!!!!'
        Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
-       inputfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
+       humfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
 
     # prompt user to supply directory if no input sonpath is given
     if not sonpath:
@@ -452,18 +528,14 @@ if __name__ == '__main__': # protecting code for parallel processing
        print 'Son files are in %s' % (sonpath)
     if cs2cs_args:
        print 'cs2cs arguments are %s' % (cs2cs_args)
-    if numproc:
-       numproc = int(numproc)
-       print 'Number of processors: %s' % (str(numproc))
     if draft:
        draft = float(draft)
        print 'Draft: %s' % (str(draft))
     if doplot:
        doplot = int(doplot)
+       if doplot==0:
+          print "Plots will not be made"
 
-    if not numproc:
-       numproc = 8
-       print '[Default] Number of processors: %s' % (str(numproc))
     if not draft:
        draft = 0
        print '[Default] Draft = %s metres' % (str(draft))
@@ -472,19 +544,30 @@ if __name__ == '__main__': # protecting code for parallel processing
        cs2cs_args = "epsg:26949"
        print '[Default] cs2cs arguments are %s' % (cs2cs_args)
     if not doplot:
-       doplot = 1
+       if doplot != 0:
+          doplot = 1
+          print "[Default] Plots will be made"
+
+    # start timer
+    if os.name=='posix': # true if linux/mac or cygwin on windows
+       start = time.time()
+    else: # windows
+       start = time.clock()
 
     ##############################################################
 
     ## for debugging
-    humfile = r"test.DAT"; sonpath = "test_data"
-    cs2cs_args = "epsg:26949"; doplot = 1; numproc = 4; draft = 0
+    ##humfile = r"test.DAT"; sonpath = "test_data"
+    ##cs2cs_args = "epsg:26949"; doplot = 1; draft = 0
 
     try:
        from joblib import Parallel, delayed
+       print '[Default] Number of processors is %s' % (str(4))
        do_parallel = 1
+       print "processing will be done in parallel"
     except:
        do_parallel = 0
+       print "no joblib library - processing will be done in serial"
 
     # get the transformation matrix of desired output coordinates
     try:
@@ -513,13 +596,11 @@ if __name__ == '__main__': # protecting code for parallel processing
     if not sonfiles:
         sonfiles = glob.glob(os.getcwd()+os.sep+sonpath+'*.SON')
 
-    print sonfiles
-
     print "WARNING: Because files have to be read in byte by byte,"
     print "this could take a very long time ..."
 
     if do_parallel:
-        data = Parallel(n_jobs=numproc, verbose=100)(delayed(decode_son)(sonfiles[k], headbytes, trans, transWGS84) for k in range(len(sonfiles)))
+        data = Parallel(n_jobs=4, verbose=10)(delayed(decode_son)(sonfiles[k], headbytes, trans, transWGS84) for k in range(len(sonfiles)))
 
         # sometimes not all 4 sonars are recorded, either by accident or design, so here we have to make checks to see what data channel is what
         if len(data)==4:
@@ -629,17 +710,17 @@ if __name__ == '__main__': # protecting code for parallel processing
     if 'data_dwnlow' in locals():
        if 'data_dwnhi' not in locals():
           flag = 1
-          savemat(sonpath+base+'.mat', mdict={'dat':dat, 'data_port': data_port, 'data_star': data_star, 'data_dwnlow': data_dwnlow})
+          savemat(sonpath+base+'.mat', mdict={'dat':dat, 'data_port': data_port, 'data_star': data_star, 'data_dwnlow': data_dwnlow},oned_as='row')
        else:
           flag = 2
-          savemat(sonpath+base+'.mat', mdict={'dat':dat, 'data_port': data_port, 'data_star': data_star, 'data_dwnlow': data_dwnlow, 'data_dwnhi': data_dwnhi})
+          savemat(sonpath+base+'.mat', mdict={'dat':dat, 'data_port': data_port, 'data_star': data_star, 'data_dwnlow': data_dwnlow, 'data_dwnhi': data_dwnhi},oned_as='row')
     else:
        if 'data_dwnhi' in locals():
           flag = 3
-          savemat(sonpath+base+'.mat', mdict={'dat':dat, 'data_port': data_port, 'data_star': data_star, 'data_dwnhi': data_dwnhi})
+          savemat(sonpath+base+'.mat', mdict={'dat':dat, 'data_port': data_port, 'data_star': data_star, 'data_dwnhi': data_dwnhi},oned_as='row')
        else:
           flag = 4
-          savemat(sonpath+base+'.mat', mdict={'dat':dat, 'data_port': data_port, 'data_star': data_star})
+          savemat(sonpath+base+'.mat', mdict={'dat':dat, 'data_port': data_port, 'data_star': data_star},oned_as='row')
 
     # here we just want the number of data values in the first packet. 
     # The rest of the record will be cropped to this
@@ -647,7 +728,7 @@ if __name__ == '__main__': # protecting code for parallel processing
     try:
        packet = packet[0][12]
     except:
-        packet = packet[12]
+       packet = packet[12]
 
     # make an index of every other record
     ind = range(0,len(data_port))
@@ -668,81 +749,113 @@ if __name__ == '__main__': # protecting code for parallel processing
     # dole out the raw data into port and starboard scans
     # first port side
     if do_parallel:
-       c_port = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_port)(data_port[i][0],packet) for i in ind)
+       c_port = Parallel(n_jobs = 4, verbose=verbosity)(delayed(get_scans_port)(data_port[i][0],packet) for i in ind)
+       del data_port       
        c_port = np.squeeze(c_port).T
-       savemat(sonpath+base+'raw_port.mat', mdict={'c_port': c_port})
-       del data_port
+       savemat(sonpath+base+'raw_port.mat', mdict={'c_port': c_port},oned_as='row')
+
     else:
        c_port = []
        for i in ind:
            c_port.append(get_scans_port(data_port[i],packet))
-       c_port = np.asarray(c_port).T
-       savemat(sonpath+base+'raw_port.mat', mdict={'c_port': c_port})
        del data_port
+       c_port = np.asarray(c_port).T
+       savemat(sonpath+base+'raw_port.mat', mdict={'c_port': c_port},oned_as='row')
+
+    nx, ny = np.shape(c_port)
+    if ny>10000:
+       Z,inds = sliding_window(np.asarray(c_port,'float16'),(nx,10000))
+       del nx, ny, inds
+       del c_port
+    else:
+       Z = c_port
+       del c_port
 
     # make a plot if requested 
     if doplot==1:
-       fig = plt.figure()
-       plt.imshow(c_port,cmap='gray', origin = 'upper'); plt.colorbar(); 
-       plt.title('Portside Raw Scan'); plt.xlabel('Ping Number (Time)'); plt.ylabel('Range (Distance)')
-       custom_save(sonpath,'raw_port')
-       del fig
-       plt.close()
+       try:
+          for k in xrange(len(Z)):
+             fig = plt.figure()
+             plt.imshow(Z[k],cmap='gray', origin = 'upper'); plt.colorbar(); 
+             plt.title('Portside Raw Scan')
+             plt.xlabel('Ping Number (Time)')
+             plt.ylabel('Range (Distance)')
+             plt.axis('normal'); plt.axis('tight')
+             custom_save(sonpath,'raw_port'+str(k))
+             del fig
+       except:
+          fig = plt.figure()
+          plt.imshow(Z,cmap='gray', origin = 'upper'); plt.colorbar(); 
+          plt.title('Portside Raw Scan')
+          plt.xlabel('Ping Number (Time)')
+          plt.ylabel('Range (Distance)')
+          plt.axis('normal'); plt.axis('tight')
+          custom_save(sonpath,'raw_port')
+          del fig       
+    del Z
 
-    del c_port
-
-    # we're only reading in the data we need for the next segment to save memory
+    # only reading in the data we need for the next segment to save memory
     # get only the starboard data
-    if flag==1:
-       data_star = loadmat(sonpath+base+'.mat')['data_star']
-    elif flag==2:
-       data_star = loadmat(sonpath+base+'.mat')['data_star']
-    elif flag==3:
-       data_star = loadmat(sonpath+base+'.mat')['data_star']
-    elif flag==4:
-       data_star = loadmat(sonpath+base+'.mat')['data_star']
-
+    data_star = loadmat(sonpath+base+'.mat')['data_star']
     data_star = np.squeeze(data_star)
 
     if do_parallel:
        # now starboard side
        try:
-          c_star = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_star)(data_star[i][0],packet) for i in ind)
+          c_star = Parallel(n_jobs = 4, verbose=verbosity)(delayed(get_scans_star)(data_star[i],packet) for i in ind)
+          c_star = np.squeeze(c_star).T
+          savemat(sonpath+base+'raw_star.mat', mdict={'c_star': c_star},oned_as='row')
+          del data_star
        except:
-          c_star = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_star)(data_star[i],packet) for i in ind)
-       c_star = np.squeeze(c_star).T
-       savemat(sonpath+base+'raw_star.mat', mdict={'c_star': c_star})
-       del data_star
+          c_star = []
+          for i in ind:
+             c_star.append(get_scans_star(data_star[i],packet))
+          c_star = np.asarray(c_star).T
+          savemat(sonpath+base+'raw_star.mat', mdict={'c_star': c_star},oned_as='row')
+          del data_star       
     else:
        c_star = []
        for i in ind:
            c_star.append(get_scans_star(data_star[i],packet))
        c_star = np.asarray(c_star).T
-       savemat(sonpath+base+'raw_star.mat', mdict={'c_star': c_star})
+       savemat(sonpath+base+'raw_star.mat', mdict={'c_star': c_star},oned_as='row')
        del data_star
+
+    nx, ny = np.shape(c_star)
+    if ny>10000:
+       Z,inds = sliding_window(np.asarray(np.squeeze(c_star),'float16'),(nx,10000))
+       del nx, ny, inds
+       del c_star
+    else:
+       Z = c_star
+       del c_star
 
     # make a plot if requested 
     if doplot==1:
-       fig = plt.figure()
-       plt.imshow(c_star,cmap='gray', origin = 'upper'); plt.colorbar(); 
-       plt.title('Starboardside Raw Scan'); plt.xlabel('Ping Number (Time)'); plt.ylabel('Range (Distance)')
-       custom_save(sonpath,'raw_star')
-       del fig
-       plt.close()
+       try:
+          for k in xrange(len(Z)):
+             fig = plt.figure()
+             plt.imshow(Z[k],cmap='gray', origin = 'upper'); plt.colorbar(); 
+             plt.title('Starboardside Raw Scan')
+             plt.xlabel('Ping Number (Time)')
+             plt.ylabel('Range (Distance)')
+             plt.axis('normal'); plt.axis('tight')
+             custom_save(sonpath,'raw_star'+str(k))
+             del fig
+       except:
+          fig = plt.figure()
+          plt.imshow(Z,cmap='gray', origin = 'upper'); plt.colorbar(); 
+          plt.title('Starboardside Raw Scan')
+          plt.xlabel('Ping Number (Time)')
+          plt.ylabel('Range (Distance)')
+          plt.axis('normal'); plt.axis('tight')
+          custom_save(sonpath,'raw_star')
+          del fig      
+    del Z
 
-    del c_star
-
-    # we're only reading in the data we need for the next segment to save memory
+    # only reading in the data we need for the next segment to save memory
     # get only the port data
-    if flag==1:
-       data_port = loadmat(sonpath+base+'.mat')['data_port']
-    elif flag==2:
-       data_port = loadmat(sonpath+base+'.mat')['data_port']
-    elif flag==3:
-       data_port = loadmat(sonpath+base+'.mat')['data_port']
-    elif flag==4:
-       data_port = loadmat(sonpath+base+'.mat')['data_port']
-
+    data_port = loadmat(sonpath+base+'.mat')['data_port']
     data_port = np.squeeze(data_port)
 
     lon = []; lat = []; spd = []
@@ -759,77 +872,92 @@ if __name__ == '__main__': # protecting code for parallel processing
        # plot longitude vs latitude
        fig = plt.figure()
        plt.plot(lon,lat,'ko')
-       plt.title('Boat Course'); plt.xlabel('Longitude'); plt.ylabel('Latitude')
+       plt.title('Boat Course'); 
+       plt.xlabel('Longitude'); 
+       plt.ylabel('Latitude')
+       plt.axis('normal'); plt.axis('tight')
        custom_save(sonpath,'raw_trace')
        del fig
-       plt.close()
 
        # plot depth
        fig = plt.figure()
        plt.plot(dep_m,'k')
-       plt.title('Depth'); plt.xlabel('Ping Number (Time)'); plt.ylabel('Depth (m)')
+       plt.title('Depth'); 
+       plt.xlabel('Ping Number (Time)'); 
+       plt.ylabel('Depth (m)')
+       plt.axis('normal'); plt.axis('tight')
        custom_save(sonpath,'raw_depth')
        del fig
-       plt.close()
 
     caltime = np.asarray(start_time + time_s,'float')
     dep_m = np.asarray(dep_m,'float')+draft
 
-    savemat(sonpath+base+'meta.mat', mdict={'lat': np.asarray(lat,'float'), 'lon': np.asarray(lon,'float'), 'spd': np.asarray(spd,'float'), 'time_s': np.asarray(time_s,'float'), 'e': np.asarray(e,'float'), 'n': np.asarray(n,'float'), 'dep_m': dep_m, 'caltime': caltime })
+    savemat(sonpath+base+'meta.mat', mdict={'lat': np.asarray(lat,'float'), 'lon': np.asarray(lon,'float'), 'spd': np.asarray(spd,'float'), 'time_s': np.asarray(time_s,'float'), 'e': np.asarray(e,'float'), 'n': np.asarray(n,'float'), 'dep_m': np.asarray(dep_m,'float'), 'caltime': np.asarray(caltime,'float') },oned_as='row')
 
-    # add meta data to port scan raw and rewrite file
-    try:
-       c_port = loadmat(sonpath+base+'raw_port.mat')['c_port']
-       savemat(sonpath+base+'raw_port.mat', mdict={'c_port': c_port, 'lat': np.asarray(lat,'float'), 'lon': np.asarray(lon,'float'), 'spd': np.asarray(spd,'float'), 'time_s': np.asarray(time_s,'float'), 'e': np.asarray(e,'float'), 'n': np.asarray(n,'float'), 'dep_m': dep_m, 'caltime': caltime })
-       del c_port
-    except:
-       print "meta data not written to %s" % (sonpath+base+'raw_port.pkl')
-
-    # add meta data to star scan raw and rewrite file
-    try:
-       c_star = loadmat(sonpath+base+'raw_star.mat')['c_star']
-       savemat(sonpath+base+'raw_star.mat', mdict={'c_star': c_star, 'lat': np.asarray(lat,'float'), 'lon': np.asarray(lon,'float'), 'spd': np.asarray(spd,'float'), 'time_s': np.asarray(time_s,'float'), 'e': np.asarray(e,'float'), 'n': np.asarray(n,'float'), 'dep_m': dep_m, 'caltime': caltime })
-       del c_star
-    except:
-       print "meta data not written to %s" % (sonpath+base+'raw_star.pkl')
-
-    # we're only reading in the data we need for the next segment to save memory
+    # only reading in the data we need for the next segment to save memory
     # get only the low freq. data
     if flag==1:
        data_dwnlow = loadmat(sonpath+base+'.mat')['data_dwnlow']
     elif flag==2:
        data_dwnlow = loadmat(sonpath+base+'.mat')['data_dwnlow']
 
-    data_dwnlow = np.squeeze(data_dwnlow)
-
     # if there is a low frequency downward looking sonar recorded, we parse that data too
     if 'data_dwnlow' in locals():
+       data_dwnlow = np.squeeze(data_dwnlow)
        # make an index of every other record
        ind = range(0,len(data_dwnlow))
        ind = ind[1::2]
        if do_parallel:
           try:
-             c_low = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_low)(data_dwnlow[i][0],packet) for i in ind)
+             c_low = Parallel(n_jobs = 4, verbose=verbosity)(delayed(get_scans_low)(data_dwnlow[i],packet) for i in ind)
           except:
-             c_low = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_low)(data_dwnlow[i],packet) for i in ind)
+             print "something went wrong ... trying serial instead"
+             c_low = []
+             for i in ind:
+                c_low.append(get_scans_low(data_dwnlow[i],packet))
+             c_low = np.squeeze(np.asarray(c_low).T)
+             savemat(sonpath+base+'raw_low.mat', mdict={'c_low': c_low},oned_as='row')
+             del data_dwnlow         
        else:
           c_low = []
           for i in ind:
              c_low.append(get_scans_low(data_dwnlow[i],packet))
        c_low = np.squeeze(np.asarray(c_low).T)
-       savemat(sonpath+base+'raw_low.mat', mdict={'c_low': c_low})
+       savemat(sonpath+base+'raw_low.mat', mdict={'c_low': c_low},oned_as='row')
        del data_dwnlow
           
        # make a plot if requested 
        if doplot==1:
-          fig = plt.figure()
-          plt.imshow(c_low,cmap='gray', origin = 'upper'); plt.colorbar(); 
-          plt.title('Low Freq. Downward Raw Sonar'); plt.xlabel('Ping Number (Time)'); plt.ylabel('Range (Distance)')
-          custom_save(sonpath,'raw_dwnlow')
-          del fig
-          plt.close()
-       savemat(sonpath+base+'raw_low.mat', mdict={'c_low': c_low, 'lat': np.asarray(lat,'float'), 'lon': np.asarray(lon,'float'), 'spd': np.asarray(spd,'float'), 'time_s': np.asarray(time_s,'float'), 'e': np.asarray(e,'float'), 'n': np.asarray(n,'float'), 'dep_m': dep_m, 'caltime': caltime })
-       del c_low
+          nx, ny = np.shape(c_low)
+          if ny>10000:
+             Z,inds = sliding_window(np.asarray(np.squeeze(c_low),'float16'),(nx,10000))
+             del nx, ny, inds
+             del c_low
+          else:
+             Z = c_low
+             del c_low
+          try:
+             for k in xrange(len(Z)):
+                fig = plt.figure()
+                plt.imshow(Z[k],cmap='gray', origin = 'upper'); 
+                plt.colorbar(); 
+                plt.title('Low Freq. Downward Raw Sonar'); 
+                plt.xlabel('Ping Number (Time)'); 
+                plt.ylabel('Range (Distance)')
+                plt.axis('normal'); plt.axis('tight')
+                custom_save(sonpath,'raw_dwnlow'+str(k))
+                del fig
+          except:
+             fig = plt.figure()
+             plt.imshow(Z,cmap='gray', origin = 'upper'); 
+             plt.colorbar(); 
+             plt.title('Low Freq. Downward Raw Sonar'); 
+             plt.xlabel('Ping Number (Time)'); 
+             plt.ylabel('Range (Distance)')
+             plt.axis('normal'); plt.axis('tight')
+             custom_save(sonpath,'raw_dwnlow')
+             del fig         
+          del Z
 
     # we're only reading in the data we need for the next segment to save memory
     # get only the high freq. data
@@ -838,41 +966,97 @@ if __name__ == '__main__': # protecting code for parallel processing
     elif flag==3:
        data_dwnhi = loadmat(sonpath+base+'.mat')['data_dwnhi']
 
-    data_dwnhi = np.squeeze(data_dwnhi)
-
     # if there is a high frequency downward looking sonar recorded, we parse that data too
     if 'data_dwnhi' in locals():
+       data_dwnhi = np.squeeze(data_dwnhi)
        # make an index of every other record
        ind = range(0,len(data_dwnhi))
        ind = ind[1::2]
        if do_parallel:
           try:
-             c_hi = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_hi)(data_dwnhi[i][0],packet) for i in ind)
+             c_hi = Parallel(n_jobs = 4, verbose=verbosity)(delayed(get_scans_hi)(data_dwnhi[i],packet) for i in ind)
           except:
-             c_hi = Parallel(n_jobs = numproc, verbose=verbosity)(delayed(get_scans_hi)(data_dwnhi[i],packet) for i in ind)
+             print "something went wrong ... trying serial instead"
+             c_hi = []
+             for i in ind:
+                c_hi.append(get_scans_hi(data_dwnhi[i],packet))
+             c_hi = np.squeeze(np.asarray(c_hi).T)
+             savemat(sonpath+base+'raw_hi.mat', mdict={'c_hi': c_hi},oned_as='row')
+             del data_dwnhi
        else:
           c_hi = []
           for i in ind:
              c_hi.append(get_scans_hi(data_dwnhi[i],packet))
        c_hi = np.squeeze(np.asarray(c_hi).T)
-       savemat(sonpath+base+'raw_hi.mat', mdict={'c_hi': c_hi})
+       savemat(sonpath+base+'raw_hi.mat', mdict={'c_hi': c_hi},oned_as='row')
        del data_dwnhi
 
        # make a plot if requested 
        if doplot==1:
-          fig = plt.figure()
-          plt.imshow(c_hi,cmap='gray', origin = 'upper'); plt.colorbar(); 
-          plt.title('High Freq. Downward Raw Sonar'); plt.xlabel('Ping Number (Time)'); plt.ylabel('Range (Distance)')
-          custom_save(sonpath,'raw_dwnhi')
-          del fig
-          plt.close()
-     
-       savemat(sonpath+base+'raw_hi.mat', mdict={'c_hi': c_hi, 'lat': np.asarray(lat,'float'), 'lon': np.asarray(lon,'float'), 'spd': np.asarray(spd,'float'), 'time_s': np.asarray(time_s,'float'), 'e': np.asarray(e,'float'), 'n': np.asarray(n,'float'), 'dep_m': dep_m, 'caltime': caltime })
-       del c_hi
+          nx, ny = np.shape(c_hi)
+          if ny>10000:
+             Z,inds = sliding_window(np.asarray(c_hi,'float16'),(nx,10000))
+             del nx, ny, inds
+             del c_hi
+          else:
+             Z = c_hi
+             del c_hi
+          try:
+             for k in xrange(len(Z)):
+                fig = plt.figure()
+                plt.imshow(Z[k],cmap='gray', origin = 'upper'); 
+                plt.colorbar(); 
+                plt.title('High Freq. Downward Raw Sonar'); 
+                plt.xlabel('Ping Number (Time)'); 
+                plt.ylabel('Range (Distance)')
+                plt.axis('normal'); plt.axis('tight')
+                custom_save(sonpath,'raw_dwnhi'+str(k))
+                del fig
+          except:
+             fig = plt.figure()
+             plt.imshow(Z,cmap='gray', origin = 'upper'); 
+             plt.colorbar(); 
+             plt.title('High Freq. Downward Raw Sonar'); 
+             plt.xlabel('Ping Number (Time)'); 
+             plt.ylabel('Range (Distance)')
+             plt.axis('normal'); plt.axis('tight')
+             custom_save(sonpath,'raw_dwnhi')
+             del fig          
+          del Z
+
+    if os.name=='posix': # true if linux/mac
+       elapsed = (time.time() - start)
+    else: # windows
+       elapsed = (time.clock() - start)
+    print "Processing took ", elapsed , "seconds to analyse"
 
     print "Done!"
 
 
+#    # add meta data to port scan raw and rewrite file
+#    try:
+#       c_port = loadmat(sonpath+base+'raw_port.mat')['c_port']
+#       savemat(sonpath+base+'raw_port.mat', mdict={'c_port': c_port, 'lat': np.asarray(lat,'float'), 'lon': np.asarray(lon,'float'), 'spd': np.asarray(spd,'float'), 'time_s': np.asarray(time_s,'float'), 'e': np.asarray(e,'float'), 'n': np.asarray(n,'float'), 'dep_m': dep_m, 'caltime': caltime })
+#       del c_port
+#    except:
+#       print "meta data not written to %s" % (sonpath+base+'raw_port.pkl')
+#       del c_port
+
+#    # add meta data to star scan raw and rewrite file
+#    try:
+#       c_star = loadmat(sonpath+base+'raw_star.mat')['c_star']
+#       savemat(sonpath+base+'raw_star.mat', mdict={'c_star': c_star, 'lat': np.asarray(lat,'float'), 'lon': np.asarray(lon,'float'), 'spd': np.asarray(spd,'float'), 'time_s': np.asarray(time_s,'float'), 'e': np.asarray(e,'float'), 'n': np.asarray(n,'float'), 'dep_m': dep_m, 'caltime': caltime })
+#       del c_star
+#    except:
+#       print "meta data not written to %s" % (sonpath+base+'raw_star.pkl')
+#       del c_star
+
+#       savemat(sonpath+base+'raw_low.mat', mdict={'c_low': c_low, 'lat': np.asarray(lat,'float'), 'lon': np.asarray(lon,'float'), 'spd': np.asarray(spd,'float'), 'time_s': np.asarray(time_s,'float'), 'e': np.asarray(e,'float'), 'n': np.asarray(n,'float'), 'dep_m': dep_m, 'caltime': caltime })
+#       del c_low
+
+
+#       savemat(sonpath+base+'raw_hi.mat', mdict={'c_hi': c_hi, 'lat': np.asarray(lat,'float'), 'lon': np.asarray(lon,'float'), 'spd': np.asarray(spd,'float'), 'time_s': np.asarray(time_s,'float'), 'e': np.asarray(e,'float'), 'n': np.asarray(n,'float'), 'dep_m': dep_m, 'caltime': caltime })
+#       del c_hi
 
       #with open(sonpath+base+'.pkl', 'wb') as fid:
       #   cPickle.dump([dat, data_port, data_star, data_dwnlow], fid) 
