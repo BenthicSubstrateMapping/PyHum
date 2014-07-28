@@ -20,6 +20,8 @@ This software is in the public domain because it contains materials that origina
 For more information, see the official USGS copyright policy at 
 http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 
+Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government.
+
 This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4, and Windows 7.
 This software has (so far) been used only with Humminbird 998 series instruments. 
 

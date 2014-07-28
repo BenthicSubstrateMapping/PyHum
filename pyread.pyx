@@ -1,5 +1,28 @@
-# cython module for reading binary humminbird files
-# Daniel Buscombe, June 2014
+'''
+pyhum_read.pyx
+Part of PyHum software 
+
+INFO:
+Cython script to read Humminbird DAT and associated SON files
+
+Author:    Daniel Buscombe
+           Grand Canyon Monitoring and Research Center
+           United States Geological Survey
+           Flagstaff, AZ 86001
+           dbuscombe@usgs.gov
+Version: 1.0      Revision: July, 2014
+
+For latest code version please visit:
+https://github.com/dbuscombe-usgs
+
+This function is part of 'PyHum' software
+This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
+For more information, see the official USGS copyright policy at 
+http://www.usgs.gov/visual-id/credit_usgs.html#copyright
+
+Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government.
+'''
+
 from __future__ import generators
 from __future__ import division
 import numpy as np
@@ -372,5 +395,7 @@ cdef class pyread:
         cdef dict metadict={'lat': np.asarray(lat), 'lon': np.asarray(lon), 'spd': np.asarray(spd), 'time_s': np.asarray(time_s), 'e': np.asarray(e), 'n': np.asarray(n), 'dep_m': np.asarray(dep_m), 'caltime': np.asarray(caltime) }
         return metadict
 
+# cython pyread.pyx
+# gcc -c -fPIC -I/usr/include/python2.7/ pyread.c; gcc -shared pyread.o -o pyread.so
 
 

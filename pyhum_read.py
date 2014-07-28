@@ -10,7 +10,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0      Revision: June, 2014
+Version: 1.0      Revision: July, 2014
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -19,6 +19,8 @@ This function is part of 'PyHum' software
 This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
 For more information, see the official USGS copyright policy at 
 http://www.usgs.gov/visual-id/credit_usgs.html#copyright
+
+Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government.
 
 thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info
 
@@ -76,6 +78,9 @@ All of the above are available through pip (https://pypi.python.org/pypi/pip) an
 
 OTHER LIBRARIES (CYTHON) NEED TO BE COMPILED FOR SPEED:
 1) pyread.pyx
+2) cwt.pyx
+3) replace_nans.pyx
+- use the shell script "compile_pyhum.sh" on linux/mac
 
 '''
 
@@ -92,8 +97,6 @@ from tkFileDialog import askopenfilename, askdirectory
 
 #numerical
 import pyread
-# cython pyread.pyx
-# gcc -c -fPIC -I/usr/include/python2.7/ pyread.c; gcc -shared pyread.o -o pyread.so
 from numpy import shape
 from pyhum_utils import sliding_window
 
@@ -238,6 +241,12 @@ if __name__ == '__main__':
 
     if doplot==1:
 
+       import ppdrc
+       # phase preserving dynamic range compression
+       dat = ppdrc.ppdrc(data_port, 768)
+       data_port = dat.getdata()
+       del dat
+
        # port
        nx, ny = shape(data_port)
        if ny>10000:
@@ -274,6 +283,12 @@ if __name__ == '__main__':
           del fig
 
        del Z
+
+       dat = ppdrc.ppdrc(data_star, 768)
+       data_star = dat.getdata()
+       del dat
+
+
        # starboard
        nx, ny = shape(data_star)
        if ny>10000:
@@ -310,7 +325,13 @@ if __name__ == '__main__':
           del fig
 
        del Z
+
        if 'data_dwnlow' in locals():
+
+          dat = ppdrc.ppdrc(data_dwnlow, 768)
+          data_dwnlow = dat.getdata()
+          del dat
+
           # dwnlow
           nx, ny = shape(data_dwnlow)
           if ny>10000:
@@ -347,6 +368,11 @@ if __name__ == '__main__':
              del fig
 
        if 'data_dwnhi' in locals():
+
+          dat = ppdrc.ppdrc(data_dwnhi, 768)
+          data_dwnhi = dat.getdata()
+          del dat
+
           # dwnhigh
           nx, ny = shape(data_dwnhi)
           if ny>10000:
@@ -390,5 +416,7 @@ if __name__ == '__main__':
 
     print "Done!"
 
-
+    #%timeit -r3 data = pyread.pyread(sonfiles, humfile)
+    #%timeit -r3 data_port = data.getportscans()
+    #%timeit -r3 meta = data.getmetadata()
 
