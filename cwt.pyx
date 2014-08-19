@@ -1,36 +1,15 @@
-'''
-cwt.pyx
-Part of PyHum software 
-
-INFO:
-Cython script to carry out Morlet wavelet computations
-
-Author:    Daniel Buscombe
-           Grand Canyon Monitoring and Research Center
-           United States Geological Survey
-           Flagstaff, AZ 86001
-           dbuscombe@usgs.gov
-Version: 1.0      Revision: July, 2014
-
-For latest code version please visit:
-https://github.com/dbuscombe-usgs
-
-This function is part of 'PyHum' software
-This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
-For more information, see the official USGS copyright policy at 
-http://www.usgs.gov/visual-id/credit_usgs.html#copyright
-
-Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government.
-'''
-
+# cython module for wavelet computations
+# Daniel Buscombe, June-Aug 2014
 from __future__ import division
 import numpy as np
 cimport numpy as np
+cimport cython
+from libc.math cimport sqrt,log,abs
 
 # =========================================================
 cdef class Cwt:
     """
-    continuous Morelet wavelet transform
+    continuous Morlet wavelet transform
     Implements via the Fourier transform
     Returns an instance.
     """
@@ -45,9 +24,13 @@ cdef class Cwt:
     cdef object win
     cdef object density
     cdef object r
-                   
+            
     # =========================================================
-    def __init__(self, np.ndarray matrix, np.int largestscale, np.int notes, np.int win, np.int density):
+    @cython.boundscheck(False)
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
+    def __init__(self, np.ndarray[np.int8_t, ndim=2] matrix, int largestscale, int notes, int win, int density):
         """
         Continuous Morlet wavelet transform of data
 
@@ -61,108 +44,148 @@ cdef class Cwt:
         self.win = win
         self.density = density
         
-        cdef np.ndarray r = np.arange(1,self.win-1,self.density, dtype=np.int)
+        cdef float pi = 3.14159265
+        
+        cdef np.ndarray r
+        r = np.arange(1,self.win-1,self.density, dtype=np.int)
         self.r = r
+        cdef int lr = len(self.r)
+        cdef int i, scaleindex
         
-        cdef np.ndarray currentscale 
-        cdef np.ndarray s_omega         
-        cdef np.ndarray psihat 
-        cdef np.ndarray datahat          
+        cdef np.ndarray[np.float64_t, ndim=0] currentscale 
         
-        cdef np.float base2 = np.float(np.floor(np.log(self.win)/np.log(2) + 0.4999))
+        cdef double base2 
+        base2 = np.floor(log(self.win)/log(2) + 0.4999)
                    
-        cdef np.int ndata = np.int(2**(base2+1)) #len(data)
-        cdef np.int tmp = 0
+        cdef int ndata = int(2**(base2+1)) #len(data)
+        cdef int tmp = 0
         self.nscale = tmp
         self.scale = largestscale
         self._setscales(ndata,largestscale,notes)
-        cdef np.ndarray cwt = np.zeros((self.nscale,ndata,len(self.r)), np.complex64)
+        cdef np.ndarray[np.complex64_t, ndim=3] cwt = np.zeros((self.nscale,ndata,len(self.r)),dtype=np.complex64)
         self.cwt = cwt
-        cdef np.ndarray omega = np.array(range(0,np.int(ndata/2))+range(-np.int(ndata/2),0))*(2.0*np.pi/ndata)
+        cdef np.ndarray[np.float64_t, ndim=1] omega = np.empty(ndata, dtype=np.float64)
+        omega = np.array(range(0,np.int(ndata/2))+range(-np.int(ndata/2),0))*(2.0*pi/ndata)
         
-        for i from 0 <= i < len(self.r):  
+        cdef np.ndarray[np.int8_t,ndim=1] data = np.empty(self.win, dtype=np.int8)
+        cdef np.ndarray[np.float64_t,ndim=1] data2 = np.empty(ndata, dtype=np.float64)
+        cdef np.ndarray[np.complex128_t,ndim=1] datahat = np.empty(ndata, dtype=np.complex128)
+        cdef np.ndarray[np.float64_t,ndim=1] s_omega = np.empty(ndata, dtype=np.float64)
+        cdef np.ndarray[np.float64_t,ndim=1] psihat = np.empty(ndata, dtype=np.float64)
+
+        for i from 0 <= i < lr:  
            data = np.asarray( self._column(matrix, np.int(self.r[i]) ) )
-           data = self._pad2nxtpow2(data - np.mean(data), base2) 
+           data2 = self._pad2nxtpow2(data - np.mean(data), base2) 
                       
-           datahat = np.fft.fft(data)
+           datahat = np.fft.fft(data2)
            self.fftdata = datahat
       
            for scaleindex from 0 <= scaleindex < self.nscale:
               currentscale = np.asarray(self.scales[scaleindex])
               self.currentscale = currentscale  # for internal use
               s_omega = omega*currentscale
-              psihat = self._wf(s_omega) * np.sqrt(2.0*np.pi*currentscale)
+              psihat = self._wf(s_omega) * sqrt(2.0*pi*currentscale)
               self.cwt[scaleindex,0:ndata,i] = np.fft.ifft(psihat * datahat)        
         return
 
     # =========================================================
-    def _log2(self, np.float x):
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
+    cpdef int _log2(self, double x):
         '''
         utility function to return (integer) log2
         '''
-        return np.int(np.log(x+0.0001)/ np.log(2.0)+0.0001)
+        return int(log(x+0.0001)/ log(2.0)+0.0001)
         
-    # =========================================================        
-    def _setscales(self, np.int ndata, np.int largestscale, np.int notes):
+    # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
+    cpdef int _setscales(self, int ndata, int largestscale, int notes):
         """
         returns a log scale based on notes per ocave
         """
-        cdef np.int noctave = self._log2( ndata/largestscale/2 )
+        cdef int noctave = self._log2( ndata/largestscale/2 )
         self.nscale = notes*noctave
-        cdef np.ndarray scales = np.zeros(self.nscale,np.float)
+        cdef np.ndarray[np.float64_t, ndim=1] scales = np.empty(self.nscale,np.float64)
         self.scales = scales
         for j from 0 <= j < self.nscale:
-             self.scales[j] = ndata/(self.scale*(2.0**(np.float(self.nscale-1-j)/notes)))
-        return
+             self.scales[j] = ndata/(self.scale*(2.0**(self.nscale-1-j)/notes))
+        return 0
         
-    # =========================================================         
-    def _wf(self, np.ndarray s_omega):
+    # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
+    cpdef np.ndarray _wf(self, np.ndarray s_omega):
        """
        Morlet mother wavelet
        """    
-       cdef np.ndarray H = np.ones(np.shape(s_omega), np.int)
+       cdef np.ndarray[np.int64_t, ndim=1] H = np.ones(np.shape(s_omega), np.int64)
        return 0.75112554*( np.exp(-(s_omega-6.0)**2/2.0))*H
       
-    # =========================================================      
-    def _pad2nxtpow2(self, np.ndarray data, np.float base2):
+    # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
+    cpdef np.ndarray _pad2nxtpow2(self, np.ndarray data, double base2):
        """
        zero pad numpy array up to next power 2
        """
-       #cdef np.float base2 = np.float(np.floor(np.log(self.win)/np.log(2) + 0.4999))
-       cdef np.ndarray Y = np.zeros((1, np.int(2**(base2+1)) ), np.float)
+       cdef np.ndarray[np.float64_t, ndim=2] Y = np.zeros((1, np.int(2**(base2+1)) ), np.float64)
        Y.flat[np.arange(self.win)] = data
        return np.squeeze(Y)
       
     # =========================================================
-    def _column(self, np.ndarray matrix, np.int i):
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
+    cpdef list _column(self, np.ndarray matrix, int i):
        """
        return a column from a matrix
        """
        return [row[i] for row in matrix]          
 
     # =========================================================
-    def _getwave(self):
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
+    cpdef np.ndarray _getwave(self):
         """
         return power spectra
         """
-        cdef np.ndarray wave = np.zeros((self.nscale,self.win,len(self.r)), np.float)
+        cdef np.ndarray[np.float64_t, ndim=3] wave = np.empty((self.nscale,self.win,len(self.r)), np.float64)
         for i from 0 <= i < len(self.r):  
-           wave[:,:,i] = np.tile(self.scales**-1, (self.win,1)).T*(np.absolute(self.cwt[:,0:self.win,i])**2)
+           wave[:,:,i] = np.tile(self.scales**-1, (self.win,1)).T*(abs(self.cwt[:,0:self.win,i])**2)
         return wave
         
     # =========================================================
-    def getvar(self):
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
+    cpdef double getvar(self):
         """
         return variance of wave
         """
-        cdef np.ndarray n = np.r_[0:len(self.scales)]-(len(self.scales)-1)/2
+        cdef float pi = 3.14159265
+        cdef np.ndarray n
+        n = np.r_[0:len(self.scales)]-(len(self.scales)-1)/2
         wave = self._getwave()
         
-        cdef np.ndarray dat = np.var(np.var(wave.T,axis=1),axis=0)
+        cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64)
+        dat = np.var(np.var(wave.T,axis=1),axis=0)
 
-        dat = dat/np.sum(dat) * np.exp(-(0.5)*((np.pi/2)*n/((len(self.scales)-1)/2))**2)
+        dat = dat/np.sum(dat) * np.exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
         dat = dat/np.sum(dat)
            
-        return np.sqrt(np.sum(dat*((self.scales- np.sum(dat*self.scales) )**2)))
+        return sqrt(np.sum(dat*((self.scales- np.sum(dat*self.scales) )**2)))
         
         

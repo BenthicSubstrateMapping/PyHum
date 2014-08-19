@@ -1,37 +1,8 @@
-'''
-replace_nans.pyx
-Part of PyHum software 
-
-INFO:
-Cython script to replace nans in data using kernel methods
-
-Author:    Daniel Buscombe
-           Grand Canyon Monitoring and Research Center
-           United States Geological Survey
-           Flagstaff, AZ 86001
-           dbuscombe@usgs.gov
-Version: 1.0      Revision: July, 2014
-
-For latest code version please visit:
-https://github.com/dbuscombe-usgs
-
-This function is part of 'PyHum' software
-This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
-For more information, see the official USGS copyright policy at 
-http://www.usgs.gov/visual-id/credit_usgs.html#copyright
-
-Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government.
-'''
-
+# cython module for replacing nans
+# Daniel Buscombe, June-Aug 2014
 from __future__ import division
 import numpy as np
 cimport numpy as np
-
-DTYPEf = np.float64
-ctypedef np.float64_t DTYPEf_t
-
-DTYPEi = np.int32
-ctypedef np.int32_t DTYPEi_t
 
 # =========================================================
 cdef class RN:
@@ -41,7 +12,7 @@ cdef class RN:
    cdef object data
 
    # =========================================================
-   def __init__(self, np.ndarray array, int max_iter, float tol, int kernel_size=1, str method='localmean'):
+   def __init__(self, np.ndarray[np.float64_t, ndim=2] array, int max_iter, float tol, int kernel_size=1, str method='localmean'):
     """Replace NaN elements in an array using an iterative image inpainting algorithm.
     The algorithm is the following:
     1) For each element in the input array, replace it by a weighted average
@@ -67,24 +38,26 @@ cdef class RN:
     a copy of the input array, where NaN elements have been replaced.
     """
      
-    cdef int i, j, I, J, it, n, k, l
+    cdef int i, j, I, J, it, k, l
     cdef int n_invalids 
+    cdef double n
     
-    cdef np.ndarray filled = np.empty( [array.shape[0], array.shape[1]], dtype=DTYPEf)
-    cdef np.ndarray kernel = np.empty( (2*kernel_size+1, 2*kernel_size+1), dtype=DTYPEf )
+    cdef np.ndarray[np.float64_t, ndim=2] filled = np.empty( [array.shape[0], array.shape[1]], dtype=np.float64)
+    cdef np.ndarray[np.float64_t, ndim=2] kernel = np.empty( (2*kernel_size+1, 2*kernel_size+1), dtype=np.float64)
 
-    cdef np.ndarray[np.int_t, ndim=1] inans
-    cdef np.ndarray[np.int_t, ndim=1] jnans
+    cdef np.ndarray[np.int64_t, ndim=1] inans = np.empty( [array.shape[0]], dtype=np.int64)
+    cdef np.ndarray[np.int64_t, ndim=1] jnans = np.empty( [array.shape[1]], dtype=np.int64)
 
     # indices where array is NaN
     inans, jnans = np.nonzero( np.isnan(array) )
     
     # number of NaN elements
-    cdef int n_nans = len(inans)
+    cdef int n_nans 
+    n_nans = len(inans)
     
     # arrays which contain replaced values to check for convergence
-    cdef np.ndarray replaced_new = np.zeros( n_nans, dtype=DTYPEf)
-    cdef np.ndarray replaced_old = np.zeros( n_nans, dtype=DTYPEf)
+    cdef np.ndarray[np.float64_t, ndim=1] replaced_new = np.zeros( n_nans, dtype=np.float64)
+    cdef np.ndarray[np.float64_t, ndim=1] replaced_old = np.zeros( n_nans, dtype=np.float64)
     
     # depending on kernel type, fill kernel array
     if method == 'localmean':
@@ -120,7 +93,7 @@ cdef class RN:
             
             # initialize to zero
             filled[i,j] = 0.0
-            n = 0
+            n = 0.0
             
             # loop over the kernel
             #for I in xrange(2*kernel_size+1):

@@ -20,8 +20,6 @@ This software is in the public domain because it contains materials that origina
 For more information, see the official USGS copyright policy at 
 http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 
-Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government.
-
 This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4, and Windows 7.
 This software has (so far) been used only with Humminbird 998 series instruments. 
 
@@ -52,7 +50,7 @@ from numpy import array, product, isnan, min, max, convolve, isnan, ones, mean, 
 from numpy import nan as npnan
 from numpy.matlib import repmat
 
-from sklearn.cluster import KMeans
+from sklearn.cluster import MiniBatchKMeans
 from scipy.interpolate import RectBivariateSpline
 
 # suppress divide and invalid warnings
@@ -225,7 +223,7 @@ def cut_kmeans(w,numclusters):
    perform a k-means segmentation of image
    '''
    wc = w.reshape((-1, 1)) # We need an (n_sample, n_feature) array
-   k_means = KMeans(numclusters)
+   k_means = MiniBatchKMeans(numclusters)
    # fit the model
    k_means.fit(wc) 
    values = k_means.cluster_centers_.squeeze()

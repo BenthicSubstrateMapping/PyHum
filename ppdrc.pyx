@@ -1,38 +1,8 @@
-'''
-ppdrc.pyx
-Part of PyHum software 
-
-INFO:
-Cython script to tone map data using a phase preserving technique
-
-Author:    Daniel Buscombe
-           Grand Canyon Monitoring and Research Center
-           United States Geological Survey
-           Flagstaff, AZ 86001
-           dbuscombe@usgs.gov
-Version: 1.0      Revision: July, 2014
-
-For latest code version please visit:
-https://github.com/dbuscombe-usgs
-
-This function is part of 'PyHum' software
-This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
-For more information, see the official USGS copyright policy at 
-http://www.usgs.gov/visual-id/credit_usgs.html#copyright
-
-Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government.
-'''
 
 from __future__ import division
 import numpy as np
 cimport numpy as np
-
-DTYPEf = np.float64
-ctypedef np.float64_t DTYPEf_t
-
-DTYPEc = np.complex128
-ctypedef np.complex128_t DTYPEc_t
-
+cimport cython
 
 # =========================================================
 cdef class ppdrc:
@@ -40,7 +10,11 @@ cdef class ppdrc:
    cdef object res
 
    # =========================================================
-   def __init__(self, np.ndarray im, int wavelength=768, int n=2):
+   @cython.boundscheck(False)
+   @cython.cdivision(True)
+   @cython.wraparound(False)
+   @cython.nonecheck(False)
+   def __init__(self, np.ndarray[np.float64_t, ndim=2] im, int wavelength=768, int n=2):
 
 
       # Reference:
@@ -50,26 +24,25 @@ cdef class ppdrc:
 
       # translated from matlab code posted on:
       # http://www.csse.uwa.edu.au/~pk/research/matlabfns/PhaseCongruency/
-      cdef int cols
-      cdef int rows
+      cdef int cols, rows
       cdef float eps = 2.2204e-16
 
       rows,cols = np.shape(im)    
 
-      cdef np.ndarray E = np.empty( [rows, cols], dtype=DTYPEf)
-      cdef np.ndarray H = np.empty( [rows, cols], dtype=DTYPEf)
-      cdef np.ndarray res = np.empty( [rows, cols], dtype=DTYPEf)
-      cdef np.ndarray radius = np.empty( [rows, cols], dtype=DTYPEf)
-      cdef np.ndarray u1 = np.empty( [rows, cols], dtype=DTYPEf)
-      cdef np.ndarray u2 = np.empty( [rows, cols], dtype=DTYPEf)
-      cdef np.ndarray ph = np.empty( [rows, cols], dtype=DTYPEf)
-      cdef np.ndarray h1f = np.empty( [rows, cols], dtype=DTYPEf)
-      cdef np.ndarray h2f = np.empty( [rows, cols], dtype=DTYPEf)
-      cdef np.ndarray f = np.empty( [rows, cols], dtype=DTYPEf)
+      cdef np.ndarray[np.float64_t, ndim=2] E = np.empty( (rows, cols), dtype=np.float64)
+      cdef np.ndarray[np.float64_t, ndim=2] H = np.empty( (rows, cols), dtype=np.float64)
+      cdef np.ndarray[np.float64_t, ndim=2] res = np.empty( (rows, cols), dtype=np.float64)
+      cdef np.ndarray[np.float64_t, ndim=2] radius = np.empty( (rows, cols), dtype=np.float64)
+      cdef np.ndarray[np.float64_t, ndim=2] u1 = np.empty( (rows, cols), dtype=np.float64)
+      cdef np.ndarray[np.float64_t, ndim=2] u2 = np.empty( (rows, cols), dtype=np.float64)
+      cdef np.ndarray[np.float64_t, ndim=2] ph = np.empty( [rows, cols], dtype=np.float64)
+      cdef np.ndarray[np.float64_t, ndim=2] h1f = np.empty( (rows, cols), dtype=np.float64)
+      cdef np.ndarray[np.float64_t, ndim=2] h2f = np.empty( (rows, cols), dtype=np.float64)
+      cdef np.ndarray[np.float64_t, ndim=2] f = np.empty( (rows, cols), dtype=np.float64)
 
-      cdef np.ndarray IM = np.empty( [rows, cols], dtype=DTYPEc)
-      cdef np.ndarray H1 = np.empty( [rows, cols], dtype=DTYPEc)
-      cdef np.ndarray H2 = np.empty( [rows, cols], dtype=DTYPEc)
+      cdef np.ndarray[np.complex128_t, ndim=2] IM = np.empty( (rows, cols), dtype=np.complex128)
+      cdef np.ndarray[np.complex128_t, ndim=2] H1 = np.empty( (rows, cols), dtype=np.complex128)
+      cdef np.ndarray[np.complex128_t, ndim=2] H2 = np.empty( (rows, cols), dtype=np.complex128)
 
       IM = np.fft.fft2(im)
 
@@ -80,7 +53,7 @@ cdef class ppdrc:
       u1 = np.fft.ifftshift(u1)   # Quadrant shift to put 0 frequency at the corners
       u2 = np.fft.ifftshift(u2)
     
-      radius = np.sqrt(u1**2 + u2**2)
+      radius = np.sqrt(u1*u1 + u2*u2)
       # Matrix values contain frequency values as a radius from centre (but quadrant shifted)
     
       # Get rid of the 0 radius value in the middle (at top left corner after
@@ -100,13 +73,13 @@ cdef class ppdrc:
       h1f = np.real(np.fft.ifft2(H*H1*IM))
       h2f = np.real(np.fft.ifft2(H*H2*IM))
     
-      ph = np.arctan(f/np.sqrt(h1f**2 + h2f**2 + eps))
-      E = np.sqrt(f**2 + h1f**2 + h2f**2)
+      ph = np.arctan(f/np.sqrt(h1f*h1f + h2f*h2f + eps))
+      E = np.sqrt(f*f + h1f*h1f + h2f*h2f)
       res = np.sin(ph)*np.log1p(E)
       self.res = res
 
 
    # =========================================================    
-   def getdata(self):
+   cpdef np.ndarray getdata(self):
       return self.res
        

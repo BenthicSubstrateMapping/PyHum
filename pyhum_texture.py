@@ -3,14 +3,13 @@ pyhum_texture.py
 Part of PyHum software 
 
 INFO:
-Python script to read radiometrically corrected Humminbird data in MAT format (output from pyhum_correct.py) and perform a textural analysis using the spectral method of Buscombe et al (in prep) and produce some rudimentary plots
 
 Author:    Daniel Buscombe
            Grand Canyon Monitoring and Research Center
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0      Revision: July, 2014
+Version: 1.0      Revision: June, 2014
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -19,8 +18,6 @@ This function is part of 'PyHum' software
 This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
 For more information, see the official USGS copyright policy at 
 http://www.usgs.gov/visual-id/credit_usgs.html#copyright
-
-Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government.
 
 This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4, and Windows 7.
 This software has (so far) been used only with Humminbird 998 series instruments. 
@@ -64,6 +61,8 @@ OTHER LIBRARIES (CYTHON) NEED TO BE COMPILED FOR SPEED:
 1) pyread.pyx
 2) cwt.pyx
 3) replace_nans.pyx
+4) ppdrc.pyx
+5) spec_noise.pyx
 - use the shell script "compile_pyhum.sh" on linux/mac
 
 '''
@@ -87,7 +86,7 @@ import cwt
 from pyhum_utils import sliding_window, im_resize, cut_kmeans, histeq, rescale
 import spec_noise
 from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
-#import replace_nans
+import replace_nans
 from scipy.ndimage.filters import median_filter
 import ppdrc
    
@@ -270,15 +269,15 @@ if __name__ == '__main__': # protecting code for parallel processing
          print '[Default] Frequency is %s kHz' % (str(f))
 
       if not win:
-         win = 200
+         win = 100
          print '[Default] Window is %s square pixels' % (str(win))
 
       if not shift:
-         shift = 10
+         shift = 5
          print '[Default] Shift is %s pixels' % (str(shift))
 
       if not density:
-         density = 50
+         density = win/2
          print '[Default] Image will be sampled every %s pixels' % (str(density))
 
       if not numclasses:
@@ -286,7 +285,7 @@ if __name__ == '__main__': # protecting code for parallel processing
          print '[Default] Number of sediment classes: %s' % (str(numclasses))
 
       if not maxscale:
-         maxscale = 3
+         maxscale = 20
          print '[Default] Max scale as inverse fraction of data length: %s ' % (str(maxscale))
 
       if not notes:
@@ -309,11 +308,11 @@ if __name__ == '__main__': # protecting code for parallel processing
       c = 1450
       f = 455
       t = 0.108
-      density = 50
-      win = 200
-      shift = 10
+      win = 100
+      density = win/2
+      shift = 5
       numclasses = 4
-      maxscale = 3
+      maxscale = 20
       notes = 4
       doplot = 1
       shorepick = 0
@@ -439,7 +438,6 @@ if __name__ == '__main__': # protecting code for parallel processing
    merge3 = dat.getdata()
    del dat, merge2
 
-
    #merge3 = merge3[5000:10000,:]
    Ny, Nx = np.shape(merge3)
 
@@ -472,17 +470,17 @@ if __name__ == '__main__': # protecting code for parallel processing
       try:
          print "Sliding window with shift= %s" % (str(shift))
          if numsegs==1:
-            Z,ind = sliding_window(np.asarray(Zt,'float16'),(win,win),(shift,shift)) #merge3
+            Z,ind = sliding_window(np.asarray(Zt,'int8'),(win,win),(shift,shift)) #float16
          else:
-            Z,ind = sliding_window(np.asarray(Zt[kk],'float16'),(win,win),(shift,shift)) #merge3
+            Z,ind = sliding_window(np.asarray(Zt[kk],'int8'),(win,win),(shift,shift)) #float16
       except:
          print "Sliding window failed with shift= %s, memory error" % (str(shift))
          shift = shift+10
          print "trying shift= %s" % (str(shift))
          if numsegs==1:
-            Z,ind = sliding_window(np.asarray(Zt,'float16'),(win,win),(shift,shift)) #merge3
+            Z,ind = sliding_window(np.asarray(Zt,'int8'),(win,win),(shift,shift)) #float16
          else:
-            Z,ind = sliding_window(np.asarray(Zt[kk],'float16'),(win,win),(shift,shift)) #merge3
+            Z,ind = sliding_window(np.asarray(Zt[kk],'int8'),(win,win),(shift,shift)) #float16
 
       try:
          print "Carrying out wavelet calculations ... round 1 ..."
@@ -524,7 +522,6 @@ if __name__ == '__main__': # protecting code for parallel processing
       elapsed = (clock() - start)
    print "Processing took ", elapsed/60 , "minutes to analyse"
 
-
    SRT = np.hstack(SRT)
 
    Snn = SRT.copy()*1/ft
@@ -532,7 +529,13 @@ if __name__ == '__main__': # protecting code for parallel processing
    del SRT
    Snn = np.asarray(Snn,'float32')
 
+   # replace nans using infilling algorithm
+   rn = replace_nans.RN(Snn,1000,0.01,2,'localmean')
+   Snn = rn.getdata()
+   del rn   
+
    Snn = median_filter(Snn,(int(Nx/200),int(Ny/200)))
+   
    S = im_resize(Snn,Nx,Ny)
    del Snn
 

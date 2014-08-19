@@ -10,7 +10,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0      Revision: July, 2014
+Version: 1.0      Revision: June, 2014
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -19,8 +19,6 @@ This function is part of 'PyHum' software
 This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
 For more information, see the official USGS copyright policy at 
 http://www.usgs.gov/visual-id/credit_usgs.html#copyright
-
-Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government.
 
 thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info
 
