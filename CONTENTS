@@ -1,14 +1,14 @@
 PyHum
 
 INFO:
-Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe et al (in prep), "Automated riverbed sediment classification using low-cost sidescan sonar", to be submitted to Journal of Hydraulic Engineering
+Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", submitted to Journal of Hydraulic Engineering, Sept 2014
 
 Author:    Daniel Buscombe
            Grand Canyon Monitoring and Research Center
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0      Revision: July, 2014
+Version: 1.0      Revision: September, 2014
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
