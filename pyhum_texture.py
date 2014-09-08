@@ -80,6 +80,9 @@ from joblib import Parallel, delayed, cpu_count
 from Tkinter import Tk
 from tkFileDialog import askopenfilename, askdirectory
 
+import warnings
+warnings.simplefilter('ignore', RuntimeWarning)
+
 # numerical
 import numpy as np
 import cwt
@@ -527,7 +530,7 @@ if __name__ == '__main__': # protecting code for parallel processing
    Snn = SRT.copy()*1/ft
    Snn[Snn<0.05] = 0
    del SRT
-   Snn = np.asarray(Snn,'float32')
+   Snn = np.asarray(Snn,'float64')
 
    # replace nans using infilling algorithm
    rn = replace_nans.RN(Snn,1000,0.01,2,'localmean')
