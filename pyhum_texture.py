@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0      Revision: June, 2014
+Version: 1.1      Revision: Sept, 2014
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -86,12 +86,13 @@ warnings.simplefilter('ignore', RuntimeWarning)
 # numerical
 import numpy as np
 import cwt
-from pyhum_utils import sliding_window, im_resize, cut_kmeans, histeq, rescale
+from pyhum_utils import sliding_window, im_resize, cut_kmeans, histeq, rescale, id_generator
 import spec_noise
 from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
 import replace_nans
 from scipy.ndimage.filters import median_filter
 import ppdrc
+from fractions import gcd
    
 # plotting
 import matplotlib.pyplot as plt
@@ -122,22 +123,6 @@ def custom_save(figdirec,root):
     plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
 
 # =========================================================
-def window_append(Z,im,ws):
-    '''
-    append a window to windowed data
-    '''
-    # append the last chunk and make a list
-    if len(Z)==np.shape(Z)[0]:
-       return im, 1
-    else:
-       tmp = im[:,len(Z)*ws:]
-       Zb = np.hstack((Z[-1],tmp))
-    Z = Z[:-1,:,:]
-    Z = Z.tolist()
-    Z.append(Zb)
-    return Z, len(Z)
-
-# =========================================================
 # =============== parse out inputs ======================
 # ========================================================= 
 if __name__ == '__main__': # protecting code for parallel processing
@@ -163,17 +148,17 @@ if __name__ == '__main__': # protecting code for parallel processing
       win = ''; shift = ''; doplot = ''
       density = ''; numclasses = ''
       maxscale = ''; notes = ''
-      shorepick = ''
+      shorepick = ''; do_two = ''
 
       # parse inputs to variables
       try:
-         opts, args = getopt.getopt(argv,"hi:s:c:t:f:S:w:d:N:m:n:p:x:")
+         opts, args = getopt.getopt(argv,"hi:s:c:t:f:S:w:d:N:m:n:p:x:T:")
       except getopt.GetoptError:
-           print 'pyhum_texture.py -i <humfile> -s sonpath [[-c <speed sound water (m/s)> -t <transducer length (m)> -f <frequency (kHz)> -S <shift size (pixels)> -w <window size (pixels)> -d <density of sampling (pixels)> -N <number of classes> -m <max scale as inverse fraction of data length> -n <notes per octave> -p <doplot> -x <manual pick shoreline>]]'
+           print 'pyhum_texture.py -i <humfile> -s sonpath [[-c <speed sound water (m/s)> -t <transducer length (m)> -f <frequency (kHz)> -S <shift size (pixels)> -w <window size (pixels)> -d <density of sampling (pixels)> -N <number of classes> -m <max scale as inverse fraction of data length> -n <notes per octave> -p <doplot> -x <manual pick shoreline> -T <do two sweeps of data analysis>]]'
            sys.exit(2)
       for opt, arg in opts:
          if opt == '-h':
-           print 'pyhum_texture.py -i <humfile> -s sonpath [[-c <speed sound water (m/s)> -t <transducer length (m)> -f <frequency (kHz)> -S <shift size (pixels)> -w <window size (pixels)> -d <density of sampling (pixels)> -N <number of classes>  -m <max scale as inverse fraction of data length> -n <notes per octave> -p <doplot> -x <manual pick shoreline>]]'
+           print 'pyhum_texture.py -i <humfile> -s sonpath [[-c <speed sound water (m/s)> -t <transducer length (m)> -f <frequency (kHz)> -S <shift size (pixels)> -w <window size (pixels)> -d <density of sampling (pixels)> -N <number of classes>  -m <max scale as inverse fraction of data length> -n <notes per octave> -p <doplot> -x <manual pick shoreline> -T <do two sweeps of data analysis>]]'
            sys.exit()
          elif opt in ("-i"):
             humfile = arg
@@ -201,7 +186,9 @@ if __name__ == '__main__': # protecting code for parallel processing
             doplot = arg
          elif opt in ("-x"):
             shorepick = arg
-                            
+         elif opt in ("-T"):
+            do_two = arg
+                                        
       # prompt user to supply file if no input file given
       if not humfile:
          print 'An input file is required!!!!!!'
@@ -233,7 +220,7 @@ if __name__ == '__main__': # protecting code for parallel processing
          print 'Window is %s square pixels' % (str(win))
       if shift:
          shift = np.asarray(shift,int)
-         print 'Shift is %s pixels' % (str(shift))
+         print 'Min shift is %s pixels' % (str(shift))
       if density:
          density = np.asarray(density,int)
          print 'Image will be sampled every %s pixels' % (str(density))
@@ -256,6 +243,13 @@ if __name__ == '__main__': # protecting code for parallel processing
             print 'Shore picking is manual'
          else: 
             print 'Shore picking is auto'
+      if do_two:
+         do_two = np.asarray(do_two,int)
+         if do_two==1:
+            print 'Two sweeps of data (takes twice as long)'
+         else: 
+            print 'One sweep of data'      
+      
       
       print '[Default] Number of processors is %s' % (str(cpu_count()))
 
@@ -276,8 +270,8 @@ if __name__ == '__main__': # protecting code for parallel processing
          print '[Default] Window is %s square pixels' % (str(win))
 
       if not shift:
-         shift = 5
-         print '[Default] Shift is %s pixels' % (str(shift))
+         shift = 2
+         print '[Default] Min shift is %s pixels' % (str(shift))
 
       if not density:
          density = win/2
@@ -304,6 +298,10 @@ if __name__ == '__main__': # protecting code for parallel processing
          shorepick = 0
          print '[Default] Shore picking is auto'
 
+      if not do_two:
+         do_two = 0
+         print '[Default] One sweep of data'
+
 
    elif debug==1:
       humfile = 'test.DAT'
@@ -313,12 +311,13 @@ if __name__ == '__main__': # protecting code for parallel processing
       t = 0.108
       win = 100
       density = win/2
-      shift = 5
+      shift = 2
       numclasses = 4
       maxscale = 20
       notes = 4
       doplot = 1
       shorepick = 0
+      do_two = 0
 
    ########################################################
    ########################################################
@@ -444,19 +443,30 @@ if __name__ == '__main__': # protecting code for parallel processing
    #merge3 = merge3[5000:10000,:]
    Ny, Nx = np.shape(merge3)
 
-   # grab port side scan with 100 pixel overlap into starboard
-   #merge3,ind = sliding_window(merge3,(int(Ny/2)+100,Nx))
-
-   #merge3, cdf = histeq(merge2.copy(),128)
-   #del merge2, cdf
-   #merge3 = np.asarray(merge3,'float16')
-
    # end of pre-processing
    
+   # get optimal number of slices
+   if Nx%2==0:
+      H = []
+      for k in xrange(3,30):
+         H.append(gcd(Nx,Nx/k))
+      hslice = np.max(H)
+      print "processing into %s slices" % str(Nx/hslice) 
+   else:
+      merge3 = np.hstack( (merge3,np.ones((Ny,1))) )
+      Ny, Nx = np.shape(merge3)
+      H = []
+      for k in xrange(3,30):
+         H.append(gcd(Nx,Nx/k))
+      hslice = np.max(H)
+      print "processing into %s slices" % str(Nx/hslice)      
+   
    # get windowed data
-   Zt,ind = sliding_window(merge3,(Ny,1000))
-   Zt,numsegs = window_append(Zt,merge3,1000)
+   Zt,ind = sliding_window(merge3,(Ny,hslice))
+    
+   #Zt,numsegs = window_append(Zt,merge3,500)
    del merge3
+   numsegs = len(Zt)
 
    # start timer
    if os.name=='posix': # true if linux/mac or cygwin on windows
@@ -478,22 +488,39 @@ if __name__ == '__main__': # protecting code for parallel processing
             Z,ind = sliding_window(np.asarray(Zt[kk],'int8'),(win,win),(shift,shift)) #float16
       except:
          print "Sliding window failed with shift= %s, memory error" % (str(shift))
-         shift = shift+10
-         print "trying shift= %s" % (str(shift))
-         if numsegs==1:
-            Z,ind = sliding_window(np.asarray(Zt,'int8'),(win,win),(shift,shift)) #float16
-         else:
-            Z,ind = sliding_window(np.asarray(Zt[kk],'int8'),(win,win),(shift,shift)) #float16
-
+         
+         shift = shift+1       
+         Z = None
+         while Z is None:         
+            try:
+               print "trying shift= %s" % (str(shift))
+               if numsegs==1:
+                  Z,ind = sliding_window(np.asarray(Zt,'int8'),(win,win),(shift,shift)) #float16
+               else:
+                  Z,ind = sliding_window(np.asarray(Zt[kk],'int8'),(win,win),(shift,shift)) #float16
+            except:
+               shift = shift+1    
+             
+      filename = 'tmpfile'+id_generator()+'.dat'    
+      print "Memory mapping the data"
+      # create memory mapped file for Z
+      fp = np.memmap(filename, dtype='int8', mode='w+', shape=np.shape(Z))
+      fp[:] = Z[:]
+      del fp
+      shapeZ = np.shape(Z)
+      del Z
+      #we are only going to access the portion of memory required
+      newfp = np.memmap(filename, dtype='int8', mode='r', shape=shapeZ)
+	  
       try:
          print "Carrying out wavelet calculations ... round 1 ..."
-         print "%s windows to process with a density of %s" % (str(len(Z)), str(density))
+         print "%s windows to process with a density of %s" % (str(len(newfp)), str(density)) #% (str(len(Z)), str(density))
          # do the wavelet clacs and get the stats
-         d = Parallel(n_jobs = -1, verbose=1)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+         d = Parallel(n_jobs = -1, verbose=1)(delayed(parallel_me)(newfp[k], maxscale, notes, win, density) for k in xrange(len(newfp)))
       except:
          print "memory error: trying a lower pre-dispatch"
          print "Carrying out wavelet calculations ... port ... takes a long time"
-         d = Parallel(n_jobs = -1, pre_dispatch='1000*n_jobs', verbose=1)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+         d = Parallel(n_jobs = 1, verbose=1)(delayed(parallel_me)(newfp[k], maxscale, notes, win, density) for k in xrange(len(newfp)))
 
       #del Z
 
@@ -502,22 +529,30 @@ if __name__ == '__main__': # protecting code for parallel processing
       srt = np.reshape(d , ( ind[0], ind[1] ) )
       del d
 
-      try:
-         print "Carrying out wavelet calculations ... round 2 ..."
-         print "%s windows to process with a density of %s" % (str(len(Z)), str(density))
-         # do the wavelet clacs and get the stats
-         d = Parallel(n_jobs = -1, verbose=1)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
-      except:
-         print "memory error: trying a lower pre-dispatch"
-         print "Carrying out wavelet calculations ... port ... takes a long time"
-         d = Parallel(n_jobs = -1, pre_dispatch='1000*n_jobs', verbose=1)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+      if do_two==1: # analyze transpose as well
+         try:
+            print "Carrying out wavelet calculations ... round 2 ..."
+            print "%s windows to process with a density of %s" % (str(len(newfp)), str(density))
+            # do the wavelet clacs and get the stats
+            d = Parallel(n_jobs = -1, verbose=1)(delayed(parallel_me)(newfp[k].T, maxscale, notes, win, density) for k in xrange(len(newfp)))
+         except:
+            print "memory error: trying a lower pre-dispatch"
+            print "Carrying out wavelet calculations ... port ... takes a long time"
+            d = Parallel(n_jobs = 1, verbose=1)(delayed(parallel_me)(newfp[k].T, maxscale, notes, win, density) for k in xrange(len(newfp)))
 
-      srt2 = np.reshape(d , ( ind[0], ind[1] ) )
-      del d
-      del Z
+         srt2 = np.reshape(d , ( ind[0], ind[1] ) )
+         del d
+         del newfp #Z
 
-      SRT.append(srt+srt2)
-      del srt, srt2
+         SRT.append(srt+srt2)
+         del srt, srt2
+         
+      else: # just one
+      
+         SRT.append(srt)
+         del srt, newfp
+      
+      os.remove(filename)
 
    if os.name=='posix': # true if linux/mac
       elapsed = (time() - start)
@@ -527,8 +562,8 @@ if __name__ == '__main__': # protecting code for parallel processing
 
    SRT = np.hstack(SRT)
 
-   Snn = SRT.copy()*1/ft
-   Snn[Snn<0.05] = 0
+   Snn = shift*(SRT.copy()*1/(ft**0.5))
+   #Snn[Snn<0.05] = 0
    del SRT
    Snn = np.asarray(Snn,'float64')
 
@@ -537,13 +572,10 @@ if __name__ == '__main__': # protecting code for parallel processing
    Snn = rn.getdata()
    del rn   
 
-   Snn = median_filter(Snn,(int(Nx/200),int(Ny/200)))
+   Snn = median_filter(Snn,(int(Nx/100),int(Ny/100)))
    
    S = im_resize(Snn,Nx,Ny)
    del Snn
-
-   #mask = mask[5000:10000,:]
-   #bw2 = bw2[5000:10000,:]
 
    S[mask==0] = np.nan
    S[bw2==1] = np.nan
@@ -554,8 +586,6 @@ if __name__ == '__main__': # protecting code for parallel processing
    port_mg_la = np.asarray(loadmat(sonpath+base+'port_la.mat')['port_mg_la'],'float64')
 
    merge = np.vstack((np.flipud(port_mg_la),star_mg_la))
-   #merge = merge[5000:10000,:]
-
 
    extent = np.shape(merge)[0]   
    del star_mg_la, port_mg_la
@@ -679,4 +709,31 @@ if __name__ == '__main__': # protecting code for parallel processing
    print "Processing took ", elapsed/60 , "minutes to analyse"
 
    print "Done!"
+
+
+   #mask = mask[5000:10000,:]
+   #bw2 = bw2[5000:10000,:]
+   
+## =========================================================
+#def window_append(Z,im,ws):
+#    '''
+#    append a window to windowed data
+#    '''
+#    # append the last chunk and make a list
+#    if len(Z)==np.shape(Z)[0]:
+#       return im, 1
+#    else:
+#       tmp = im[:,len(Z)*ws:]
+#       Zb = np.hstack((Z[-1],tmp))
+#    Z = Z[:-1,:,:]
+#    Z = Z.tolist()
+#    Z.append(Zb)
+#    return Z, len(Z)
+
+   # grab port side scan with 100 pixel overlap into starboard
+   #merge3,ind = sliding_window(merge3,(int(Ny/2)+100,Nx))
+
+   #merge3, cdf = histeq(merge2.copy(),128)
+   #del merge2, cdf
+   #merge3 = np.asarray(merge3,'float16')
 

@@ -52,10 +52,15 @@ from numpy.matlib import repmat
 
 from sklearn.cluster import MiniBatchKMeans
 from scipy.interpolate import RectBivariateSpline
+import string, random
 
 # suppress divide and invalid warnings
 seterr(divide='ignore')
 seterr(invalid='ignore')
+
+# =========================================================
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+   return ''.join(random.choice(chars) for _ in range(size))
 
 # =========================================================
 def ascol( arr ):
