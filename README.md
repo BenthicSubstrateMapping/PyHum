@@ -1,6 +1,8 @@
 ### About
 PyHum
 
+![alt tag](http://dbuscombe-usgs.github.io/figs/class_R01560.png)
+
 Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", submitted to Journal of Hydraulic Engineering, September 2014.
 
 ### Contributing & Credits
@@ -20,7 +22,7 @@ This software is in the public domain because it contains materials that origina
 from the United States Geological Survey, an agency of the United States Department of Interior. 
 For more information, see the official USGS copyright policy at 
 ```
-http://www.usgs.gov/visual-id/credit_usgs.html#copyright"
+http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 ```
 
 Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government. 
@@ -66,11 +68,14 @@ OTHER LIBRARIES (CYTHON) NEED TO BE COMPILED FOR SPEED:
 4) replace_nans.pyx
 5) spec_noise.pyx
 
-This compilation can be carried out by running the supplied bash script, ```
+This compilation can be carried out by running the supplied bash script, 
+
+```
 compile_pyhum.sh
 ```
 
 To run the example using the data within 'test.DAT' and files within the folder 'test_data', run the bash script 
+
 ```
 run_example.sh
 ```
