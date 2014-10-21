@@ -1,7 +1,9 @@
+### About
 PyHum
 
-INFO:
 Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", submitted to Journal of Hydraulic Engineering, September 2014.
+
+### Contributing & Credits
 
 Author:    Daniel Buscombe
            Grand Canyon Monitoring and Research Center
@@ -13,20 +15,22 @@ Version: 1.0      Revision: September, 2014
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
 
-====================================
-   This function is part of PyHum software
-   This software is in the public domain because it contains materials that originally came 
-   from the United States Geological Survey, an agency of the United States Department of Interior. 
-   For more information, see the official USGS copyright policy at 
-   http://www.usgs.gov/visual-id/credit_usgs.html#copyright
+This function is part of PyHum software
+This software is in the public domain because it contains materials that originally came 
+from the United States Geological Survey, an agency of the United States Department of Interior. 
+For more information, see the official USGS copyright policy at 
+```
+http://www.usgs.gov/visual-id/credit_usgs.html#copyright"
+```
 
 Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government. 
-====================================
 
 thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info
 
 This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4.
 This software has (so far) been used only with Humminbird 998 series instruments. 
+
+### Contents
 
 The programs in this package are as follows:
 1) pyhum_read.py
@@ -39,6 +43,8 @@ Python script to read Humminbird data in MAT format (output from pyhum_read.py) 
 Python script to read radiometrically corrected Humminbird data in MAT format (output from pyhum_correct.py) and perform a textural analysis using the spectral method of Buscombe et al (in prep) and produce some rudimentary plots
 
 These are all command-line programs which take a number of input (some required, some optional). Please see the individual files for a comprehensive list of input options
+
+### Setup
 
 Installation:
 
@@ -60,9 +66,14 @@ OTHER LIBRARIES (CYTHON) NEED TO BE COMPILED FOR SPEED:
 4) replace_nans.pyx
 5) spec_noise.pyx
 
-This compilation can be carried out by running the supplied bash script, 'compile_pyhum.sh'
+This compilation can be carried out by running the supplied bash script, ```
+compile_pyhum.sh
+```
 
-To run the example using the data within 'test.DAT' and files within the folder 'test_data', run the bash script 'run_example.sh' 
+To run the example using the data within 'test.DAT' and files within the folder 'test_data', run the bash script 
+```
+run_example.sh
+```
 
 This is a new project written and maintained by Daniel Buscombe. Thus far extensive testing has not been possible so bugs are expected. 
 
