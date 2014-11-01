@@ -12,7 +12,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0      Revision: September, 2014
+Version: 1.0      Revision: October, 2014
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -29,7 +29,7 @@ Any use of trade, product, or firm names is for descriptive purposes only and do
 
 thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info
 
-This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4.
+This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4 & 14.4.
 This software has (so far) been used only with Humminbird 998 series instruments. 
 
 ### Contents
@@ -48,16 +48,33 @@ These are all command-line programs which take a number of input (some required,
 
 ### Setup
 
-Installation:
+Automatic Installation:
+
+```
+python setup.py install
+```
+
+or a local installation:
+
+```
+python setup.py install --user
+```
+
+or with admin privileges, e.g.:
+
+```
+sudo python setup.py install
+```
+
+Manual Installation:
 
 PYTHON LIBRARIES YOU MAY NEED TO INSTALL TO USE PyHum:
-1) Joblib: http://pythonhosted.org/joblib/
-2) Pyproj: http://code.google.com/p/pyproj/
-3) SciPy: http://www.scipy.org/scipylib/download.html
-4) Numpy: http://www.scipy.org/scipylib/download.html
-5) Matplotlib: http://matplotlib.org/downloads.html
-6) Scikit-learn: http://scikit-learn.org/stable/
-7) Python Image LIbrary (PIL) http://www.pythonware.com/products/pil/
+1) Pyproj: http://code.google.com/p/pyproj/
+2) SciPy: http://www.scipy.org/scipylib/download.html
+3) Numpy: http://www.scipy.org/scipylib/download.html
+4) Matplotlib: http://matplotlib.org/downloads.html
+5) Scikit-learn: http://scikit-learn.org/stable/
+6) Python Image LIbrary (PIL) http://www.pythonware.com/products/pil/
 
 All of the above are available through pip (https://pypi.python.org/pypi/pip) and easy_install (https://pythonhosted.org/setuptools/easy_install.html)
 
@@ -68,17 +85,79 @@ OTHER LIBRARIES (CYTHON) NEED TO BE COMPILED FOR SPEED:
 4) replace_nans.pyx
 5) spec_noise.pyx
 
-This compilation can be carried out by running the supplied bash script, 
+On a Linux platform this can be achieved using:
 
 ```
-compile_pyhum.sh
+echo "Compiling file reading module"
+cython pyread.pyx
+gcc -c -fPIC -I/usr/include/python2.7/ pyread.c
+gcc -shared pyread.o -o pyread.so
+
+echo "Compiling wavelet computations module"
+cython cwt.pyx
+gcc -c -fPIC -I/usr/include/python2.7/ cwt.c
+gcc -shared cwt.o -o cwt.so
+
+echo "Compiling nan infilling module"
+cython replace_nans.pyx
+gcc -c -fPIC -I/usr/include/python2.7/ replace_nans.c
+gcc -shared replace_nans.o -o replace_nans.so
+
+echo "Compiling spectral noise module"
+cython spec_noise.pyx
+gcc -c -fPIC -I/usr/include/python2.7/ spec_noise.c
+gcc -shared spec_noise.o -o spec_noise.so
+
+echo "Compiling the phase preserving dynamic range compression module"
+cython ppdrc.pyx
+gcc -c -fPIC -I/usr/include/python2.7/ ppdrc.c
+gcc -shared ppdrc.o -o ppdrc.so
 ```
 
-To run the example using the data within 'test.DAT' and files within the folder 'test_data', run the bash script 
+### Test
+
+A test can be carried out by running the supplied script:
 
 ```
-run_example.sh
+python -c "import PyHum; PyHum.test.dotest()"
 ```
+
+which carries out the following operations:
+
+```
+   humfile = PyHum.__path__[0]+os.sep+'test.DAT'
+   sonpath = PyHum.__path__[0]
+   c = 1450
+   t = 0.108
+   f = 455
+   doplot = 1
+
+   # correction specific settings
+   bedpick = 1
+   maxW = 1000
+
+   # reading specific settings
+   epsg = "epsg:26949"
+   draft = 0
+
+   # for texture calcs
+   win = 100
+   shift = 10
+   density = win/2
+   numclasses = 4
+   maxscale = 20
+   notes = 4
+   shorepick = 0
+   do_two = 0
+
+   PyHum.humread(humfile, sonpath, epsg, draft, doplot)
+
+   PyHum.humcorrect(humfile, sonpath, c, t, f, maxW, bedpick, doplot)
+
+   PyHum.humtexture(humfile, sonpath, c, t, f, win, shift, doplot, density, numclasses, maxscale, notes, shorepick, do_two)
+```
+
+### Support
 
 This is a new project written and maintained by Daniel Buscombe. Thus far extensive testing has not been possible so bugs are expected. 
 

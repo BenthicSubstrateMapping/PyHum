@@ -58,58 +58,73 @@ import string, random
 seterr(divide='ignore')
 seterr(invalid='ignore')
 
+__all__ = [
+    'id_generator',
+    'rm_spikes',
+    'ascol',
+    'rescale',
+    'runningMeanFast',
+    'nan_helper',
+    'norm_shape',
+    'sliding_window',
+    'dpboundary',
+    'cut_kmeans',
+    'im_resize',
+    'histeq',
+    ]
+
+#################################################
 # =========================================================
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
    return ''.join(random.choice(chars) for _ in range(size))
 
 # =========================================================
 def ascol( arr ):
-    '''
-    reshapes row matrix to be a column matrix (N,1).
-    '''
-    if len( arr.shape ) == 1: arr = arr.reshape( ( arr.shape[0], 1 ) )
-    return arr 
+   '''
+   reshapes row matrix to be a column matrix (N,1).
+   '''
+   if len( arr.shape ) == 1: arr = arr.reshape( ( arr.shape[0], 1 ) )
+   return arr 
 
 # =========================================================
 def rm_spikes(dat,numstds):
-    """
-    remove spikes in dat
-    """
-    ht = mean(dat) + numstds*std(dat)
-    lt = argmax(mean(dat) - numstds*std(dat),0)
+   """
+   remove spikes in dat
+   """
+   ht = mean(dat) + numstds*std(dat)
+   lt = argmax(mean(dat) - numstds*std(dat),0)
 
-    index = where(dat>ht); 
-    if index:
+   index = where(dat>ht); 
+   if index:
       dat[index] = npnan
 
-    index = where(dat<lt); 
-    if index: 
+   index = where(dat<lt); 
+   if index: 
       dat[index] = npnan
 
-    # fill nans using linear interpolation
-    nans, y= nan_helper(dat)
-    dat[nans]= interp(y(nans), y(~nans), dat[~nans])
-
-    return dat
+   # fill nans using linear interpolation
+   nans, y= nan_helper(dat)
+   dat[nans]= interp(y(nans), y(~nans), dat[~nans])
+   return dat
 
 # =========================================================
 def rescale(dat,mn,mx):
-    """
-    rescales an input dat between mn and mx
-    """
-    m = min(dat.flatten())
-    M = max(dat.flatten())
-    return (mx-mn)*(dat-m)/(M-m)+mn
+   """
+   rescales an input dat between mn and mx
+   """
+   m = min(dat.flatten())
+   M = max(dat.flatten())
+   return (mx-mn)*(dat-m)/(M-m)+mn
 
 # =========================================================
 def runningMeanFast(x, N):
-    '''
-    flawed but fast running mean
-    '''
-    x = convolve(x, ones((N,))/N)[(N-1):]
-    # the last N values will be crap, so they're set to the global mean
-    x[-N:] = x[-N]
-    return x
+   '''
+   flawed but fast running mean
+   '''
+   x = convolve(x, ones((N,))/N)[(N-1):]
+   # the last N values will be crap, so they're set to the global mean
+   x[-N:] = x[-N]
+   return x
 
 # =========================================================
 def nan_helper(y):
@@ -120,72 +135,72 @@ def nan_helper(y):
 
 # =========================================================
 def norm_shape(shap):
-    '''
-    Normalize numpy array shapes so they're always expressed as a tuple, 
-    even for one-dimensional shapes.
-    '''
-    try:
-        i = int(shap)
-        return (i,)
-    except TypeError:
-        # shape was not a number
-        pass
+   '''
+   Normalize numpy array shapes so they're always expressed as a tuple, 
+   even for one-dimensional shapes.
+   '''
+   try:
+      i = int(shap)
+      return (i,)
+   except TypeError:
+      # shape was not a number
+      pass
  
-    try:
-        t = tuple(shap)
-        return t
-    except TypeError:
-        # shape was not iterable
-        pass
+   try:
+      t = tuple(shap)
+      return t
+   except TypeError:
+      # shape was not iterable
+      pass
      
-    raise TypeError('shape must be an int, or a tuple of ints')
+   raise TypeError('shape must be an int, or a tuple of ints')
 
 # =========================================================
 # Return a sliding window over a in any number of dimensions
 def sliding_window(a,ws,ss = None,flatten = True):
-    '''
-    Return a sliding window over a in any number of dimensions
-    '''
-    if None is ss:
-        # ss was not provided. the windows will not overlap in any direction.
-        ss = ws
-    ws = norm_shape(ws)
-    ss = norm_shape(ss)
-    # convert ws, ss, and a.shape to numpy arrays
-    ws = array(ws)
-    ss = array(ss)
-    shap = array(a.shape)
-    # ensure that ws, ss, and a.shape all have the same number of dimensions
-    ls = [len(shap),len(ws),len(ss)]
-    if 1 != len(set(ls)):
-        raise ValueError(\
-        'a.shape, ws and ss must all have the same length. They were %s' % str(ls))
+   '''
+   Return a sliding window over a in any number of dimensions
+   '''
+   if None is ss:
+      # ss was not provided. the windows will not overlap in any direction.
+      ss = ws
+   ws = norm_shape(ws)
+   ss = norm_shape(ss)
+   # convert ws, ss, and a.shape to numpy arrays
+   ws = array(ws)
+   ss = array(ss)
+   shap = array(a.shape)
+   # ensure that ws, ss, and a.shape all have the same number of dimensions
+   ls = [len(shap),len(ws),len(ss)]
+   if 1 != len(set(ls)):
+      raise ValueError(\
+      'a.shape, ws and ss must all have the same length. They were %s' % str(ls))
      
-    # ensure that ws is smaller than a in every dimension
-    if any(ws > shap):
-        raise ValueError(\
-        'ws cannot be larger than a in any dimension.\
+   # ensure that ws is smaller than a in every dimension
+   if any(ws > shap):
+      raise ValueError(\
+      'ws cannot be larger than a in any dimension.\
  a.shape was %s and ws was %s' % (str(a.shape),str(ws)))
-    # how many slices will there be in each dimension?
-    newshape = norm_shape(((shap - ws) // ss) + 1)
-    # the shape of the strided array will be the number of slices in each dimension
-    # plus the shape of the window (tuple addition)
-    newshape += norm_shape(ws)
-    # the strides tuple will be the array's strides multiplied by step size, plus
-    # the array's strides (tuple addition)
-    newstrides = norm_shape(array(a.strides) * ss) + a.strides
-    a = ast(a,shape = newshape,strides = newstrides)
-    if not flatten:
-        return a
-    # Collapse strided so that it has one more dimension than the window.  I.e.,
-    # the new array is a flat list of slices.
-    meat = len(ws) if ws.shape else 0
-    firstdim = (product(newshape[:-meat]),) if ws.shape else ()
-    dim = firstdim + (newshape[-meat:])
-    # remove any dimensions with size 1
-    dim = filter(lambda i : i != 1,dim) 
+   # how many slices will there be in each dimension?
+   newshape = norm_shape(((shap - ws) // ss) + 1)
+   # the shape of the strided array will be the number of slices in each dimension
+   # plus the shape of the window (tuple addition)
+   newshape += norm_shape(ws)
+   # the strides tuple will be the array's strides multiplied by step size, plus
+   # the array's strides (tuple addition)
+   newstrides = norm_shape(array(a.strides) * ss) + a.strides
+   a = ast(a,shape = newshape,strides = newstrides)
+   if not flatten:
+      return a
+   # Collapse strided so that it has one more dimension than the window.  I.e.,
+   # the new array is a flat list of slices.
+   meat = len(ws) if ws.shape else 0
+   firstdim = (product(newshape[:-meat]),) if ws.shape else ()
+   dim = firstdim + (newshape[-meat:])
+   # remove any dimensions with size 1
+   dim = filter(lambda i : i != 1,dim) 
     
-    return a.reshape(dim), newshape
+   return a.reshape(dim), newshape
 
 # =========================================================
 def dpboundary(imu):
@@ -216,9 +231,9 @@ def dpboundary(imu):
    for i in reversed(range(1,m)):
       x[i] = xpos
       if p[i,xpos]==2 and xpos<n:
-        xpos = xpos+1
+         xpos = xpos+1
       elif p[i,xpos]==3 and xpos>1:
-        xpos = xpos-1
+         xpos = xpos-1
    x[0] = xpos
    return x
 
@@ -262,24 +277,5 @@ def histeq(im,nbr_bins=256):
    im2 = interp(im.flatten(),bins[:-1],cdf)
 
    return im2.reshape(im.shape), cdf
-
-
-## =========================================================
-#def spec_noise(im,factor=1.25):
-#   cols, rows = np.shape(im)
-#   imfft = fftshift(fft2(np.random.randn(cols,rows)))
-#   mag = abs(imfft)  
-#   phase = imfft/mag  
-#   xi, yi = np.meshgrid(np.r_[:rows],np.r_[:cols])  
-#   radius = np.sqrt(xi**2 + yi**2)
-#   radius[cols/2 + 1, rows/2 + 1] = 1
-#   radius[radius==0] = 1
-#   filter = np.divide(1,(radius**factor))
-#   noise = real(ifft2(fftshift(np.multiply(filter,phase)))) 
-#   noise = noise/noise.sum() 
-#   return rescale(im_resize(noise[::2,::2],cols,rows),np.nanmin(im),np.nanmax(im))
-
-
-
 
 
