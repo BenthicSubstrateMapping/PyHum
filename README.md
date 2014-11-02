@@ -48,9 +48,27 @@ These are all command-line programs which take a number of input (some required,
 
 ### Setup
 
-Automatic Installation:
+Try before you install using a virtual environment:
 
 ```
+virtualenv venv
+source venv/bin/activate
+pip install numpy
+pip install Cython
+pip install PyHum
+```
+
+Automatic Installation from PyPI:
+
+```
+pip install PyHum
+```
+
+Automatic Installation from github:
+
+```
+git clone git@github.com:dbuscombe-usgs/PyHum.git
+cd PyHum
 python setup.py install
 ```
 

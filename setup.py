@@ -39,7 +39,7 @@ try:
     import numpy
 except:
     msg = ("No module named numpy. "
-           "Please install numpy first, it is needed before installing ObsPy.")
+           "Please install numpy first, it is needed before installing PyHum.")
     raise ImportError(msg)
 
 from distutils.core import setup
@@ -58,13 +58,20 @@ SETUP_DIRECTORY = os.path.dirname(os.path.abspath(inspect.getfile(
 USE_CYTHON = True
 
 if USE_CYTHON:
-    try:
-        from Cython.Distutils import build_ext
-    except ImportError:
-        if USE_CYTHON=='auto':
-            USE_CYTHON=False
-        else:
-            raise
+    from Cython.Distutils import build_ext
+except:
+    msg = ("No module named Cython. "
+           "Please install Cython first, it is needed before installing PyHum.")
+    raise ImportError(msg)
+
+#if USE_CYTHON:
+#    try:
+#        from Cython.Distutils import build_ext
+#    except ImportError:
+#        if USE_CYTHON=='auto':
+#            USE_CYTHON=False
+#        else:
+#            raise
 
 # Read version from distmesh/__init__.py
 with open(os.path.join('PyHum', '__init__.py')) as f:
@@ -97,13 +104,13 @@ install_requires = [
     'pyproj','numpy','scipy','Pillow','matplotlib','scikit-learn',
 ]
 
-long_description = open('README.md').read()
+#long_description = open('README.md').read()
 
 def setupPackage():
    setup(name='PyHum',
          version=__version__,
          description='Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", submitted to Journal of Hydraulic Engineering, September 2014.',
-         long_description=long_description,
+         #long_description=long_description,
          classifiers=[
              'Intended Audience :: Science/Research',
              'Intended Audience :: Developers',
