@@ -58,11 +58,12 @@ SETUP_DIRECTORY = os.path.dirname(os.path.abspath(inspect.getfile(
 USE_CYTHON = True
 
 if USE_CYTHON:
-    from Cython.Distutils import build_ext
-except:
-    msg = ("No module named Cython. "
+   try:
+      from Cython.Distutils import build_ext
+   except:
+      msg = ("No module named Cython. "
            "Please install Cython first, it is needed before installing PyHum.")
-    raise ImportError(msg)
+      raise ImportError(msg)
 
 #if USE_CYTHON:
 #    try:
