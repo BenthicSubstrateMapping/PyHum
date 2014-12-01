@@ -36,7 +36,7 @@ For more information visit http://dbuscombe-usgs.github.io/PyHum/
 import os, sys, glob
 import inspect
 try:
-    import numpy
+    import numpy as np
 except:
     msg = ("No module named numpy. "
            "Please install numpy first, it is needed before installing PyHum.")
@@ -86,20 +86,30 @@ cmdclass = { }
 
 if USE_CYTHON:
     ext_modules += [
-        Extension("PyHum.cwt", [ "PyHum/_cwt.pyx" ]),
-        Extension("PyHum.pyread", [ "PyHum/_pyread.pyx" ]),
-        Extension("PyHum.ppdrc", [ "PyHum/_ppdrc.pyx" ]),       
-        Extension("PyHum.replace_nans", [ "PyHum/_replace_nans.pyx" ]),
-        Extension("PyHum.spec_noise", [ "PyHum/_spec_noise.pyx" ]),
+        Extension("PyHum.cwt", [ "PyHum/_cwt.pyx" ],
+        include_dirs=[np.get_include()]),
+        Extension("PyHum.pyread", [ "PyHum/_pyread.pyx" ],
+        include_dirs=[np.get_include()]),
+        Extension("PyHum.ppdrc", [ "PyHum/_ppdrc.pyx" ],
+        include_dirs=[np.get_include()]),    
+        Extension("PyHum.replace_nans", [ "PyHum/_replace_nans.pyx" ],
+        include_dirs=[np.get_include()]),
+        Extension("PyHum.spec_noise", [ "PyHum/_spec_noise.pyx" ],
+        include_dirs=[np.get_include()]),
     ]
     cmdclass.update({ 'build_ext': build_ext })
 else:
     ext_modules += [
-        Extension("PyHum.cwt", [ "PyHum/_cwt.c" ]),
-        Extension("PyHum.pyread", [ "PyHum/_pyread.c" ]),
-        Extension("PyHum.ppdrc", [ "PyHum/_ppdrc.c" ]),       
-        Extension("PyHum.replace_nans", [ "PyHum/_replace_nans.c" ]),
-        Extension("PyHum.spec_noise", [ "PyHum/_spec_noise.c" ]),
+        Extension("PyHum.cwt", [ "PyHum/_cwt.c" ],
+        include_dirs=[np.get_include()]),
+        Extension("PyHum.pyread", [ "PyHum/_pyread.c" ],
+        include_dirs=[np.get_include()]),
+        Extension("PyHum.ppdrc", [ "PyHum/_ppdrc.c" ],
+        include_dirs=[np.get_include()]),   
+        Extension("PyHum.replace_nans", [ "PyHum/_replace_nans.c" ],
+        include_dirs=[np.get_include()]),
+        Extension("PyHum.spec_noise", [ "PyHum/_spec_noise.c" ],
+        include_dirs=[np.get_include()]),
     ]
 install_requires = [
     'numpy','scipy','Pillow','matplotlib','scikit-learn', 'cython', #'pyproj',
