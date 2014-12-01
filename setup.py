@@ -102,7 +102,7 @@ else:
         Extension("PyHum.spec_noise", [ "PyHum/_spec_noise.c" ]),
     ]
 install_requires = [
-    'pyproj','numpy','scipy','Pillow','matplotlib','scikit-learn',
+    'numpy','scipy','Pillow','matplotlib','scikit-learn', 'cython', #'pyproj',
 ]
 
 #long_description = open('README.md').read()
