@@ -37,7 +37,7 @@ cdef class Noise:
       imfft = np.fft.fftshift(ffrr)
       mag = np.abs(imfft)  
       phase = imfft/mag  
-      xi, yi = np.meshgrid(np.r_[:rows],np.r_[:cols])  
+      xi, yi = np.meshgrid(np.r_[:rows].astype('int64'),np.r_[:cols].astype('int64'))  
       radius = np.sqrt(xi**2 + yi**2)
       radius[int(cols/2 + 1), int(rows/2 + 1)] = 1
       radius[radius==0] = 1
