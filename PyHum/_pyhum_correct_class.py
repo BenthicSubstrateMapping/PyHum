@@ -10,7 +10,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.1      Revision: Sept, 2014
+Version: 1.1      Revision: Dec, 2014
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -184,7 +184,7 @@ class humcorrect:
          sonpath = sonpath + os.sep
 
       base = humfile.split('.DAT') # get base of file name for output
-      base = base[0].split('/')[-1]
+      base = base[0].split(os.sep)[-1]
 
       try:
          e = np.squeeze(loadmat(sonpath+base+'meta.mat')['e'])
