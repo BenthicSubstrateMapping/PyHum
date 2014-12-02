@@ -413,16 +413,16 @@ def humtexture(humfile, sonpath, c, t, f, win, shift, doplot, density, numclasse
                except:
                   shift = shift+1    
              
-         filename = sonpath+'tmpfile'+humutils.id_generator()+'.dat'    
+         filename1 = sonpath+'tmpfile'+humutils.id_generator()+'.dat'    
          print "Memory mapping the data"
          # create memory mapped file for Z
-         fp = np.memmap(filename, dtype='int8', mode='w+', shape=np.shape(Z))
+         fp = np.memmap(filename1, dtype='int8', mode='w+', shape=np.shape(Z))
          fp[:] = Z[:]
          del fp
          shapeZ = np.shape(Z)
          del Z
          #we are only going to access the portion of memory required
-         newfp = np.memmap(filename, dtype='int8', mode='r', shape=shapeZ)
+         newfp = np.memmap(filename1, dtype='int8', mode='r', shape=shapeZ)
 	  
          try:
             print "Carrying out wavelet calculations ... round 1 ..."
@@ -462,7 +462,10 @@ def humtexture(humfile, sonpath, c, t, f, win, shift, doplot, density, numclasse
             SRT.append(srt)
             del srt #, newfp
       
-         os.remove(filename)
+         try:
+            os.remove(filename1)
+         except:
+            print "Cannot remove %s" % (filename1)
 
       #del newfp
       if os.name=='posix': # true if linux/mac
