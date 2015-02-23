@@ -10,7 +10,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.1      Revision: Dec, 2014
+Version: 1.0.8      Revision: Feb, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -187,21 +187,20 @@ class humcorrect:
       base = base[0].split(os.sep)[-1]
 
       try:
-         e = np.squeeze(loadmat(sonpath+base+'meta.mat')['e'])
+         es = np.squeeze(loadmat(sonpath+base+'meta.mat')['es'])
       except:
          sonpath = os.getcwd()+os.sep
-         e = np.squeeze(loadmat(sonpath+base+'meta.mat')['e'])
+         es = np.squeeze(loadmat(sonpath+base+'meta.mat')['es'])
          
-      n = np.squeeze(loadmat(sonpath+base+'meta.mat')['n'])
+      ns = np.squeeze(loadmat(sonpath+base+'meta.mat')['ns'])
       dep_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dep_m'])
 
       dep_m = humutils.rm_spikes(dep_m,2)
 
-      es = humutils.runningMeanFast(e,20)
-      ns = humutils.runningMeanFast(n,20)
+      #es = humutils.runningMeanFast(e,20)
+      #ns = humutils.runningMeanFast(n,20)
        
       dist_m = np.cumsum(np.sqrt(np.gradient(es)**2 + np.gradient(ns)**2))
-      del e, n
 
       # theta at 3dB in the horizontal
       theta3dB = np.arcsin(c/(t*(f*1000)))
@@ -339,7 +338,7 @@ class humcorrect:
             del dist_mi
 
          # 'real' bed is estimated to be the minimum of the two
-         bed = np.min(np.vstack((bed,np.squeeze(x))),axis=0) 
+         bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
          del x
 
       else: #manual
@@ -460,8 +459,11 @@ class humcorrect:
          data_port_dB[:,k] = np.r_[data_port_dB[bed[k]:,k], np.zeros( (np.shape(data_port_dB)[0] -  np.shape(data_port_dB[bed[k]:,k])[0] ,) )]
 
 
-      star_mg = 20*np.log10(np.asarray(data_star_dB,'float64')+0.001)
-      port_mg = 20*np.log10(np.asarray(data_port_dB,'float64')+0.001)
+      star_mg = 10**np.log10(np.asarray(data_star_dB,'float64')+0.001)
+      port_mg = 10**np.log10(np.asarray(data_port_dB,'float64')+0.001)
+
+      #star_mg = 20*np.log10(np.asarray(data_star_dB,'float64')+0.001)
+      #port_mg = 20*np.log10(np.asarray(data_port_dB,'float64')+0.001)
 
       star_mg[data_star_dB==0] = np.nan
       port_mg[data_port_dB==0] = np.nan
@@ -708,7 +710,8 @@ class humcorrect:
          for k in xrange(np.shape(data_dwnhi_dB)[1]):
             data_dwnhi_dB[:,k] = np.r_[data_dwnhi_dB[bed[k]:,k], np.zeros( (np.shape(data_dwnhi_dB)[0] -  np.shape(data_dwnhi_dB[bed[k]:,k])[0] ,) )]
 
-         dwnhi_mg = 20*np.log10(np.asarray(data_dwnhi_dB,'float64')+0.001)
+         dwnhi_mg = 10**np.log10(np.asarray(data_dwnhi_dB,'float64')+0.001)
+         #dwnhi_mg = 20*np.log10(np.asarray(data_dwnhi_dB,'float64')+0.001)
          dwnhi_mg[data_dwnhi_dB==0] = np.nan
          del data_dwnhi_dB
 
@@ -815,7 +818,8 @@ class humcorrect:
          for k in xrange(np.shape(data_dwnlow_dB)[1]):
             data_dwnlow_dB[:,k] = np.r_[data_dwnlow_dB[bed[k]:,k], np.zeros( (np.shape(data_dwnlow_dB)[0] -  np.shape(data_dwnlow_dB[bed[k]:,k])[0] ,) )]
 
-         dwnlow_mg = 20*np.log10(np.asarray(data_dwnlow_dB,'float64')+0.001)
+         dwnlow_mg = 10**np.log10(np.asarray(data_dwnlow_dB,'float64')+0.001)
+         #dwnlow_mg = 20*np.log10(np.asarray(data_dwnlow_dB,'float64')+0.001)
          dwnlow_mg[data_dwnlow_dB==0] = np.nan
          del data_dwnlow_dB
 

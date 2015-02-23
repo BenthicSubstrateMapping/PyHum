@@ -10,7 +10,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0      Revision: Dec, 2014
+Version: 1.0.8      Revision: Feb, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -95,8 +95,10 @@ from tkFileDialog import askopenfilename, askdirectory
 #numerical
 import pyread
 from numpy import shape
-#from pyhum_utils import sliding_window
 import PyHum.utils as humutils
+from skimage.measure import LineModel, ransac
+import numpy as np
+import pyproj
 
 #plotting
 import matplotlib.pyplot as plt
@@ -109,7 +111,7 @@ rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 #################################################
 class humread:
 
-   def __init__(self, humfile, sonpath, cs2cs_args, draft, doplot):
+   def __init__(self, humfile, sonpath, cs2cs_args, c, draft, doplot):
 
       # prompt user to supply file if no input file given
       if not humfile:
@@ -133,11 +135,17 @@ class humread:
       if draft:
          draft = float(draft)
          print 'Draft: %s' % (str(draft))
+      if c:
+         c = float(c)
+         print 'Celerity of sound: %s m/s' % (str(c))
       if doplot:
          doplot = int(doplot)
          if doplot==0:
             print "Plots will not be made"
 
+      if not c:
+         c = 1450.0
+         print '[Default] Celerity of sound = %s m/s' % (str(c))
       if not draft:
          draft = 0
          print '[Default] Draft = %s metres' % (str(draft))
@@ -178,7 +186,7 @@ class humread:
       print "WARNING: Because files have to be read in byte by byte,"
       print "this could take a very long time ..."
 
-      data = pyread.pyread(sonfiles, humfile, headbytes, cs2cs_args)
+      data = pyread.pyread(sonfiles, humfile, c, headbytes, cs2cs_args)
 
       data_port = data.getportscans()
       data_star = data.getstarscans()
@@ -189,6 +197,49 @@ class humread:
       metadat = data.getmetadata()
       del data
 
+      try:
+         es = humutils.runningMeanFast(metadat['e'],len(metadat['e'])/100)
+         ns = humutils.runningMeanFast(metadat['n'],len(metadat['n'])/100)
+      except:
+         es = metadat['e']
+         ns = metadat['n']
+
+      metadat['e'] = es
+      metadat['n'] = ns
+
+      # ransac for outlier detection
+      np.random.seed(seed=1)
+
+      data = np.column_stack([es, ns])
+
+      # fit line using all data
+      model = LineModel()
+      model.estimate(data)
+
+      # robustly fit line only using inlier data with RANSAC algorithm
+      model_robust, inliers = ransac(data, LineModel, min_samples=2, residual_threshold=3, max_trials=1000)
+      outliers = inliers == False
+
+      # remove outliers and interpolate over the gaps
+      esi = es.copy()
+      esi[outliers] = np.nan
+      nsi = ns.copy()
+      nsi[outliers] = np.nan
+
+      nans, y= humutils.nan_helper(esi)
+      esi[nans]= np.interp(y(nans), y(~nans), esi[~nans])
+
+      nans, y= humutils.nan_helper(nsi)
+      nsi[nans]= np.interp(y(nans), y(~nans), nsi[~nans])
+    
+      metadat['es'] = esi
+      metadat['ns'] = nsi
+    
+      trans =  pyproj.Proj(init=cs2cs_args)
+      lon, lat = trans(esi, nsi, inverse=True)
+      metadat['lon'] = lon
+      metadat['lat'] = lat    
+    
       #imshow(data_port)
       try:
          savemat(sonpath+base+'.mat', mdict={'dat': dat, 'data_port': data_port, 'data_star': data_star, 'data_dwnlow': data_dwnlow, 'data_dwnhi': data_dwnhi},oned_as='row')

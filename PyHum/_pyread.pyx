@@ -1,5 +1,27 @@
 # cython module for reading binary humminbird files
-# Daniel Buscombe, June 2014
+# Daniel Buscombe, June 2014 - Feb 2015
+"""
+Part of PyHum software 
+
+INFO:
+
+
+Author:    Daniel Buscombe
+           Grand Canyon Monitoring and Research Center
+           United States Geological Survey
+           Flagstaff, AZ 86001
+           dbuscombe@usgs.gov
+Version: 1.0.8      Revision: Feb, 2015
+
+For latest code version please visit:
+https://github.com/dbuscombe-usgs
+
+This function is part of 'PyHum' software
+This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
+For more information, see the official USGS copyright policy at 
+http://www.usgs.gov/visual-id/credit_usgs.html#copyright
+"""
+
 from __future__ import generators
 from __future__ import division
 import numpy as np
@@ -19,7 +41,7 @@ cdef class pyread:
     cdef object humdat
     
     # =========================================================
-    def __init__(self, list sonfiles, str humfile, int headbytes=67, str cs2cs_args1="epsg:26949"):
+    def __init__(self, list sonfiles, str humfile, float c, int headbytes=67, str cs2cs_args1="epsg:26949"):
        """
        PyRead
 
@@ -30,6 +52,7 @@ cdef class pyread:
 
        trans =  pyproj.Proj(init=cs2cs_args1)
 
+       # world mercator
        cdef str cs2cs_args2 = '+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
        transWGS84 =  pyproj.Proj(cs2cs_args2)
        
@@ -65,7 +88,7 @@ cdef class pyread:
      
           fid = open(sonfile,'rb')
           for i from 0 <= i < len(dfbreak):              
-             tmpdata.append(self._gethead(fid,trans,transWGS84)) # get header for packet
+             tmpdata.append(self._gethead(fid,trans,transWGS84, c)) # get header for packet
              ints_list = []
              for j from 0 <= j < dfbreak[i]-headbytes:                 
                 ints_list.append(struct.unpack('>B', ''.join(self._fread(fid,1,'c')) )[0])
@@ -80,6 +103,16 @@ cdef class pyread:
        return
 
     # internal functions ======================================
+
+
+    # =========================================================
+    def _calc_beam_pos(self, float dist, float bearing, tuple point):
+
+       cdef float dist_x, dist_y, x_final, y_final
+       dist_x, dist_y = (dist*np.sin(bearing), dist*np.cos(bearing))
+       xfinal, yfinal = (point[0] + dist_x, point[1] + dist_y)
+       return (xfinal, yfinal)
+
     # =========================================================
     def _KnuthMorrisPratt(self, list text, list pattern):
        # Knuth-Morris-Pratt string matching
@@ -125,7 +158,7 @@ cdef class pyread:
           return(list(dat))
 
     # =========================================================
-    def _gethead(self, fid, trans, transWGS84):
+    def _gethead(self, fid, trans, transWGS84, float c):
        cdef list hd = self._fread(fid, 3, 'B')
        cdef list head=[] #pre-allocate list
        cdef int flag
@@ -189,17 +222,21 @@ cdef class pyread:
        else:
           head.append('unknown')
 
-       cdef float lon
-       cdef float lat
-       lon, lat = transWGS84(head[2],head[3], inverse=True)
+       cdef float lon, lat
+       cdef float dist, bearing
 
-       head.append(lat)
-       head.append(lon)
-
-       lon, lat = trans(lon, lat)
-
-       head.append(lat)
-       head.append(lon)       
+       cdef float tvg = ((8.5*10**-5)+(3/76923)+((8.5*10**-5)/4))*c
+        
+       if head[9]==3 or head[9]==2: #starboard or port
+          dist = ((np.tan(np.radians(25)))*head[8])-(tvg) #depth
+          bearing = np.radians(head[5]) - (np.pi/2) #heading_deg
+          x_utm, y_utm = self._calc_beam_pos(dist, bearing, (head[2],head[3]))
+          lon, lat = transWGS84(x_utm,y_utm, inverse=True)
+          head.append(lat)
+          head.append(lon)
+          lon, lat = trans(lon, lat)
+          head.append(lat)
+          head.append(lon)     
        
        return head
 
@@ -349,7 +386,8 @@ cdef class pyread:
         ind = ind[1::2]        
         
         cdef np.ndarray tmp = np.squeeze(data_port)
-        
+
+        cdef list hdg = []        
         cdef list lon = []
         cdef list lat = []
         cdef list spd = []
@@ -365,11 +403,12 @@ cdef class pyread:
            dep_m.append(float(tmp[i-1][8]) )
            e.append(float(tmp[i-1][17]) )
            n.append(float(tmp[i-1][16]) )
+           hdg.append(float(tmp[i-1][5]) )
 
         cdef np.ndarray starttime = np.asarray(self.humdat['unix_time'], 'float')
         cdef np.ndarray caltime = np.asarray(starttime + time_s, 'float')
 
-        cdef dict metadict={'lat': np.asarray(lat), 'lon': np.asarray(lon), 'spd': np.asarray(spd), 'time_s': np.asarray(time_s), 'e': np.asarray(e), 'n': np.asarray(n), 'dep_m': np.asarray(dep_m), 'caltime': np.asarray(caltime) }
+        cdef dict metadict={'lat': np.asarray(lat), 'lon': np.asarray(lon), 'spd': np.asarray(spd), 'time_s': np.asarray(time_s), 'e': np.asarray(e), 'n': np.asarray(n), 'dep_m': np.asarray(dep_m), 'caltime': np.asarray(caltime), 'heading': np.asarray(hdg) }
         return metadict
 
 # cython pyread.pyx

@@ -1,16 +1,15 @@
 '''
-pyhum_utils.py
 Part of PyHum software 
 
 INFO:
-helper functions and utilities
+
 
 Author:    Daniel Buscombe
            Grand Canyon Monitoring and Research Center
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0      Revision: June, 2014
+Version: 1.1      Revision: Dec, 2014
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -19,29 +18,6 @@ This function is part of 'PyHum' software
 This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
 For more information, see the official USGS copyright policy at 
 http://www.usgs.gov/visual-id/credit_usgs.html#copyright
-
-This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4, and Windows 7.
-This software has (so far) been used only with Humminbird 998 series instruments. 
-
-Installation:
-
-PYTHON LIBRARIES YOU MAY NEED TO INSTALL TO USE PyHum:
-1) Joblib: http://pythonhosted.org/joblib/
-2) Pyproj: http://code.google.com/p/pyproj/
-3) SciPy: http://www.scipy.org/scipylib/download.html
-4) Numpy: http://www.scipy.org/scipylib/download.html
-5) Matplotlib: http://matplotlib.org/downloads.html
-6) Scikit-learn: http://scikit-learn.org/stable/
-7) Python Image LIbrary (PIL) http://www.pythonware.com/products/pil/
-
-All of the above are available through pip (https://pypi.python.org/pypi/pip) and easy_install (https://pythonhosted.org/setuptools/easy_install.html)
-
-OTHER LIBRARIES (CYTHON) NEED TO BE COMPILED FOR SPEED:
-1) pyread.pyx
-2) cwt.pyx
-3) replace_nans.pyx
-- use the shell script "compile_pyhum.sh" on linux/mac
-
 '''
 
 from numpy.lib.stride_tricks import as_strided as ast
@@ -277,5 +253,4 @@ def histeq(im,nbr_bins=256):
    im2 = interp(im.flatten(),bins[:-1],cdf)
 
    return im2.reshape(im.shape), cdf
-
-
+    

@@ -12,7 +12,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0      Revision: October, 2014
+Version: 1.0.8      Revision: Feb, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -29,7 +29,7 @@ Any use of trade, product, or firm names is for descriptive purposes only and do
 
 thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info
 
-This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4 & 14.4.
+This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4 & 14.4, Windows 7.
 This software has (so far) been used only with Humminbird 998 series instruments. 
 
 ### Contents
@@ -42,7 +42,7 @@ Python script to read Humminbird DAT and associated SON files, and export data i
 Python script to read Humminbird data in MAT format (output from pyhum_read.py) and perform some radiometric corrections and produce some rudimentary plots
 
 3) pyhum_texture.py
-Python script to read radiometrically corrected Humminbird data in MAT format (output from pyhum_correct.py) and perform a textural analysis using the spectral method of Buscombe et al (in prep) and produce some rudimentary plots
+Python script to read radiometrically corrected Humminbird data in MAT format (output from pyhum_correct.py) and perform a textural analysis using the spectral method of Buscombe et al (in review) and produce some rudimentary plots
 
 These are all command-line programs which take a number of input (some required, some optional). Please see the individual files for a comprehensive list of input options
 
@@ -93,6 +93,7 @@ PYTHON LIBRARIES YOU MAY NEED TO INSTALL TO USE PyHum:
 4) Matplotlib: http://matplotlib.org/downloads.html
 5) Scikit-learn: http://scikit-learn.org/stable/
 6) Python Image LIbrary (PIL) http://www.pythonware.com/products/pil/
+7) scikit-image: http://scikit-image.org/ 
 
 All of the above are available through pip (https://pypi.python.org/pypi/pip) and easy_install (https://pythonhosted.org/setuptools/easy_install.html)
 
@@ -168,7 +169,7 @@ which carries out the following operations:
    shorepick = 0
    do_two = 0
 
-   PyHum.humread(humfile, sonpath, epsg, draft, doplot)
+   PyHum.humread(humfile, sonpath, epsg, c, draft, doplot)
 
    PyHum.humcorrect(humfile, sonpath, c, t, f, maxW, bedpick, doplot)
 
@@ -179,7 +180,7 @@ which carries out the following operations:
 
 This is a new project written and maintained by Daniel Buscombe. Thus far extensive testing has not been possible so bugs are expected. 
 
-Please download, try, report bugs, fork, modify, evaluate, discuss. Please address all suggestions, comments and queries to: dbuscombe@usgs.gov. Thanks for stopping by! 
+Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please address all suggestions, comments and queries to: dbuscombe@usgs.gov. Thanks for stopping by! 
 
 
 

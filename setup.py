@@ -112,7 +112,7 @@ else:
         include_dirs=[np.get_include()]),
     ]
 install_requires = [
-    'numpy','scipy','Pillow','matplotlib','scikit-learn', 'cython', #'pyproj',
+    'numpy','scipy','Pillow','matplotlib','scikit-learn', 'cython', 'pyproj', 'scikit-image'
 ]
 
 #long_description = open('README.md').read()

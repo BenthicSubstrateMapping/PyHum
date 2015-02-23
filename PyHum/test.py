@@ -1,4 +1,25 @@
+"""
+Part of PyHum software 
 
+INFO:
+
+
+Author:    Daniel Buscombe
+           Grand Canyon Monitoring and Research Center
+           United States Geological Survey
+           Flagstaff, AZ 86001
+           dbuscombe@usgs.gov
+Version: 1.0.8      Revision: Feb, 2015
+
+For latest code version please visit:
+https://github.com/dbuscombe-usgs
+
+This function is part of 'PyHum' software
+This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
+For more information, see the official USGS copyright policy at 
+http://www.usgs.gov/visual-id/credit_usgs.html#copyright
+    
+"""
 #python -c "import PyHum; PyHum.test.dotest()"
 
 import PyHum
@@ -35,7 +56,7 @@ def dotest():
    shorepick = 0
    do_two = 0
 
-   PyHum.humread(humfile, sonpath, epsg, draft, doplot)
+   PyHum.humread(humfile, sonpath, epsg, c, draft, doplot)
 
    PyHum.humcorrect(humfile, sonpath, c, t, f, maxW, bedpick, doplot)
 
