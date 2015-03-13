@@ -3,7 +3,7 @@ PyHum
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/class_R01560.png)
 
-![alt tag](http://dbuscombe-usgs.github.io/figs/.png)
+![alt tag](http://dbuscombe-usgs.github.io/figs/R00426_map.png)
 Dog River, Alabama. Credit: Allen Aven, Dauphin Island Sea Lab
 
 Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", forthcoming.
