@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.1.2      Revision: Mar, 2015
+Version: 1.1.4      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -98,7 +98,7 @@ def domap(humfile, sonpath, cs2cs_args, imagery):
          sonpath = sonpath + os.sep
 
       base = humfile.split('.DAT') # get base of file name for output
-      base = base[0].split('/')[-1]
+      base = base[0].split(os.sep)[-1]
 
       try:
          esi = np.squeeze(loadmat(sonpath+base+'meta.mat')['e']) #+ 395

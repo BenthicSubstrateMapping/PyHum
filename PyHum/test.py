@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.1.2      Revision: Mar, 2015
+Version: 1.1.4      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -24,15 +24,32 @@ http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 
 import PyHum
 import os
+import shutil
+import errno
+ 
+def dircopy(src, dest):
+    try:
+        shutil.copytree(src, dest)
+    except OSError as e:
+        # If the error was caused because the source wasn't a directory
+        if e.errno == errno.ENOTDIR:
+            shutil.copy(src, dst)
+        else:
+            print('Directory not copied. Error: %s' % e)
 
 __all__ = [
     'dotest',
     ]
 
 def dotest():
-   # general settings
-   humfile = PyHum.__path__[0]+os.sep+'test.DAT'
-   sonpath = PyHum.__path__[0]
+
+   # copy files over to somewhere read/writeable
+   dircopy(PyHum.__path__[0], os.path.expanduser("~")+os.sep+'pyhum_test')
+   shutil.copy(PyHum.__path__[0]+os.sep+'test.DAT', os.path.expanduser("~")+os.sep+'pyhum_test'+os.sep+'test.DAT')
+
+   # general settings   
+   humfile = os.path.expanduser("~")+os.sep+'test.DAT' #PyHum.__path__[0]+os.sep+'test.DAT'
+   sonpath = os.path.expanduser("~")+os.sep+'pyhum_test' #PyHum.__path__[0]
    doplot = 1
 
    # reading specific settings
