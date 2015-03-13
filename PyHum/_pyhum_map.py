@@ -98,7 +98,10 @@ def domap(humfile, sonpath, cs2cs_args, imagery):
          sonpath = sonpath + os.sep
 
       base = humfile.split('.DAT') # get base of file name for output
-      base = base[0].split('/')[-1]
+      if '/' in base:
+          base = base[0].split('/')[-1]
+      else:  # FOR WINDOWS USERS!
+          base = base[0].split('\\')[-1]
 
       try:
          esi = np.squeeze(loadmat(sonpath+base+'meta.mat')['e']) #+ 395
