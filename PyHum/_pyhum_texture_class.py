@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0.9      Revision: Mar, 2015
+Version: 1.1.2      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -231,16 +231,21 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
       #theta3dB = np.arcsin(c/(t*(f*1000))) # *(180/pi) # to see in degs
       #ft = (np.pi/2)*(1/theta3dB)
 
-      ft = 1/np.squeeze(loadmat(sonpath+base+'meta.mat')['pix_m'])
+      try:
+         ft = 1/np.squeeze(loadmat(sonpath+base+'meta.mat')['pix_m'])
+      except:
+         ft = 1/np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['pix_m'])
 
       # convert to float16 from float64 to conserve memory
       try:
          port_mg = np.asarray(loadmat(sonpath+base+'port_la.mat')['port_mg_la'],'float16')
       except:
-         sonpath = os.getcwd()+os.sep
-         port_mg = np.asarray(loadmat(sonpath+base+'port_la.mat')['port_mg_la'],'float16')
+         port_mg = np.asarray(loadmat(os.path.expanduser("~")+os.sep+base+'port_la.mat')['port_mg_la'],'float16')
          
-      star_mg = np.asarray(loadmat(sonpath+base+'star_la.mat')['star_mg_la'],'float16')
+      try:
+         star_mg = np.asarray(loadmat(sonpath+base+'star_la.mat')['star_mg_la'],'float16')
+      except:
+         star_mg = np.asarray(loadmat(os.path.expanduser("~")+os.sep+base+'star_la.mat')['star_mg_la'],'float16')
 
       if shorepick==1:
          raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue...")
@@ -283,8 +288,13 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
       merge = np.asarray(merge, 'float64')
 
       # convert to float16 from float64 to conserve memory
-      port_mg = loadmat(sonpath+base+'port_la.mat')['port_mg_la']
-      star_mg = loadmat(sonpath+base+'star_la.mat')['star_mg_la']
+      try:
+         port_mg = loadmat(sonpath+base+'port_la.mat')['port_mg_la']
+         star_mg = loadmat(sonpath+base+'star_la.mat')['star_mg_la']
+      except:
+         port_mg = loadmat(os.path.expanduser("~")+os.sep+base+'port_la.mat')['port_mg_la']
+         star_mg = loadmat(os.path.expanduser("~")+os.sep+base+'star_la.mat')['star_mg_la']
+
       merge_mask = np.vstack((np.flipud(port_mg),star_mg))
       del port_mg, star_mg
       #merge_mask = np.asarray(merge_mask, 'float64')
@@ -418,16 +428,28 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
                except:
                   shift = shift+1    
              
-         filename1 = sonpath+'tmpfile'+humutils.id_generator()+'.dat'    
-         print "Memory mapping the data"
-         # create memory mapped file for Z
-         fp = np.memmap(filename1, dtype='int8', mode='w+', shape=np.shape(Z))
-         fp[:] = Z[:]
-         del fp
-         shapeZ = np.shape(Z)
-         Z = None
-         #we are only going to access the portion of memory required
-         newfp = np.memmap(filename1, dtype='int8', mode='r', shape=shapeZ)
+         try:
+            filename1 = sonpath+'tmpfile'+humutils.id_generator()+'.dat'    
+            print "Memory mapping the data"
+            # create memory mapped file for Z
+            fp = np.memmap(filename1, dtype='int8', mode='w+', shape=np.shape(Z))
+            fp[:] = Z[:]
+            del fp
+            shapeZ = np.shape(Z)
+            Z = None
+            #we are only going to access the portion of memory required
+            newfp = np.memmap(filename1, dtype='int8', mode='r', shape=shapeZ)
+         except:
+            filename1 = os.path.expanduser("~")+os.sep+'tmpfile'+humutils.id_generator()+'.dat'    
+            print "Memory mapping the data"
+            # create memory mapped file for Z
+            fp = np.memmap(filename1, dtype='int8', mode='w+', shape=np.shape(Z))
+            fp[:] = Z[:]
+            del fp
+            shapeZ = np.shape(Z)
+            Z = None
+            #we are only going to access the portion of memory required
+            newfp = np.memmap(filename1, dtype='int8', mode='r', shape=shapeZ)
 	  
          try:
             print "Carrying out wavelet calculations ... round 1 ..."
@@ -498,10 +520,14 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
       S[mask==0] = np.nan
       S[bw2==1] = np.nan
    
-      dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
-
-      star_mg_la = np.asarray(loadmat(sonpath+base+'star_la.mat')['star_mg_la'],'float64')
-      port_mg_la = np.asarray(loadmat(sonpath+base+'port_la.mat')['port_mg_la'],'float64')
+      try:
+         dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
+         star_mg_la = np.asarray(loadmat(sonpath+base+'star_la.mat')['star_mg_la'],'float64')
+         port_mg_la = np.asarray(loadmat(sonpath+base+'port_la.mat')['port_mg_la'],'float64')
+      except:
+         dist_m = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['dist_m'])
+         star_mg_la = np.asarray(loadmat(os.path.expanduser("~")+os.sep+base+'star_la.mat')['star_mg_la'],'float64')
+         port_mg_la = np.asarray(loadmat(os.path.expanduser("~")+os.sep+base+'port_la.mat')['port_mg_la'],'float64')
 
       merge = np.vstack((np.flipud(port_mg_la),star_mg_la))
 
@@ -618,7 +644,10 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
          ########################################################
          ########################################################
          # save away data
-         savemat(sonpath+base+'class.mat', mdict={'numclasses': numclasses, 'S': S, 'kclass': wc, 'ft': ft, 'dist_m': dist_m, 'merge': merge },oned_as='row')
+         try:
+            savemat(sonpath+base+'class.mat', mdict={'numclasses': numclasses, 'S': S, 'kclass': wc, 'ft': ft, 'dist_m': dist_m, 'merge': merge },oned_as='row')
+         except:
+            savemat(os.path.expanduser("~")+os.sep+base+'class.mat', mdict={'numclasses': numclasses, 'S': S, 'kclass': wc, 'ft': ft, 'dist_m': dist_m, 'merge': merge },oned_as='row')
 
          if os.name=='posix': # true if linux/mac
             elapsed = (time() - start1)
@@ -630,10 +659,10 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
 
 # =========================================================
 def custom_save(figdirec,root):
-    try:
-       plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
-    except:
-       plt.savefig(os.getcwd()+os.sep+root,bbox_inches='tight',dpi=400)      
+   try:
+      plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
+   except:
+      plt.savefig(os.path.expanduser("~")+os.sep+root,bbox_inches='tight',dpi=400)      
 
 # =========================================================
 def parallel_me(x, maxscale, notes, win, density):

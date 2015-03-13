@@ -10,7 +10,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0.9      Revision: Mar, 2015
+Version: 1.1.2      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -156,17 +156,32 @@ class humcorrect:
       base = base[0].split(os.sep)[-1]
 
       # add wattage to metadata dict 
-      meta = loadmat(sonpath+base+'meta.mat')
+      try:
+         meta = loadmat(sonpath+base+'meta.mat')
+      except:
+         meta = loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')
       meta['maxW'] = maxW
-      savemat(sonpath+base+'meta.mat', meta ,oned_as='row')
+
+      try:
+         savemat(sonpath+base+'meta.mat', meta ,oned_as='row')
+      except:
+         savemat(os.path.expanduser("~")+os.sep+base+'meta.mat', meta ,oned_as='row')
+
       del meta
 
-      bed = np.squeeze(loadmat(sonpath+base+'meta.mat')['bed'])
-      ft = 1/loadmat(sonpath+base+'meta.mat')['pix_m'] #np.squeeze(loadmat(sonpath+base+'meta.mat')['ft'])
-      dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
+      try:
+         bed = np.squeeze(loadmat(sonpath+base+'meta.mat')['bed'])
+         ft = 1/loadmat(sonpath+base+'meta.mat')['pix_m'] #np.squeeze(loadmat(sonpath+base+'meta.mat')['ft'])
+         dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
+         data_port = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_port']),'float16')
+         data_star = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_star']),'float16')
+      except:
+         bed = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['bed'])
+         ft = 1/loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['pix_m'] #np.squeeze(loadmat(sonpath+base+'meta.mat')['ft'])
+         dist_m = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['dist_m'])
+         data_port = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'.mat')['data_port']),'float16')
+         data_star = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'.mat')['data_star']),'float16')
 
-      data_port = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_port']),'float16')
-      data_star = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_star']),'float16')
       extent = np.shape(data_port)[0]
 
       # calculate in dB
@@ -427,18 +442,28 @@ class humcorrect:
       port_mg_la[np.isnan(port_mg_la)] = 0
       star_mg_la[np.isnan(star_mg_la)] = 0
 
-      savemat(sonpath+base+'port_la.mat', mdict={'port_mg_la': np.asarray(port_mg_la, 'float16')},oned_as='row')
-      
+      try:
+         savemat(sonpath+base+'port_la.mat', mdict={'port_mg_la': np.asarray(port_mg_la, 'float16')},oned_as='row')
+      except:
+         savemat(os.path.expanduser("~")+os.sep+base+'port_la.mat', mdict={'port_mg_la': np.asarray(port_mg_la, 'float16')},oned_as='row')      
+
       del port_mg_la
 
-      savemat(sonpath+base+'star_la.mat', mdict={'star_mg_la': np.asarray(star_mg_la, 'float16')},oned_as='row')
-      
+      try:
+         savemat(sonpath+base+'star_la.mat', mdict={'star_mg_la': np.asarray(star_mg_la, 'float16')},oned_as='row')
+      except:
+         savemat(os.path.expanduser("~")+os.sep+base+'star_la.mat', mdict={'star_mg_la': np.asarray(star_mg_la, 'float16')},oned_as='row')
+
+
       del star_mg_la
 
       ###########################################################
       ###########################################################
       # load in high freq echogram
-      data_dwnhi = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_dwnhi']),'float16')
+      try:
+         data_dwnhi = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_dwnhi']),'float16')
+      except:
+         data_dwnhi = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'.mat')['data_dwnhi']),'float16')
 
       if np.size(data_dwnhi)>0:
          # calculate in dB
@@ -541,14 +566,20 @@ class humcorrect:
             del Z, Zdist
 
          dwnhi_mg_la[np.isnan(dwnhi_mg_la)] = 0
-         savemat(sonpath+base+'dwnhi_la.mat', mdict={'dwnhi_mg_la': np.asarray(dwnhi_mg_la, 'float16')},oned_as='row')
-         
+         try:
+            savemat(sonpath+base+'dwnhi_la.mat', mdict={'dwnhi_mg_la': np.asarray(dwnhi_mg_la, 'float16')},oned_as='row')
+         except:
+            savemat(os.path.expanduser("~")+os.sep+base+'dwnhi_la.mat', mdict={'dwnhi_mg_la': np.asarray(dwnhi_mg_la, 'float16')},oned_as='row')
+
          del dwnhi_mg_la
 
            #################################################################################
       # load in low freq echogram
-      data_dwnlow = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_dwnlow']),'float16')
-
+      try:
+         data_dwnlow = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_dwnlow']),'float16')
+      except:
+         data_dwnlow = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'.mat')['data_dwnlow']),'float16')
+     
       if np.size(data_dwnlow)>0:
          data_dwnlow_dB = data_dwnlow*(10*np.log10(maxW)/255)
          del data_dwnlow
@@ -658,8 +689,12 @@ class humcorrect:
 
          dwnlow_mg_la[np.isnan(dwnlow_mg_la)] = 0
 
-         savemat(sonpath+base+'dwnlow_la.mat', mdict={'dwnlow_mg_la': np.asarray(dwnlow_mg_la, 'float16')},oned_as='row')
-         
+         try:
+            savemat(sonpath+base+'dwnlow_la.mat', mdict={'dwnlow_mg_la': np.asarray(dwnlow_mg_la, 'float16')},oned_as='row')
+         except:
+            savemat(os.path.expanduser("~")+os.sep+base+'dwnlow_la.mat', mdict={'dwnlow_mg_la': np.asarray(dwnlow_mg_la, 'float16')},oned_as='row')
+
+
          del dwnlow_mg_la
 
       if os.name=='posix': # true if linux/mac
@@ -675,5 +710,5 @@ class humcorrect:
       try:
          plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
       except:
-         plt.savefig(os.getcwd()+os.sep+root,bbox_inches='tight',dpi=400)      
+         plt.savefig(os.path.expanduser("~")+os.sep+root,bbox_inches='tight',dpi=400)      
 

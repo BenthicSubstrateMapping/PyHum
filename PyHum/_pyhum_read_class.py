@@ -10,7 +10,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0.9      Revision: Mar, 2015
+Version: 1.1.2      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -107,6 +107,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 #rc('text', usetex=True)
+import simplekml
 
 #################################################
 class humread:
@@ -251,7 +252,10 @@ class humread:
       metadat = data.getmetadata()
       del data
 
-      savemat(sonpath+base+'.mat', mdict={'dat': dat, 'data_port': data_port, 'data_star': data_star, 'data_dwnlow': data_dwnlow, 'data_dwnhi': data_dwnhi},oned_as='row')
+      try:
+         savemat(sonpath+base+'.mat', mdict={'dat': dat, 'data_port': data_port, 'data_star': data_star, 'data_dwnlow': data_dwnlow, 'data_dwnhi': data_dwnhi},oned_as='row')
+      except:
+         savemat(os.path.expanduser("~")+os.sep+base+'.mat', mdict={'dat': dat, 'data_port': data_port, 'data_star': data_star, 'data_dwnlow': data_dwnlow, 'data_dwnhi': data_dwnhi},oned_as='row')
 
       try:
          es = humutils.runningMeanFast(metadat['e'],len(metadat['e'])/100)
@@ -268,19 +272,18 @@ class humread:
       metadat['lon'] = lon
       metadat['lat'] = lat
 
+      # create kml for loading path into google earth
+      kml = simplekml.Kml()
+      ls = kml.newlinestring(name='trackline')
+      ls.coords = zip(lon,lat)
+      ls.extrude = 1
+      ls.altitudemode = simplekml.AltitudeMode.relativetoground
+      ls.style.linestyle.width = 5
+      ls.style.linestyle.color = simplekml.Color.red
       try:
-         import simplekml
-         # create kml for loading path into google earth
-         kml = simplekml.Kml()
-         ls = kml.newlinestring(name='trackline')
-         ls.coords = zip(lon,lat)
-         ls.extrude = 1
-         ls.altitudemode = simplekml.AltitudeMode.relativetoground
-         ls.style.linestyle.width = 5
-         ls.style.linestyle.color = simplekml.Color.red
          kml.save(sonpath+base+"trackline.kml")
       except:
-         print "install simplekml for kml plots"
+         kml.save(os.path.expanduser("~")+os.sep+base+"trackline.kml")
 
       #e = np.squeeze(loadmat(sonpath+base+'meta.mat')['es'])
       #n = np.squeeze(loadmat(sonpath+base+'meta.mat')['ns'])
@@ -304,8 +307,12 @@ class humread:
 
       metadat['dist_m'] = dist_m
 
-      data_port = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_port']),'float16')
-      data_star = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_star']),'float16')
+      try:
+         data_port = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_port']),'float16')
+         data_star = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_star']),'float16')
+      except:
+         data_port = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'.mat')['data_port']),'float16')
+         data_star = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'.mat')['data_star']),'float16')
 
       extent = np.shape(data_port)[0]
 
@@ -523,7 +530,11 @@ class humread:
       metadat['t'] = t
       metadat['f'] = f
 
-      savemat(sonpath+base+'meta.mat', metadat ,oned_as='row')
+      try:
+         savemat(sonpath+base+'meta.mat', metadat ,oned_as='row')
+      except:
+         savemat(os.path.expanduser("~")+os.sep+base+'meta.mat', metadat ,oned_as='row')
+      
 
       # read meta-data back in and append new variables
       #metadat = loadmat(sonpath+base+'meta.mat')
@@ -533,14 +544,25 @@ class humread:
       #savemat(sonpath+base+'meta.mat', metadat ,oned_as='row')
       #del metadat
 
-      heading = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
+      try:
+         heading = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
+      except:
+         heading = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['heading'])
 
-      f = open(sonpath+base+'rawdat.csv', 'wt')
-      writer = csv.writer(f)
-      writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth (m)', 'distance (m)', 'heading (deg.)' ) )
-      for i in range(0, len(lon)):
-         writer.writerow(( float(lon[i]),float(lat[i]),float(es[i]),float(ns[i]),float(dep_m[i]),float(dist_m[i]), float(heading[i]) ))
-      f.close()
+      try:
+         f = open(sonpath+base+'rawdat.csv', 'wt')
+         writer = csv.writer(f)
+         writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth (m)', 'distance (m)', 'heading (deg.)' ) )
+         for i in range(0, len(lon)):
+            writer.writerow(( float(lon[i]),float(lat[i]),float(es[i]),float(ns[i]),float(dep_m[i]),float(dist_m[i]), float(heading[i]) ))
+         f.close()
+      except:
+         f = open(os.path.expanduser("~")+os.sep+base+'rawdat.csv', 'wt')
+         writer = csv.writer(f)
+         writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth (m)', 'distance (m)', 'heading (deg.)' ) )
+         for i in range(0, len(lon)):
+            writer.writerow(( float(lon[i]),float(lat[i]),float(es[i]),float(ns[i]),float(dep_m[i]),float(dist_m[i]), float(heading[i]) ))
+         f.close()
 
       del heading, lat, lon, dep_m, dist_m
 
@@ -761,7 +783,7 @@ class humread:
       try:
          plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
       except:
-         plt.savefig(os.getcwd()+os.sep+root,bbox_inches='tight',dpi=400)
+         plt.savefig(os.path.expanduser("~")+os.sep+root,bbox_inches='tight',dpi=400)      
 
 
 

@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0.9      Revision: Mar, 2015
+Version: 1.1.2      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -29,7 +29,7 @@ This software has (so far) been used only with Humminbird 998 and 1198 series in
 
 # operational
 from __future__ import division
-from scipy.io import savemat, loadmat
+from scipy.io import loadmat
 import os, time, sys, getopt
 from Tkinter import Tk
 from tkFileDialog import askopenfilename, askdirectory
@@ -43,7 +43,7 @@ import PyHum.utils as humutils
 # plotting
 import matplotlib.pyplot as plt
 from mpl_toolkits.basemap import Basemap
-
+import simplekml
 
 # suppress divide and invalid warnings
 np.seterr(divide='ignore')
@@ -100,18 +100,26 @@ def domap(humfile, sonpath, cs2cs_args, imagery):
       base = humfile.split('.DAT') # get base of file name for output
       base = base[0].split('/')[-1]
 
-      esi = np.squeeze(loadmat(sonpath+base+'meta.mat')['e']) #+ 395
-      nsi = np.squeeze(loadmat(sonpath+base+'meta.mat')['n']) #- 58
-
-      pix_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['pix_m'])
+      try:
+         esi = np.squeeze(loadmat(sonpath+base+'meta.mat')['e']) #+ 395
+         nsi = np.squeeze(loadmat(sonpath+base+'meta.mat')['n']) #- 58
+         pix_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['pix_m'])
+         bearing = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
+         port_la = np.asarray(np.squeeze(loadmat(sonpath+base+'port_la.mat')['port_mg_la']),'float16')
+         star_la = np.asarray(np.squeeze(loadmat(sonpath+base+'star_la.mat')['star_mg_la']),'float16')
+      except:
+         esi = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['e']) #+ 395
+         nsi = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['n']) #- 58
+         pix_m = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['pix_m'])
+         bearing = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['heading'])
+         port_la = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'port_la.mat')['port_mg_la']),'float16')
+         star_la = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'star_la.mat')['star_mg_la']),'float16')
 
       # reported bearing by instrument (Kalman filtered?)
-      bearing = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
+
       bearing = humutils.runningMeanFast(bearing, len(bearing)/100)
       theta = np.asarray(bearing, 'float')/(180/np.pi)
 
-      port_la = np.asarray(np.squeeze(loadmat(sonpath+base+'port_la.mat')['port_mg_la']),'float16')
-      star_la = np.asarray(np.squeeze(loadmat(sonpath+base+'star_la.mat')['star_mg_la']),'float16')
 
       #merge = np.vstack((np.flipud(port_la),star_la))
       merge = np.vstack((port_la,star_la))
@@ -145,9 +153,14 @@ def domap(humfile, sonpath, cs2cs_args, imagery):
       Y = Y.flatten()
 
       # write raw bs to file
-      outfile = sonpath+'x_y_ss_raw.asc' 
-      with open(outfile, 'w') as f:
-         np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+      try:
+         outfile = sonpath+'x_y_ss_raw.asc' 
+         with open(outfile, 'w') as f:
+            np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+      except:
+         outfile = os.path.expanduser("~")+os.sep+'x_y_ss_raw.asc' 
+         with open(outfile, 'w') as f:
+            np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
       humlon, humlat = trans(X, Y, inverse=True)
 
@@ -182,26 +195,28 @@ def domap(humfile, sonpath, cs2cs_args, imagery):
       custom_save(sonpath,base+'map')
       del fig 
 
+      #============================
+      kml = simplekml.Kml()
+      ground = kml.newgroundoverlay(name='GroundOverlay')
+      ground.icon.href = sonpath+base+'map.png'
+
+      ground.latlonbox.north = np.min(humlat)-0.001
+      ground.latlonbox.south = np.max(humlat)+0.001
+      ground.latlonbox.east =  np.max(humlon)+0.001
+      ground.latlonbox.west =  np.min(humlon)-0.001
+      ground.latlonbox.rotation = 0
+
       try:
-         import simplekml
-         kml = simplekml.Kml()
-         ground = kml.newgroundoverlay(name='GroundOverlay')
-         ground.icon.href = sonpath+base+'map.png'
-
-         ground.latlonbox.north = np.min(humlat)-0.001
-         ground.latlonbox.south = np.max(humlat)+0.001
-         ground.latlonbox.east =  np.max(humlon)+0.001
-         ground.latlonbox.west =  np.min(humlon)-0.001
-         ground.latlonbox.rotation = 0
-
          kml.save(sonpath+base+"GroundOverlay.kml")
       except:
-         "install simplekml for kml file creation"
+         kml.save(os.path.expanduser("~")+os.sep+base+"GroundOverlay.kml")
 
 # =========================================================
 def custom_save(figdirec,root):
-    plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
-
+   try:
+      plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
+   except:
+      plt.savefig(os.path.expanduser("~")+os.sep+root,bbox_inches='tight',dpi=400)      
 
 
 

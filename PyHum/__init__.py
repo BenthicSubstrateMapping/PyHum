@@ -22,7 +22,7 @@ For more information visit http://dbuscombe-usgs.github.io/PyHum/
     
 """
 
-__version__ = '1.0.9'
+__version__ = '1.1.3'
 
 #-----------------------------------------------------------------------------
 # Imports
