@@ -5,7 +5,7 @@ PyHum - a Python framework for sidescan data texture classification.
 
 PyHum is an open-source project dedicated to provide a Python framework for
 processing low-cost sidescan data. It provides parsers for Humminbird file formats,
-and signal processing routines which allow the manipulation of sidescan data and automated texture classification (see Buscombe et al., in review).
+and signal processing routines which allow the manipulation of sidescan data and automated texture classification 
 
 For more information visit http://dbuscombe-usgs.github.io/PyHum/
 
@@ -96,6 +96,9 @@ if USE_CYTHON:
         include_dirs=[np.get_include()]),
         Extension("PyHum.spec_noise", [ "PyHum/_spec_noise.pyx" ],
         include_dirs=[np.get_include()]),
+        Extension("PyHum.stdev", [ "PyHum/_stdev.pyx" ],
+        include_dirs=[np.get_include()]),
+        Extension('_RunningStats',sources=['PyHum/RunningStats_wrap.cxx', 'PyHum/RunningStats.cpp']),
     ]
     cmdclass.update({ 'build_ext': build_ext })
 else:
@@ -110,17 +113,20 @@ else:
         include_dirs=[np.get_include()]),
         Extension("PyHum.spec_noise", [ "PyHum/_spec_noise.c" ],
         include_dirs=[np.get_include()]),
+        Extension("PyHum.stdev", [ "PyHum/_stdev.c" ],
+        include_dirs=[np.get_include()]),
+        Extension('_RunningStats',sources=['PyHum/RunningStats_wrap.cxx', 'PyHum/RunningStats.cpp']),
     ]
 install_requires = [
-    'numpy','scipy','Pillow','matplotlib','scikit-learn', 'cython', 'pyproj', 'scikit-image'
+    'numpy','scipy','Pillow','matplotlib', 'cython', 'pyproj', 'scikit-image', 'simplekml'
 ]
-
+#'scikit-learn',
 #long_description = open('README.md').read()
 
 def setupPackage():
    setup(name='PyHum',
          version=__version__,
-         description='Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", submitted to Journal of Hydraulic Engineering, September 2014.',
+         description='Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", forthcoming.',
          #long_description=long_description,
          classifiers=[
              'Intended Audience :: Science/Research',

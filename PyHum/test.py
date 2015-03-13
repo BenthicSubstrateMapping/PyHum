@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0.8      Revision: Feb, 2015
+Version: 1.0.9      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -33,18 +33,20 @@ def dotest():
    # general settings
    humfile = PyHum.__path__[0]+os.sep+'test.DAT'
    sonpath = PyHum.__path__[0]
+   doplot = 1
+
+   # reading specific settings
+   cs2cs_args = "epsg:26949"
+   draft = 0
+   bedpick = 1
    c = 1450
    t = 0.108
    f = 455
-   doplot = 1
+   draft = 0.3
+   flip_lr = 1
 
    # correction specific settings
-   bedpick = 1
    maxW = 1000
-
-   # reading specific settings
-   epsg = "epsg:26949"
-   draft = 0
 
    # for texture calcs
    win = 100
@@ -56,11 +58,16 @@ def dotest():
    shorepick = 0
    do_two = 0
 
-   PyHum.humread(humfile, sonpath, epsg, c, draft, doplot)
+   # for mapping
+   imagery = 1 # server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery'
 
-   PyHum.humcorrect(humfile, sonpath, c, t, f, maxW, bedpick, doplot)
+   PyHum.humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr)
 
-   PyHum.humtexture(humfile, sonpath, c, t, f, win, shift, doplot, density, numclasses, maxscale, notes, shorepick, do_two)
+   PyHum.humcorrect(humfile, sonpath, maxW, doplot)
+
+   PyHum.humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes, shorepick, do_two)
+
+   PyHum.domap(humfile, sonpath, cs2cs_args, imagery)
 
 if __name__ == '__main__':
    dotest()

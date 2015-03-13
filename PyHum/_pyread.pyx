@@ -11,7 +11,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0.8      Revision: Feb, 2015
+Version: 1.0.9      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -26,6 +26,8 @@ from __future__ import generators
 from __future__ import division
 import numpy as np
 cimport numpy as np
+from libc.math cimport tan, atan, exp
+
 from array import array as arr
 import pyproj
 import os, struct
@@ -36,7 +38,7 @@ cdef class pyread:
     read a humminbird file
     """
     cdef object trans
-    cdef object transWGS84
+    #cdef object transWGS84
     cdef object data
     cdef object humdat
     
@@ -53,11 +55,11 @@ cdef class pyread:
        trans =  pyproj.Proj(init=cs2cs_args1)
 
        # world mercator
-       cdef str cs2cs_args2 = '+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
-       transWGS84 =  pyproj.Proj(cs2cs_args2)
+       #cdef str cs2cs_args2 = '+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
+       #transWGS84 =  pyproj.Proj(cs2cs_args2)
        
        fid2 = open(humfile,'rb')
-       humdat = self._decode_humdat(fid2, trans, transWGS84)
+       humdat = self._decode_humdat(fid2, trans) #, transWGS84)
        self.humdat = humdat
 
        cdef list dat = []       
@@ -88,7 +90,7 @@ cdef class pyread:
      
           fid = open(sonfile,'rb')
           for i from 0 <= i < len(dfbreak):              
-             tmpdata.append(self._gethead(fid,trans,transWGS84, c)) # get header for packet
+             tmpdata.append(self._gethead(fid,trans, c)) # get header for packet transWGS84,
              ints_list = []
              for j from 0 <= j < dfbreak[i]-headbytes:                 
                 ints_list.append(struct.unpack('>B', ''.join(self._fread(fid,1,'c')) )[0])
@@ -158,7 +160,7 @@ cdef class pyread:
           return(list(dat))
 
     # =========================================================
-    def _gethead(self, fid, trans, transWGS84, float c):
+    def _gethead(self, fid, trans, float c): #transWGS84,
        cdef list hd = self._fread(fid, 3, 'B')
        cdef list head=[] #pre-allocate list
        cdef int flag
@@ -231,17 +233,27 @@ cdef class pyread:
           dist = ((np.tan(np.radians(25)))*head[8])-(tvg) #depth
           bearing = np.radians(head[5]) - (np.pi/2) #heading_deg
           x_utm, y_utm = self._calc_beam_pos(dist, bearing, (head[2],head[3]))
-          lon, lat = transWGS84(x_utm,y_utm, inverse=True)
+          #lon, lat = transWGS84(x_utm,y_utm, inverse=True)
+          lat = atan(tan(atan(exp(y_utm/ 6378388.0)) * 2.0 - 1.570796326794897) * 1.0067642927) * 57.295779513082302
+          lon = x_utm * 57.295779513082302 / 6378388.0
+           
           head.append(lat)
           head.append(lon)
           lon, lat = trans(lon, lat)
           head.append(lat)
-          head.append(lon)     
+          head.append(lon)
+
+       #lon, lat = transWGS84(head[2],head[3], inverse=True)
+       #head.append(lat)
+       #head.append(lon)
+       #lon, lat = trans(lon, lat)
+       #head.append(lat)
+       #head.append(lon)       
        
        return head
 
     # =========================================================
-    def _decode_humdat(self, fid2, trans, transWGS84): 
+    def _decode_humdat(self, fid2, trans): #, transWGS84): 
        """
        returns data from .DAT file
        """
@@ -277,8 +289,11 @@ cdef class pyread:
 
        cdef float humlon
        cdef float humlat
-       humlon, humlat = transWGS84(humdat[3],humdat[4], inverse=True)
+       #humlon, humlat = transWGS84(humdat[3],humdat[4], inverse=True)
 
+       humlat = atan(tan(atan(exp(humdat[4]/ 6378388.0)) * 2.0 - 1.570796326794897) * 1.0067642927) * 57.295779513082302
+       humlon = humdat[3] * 57.295779513082302 / 6378388.0
+ 
        humlon, humlat = trans(humlon, humlat)
        humdat.append(humlat)
        humdat.append(humlon)

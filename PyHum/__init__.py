@@ -22,7 +22,7 @@ For more information visit http://dbuscombe-usgs.github.io/PyHum/
     
 """
 
-__version__ = '1.0.8'
+__version__ = '1.0.9'
 
 #-----------------------------------------------------------------------------
 # Imports
@@ -31,6 +31,7 @@ __version__ = '1.0.8'
 from PyHum._pyhum_read_class import humread
 from PyHum._pyhum_correct_class import humcorrect
 from PyHum._pyhum_texture_class import humtexture
+from PyHum._pyhum_map import domap
 from PyHum.utils import *
 from PyHum.test import *
 

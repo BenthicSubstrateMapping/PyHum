@@ -91,7 +91,6 @@ import replace_nans
 import PyHum.utils as humutils
 from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
 from scipy.ndimage.filters import median_filter
-from scipy.ndimage.measurements import label
 from fractions import gcd
    
 # plotting
@@ -101,8 +100,6 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 #rc('text', usetex=True)
-
-import stdev
 
 # suppress divide and invalid warnings
 np.seterr(divide='ignore')
@@ -213,8 +210,6 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
       ########################################################
       ########################################################
 
-      kvals = 10
-      
       # start timer
       if os.name=='posix': # true if linux/mac or cygwin on windows
          start1 = time()
@@ -297,30 +292,12 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
       # first, make a mask of merged scans
       mask = np.asarray(merge!=0,'int8') # only 8bit precision needed
 
-      Z,ind = humutils.sliding_window(merge,(win,win),(win/2,win/2))
       if shorepick==0:
-
-         try: #parallel processing with all available cores
-            w = Parallel(n_jobs=-1, verbose=1)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z))) #backend="threading"
-         except: #fall back to serial
-            w = Parallel(n_jobs=1, verbose=1)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z)))
-
-         zmean,stdv= zip(*w)
-         del w, stdv
-
-         zmean = np.reshape(zmean , ( ind[0], ind[1] ) )
-
-         Ny, Nx = np.shape(merge)
-         M = humutils.im_resize(zmean,Nx,Ny)
-         M[mask==0] = 0
-         del zmean
-
-         # get a k-value segmentation   
-         wc, values = humutils.cut_kmeans(M, kvals) #merge,kvals)
-         del M, Ny, Nx
+         # get a 5-value segmentation   
+         wc, values = humutils.cut_kmeans(merge,5)
    
          # the lowest value is zero, get the next lowest
-         bw = wc==np.sort(values)[-(kvals-1)]
+         bw = wc==np.sort(values)[-4]
          del wc, values
 
          # erode and dilate to remove splotches of no data
@@ -335,7 +312,6 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
       else:
          bw2 = np.asarray(np.isnan(merge),'int8')
 
-      Z = None
       merge[np.isnan(merge)] = 0
       Ny, Nx = np.shape(merge)
 
@@ -425,7 +401,7 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
          fp[:] = Z[:]
          del fp
          shapeZ = np.shape(Z)
-         Z = None
+         del Z
          #we are only going to access the portion of memory required
          newfp = np.memmap(filename1, dtype='int8', mode='r', shape=shapeZ)
 	  
@@ -639,85 +615,4 @@ def custom_save(figdirec,root):
 def parallel_me(x, maxscale, notes, win, density):
    dat = cwt.Cwt(x, maxscale, notes, win, density)
    return dat.getvar()
-
-#==================================================
-def get_stats(pts):
-   '''
-   call the analysis routine. Gets called by the parallel processing queue
-   '''
-   return stdev.proc(pts).getdata()
-
-
-
-#import stdev
-#from scipy.spatial import cKDTree
-
-##==================================================
-#def centroid(inpts):
-#   '''
-#   return centroid
-#   '''
-#   return np.mean(inpts,axis=0)
-
-##==================================================
-#def do_kdtree2(toproc,allpoints, p, win, mxpts=256):
-#   '''
-#   binary search tree for fast nearest neighbour point check
-#   with boundary pruning
-#   '''
-#   # get the tree for the entire point cloud
-#   mytree = cKDTree(allpoints)
-#   dist, indices = mytree.query(p,mxpts, distance_upper_bound=win)
-#   # remove any indices associated with 'inf' distance
-#   indices = np.squeeze(indices[np.where(np.all(np.isinf(dist),axis=1) ==  False),:])
-#   dist = np.squeeze(dist[np.where(np.all(np.isinf(dist),axis=1) ==  False),:])
-
-#   # define null indices
-#   indices[indices==len(allpoints)] = -999
-#   indices = indices.tolist()
-
-#   # remove null records
-#   for k in xrange(len(indices)):
-#      indices[k] = [n for n in indices[k] if n!=-999]
-
-#   return indices
-
-
-##==================================================
-#def get_stats(pts):
-#   '''
-#   call the analysis routine. Gets called by the parallel processing queue
-#   '''
-#   return stdev.proc(pts).getdata()
-
-
-#base2 = np.floor(np.log(win)/np.log(2) + 0.4999)
-#mxpts = np.int(2**(base2+1))
-
-#x, y = np.meshgrid(np.r_[:np.shape(merge)[0]], np.r_[:np.shape(merge)[1]])
-
-#tmp = merge.flatten()
-#del merge
-#x = x.flatten()
-#y = y.flatten()
-
-#win2 = 1000
-#xv = np.arange(0, len(tmp), win2)
-#xx, yy = np.meshgrid(xv, xv)
-#p = list(np.vstack([xx.flatten(),yy.flatten()]).transpose())
-
-#del xx, yy, xv
-
-#toproc = np.c_[x.ravel(), x.ravel(), tmp.ravel()].astype('float32')
-# 
-## find all points within 'out' metres of each centroid in p 
-#nr_pts = do_kdtree2(toproc, zip(x.ravel(), x.ravel()), p, win2, mxpts)
-
-
-#try: #parallel processing with all available cores
-#   w = Parallel(n_jobs=-1, verbose=1)(delayed(get_stats)(toproc[nr_pts[k],:3]) for k in xrange(len(nr_pts))) #backend="threading"
-#except: #fall back to serial
-#   w = Parallel(n_jobs=1, verbose=1)(delayed(get_stats)(toproc[nr_pts[k],:3]) for k in xrange(len(nr_pts)))
-
-#x,y,zmean,stdev= zip(*w)
 

@@ -3,7 +3,7 @@ PyHum
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/class_R01560.png)
 
-Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", submitted to Journal of Hydraulic Engineering, September 2014.
+Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", forthcoming.
 
 ### Contributing & Credits
 
@@ -12,7 +12,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.0.8      Revision: Feb, 2015
+Version: 1.0.9      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -30,7 +30,7 @@ Any use of trade, product, or firm names is for descriptive purposes only and do
 thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info
 
 This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4 & 14.4, Windows 7.
-This software has (so far) been used only with Humminbird 998 series instruments. 
+This software has (so far) been used only with Humminbird 998 and 1198 series instruments. 
 
 ### Contents
 
@@ -48,15 +48,29 @@ These are all command-line programs which take a number of input (some required,
 
 ### Setup
 
-Try before you install using a virtual environment:
+You could try before you install, using a virtual environment:
 
 ```
 virtualenv venv
 source venv/bin/activate
 pip install numpy
 pip install Cython
+pip install scipy
+pip install simplekml
+pip install pyproj
+pip install scikit-learn
+pip install Pillow
+pip install matplotlib
+pip install basemap --allow-external basemap --allow-unverified basemap
 pip install PyHum
+python -c "import PyHum; PyHum.test.dotest()"
+deactivate (or source venv/bin/deactivate)
 ```
+
+The results will live in "venv/lib/python2.7/site-packages/PyHum"
+
+Note for Fedora linux users: you need the geos-devel package for basemap, and the blas and libpack libraries for scipy
+
 
 Automatic Installation from PyPI:
 
@@ -93,7 +107,9 @@ PYTHON LIBRARIES YOU MAY NEED TO INSTALL TO USE PyHum:
 4) Matplotlib: http://matplotlib.org/downloads.html
 5) Scikit-learn: http://scikit-learn.org/stable/
 6) Python Image LIbrary (PIL) http://www.pythonware.com/products/pil/
-7) scikit-image: http://scikit-image.org/ 
+7) simplekml: http://simplekml.readthedocs.org/en/latest/index.html
+8) pyproj: https://pypi.python.org/pypi/pyproj
+9) basemap: http://matplotlib.org/basemap/
 
 All of the above are available through pip (https://pypi.python.org/pypi/pip) and easy_install (https://pythonhosted.org/setuptools/easy_install.html)
 
@@ -146,18 +162,19 @@ which carries out the following operations:
 ```
    humfile = PyHum.__path__[0]+os.sep+'test.DAT'
    sonpath = PyHum.__path__[0]
+
+   # reading specific settings
+   cs2cs_args = "epsg:26949"
+   draft = 0
+   bedpick = 1
    c = 1450
    t = 0.108
    f = 455
-   doplot = 1
+   draft = 0.3
+   flip_lr = 1
 
    # correction specific settings
-   bedpick = 1
    maxW = 1000
-
-   # reading specific settings
-   epsg = "epsg:26949"
-   draft = 0
 
    # for texture calcs
    win = 100
@@ -169,12 +186,45 @@ which carries out the following operations:
    shorepick = 0
    do_two = 0
 
-   PyHum.humread(humfile, sonpath, epsg, c, draft, doplot)
+   # for mapping
+   imagery = 1 # server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery'
 
-   PyHum.humcorrect(humfile, sonpath, c, t, f, maxW, bedpick, doplot)
+   PyHum.humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr)
 
-   PyHum.humtexture(humfile, sonpath, c, t, f, win, shift, doplot, density, numclasses, maxscale, notes, shorepick, do_two)
+   PyHum.humcorrect(humfile, sonpath, maxW, doplot)
+
+   PyHum.humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes, shorepick, do_two)
+
+   PyHum.domap(humfile, sonpath, cs2cs_args, imagery)
 ```
+
+on the following files:
+test.DAT
+B003.SON
+B002.SON
+B001.SON
+B000.SON
+
+and results in a set of outputs such as csv, mat and kml files, and including some rudimentary figures such as:
+
+![alt tag](http://dbuscombe-usgs.github.io/figs/bed_pick.png)
+port and starboard scans showing automated bed picks
+
+![alt tag](http://dbuscombe-usgs.github.io/figs/merge_corrected_scan_ppdrc.png)
+a merged port/starboard scan
+
+![alt tag](http://dbuscombe-usgs.github.io/figs/raw_dwnhi.png)
+a raw 200 kHz downward sonar scan
+
+![alt tag](http://dbuscombe-usgs.github.io/figs/raw_dwnlow.png)
+a raw 83 kHz downward sonar scan
+
+![alt tag](http://dbuscombe-usgs.github.io/figs/class.png)
+radiometrically corrected scan (top) and wavelet lengthscale classification (bottom)
+
+![alt tag](http://dbuscombe-usgs.github.io/figs/class_kmeans.png)
+k=4 means lengthscale classification
+
 
 ### Support
 
