@@ -78,9 +78,11 @@ The results will live in "venv/lib/python2.7/site-packages/PyHum"
 Note for Fedora linux users: you need the geos-devel package for basemap, and the blas and libpack libraries for scipy
 
 
-Automatic Installation from PyPI:
+Automatic Installation from PyPI (assuming a Anaconda distribution which comes with almost all required program dependencies):
 
 ```
+pip install simplekml
+pip uninstall PyHum (removes previous installation)
 pip install PyHum
 ```
 
@@ -103,6 +105,18 @@ or with admin privileges, e.g.:
 ```
 sudo python setup.py install
 ```
+
+### Note for Windows users
+pip seems to have a bug with pyproj depending on what c-compiler your python distribution uses. Therefore, you may have to install pyproj (and other dependencies) from here:
+
+http://www.lfd.uci.edu/~gohlke/pythonlibs/
+
+Download the .whl file, then use pip to install it, e.g.
+
+```
+pip install pyproj-1.9.4-cp27-none-win_amd64.whl
+```
+
 
 Manual Installation:
 
