@@ -9,11 +9,11 @@ Python/Cython scripts to:
 
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/class_R01560.png)
-Sand dunes on the bed of the Colorado River in Grand Canyon
+*Sand dunes on the bed of the Colorado River in Grand Canyon*
 
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/R00426_map.jpg)
-Dog River, Alabama. Credit: Allen Aven, Dauphin Island Sea Lab
+*Dog River, Alabama. Credit: Allen Aven, Dauphin Island Sea Lab*
 
 ### Contributing & Credits
 
@@ -210,6 +210,7 @@ which carries out the following operations:
 ```
 
 on the following files:
+
 1. test.DAT
 2. B003.SON
 3. B002.SON
@@ -219,22 +220,22 @@ on the following files:
 and results in a set of outputs such as csv, mat and kml files, and including some rudimentary figures such as:
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/bed_pick.png)
-port and starboard scans showing automated bed picks
+*port and starboard scans showing automated bed picks*
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/merge_corrected_scan_ppdrc.png)
-a merged port/starboard scan
+*a merged port/starboard scan*
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/raw_dwnhi.png)
-a raw 200 kHz downward sonar scan
+*a raw 200 kHz downward sonar scan*
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/raw_dwnlow.png)
-a raw 83 kHz downward sonar scan
+*a raw 83 kHz downward sonar scan*
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/class.png)
-radiometrically corrected scan (top) and wavelet lengthscale classification (bottom)
+*radiometrically corrected scan (top) and wavelet lengthscale classification (bottom)*
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/class_kmeans.png)
-k=4 means lengthscale classification
+*k=4 means lengthscale classification*
 
 ### Support
 
