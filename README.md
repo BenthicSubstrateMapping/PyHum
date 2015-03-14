@@ -17,12 +17,13 @@ Dog River, Alabama. Credit: Allen Aven, Dauphin Island Sea Lab
 
 ### Contributing & Credits
 
-| Author:    Daniel Buscombe |
-|         |  Grand Canyon Monitoring and Research Center|
-|          | United States Geological Survey|
-|          | Flagstaff, AZ 86001|
-|          | dbuscombe@usgs.gov|
-|Version: 1.1.6   |   Revision: Mar, 2015|
+ Author |    Daniel Buscombe 
+ ------ | ---------------
+         |  Grand Canyon Monitoring and Research Center
+          | United States Geological Survey
+          | Flagstaff, AZ 86001
+          | dbuscombe@usgs.gov
+Version: 1.1.6   |   Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -140,15 +141,15 @@ Note for Fedora linux users: you need the geos-devel package for basemap, and th
 Manual Installation:
 
 PYTHON LIBRARIES YOU MAY NEED TO INSTALL TO USE PyHum:
-1. Pyproj: http://code.google.com/p/pyproj/
-2. SciPy: http://www.scipy.org/scipylib/download.html
-3. Numpy: http://www.scipy.org/scipylib/download.html
-4. Matplotlib: http://matplotlib.org/downloads.html
-5. Scikit-learn: http://scikit-learn.org/stable/
-6. Python Image LIbrary (PIL) http://www.pythonware.com/products/pil/
-7. simplekml: http://simplekml.readthedocs.org/en/latest/index.html
-8. pyproj: https://pypi.python.org/pypi/pyproj
-9. basemap: http://matplotlib.org/basemap/
+1. Pyproj (http://code.google.com/p/pyproj/)
+2. SciPy (http://www.scipy.org/scipylib/download.html)
+3. Numpy (http://www.scipy.org/scipylib/download.html)
+4. Matplotlib (http://matplotlib.org/downloads.html)
+5. Scikit-learn (http://scikit-learn.org/stable/)
+6. Python Image LIbrary (PIL) (http://www.pythonware.com/products/pil/)
+7. simplekml (http://simplekml.readthedocs.org/en/latest/index.html)
+8. pyproj (https://pypi.python.org/pypi/pyproj)
+9. basemap (http://matplotlib.org/basemap/)
 
 All of the above are available through pip (https://pypi.python.org/pypi/pip) and easy_install (https://pythonhosted.org/setuptools/easy_install.html)
 
