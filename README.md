@@ -1,7 +1,11 @@
 ### About
 PyHum
 
-Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", forthcoming.
+Python/Cython scripts to: 
+1. read Humminbird DAT and associated SON files
+2. export data
+3. carry out rudimentary radiometric corrections to data, and 
+4. classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", forthcoming.
 
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/class_R01560.png)
@@ -13,12 +17,12 @@ Dog River, Alabama. Credit: Allen Aven, Dauphin Island Sea Lab
 
 ### Contributing & Credits
 
-Author:    Daniel Buscombe
-           Grand Canyon Monitoring and Research Center
-           United States Geological Survey
-           Flagstaff, AZ 86001
-           dbuscombe@usgs.gov
-Version: 1.0.9      Revision: Mar, 2015
+| Author:    Daniel Buscombe |
+|         |  Grand Canyon Monitoring and Research Center|
+|          | United States Geological Survey|
+|          | Flagstaff, AZ 86001|
+|          | dbuscombe@usgs.gov|
+|Version: 1.1.6   |   Revision: Mar, 2015|
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -27,6 +31,7 @@ This function is part of PyHum software
 This software is in the public domain because it contains materials that originally came 
 from the United States Geological Survey, an agency of the United States Department of Interior. 
 For more information, see the official USGS copyright policy at 
+
 ```
 http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 ```
@@ -41,18 +46,72 @@ This software has (so far) been used only with Humminbird 998 and 1198 series in
 ### Contents
 
 The programs in this package are as follows:
-1) pyhum_read.py
-Python script to read Humminbird DAT and associated SON files, and export data in MAT format
 
-2) pyhum_correct.py
-Python script to read Humminbird data in MAT format (output from pyhum_read.py) and perform some radiometric corrections and produce some rudimentary plots
+1. pyhum_read
+script to read Humminbird DAT and associated SON files, and export data in MAT format
 
-3) pyhum_texture.py
-Python script to read radiometrically corrected Humminbird data in MAT format (output from pyhum_correct.py) and perform a textural analysis using the spectral method of Buscombe et al (in review) and produce some rudimentary plots
+2. pyhum_correct
+script to read Humminbird data in MAT format (output from pyhum_read.py) and perform some radiometric corrections and produce some rudimentary plots
+
+3. pyhum_texture
+script to read radiometrically corrected Humminbird data in MAT format (output from pyhum_correct.py) and perform a textural analysis using the spectral method of Buscombe et al (forthcoming) and produce some rudimentary plots
+
+4. pyhum_domap
+script to generate a point cloud (X,Y,sidescan intensity), save it to ascii format file, grid it and make a raster overlay on an aerial image (pulled automatically from the ESRI GIS image server), and a kml file for showing the same thing in google-earth
 
 These are all command-line programs which take a number of input (some required, some optional). Please see the individual files for a comprehensive list of input options
 
 ### Setup
+
+# Automatic Installation from PyPI 
+
+```
+pip uninstall PyHum (removes previous installation)
+pip install PyHum
+```
+
+Automatic Installation from github:
+
+```
+git clone git@github.com:dbuscombe-usgs/PyHum.git
+cd PyHum
+python setup.py install
+```
+
+or a local installation:
+
+```
+python setup.py install --user
+```
+
+or with admin privileges, e.g.:
+
+```
+sudo python setup.py install
+```
+
+### Notes for Windows/Anaconda users
+
+Assuming a Anaconda distribution which comes with almost all required program dependencies:
+
+```
+pip install simplekml
+pip uninstall PyHum (removes previous installation)
+pip install PyHum
+```
+
+pip seems to have a bug with pyproj depending on what c-compiler your python distribution uses. Therefore, you may have to install pyproj (and other dependencies) from here:
+
+http://www.lfd.uci.edu/~gohlke/pythonlibs/
+
+Download the .whl file, then use pip to install it, e.g.
+
+```
+pip install pyproj-1.9.4-cp27-none-win_amd64.whl
+```
+
+
+### Notes for Linux users
 
 You could try before you install, using a virtual environment:
 
@@ -78,96 +137,20 @@ The results will live in "venv/lib/python2.7/site-packages/PyHum"
 Note for Fedora linux users: you need the geos-devel package for basemap, and the blas and libpack libraries for scipy
 
 
-Automatic Installation from PyPI (assuming a Anaconda distribution which comes with almost all required program dependencies):
-
-```
-pip install simplekml
-pip uninstall PyHum (removes previous installation)
-pip install PyHum
-```
-
-Automatic Installation from github:
-
-```
-git clone git@github.com:dbuscombe-usgs/PyHum.git
-cd PyHum
-python setup.py install
-```
-
-or a local installation:
-
-```
-python setup.py install --user
-```
-
-or with admin privileges, e.g.:
-
-```
-sudo python setup.py install
-```
-
-### Note for Windows users
-pip seems to have a bug with pyproj depending on what c-compiler your python distribution uses. Therefore, you may have to install pyproj (and other dependencies) from here:
-
-http://www.lfd.uci.edu/~gohlke/pythonlibs/
-
-Download the .whl file, then use pip to install it, e.g.
-
-```
-pip install pyproj-1.9.4-cp27-none-win_amd64.whl
-```
-
-
 Manual Installation:
 
 PYTHON LIBRARIES YOU MAY NEED TO INSTALL TO USE PyHum:
-1) Pyproj: http://code.google.com/p/pyproj/
-2) SciPy: http://www.scipy.org/scipylib/download.html
-3) Numpy: http://www.scipy.org/scipylib/download.html
-4) Matplotlib: http://matplotlib.org/downloads.html
-5) Scikit-learn: http://scikit-learn.org/stable/
-6) Python Image LIbrary (PIL) http://www.pythonware.com/products/pil/
-7) simplekml: http://simplekml.readthedocs.org/en/latest/index.html
-8) pyproj: https://pypi.python.org/pypi/pyproj
-9) basemap: http://matplotlib.org/basemap/
+1. Pyproj: http://code.google.com/p/pyproj/
+2. SciPy: http://www.scipy.org/scipylib/download.html
+3. Numpy: http://www.scipy.org/scipylib/download.html
+4. Matplotlib: http://matplotlib.org/downloads.html
+5. Scikit-learn: http://scikit-learn.org/stable/
+6. Python Image LIbrary (PIL) http://www.pythonware.com/products/pil/
+7. simplekml: http://simplekml.readthedocs.org/en/latest/index.html
+8. pyproj: https://pypi.python.org/pypi/pyproj
+9. basemap: http://matplotlib.org/basemap/
 
 All of the above are available through pip (https://pypi.python.org/pypi/pip) and easy_install (https://pythonhosted.org/setuptools/easy_install.html)
-
-OTHER LIBRARIES (CYTHON) NEED TO BE COMPILED FOR SPEED:
-1) pyread.pyx
-2) ppdrc.pyx
-3) cwt.pyx
-4) replace_nans.pyx
-5) spec_noise.pyx
-
-On a Linux platform this can be achieved using:
-
-```
-echo "Compiling file reading module"
-cython pyread.pyx
-gcc -c -fPIC -I/usr/include/python2.7/ pyread.c
-gcc -shared pyread.o -o pyread.so
-
-echo "Compiling wavelet computations module"
-cython cwt.pyx
-gcc -c -fPIC -I/usr/include/python2.7/ cwt.c
-gcc -shared cwt.o -o cwt.so
-
-echo "Compiling nan infilling module"
-cython replace_nans.pyx
-gcc -c -fPIC -I/usr/include/python2.7/ replace_nans.c
-gcc -shared replace_nans.o -o replace_nans.so
-
-echo "Compiling spectral noise module"
-cython spec_noise.pyx
-gcc -c -fPIC -I/usr/include/python2.7/ spec_noise.c
-gcc -shared spec_noise.o -o spec_noise.so
-
-echo "Compiling the phase preserving dynamic range compression module"
-cython ppdrc.pyx
-gcc -c -fPIC -I/usr/include/python2.7/ ppdrc.c
-gcc -shared ppdrc.o -o ppdrc.so
-```
 
 ### Test
 
@@ -180,8 +163,14 @@ python -c "import PyHum; PyHum.test.dotest()"
 which carries out the following operations:
 
 ```
-   humfile = PyHum.__path__[0]+os.sep+'test.DAT'
-   sonpath = PyHum.__path__[0]
+   # copy files over to somewhere read/writeable (a subdirectory on your home folder)
+   dircopy(PyHum.__path__[0], os.path.expanduser("~")+os.sep+'pyhum_test')
+   shutil.copy(PyHum.__path__[0]+os.sep+'test.DAT', os.path.expanduser("~")+os.sep+'pyhum_test'+os.sep+'test.DAT')
+
+   # general settings   
+   humfile = os.path.expanduser("~")+os.sep+'pyhum_test'+os.sep+'test.DAT' 
+   sonpath = os.path.expanduser("~")+os.sep+'pyhum_test'
+   doplot = 1
 
    # reading specific settings
    cs2cs_args = "epsg:26949"
@@ -219,11 +208,11 @@ which carries out the following operations:
 ```
 
 on the following files:
-test.DAT
-B003.SON
-B002.SON
-B001.SON
-B000.SON
+1. test.DAT
+2. B003.SON
+3. B002.SON
+4. B001.SON
+5. B000.SON
 
 and results in a set of outputs such as csv, mat and kml files, and including some rudimentary figures such as:
 
@@ -247,7 +236,7 @@ k=4 means lengthscale classification
 
 ### Support
 
-This is a new project written and maintained by Daniel Buscombe. Thus far extensive testing has not been possible so bugs are expected. 
+This is a new project written and maintained by Daniel Buscombe. Bugs are expected - please report them, I will fix them quickly. Feedback and suggestions for improvements are *very* welcome
 
 Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please address all suggestions, comments and queries to: dbuscombe@usgs.gov. Thanks for stopping by! 
 
