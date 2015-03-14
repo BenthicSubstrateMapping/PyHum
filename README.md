@@ -1,7 +1,7 @@
-### About
-PyHum
+### PyHum
 
 Python/Cython scripts to: 
+
 1. read Humminbird DAT and associated SON files
 2. export data
 3. carry out rudimentary radiometric corrections to data, and 
@@ -62,9 +62,9 @@ script to generate a point cloud (X,Y,sidescan intensity), save it to ascii form
 
 These are all command-line programs which take a number of input (some required, some optional). Please see the individual files for a comprehensive list of input options
 
-### Setup
+## Setup
 
-# Automatic Installation from PyPI 
+### Automatic Installation from PyPI 
 
 ```
 pip uninstall PyHum (removes previous installation)
@@ -138,9 +138,10 @@ The results will live in "venv/lib/python2.7/site-packages/PyHum"
 Note for Fedora linux users: you need the geos-devel package for basemap, and the blas and libpack libraries for scipy
 
 
-Manual Installation:
+###Manual Installation
 
 PYTHON LIBRARIES YOU MAY NEED TO INSTALL TO USE PyHum:
+
 1. Pyproj (http://code.google.com/p/pyproj/)
 2. SciPy (http://www.scipy.org/scipylib/download.html)
 3. Numpy (http://www.scipy.org/scipylib/download.html)
