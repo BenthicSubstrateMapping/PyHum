@@ -6,6 +6,7 @@ Python/Cython scripts to:
 2. export data
 3. carry out rudimentary radiometric corrections to data, and 
 4. classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", forthcoming.
+5. produce some maps on aerial photos and kml files for google-earth
 
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/class_R01560.png)
