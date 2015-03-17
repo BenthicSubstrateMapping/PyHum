@@ -232,7 +232,9 @@ cdef class pyread:
        if head[9]==3 or head[9]==2: #starboard or port
           dist = ((np.tan(np.radians(25)))*head[8])-(tvg) #depth
           bearing = np.radians(head[5]) - (np.pi/2) #heading_deg
-          x_utm, y_utm = self._calc_beam_pos(dist, bearing, (head[2],head[3]))
+          #x_utm, y_utm = self._calc_beam_pos(dist, bearing, (head[2],head[3]))
+          x_utm = head[2]
+          y_utm = head[3]
           #lon, lat = transWGS84(x_utm,y_utm, inverse=True)
           lat = atan(tan(atan(exp(y_utm/ 6378388.0)) * 2.0 - 1.570796326794897) * 1.0067642927) * 57.295779513082302
           lon = x_utm * 57.295779513082302 / 6378388.0
@@ -294,7 +296,7 @@ cdef class pyread:
        humlat = atan(tan(atan(exp(humdat[4]/ 6378388.0)) * 2.0 - 1.570796326794897) * 1.0067642927) * 57.295779513082302
        humlon = humdat[3] * 57.295779513082302 / 6378388.0
  
-       humlon, humlat = trans(humlon, humlat)
+       #humlon, humlat = trans(humlon, humlat)
        humdat.append(humlat)
        humdat.append(humlon)
 

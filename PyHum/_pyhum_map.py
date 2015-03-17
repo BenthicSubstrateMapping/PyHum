@@ -38,7 +38,8 @@ from tkFileDialog import askopenfilename, askdirectory
 import numpy as np
 import pyproj
 import PyHum.utils as humutils
-#from pyhum_utils import ascol, runningMeanFast, rescale
+from scipy.interpolate import griddata
+from scipy.spatial import cKDTree as KDTree
 
 # plotting
 import matplotlib.pyplot as plt
@@ -91,6 +92,12 @@ def domap(humfile, sonpath, cs2cs_args, imagery):
             imagery = 1
             print "[Default] World imagery will be used"
 
+
+      dogrid=1
+      calc_bearing = 0
+      filt_bearing = 0
+      res=0.05
+
       trans =  pyproj.Proj(init=cs2cs_args)
 
       # if son path name supplied has no separator at end, put one on
@@ -104,112 +111,237 @@ def domap(humfile, sonpath, cs2cs_args, imagery):
          esi = np.squeeze(loadmat(sonpath+base+'meta.mat')['e']) #+ 395
          nsi = np.squeeze(loadmat(sonpath+base+'meta.mat')['n']) #- 58
          pix_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['pix_m'])
-         bearing = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
-         port_la = np.asarray(np.squeeze(loadmat(sonpath+base+'port_la.mat')['port_mg_la']),'float16')
-         star_la = np.asarray(np.squeeze(loadmat(sonpath+base+'star_la.mat')['star_mg_la']),'float16')
+
+         # over-ride measured bearing and calc from positions
+         if calc_bearing==1:
+            lat = np.squeeze(loadmat(sonpath+base+'meta.mat')['lat'])
+            lon = np.squeeze(loadmat(sonpath+base+'meta.mat')['lon']) 
+
+            #point-to-point bearing
+            bearing = np.zeros(len(lat))
+            for k in xrange(len(lat)-1):
+               bearing[k] = bearingBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+            del lat, lon
+         else:       # reported bearing by instrument (Kalman filtered?)
+            bearing = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
+
+
+         # load memory mapped scans
+         shape_port = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_port'])
+         if shape_port!='':
+            port_fp = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+
+         shape_star = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_star'])
+         if shape_star!='':
+            star_fp = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+
+         #port_la = np.asarray(np.squeeze(loadmat(sonpath+base+'port_la.mat')['port_mg_la']),'float16')
+         #star_la = np.asarray(np.squeeze(loadmat(sonpath+base+'star_la.mat')['star_mg_la']),'float16')
       except:
          esi = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['e']) #+ 395
          nsi = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['n']) #- 58
          pix_m = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['pix_m'])
-         bearing = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['heading'])
-         port_la = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'port_la.mat')['port_mg_la']),'float16')
-         star_la = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'star_la.mat')['star_mg_la']),'float16')
 
-      # reported bearing by instrument (Kalman filtered?)
+         # over-ride measured bearing and calc from positions
+         if calc_bearing==1:
+            lat = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['lat'])
+            lon = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['lon']) 
 
-      bearing = humutils.runningMeanFast(bearing, len(bearing)/100)
+            #point-to-point bearing
+            bearing = np.zeros(len(lat))
+            for k in xrange(len(lat)-1):
+               bearing[k] = bearingBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+            del lat, lon
+         else:       # reported bearing by instrument (Kalman filtered?)
+            bearing = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['heading'])
+
+         # load memory mapped scans
+         shape_port = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['shape_port'])
+         if shape_port!='':
+            port_fp = np.memmap(os.path.expanduser("~")+os.sep+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+
+         shape_star = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['shape_star'])
+         if shape_star!='':
+            star_fp = np.memmap(os.path.expanduser("~")+os.sep+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+
+         #port_la = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'port_la.mat')['port_mg_la']),'float16')
+         #star_la = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'star_la.mat')['star_mg_la']),'float16')
+
+
+      # if stdev in heading is large, there's probably noise that needs to be filtered out
+      if np.std(bearing)>90:
+         print "WARNING: large heading stdev - attempting filtering"
+         from sklearn.cluster import MiniBatchKMeans
+         # can have two modes
+         data = np.column_stack([bearing, bearing])
+         k_means = MiniBatchKMeans(2)
+         # fit the model
+         k_means.fit(data) 
+         values = k_means.cluster_centers_.squeeze()
+         labels = k_means.labels_
+
+         if np.sum(labels==0) > np.sum(labels==1):
+            bearing[labels==1] = np.nan
+         else:
+            bearing[labels==0] = np.nan
+
+         nans, y= humutils.nan_helper(bearing)
+         bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans])
+
+         # save this filtered version to file
+         meta = loadmat(sonpath+base+'meta.mat')
+         meta['heading_filt'] = bearing
+         savemat(sonpath+base+'meta.mat', meta ,oned_as='row')
+         del meta   
+
+
+      if filt_bearing ==1:
+         bearing = humutils.runningMeanFast(bearing, len(bearing)/100)
+
       theta = np.asarray(bearing, 'float')/(180/np.pi)
 
 
-      #merge = np.vstack((np.flipud(port_la),star_la))
-      merge = np.vstack((port_la,star_la))
-      merge[np.isnan(merge)] = 0
+      tvg = ((8.5*10**-5)+(3/76923)+((8.5*10**-5)/4))*c
+        
+      dist_tvg = ((np.tan(np.radians(25)))*dep_m)-(tvg)
 
-      del port_la, star_la
+      for p in xrange(len(star_fp)):
 
-      # get number pixels in scan line
-      extent = int(np.shape(merge)[0]/2)
+         e = esi[shape_port[-1]*p:shape_port[-1]*(p+1)]
+         n = nsi[shape_port[-1]*p:shape_port[-1]*(p+1)]
+         t = theta[shape_port[-1]*p:shape_port[-1]*(p+1)]
+         d = dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)]
+   
+         merge = np.vstack((port_fp[p],star_fp[p]))
+         #merge = np.vstack((np.flipud(port_fp[p]),star_fp[p]))
+   
+         merge[np.isnan(merge)] = 0
 
-      yvec = np.linspace(pix_m,extent*pix_m,extent)
+         # get number pixels in scan line
+         extent = int(np.shape(merge)[0]/2)
 
-      print "getting point cloud ..."
-      # get the points by rotating the [x,y] vector so it lines up with boat heading, assumed to be the same as the curvature of the [e,n] trace
-      X=[]; Y=[];
-      for k in range(len(nsi)): 
-         x = np.concatenate((np.tile(esi[k],extent) , np.tile(esi[k],extent)))
-         y = np.concatenate((nsi[k]+yvec, nsi[k]-yvec))
-         # Rotate line around center point
-         X.append(esi[k] - ((x - esi[k]) * np.cos(theta[k])) - ((y - nsi[k]) * np.sin(theta[k])))
-         Y.append(nsi[k] - ((x - esi[k]) * np.sin(theta[k])) + ((y - nsi[k]) * np.cos(theta[k])))   
+         yvec = np.linspace(pix_m,extent*pix_m,extent)
 
-      del esi, nsi, theta, x, y
+         print "getting point cloud ..."
+         # get the points by rotating the [x,y] vector so it lines up with boat heading, assumed to be the same as the curvature of the [e,n] trace
+         X=[]; Y=[];
+         for k in range(len(n)): 
+            x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
+            y = np.concatenate((n[k]+yvec, n[k]-yvec))
+            # Rotate line around center point
+            xx = e[k] - ((x - e[k]) * np.cos(t[k])) - ((y - n[k]) * np.sin(t[k]))
+            yy = n[k] - ((x - e[k]) * np.sin(t[k])) + ((y - n[k]) * np.cos(t[k]))
+            xx, yy = calc_beam_pos(d[k], t[k], xx, yy)
+            X.append(xx)
+            Y.append(yy)     
+            R.append(np.sqrt( (e[k]-xx)**2 + (n[k]-yy)**2 ))  #range to point  
+      
+         del e, n, t, x, y #, X, Y
 
-      # merge flatten and stack
-      X = np.asarray(X,'float').T
-      X = X.flatten()
+         # merge flatten and stack
+         X = np.asarray(X,'float').T
+         X = X.flatten()
 
-      # merge flatten and stack
-      Y = np.asarray(Y,'float').T
-      Y = Y.flatten()
+         # merge flatten and stack
+         Y = np.asarray(Y,'float').T
+         Y = Y.flatten()
 
-      # write raw bs to file
-      try:
-         outfile = sonpath+'x_y_ss_raw.asc' 
-         with open(outfile, 'w') as f:
-            np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
-      except:
-         outfile = os.path.expanduser("~")+os.sep+'x_y_ss_raw.asc' 
-         with open(outfile, 'w') as f:
-            np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+         # merge flatten and stack
+         R = np.asarray(R,'float').T
+         R = R.flatten()
 
-      humlon, humlat = trans(X, Y, inverse=True)
+         # write raw bs to file
+         try:
+            outfile = sonpath+'x_y_ss_raw.asc' 
+            with open(outfile, 'w') as f:
+               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+         except:
+            outfile = os.path.expanduser("~")+os.sep+'x_y_ss_raw.asc' 
+            with open(outfile, 'w') as f:
+               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
-      del X, Y, bearing, pix_m, yvec
+         # write range (m) to file
+         try:
+            outfile = sonpath+'x_y_ss_raw.asc' 
+            with open(outfile, 'w') as f:
+               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(R.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+         except:
+            outfile = os.path.expanduser("~")+os.sep+'x_y_ss_raw.asc' 
+            with open(outfile, 'w') as f:
+               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(R.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
-      print "drawing and printing map ..."
-      fig = plt.figure()
-      map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
+
+         humlon, humlat = trans(X, Y, inverse=True)
+
+         if dogrid==1:
+            grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
+
+            dat = griddata(np.c_[X.flatten(),Y.flatten()], merge.flatten(), (grid_x, grid_y), method='nearest') 
+
+            ## create mask for where the data is not
+            tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+            dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+            dist = dist.reshape(grid_x.shape)
+
+         del X, Y #, bearing #, pix_m, yvec
+
+         if dogrid==1:
+            ## mask
+            dat[dist> np.floor(np.sqrt(1/res))-1 ] = np.nan #np.floor(np.sqrt(1/res))-1 ] = np.nan
+            del dist, tree
+
+            dat[dat==0] = np.nan
+            dat[np.isinf(dat)] = np.nan
+            datm = np.ma.masked_invalid(dat)
+
+            glon, glat = trans(grid_x, grid_y, inverse=True)
+            del grid_x, grid_y
+
+         print "drawing and printing map ..."
+         fig = plt.figure(frameon=False)
+         map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
           resolution = 'i', #h #f
           llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
           urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
 
-      # draw point cloud
-      x,y = map.projtran(humlon, humlat)
+         if dogrid==1:
+            gx,gy = map.projtran(glon, glat)
 
-      map.scatter(x.flatten(), y.flatten(), 0.01, merge.flatten(), cmap='gray', linewidth = '0')
+         ax = plt.Axes(fig, [0., 0., 1., 1.], )
+         ax.set_axis_off()
+         fig.add_axes(ax)
 
-      try:
-         if imagery==1:
-            map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
-         else:
-            map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
-      except:
-         print "servor error: trying again"
-         if imagery==1:
-            map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
-         else:
-            map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
+         if dogrid==1:
+            map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(dat), vmax=np.nanmax(dat))
+            del datm, dat
+         else: 
+            ## draw point cloud
+            x,y = map.projtran(humlon, humlat)
+            map.scatter(x.flatten(), y.flatten(), 0.1, merge.flatten(), cmap='gray', linewidth = '0')
 
-#plt.show()
+         try;
+            custom_save(sonpath+base,'map'+str(p))
+            del fig 
+         except:
+            custom_save(os.path.expanduser("~")+os.sep+base,'map'+str(p))
+            del fig 
 
-      custom_save(sonpath,base+'map')
-      del fig 
+         kml = simplekml.Kml()
+         ground = kml.newgroundoverlay(name='GroundOverlay')
+         ground.icon.href = sonpath+'map'+str(p)+'.png'
+         ground.latlonbox.north = np.min(humlat)-0.001
+         ground.latlonbox.south = np.max(humlat)+0.001
+         ground.latlonbox.east =  np.max(humlon)+0.001
+         ground.latlonbox.west =  np.min(humlon)-0.001
+         ground.latlonbox.rotation = 0
 
-      #============================
-      kml = simplekml.Kml()
-      ground = kml.newgroundoverlay(name='GroundOverlay')
-      ground.icon.href = sonpath+base+'map.png'
+         try:
+            kml.save(sonpath+base+"GroundOverlay.kml")
+         except:
+            kml.save(os.path.expanduser("~")+os.sep+base+"GroundOverlay.kml")
 
-      ground.latlonbox.north = np.min(humlat)-0.001
-      ground.latlonbox.south = np.max(humlat)+0.001
-      ground.latlonbox.east =  np.max(humlon)+0.001
-      ground.latlonbox.west =  np.min(humlon)-0.001
-      ground.latlonbox.rotation = 0
+         del humlat, humlon
 
-      try:
-         kml.save(sonpath+base+"GroundOverlay.kml")
-      except:
-         kml.save(os.path.expanduser("~")+os.sep+base+"GroundOverlay.kml")
 
 # =========================================================
 def custom_save(figdirec,root):
@@ -218,6 +350,23 @@ def custom_save(figdirec,root):
    except:
       plt.savefig(os.path.expanduser("~")+os.sep+root,bbox_inches='tight',dpi=400)      
 
+# =========================================================
+def calc_beam_pos(dist, bearing, x, y):
 
+   dist_x, dist_y = (dist*np.sin(bearing), dist*np.cos(bearing))
+   xfinal, yfinal = (x + dist_x, y + dist_y)
+   return (xfinal, yfinal)
+
+# =========================================================
+def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
+   lat1 = np.deg2rad(pos1_lat)
+   lon1 = np.deg2rad(pos1_lon)
+   lat2 = np.deg2rad(pos2_lat)
+   lon2 = np.deg2rad(pos2_lon)
+
+   bearing = np.arctan2(np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(lon2 - lon1), np.sin(lon2 - lon1) * np.cos(lat2))
+
+   db = np.rad2deg(bearing)
+   return (90.0 - db + 360.0) % 360.0
 
 

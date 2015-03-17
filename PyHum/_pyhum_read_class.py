@@ -92,6 +92,7 @@ import os, time
 from Tkinter import Tk
 from tkFileDialog import askopenfilename, askdirectory
 import csv
+from fractions import gcd
 
 #numerical
 import pyread
@@ -198,580 +199,363 @@ class humread:
       else: # windows
          start = time.clock()
 
-      tonemap=1
-
-      # number of bytes in a header packet in SON file
-      headbytes = 67
-
-      # if son path name supplied has no separator at end, put one on
-      if sonpath[-1]!=os.sep:
-         sonpath = sonpath + os.sep
-
-      base = humfile.split('.DAT') # get base of file name for output
-      base = base[0].split(os.sep)[-1]
-
-      # get the SON files from this directory
-      sonfiles = glob.glob(sonpath+'*.SON')
-      if not sonfiles:
-          sonfiles = glob.glob(os.getcwd()+os.sep+sonpath+'*.SON')
-
-      print "WARNING: Because files have to be read in byte by byte,"
-      print "this could take a very long time ..."
-
-      data = pyread.pyread(sonfiles, humfile, c, headbytes, cs2cs_args)
+      ##tonemap=1
 
 
-      try:
-         if flip_lr==0:
-            data_port = data.getportscans()
-         else:
-            data_port = data.getstarscans()
-      except:
-         data_port = ''
-         print "portside scan not available"
-      try:
-         if flip_lr==0:
-            data_star = data.getstarscans()
-         else:
-            data_star = data.getportscans()
-      except:
-         data_star = ''
-         print "starboardside scan not available"
-      try:
-         data_dwnlow = data.getlowscans()
-      except:
-         data_dwnlow = ''
-         print "low-freq. scan not available"
-      try:
-         data_dwnhi = data.gethiscans()
-      except:
-         data_dwnhi = ''
-         print "high-freq. scan not available"
+    # number of bytes in a header packet in SON file
+    headbytes = 67
 
-      dat = data.gethumdat() 
-      metadat = data.getmetadata()
-      del data
+    # if son path name supplied has no separator at end, put one on
+    if sonpath[-1]!=os.sep:
+       sonpath = sonpath + os.sep
 
-      try:
-         savemat(sonpath+base+'.mat', mdict={'dat': dat, 'data_port': data_port, 'data_star': data_star, 'data_dwnlow': data_dwnlow, 'data_dwnhi': data_dwnhi},oned_as='row')
-      except:
-         savemat(os.path.expanduser("~")+os.sep+base+'.mat', mdict={'dat': dat, 'data_port': data_port, 'data_star': data_star, 'data_dwnlow': data_dwnlow, 'data_dwnhi': data_dwnhi},oned_as='row')
+    base = humfile.split('.DAT') # get base of file name for output
+    base = base[0].split(os.sep)[-1]
 
-      try:
-         es = humutils.runningMeanFast(metadat['e'],len(metadat['e'])/100)
-         ns = humutils.runningMeanFast(metadat['n'],len(metadat['n'])/100)
-      except:
-         es = metadat['e']
-         ns = metadat['n']
+    # get the SON files from this directory
+    sonfiles = glob.glob(sonpath+'*.SON')
+    if not sonfiles:
+        sonfiles = glob.glob(os.getcwd()+os.sep+sonpath+'*.SON')
+
+    print "WARNING: Because files have to be read in byte by byte,"
+    print "this could take a very long time ..."
+
+    data = pyread2.pyread(sonfiles, humfile, c, headbytes, cs2cs_args)
+
+    dat = data.gethumdat() 
+    metadat = data.getmetadata()
+
+    try:
+       if flip_lr==0:
+          data_port = data.getportscans().astype('int16')
+       else:
+          data_port = data.getstarscans().astype('int16')
+
+       Zt, ind_port = makechunks(data_port)
+       del data_port
+
+       # create memory mapped file for Z
+       fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+       del fp
+       shape_port = np.shape(Zt)
+       del Zt
+       #we are only going to access the portion of memory required
+       port_fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='r', shape=shape_port)
+
+    except:
+       data_port = ''
+       print "portside scan not available"
+
+    try:
+       if flip_lr==0:
+          data_star = data.getstarscans().astype('int16')
+       else:
+          data_star = data.getportscans().astype('int16')
+
+       Zt, ind_star = makechunks(data_star)
+       del data_star
+
+       # create memory mapped file for Z
+       fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+       del fp
+       shape_star = np.shape(Zt)
+       del Zt
+       #we are only going to access the portion of memory required
+       star_fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='r', shape=shape_star)
+
+    except:
+       data_star = ''
+       print "starboardside scan not available"
+
+    try:
+       data_dwnlow = data.getlowscans().astype('int16')
+
+       Zt, ind_low = makechunks2(data_dwnlow)
+       del data_dwnlow
+
+       # create memory mapped file for Z
+       fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+       del fp
+       shape_low = np.shape(Zt)
+       del Zt
+       #we are only going to access the portion of memory required
+       dwnlow_fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='r', shape=shape_low)
+
+    except:
+       data_dwnlow = ''
+       print "low-freq. scan not available"
+
+    try:
+       data_dwnhi = data.gethiscans().astype('int16')
+
+       Zt, ind_hi = makechunks2(data_dwnhi)
+       del data_dwnhi
+
+       # create memory mapped file for Z
+       fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+       del fp
+       shape_hi = np.shape(Zt)
+       del Zt
+       #we are only going to access the portion of memory required
+       dwnhi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=shape_hi)
+
+    except:
+       data_dwnhi = ''
+       print "high-freq. scan not available"
+
+    del data
+
+    try:
+       es = humutils.runningMeanFast(metadat['e'],len(metadat['e'])/100)
+       ns = humutils.runningMeanFast(metadat['n'],len(metadat['n'])/100)
+    except:
+       es = metadat['e']
+       ns = metadat['n']
     
-      metadat['es'] = es
-      metadat['ns'] = ns
+    metadat['es'] = es
+    metadat['ns'] = ns
 
-      trans =  pyproj.Proj(init=cs2cs_args)
-      lon, lat = trans(es, ns, inverse=True)
-      metadat['lon'] = lon
-      metadat['lat'] = lat
+    trans =  pyproj.Proj(init=cs2cs_args)
+    lon, lat = trans(es, ns, inverse=True)
+    metadat['lon'] = lon
+    metadat['lat'] = lat
 
-      # create kml for loading path into google earth
-      kml = simplekml.Kml()
-      ls = kml.newlinestring(name='trackline')
-      ls.coords = zip(lon,lat)
-      ls.extrude = 1
-      ls.altitudemode = simplekml.AltitudeMode.relativetoground
-      ls.style.linestyle.width = 5
-      ls.style.linestyle.color = simplekml.Color.red
-      try:
-         kml.save(sonpath+base+"trackline.kml")
-      except:
-         kml.save(os.path.expanduser("~")+os.sep+base+"trackline.kml")
+    if 'shape_port' in locals():
+       metadat['shape_port'] = shape_port
+    else:
+       metadat['shape_port'] = ''   
 
-      #e = np.squeeze(loadmat(sonpath+base+'meta.mat')['es'])
-      #n = np.squeeze(loadmat(sonpath+base+'meta.mat')['ns'])
+    if 'shape_star' in locals():
+       metadat['shape_star'] = shape_star
+    else:
+       metadat['shape_star'] = ''   
 
-      #dist_m = np.cumsum(np.sqrt(np.gradient(e)**2 + np.gradient(n)**2))
+    if 'shape_hi' in locals():
+       metadat['shape_hi'] = shape_hi
+    else:
+       metadat['shape_hi'] = ''   
 
-      dist = np.zeros(len(lat))
-      for k in xrange(len(lat)-1):
-         dist[k] = self._distBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+    if 'shape_low' in locals():
+       metadat['shape_low'] = shape_low
+    else:
+       metadat['shape_low'] = ''   
 
-      dist_m = np.cumsum(dist)
+    try:
+       # create kml for loading path into google earth
+       kml = simplekml.Kml()
+       ls = kml.newlinestring(name='trackline')
+       ls.coords = zip(lon,lat)
+       ls.extrude = 1
+       ls.altitudemode = simplekml.AltitudeMode.relativetoground
+       ls.style.linestyle.width = 5
+       ls.style.linestyle.color = simplekml.Color.red
+       kml.save(sonpath+base+"trackline.kml")
+    except:
+       print "install simplekml for kml plots"
 
-      # theta at 3dB in the horizontal
-      theta3dB = np.arcsin(c/(t*(f*1000)))
-      #resolution of 1 sidescan pixel to nadir
-      ft = (np.pi/2)*(1/theta3dB)
+    dist = np.zeros(len(lat))
+    for k in xrange(len(lat)-1):
+       dist[k] = self._distBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
 
-      dep_m = np.squeeze(metadat['dep_m']) #loadmat(sonpath+base+'meta.mat')['dep_m'])
+    dist_m = np.cumsum(dist)
 
-      dep_m = humutils.rm_spikes(dep_m,2)
+    # theta at 3dB in the horizontal
+    theta3dB = np.arcsin(c/(t*(f*1000)))
+    #resolution of 1 sidescan pixel to nadir
+    ft = (np.pi/2)*(1/theta3dB)
 
-      metadat['dist_m'] = dist_m
+    dep_m = np.squeeze(metadat['dep_m']) #loadmat(sonpath+base+'meta.mat')['dep_m'])
 
-      try:
-         data_port = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_port']),'float16')
-         data_star = np.asarray(np.squeeze(loadmat(sonpath+base+'.mat')['data_star']),'float16')
-      except:
-         data_port = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'.mat')['data_port']),'float16')
-         data_star = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'.mat')['data_star']),'float16')
+    dep_m = humutils.rm_spikes(dep_m,2)
 
-      extent = np.shape(data_port)[0]
+    metadat['dist_m'] = dist_m
 
-      if bedpick == 1: # auto
 
-         # get bed from depth trace
-         bed = ft*dep_m
-         # narrow image to within range of estimated bed
-         imu = data_port[int(np.min(bed)):int(np.max(bed)),:]
+    if bedpick == 1: # auto
+
+       # get bed from depth trace
+       bed = ft*dep_m
+
+       imu = []
+       for k in xrange(len(port_fp)):
+          imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
+       imu = np.hstack(imu)
+
+       ## narrow image to within range of estimated bed
+       #imu = data_port[int(np.min(bed)):int(np.max(bed)),:]
        # use dynamic boundary tracing to get 2nd estimate of bed  
-         x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T))
-         del imu 
+       x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T))
+       del imu 
 
-         if doplot==1:
+       if doplot==1:
 
-            dist_mi = np.linspace(np.min(dist_m),np.max(dist_m),len(dist_m))
+          #dist_mi = np.linspace(np.min(dist_m),np.max(dist_m),len(dist_m))
 
-            nx, ny = np.shape(data_port)
-            if ny>10000:
-               Z,inds = humutils.sliding_window(data_port,(nx,10000))
-               del inds
+          for k in xrange(len(port_fp)):
+             Zbed = bed[ind_port[-1]*k:ind_port[-1]*(k+1)]
+             Zdist = dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)]
+             Zx = x[ind_port[-1]*k:ind_port[-1]*(k+1)]
 
-            nx, ny = np.shape(data_star)
-            if ny>10000:
-               Zstar,inds = humutils.sliding_window(data_star,(nx,10000))
-               del inds
+             extent = np.shape(port_fp[k])[0]
 
-            if ny>10000:
-               Zx,inds = humutils.sliding_window(np.squeeze(x),(10000))
-               del inds
+             fig = plt.figure()
+             fig.subplots_adjust(wspace = 0.1, hspace=0.1)
+             plt.subplot(2,2,1)
+             ax = plt.gca()
+             im = ax.imshow(np.flipud(port_fp[k]),cmap='gray',extent=[min(Zdist), max(Zdist), 0, extent*(1/ft)],origin='upper')
+             plt.ylabel('Range (m)'); #plt.xlabel('Distance along track (m)')  
+             plt.axis('normal'); plt.axis('tight')
 
-            ny = np.shape(bed)[0]
-            if ny>10000:   
-               Zbed,inds = humutils.sliding_window(np.squeeze(bed),(10000))
-               del inds
+             plt.subplot(2,2,3)
+             ax = plt.gca()
+             im = ax.imshow(star_fp[k],cmap='gray',extent=[min(Zdist), max(Zdist), extent*(1/ft), 0],origin='upper')
+             plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
+             plt.axis('normal'); plt.axis('tight')
 
-            if ny>10000:   
-               Zdist,inds = humutils.sliding_window(np.squeeze(dist_mi),(10000))
-               del inds   
-            #del ny
+             axR=plt.subplot(1,2,2); 
+             axR.yaxis.tick_right()
+             axR.yaxis.set_label_position("right")
+             axR.imshow(star_fp[k],cmap='gray',extent=[min(Zdist), max(Zdist), extent*(1/ft), 0],origin='upper')
+             plt.plot(Zdist,Zbed/ft,'k')
+             plt.plot(Zdist,Zx[:len(Zdist)]/ft,'r')
+             plt.axis('normal'); plt.axis('tight')
+             plt.ylim(10,0)
+             plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
+             self._custom_save(sonpath,'bed_2picks'+str(k))
+             del fig
 
-            if 'Z' in locals():
-               if len(Z)==nx:
-                  fig = plt.figure()
-                  fig.subplots_adjust(wspace = 0.1, hspace=0.1)
-                  plt.subplot(2,2,1)
-                  ax = plt.gca()
-                  im = ax.imshow(np.flipud(Z),cmap='gray',extent=[min(Zdist), max(Zdist), 0, extent*(1/ft)],origin='upper')
-                  plt.ylabel('Range (m)'); #plt.xlabel('Distance along track (m)')  
-                  plt.axis('normal'); plt.axis('tight')
+          del Zbed, Zdist, Zx
 
-                  plt.subplot(2,2,3)
-                  ax = plt.gca()
-                  im = ax.imshow(Zstar,cmap='gray',extent=[min(Zdist), max(Zdist), extent*(1/ft), 0],origin='upper')
-                  plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
-                  plt.axis('normal'); plt.axis('tight')
-
-                  axR=plt.subplot(1,2,2); 
-                  axR.yaxis.tick_right()
-                  axR.yaxis.set_label_position("right")
-                  axR.imshow(Zstar,cmap='gray',extent=[min(Zdist), max(Zdist), extent*(1/ft), 0],origin='upper')
-                  plt.plot(Zdist,Zbed/ft,'k')
-                  plt.plot(Zdist,Zx/ft,'r')
-                  plt.axis('normal'); plt.axis('tight')
-                  plt.ylim(10,0)
-                  plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
-                  self._custom_save(sonpath,'bed_2picks')
-                  del fig
-
-               else:
-                  for k in xrange(len(Z)):
-                     fig = plt.figure()
-                     fig.subplots_adjust(wspace = 0.1, hspace=0.1)
-                     plt.subplot(2,2,1)
-                     ax = plt.gca()
-                     im = ax.imshow(np.flipud(Z[k]),cmap='gray',extent=[min(Zdist[k]), max(Zdist[k]), 0, extent*(1/ft)],origin='upper')
-                     plt.ylabel('Range (m)'); #plt.xlabel('Distance along track (m)')  
-                     plt.axis('normal'); plt.axis('tight')
-
-                     plt.subplot(2,2,3)
-                     ax = plt.gca()
-                     im = ax.imshow(Zstar[k],cmap='gray',extent=[min(Zdist[k]), max(Zdist[k]), extent*(1/ft), 0],origin='upper')
-                     plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
-                     plt.axis('normal'); plt.axis('tight')
-
-                     axR=plt.subplot(1,2,2); 
-                     axR.yaxis.tick_right()
-                     axR.yaxis.set_label_position("right")
-                     axR.imshow(Zstar[k],cmap='gray',extent=[min(Zdist[k]), max(Zdist[k]), extent*(1/ft), 0],origin='upper')
-                     plt.plot(Zdist[k],Zbed[k]/ft,'k')
-                     plt.plot(Zdist[k],Zx[k]/ft,'r')
-                     plt.axis('normal'); plt.axis('tight')
-                     plt.ylim(10,0)
-                     plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
-                     self._custom_save(sonpath,'bed_2picks'+str(k))
-                     del fig
-
-            else:
-               fig = plt.figure()
-               fig.subplots_adjust(wspace = 0.1, hspace=0.1)
-               plt.subplot(2,2,1)
-               ax = plt.gca()
-               im = ax.imshow(np.flipud(data_port),cmap='gray',extent=[min(dist_m), max(dist_m), 0, extent*(1/ft)],origin='upper')
-               plt.ylabel('Range (m)'); #plt.xlabel('Distance along track (m)')  
-               plt.axis('normal'); plt.axis('tight')
-
-               plt.subplot(2,2,3)
-               ax = plt.gca()
-               im = ax.imshow(data_star,cmap='gray',extent=[min(dist_m), max(dist_m), extent*(1/ft), 0],origin='upper')
-               plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
-               plt.axis('normal'); plt.axis('tight')
-
-               axR=plt.subplot(1,2,2); 
-               axR.yaxis.tick_right()
-               axR.yaxis.set_label_position("right")
-               axR.imshow(data_star,cmap='gray',extent=[min(dist_m), max(dist_m), extent*(1/ft), 0],origin='upper')
-               plt.plot(dist_mi,bed/ft,'k')
-               plt.plot(dist_mi,x/ft,'r')
-               plt.axis('normal'); plt.axis('tight')
-               plt.ylim(np.max((np.max(bed/ft),np.max(x/ft)))+1,0)
-               plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
-               self._custom_save(sonpath,'bed_2picks')
-               del fig
-
-            if 'Zstar' and 'Z' and 'Zx' and 'Zbed' and 'Zdist' in locals():
-               del Zstar, Z, Zx, Zbed, Zdist
-
-            del dist_mi
-
-         # 'real' bed is estimated to be the minimum of the two
-         #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
-         bed = np.min(np.vstack((bed,np.squeeze(x))),axis=0) 
-         del x
+       # 'real' bed is estimated to be the minimum of the two
+       #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
+       bed = np.min(np.vstack((bed,np.squeeze(x[:len(bed)]))),axis=0) 
+       del x
 
 
-      else: #manual
+    else: #manual
 
-         nx, ny = np.shape(data_port)
-         if ny>10000:
-            Z,inds = humutils.sliding_window(data_port,(nx,10000))
-            del inds
+       beds=[]
+       for k in xrange(len(port_fp)):
+          raw_input("Bed picking "+str(k+1)+" of "+str(len(port_fp))+", are you ready? 30 seconds. Press Enter to continue...")
+          bed={}
+          fig = plt.figure()
+          ax = plt.gca()
+          im = ax.imshow(port_fp[k], cmap = 'gray', origin = 'upper')
+          pts1 = plt.ginput(n=300, timeout=15) # it will wait for 200 clicks or 60 seconds
+          x1=map(lambda x: x[0],pts1) # map applies the function passed as 
+          y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
+          bed = np.interp(np.r_[:ind_port[-1]],x1,y1)
+          plt.close()
+          del fig
+          beds.append(bed)
+          extent = np.shape(port_fp[k])[0]
+       bed = np.asarray(np.hstack(beds),'float')
 
-         if len(Z) != len(data_port):
-            beds=[]
-            for k in xrange(len(Z)):
-               raw_input("Bed picking "+str(k)+" of "+str(len(Z))+", are you ready? 60 seconds. Press Enter to continue...")
-               bed={}
-               fig = plt.figure()
-               ax = plt.gca()
-               im = ax.imshow(Z[k], cmap = 'gray', origin = 'upper')
-               pts1 = plt.ginput(n=300, timeout=60) # it will wait for 200 clicks or 60 seconds
-               x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-               y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-               bed = np.interp(np.r_[:10000],x1,y1)
-               plt.close()
-               del fig
-               beds.append(bed)
-            # last chunk
-            raw_input("Bed picking "+str(len(Z))+" of "+str(len(Z))+", are you ready? 60 seconds. Press Enter to continue...")
-            fig = plt.figure()
-            ax = plt.gca()
-            im = ax.imshow(data_port[:,-(np.shape(data_port)[1]-len(Z)*10000):], cmap = 'gray', origin = 'upper')
-            pts1 = plt.ginput(n=300, timeout=60) # it will wait for 200 clicks or 60 seconds
-            x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-            y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-            bed = np.interp(np.r_[:np.shape(data_port)[1]-len(Z)*10000],x1,y1)
-            plt.close()
-            del fig
-            beds.append(bed)
-            del Z
+    # now revise the depth in metres
+    dep_m = (1/ft)*bed
 
-            bed = np.hstack(beds)
+    if doplot==1:
+       for k in xrange(len(star_fp)):
 
-         else:
-            raw_input("Bed picking, are you ready? 60 seconds. Press Enter to continue...")
-            bed={}
-            fig = plt.figure()
-            ax = plt.gca()
-            im = ax.imshow(data_port, cmap = 'gray', origin = 'upper')
-            pts1 = plt.ginput(n=300, timeout=60) # it will wait for 200 clicks or 60 seconds
-            x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-            y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-            bed = np.interp(np.r_[:np.shape(data_port)[1]],x1,y1)
-            plt.close()
-            del fig
+          Zbed = (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)]
+          Zdist = dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)]
 
-      # now revise the depth in metres
-      dep_m = (1/ft)*bed
+          fig = plt.figure()
+          plt.subplot(2,2,1)
+          plt.imshow(np.flipud(star_fp[k]),cmap='gray', extent=[min(Zdist), max(Zdist), 0, extent*(1/ft)], origin='upper')
+          plt.plot(np.linspace(min(Zdist), max(Zdist),len(Zbed)), Zbed,'r')
+          plt.axis('normal'); plt.axis('tight')
+          plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
 
-      if doplot==1:
-         nx, ny = np.shape(data_star)
-         # make a plot of the starboard side with the bed pick
-         fig = plt.figure()
-         plt.subplot(2,2,1)
-         plt.imshow(data_star[:,:min(ny,10000)],cmap='gray')
-         plt.plot(bed[:min(ny,10000)],'r')
-         plt.axis('normal'); plt.axis('tight')
-         #plt.ylabel('Range (m)'); #plt.xlabel('Distance along track (m)')
+          plt.subplot(2,2,3)
+          plt.imshow(port_fp[k],cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0], origin='upper')
+          plt.plot(np.linspace(min(Zdist), max(Zdist),len(Zbed)), Zbed,'r')
+          plt.axis('normal'); plt.axis('tight')
+          plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
 
-         plt.subplot(2,2,3)
-         plt.imshow(data_port[:,:min(ny,10000)],cmap='gray')
-         plt.plot(bed[:min(ny,10000)],'r')
-         plt.axis('normal'); plt.axis('tight')
-         #plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
+          self._custom_save(sonpath,'bed_pick'+str(k))
+          del fig
 
-         self._custom_save(sonpath,'bed_pick')
-         del fig
+    metadat['dist_m'] = dist_m
+    metadat['dep_m'] = dep_m
+    metadat['pix_m'] = 1/ft
+    metadat['bed'] = bed
 
-      metadat['dist_m'] = dist_m
-      metadat['dep_m'] = dep_m
-      metadat['pix_m'] = 1/ft
-      metadat['bed'] = bed
+    metadat['c'] = c
+    metadat['t'] = t
+    metadat['f'] = f
 
-      metadat['c'] = c
-      metadat['t'] = t
-      metadat['f'] = f
+    savemat(sonpath+base+'meta.mat', metadat ,oned_as='row')
 
-      try:
-         savemat(sonpath+base+'meta.mat', metadat ,oned_as='row')
-      except:
-         savemat(os.path.expanduser("~")+os.sep+base+'meta.mat', metadat ,oned_as='row')
-      
+    heading = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
 
-      # read meta-data back in and append new variables
-      #metadat = loadmat(sonpath+base+'meta.mat')
-      #metadat['es'] = es; del es
-      #metadat['ns'] = ns; del ns
+    f = open(sonpath+base+'rawdat.csv', 'wt')
+    writer = csv.writer(f)
+    writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth (m)', 'distance (m)', 'heading (deg.)' ) )
+    for i in range(0, len(lon)):
+       writer.writerow(( float(lon[i]),float(lat[i]),float(es[i]),float(ns[i]),float(dep_m[i]),float(dist_m[i]), float(heading[i]) ))
+    f.close()
 
-      #savemat(sonpath+base+'meta.mat', metadat ,oned_as='row')
-      #del metadat
+    del heading, lat, lon, dep_m #, dist_m
 
-      try:
-         heading = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
-      except:
-         heading = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['heading'])
+    if doplot==1:
 
-      try:
-         f = open(sonpath+base+'rawdat.csv', 'wt')
-         writer = csv.writer(f)
-         writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth (m)', 'distance (m)', 'heading (deg.)' ) )
-         for i in range(0, len(lon)):
-            writer.writerow(( float(lon[i]),float(lat[i]),float(es[i]),float(ns[i]),float(dep_m[i]),float(dist_m[i]), float(heading[i]) ))
-         f.close()
-      except:
-         f = open(os.path.expanduser("~")+os.sep+base+'rawdat.csv', 'wt')
-         writer = csv.writer(f)
-         writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth (m)', 'distance (m)', 'heading (deg.)' ) )
-         for i in range(0, len(lon)):
-            writer.writerow(( float(lon[i]),float(lat[i]),float(es[i]),float(ns[i]),float(dep_m[i]),float(dist_m[i]), float(heading[i]) ))
-         f.close()
+       fig = plt.figure()
+       fig.subplots_adjust(wspace = 0.5, hspace=0.5)
+       plt.subplot(221)
+       plt.plot(metadat['e'],metadat['n'],'k')
+       plt.plot(es,ns,'r.')
+       #plt.plot(esi,nsi,'b.')
+       plt.xlabel('Easting (m)')
+       plt.ylabel('Northing (m)')
+       plt.setp(plt.xticks()[1], rotation=30)
+       plt.axis('normal'); plt.axis('tight')
 
-      del heading, lat, lon, dep_m, dist_m
+       plt.subplot(222)
+       plt.plot(metadat['lon'],metadat['lat'],'k')
+       plt.xlabel('Longitude')
+       plt.ylabel('Latitude')
+       plt.axis('normal'); plt.axis('tight')
+       plt.setp(plt.xticks()[1], rotation=30)
+       self._custom_save(sonpath,'raw_filt_pos')
+       del fig
 
-      if doplot==1:
+       if 'dwnlow_fp' in locals():
+          for k in xrange(len(dwnlow_fp)):
 
-         fig = plt.figure()
-         fig.subplots_adjust(wspace = 0.5, hspace=0.5)
-         plt.subplot(221)
-         plt.plot(metadat['e'],metadat['n'],'k')
-         plt.plot(es,ns,'r.')
-         #plt.plot(esi,nsi,'b.')
-         plt.xlabel('Easting (m)')
-         plt.ylabel('Northing (m)')
-         plt.setp(plt.xticks()[1], rotation=30)
-         plt.axis('normal'); plt.axis('tight')
-         #custom_save(sonpath,'raw_filt_pos_en')
-         #del fig
+             fig = plt.figure()
+             plt.imshow(dwnlow_fp[k],cmap='gray')
+             plt.axis('normal'); plt.axis('tight')
+             plt.xlabel('Ping Number (Time)')
+             plt.ylabel('Range (Distance)')
 
-         plt.subplot(222)
-         plt.plot(metadat['lon'],metadat['lat'],'k')
-         plt.xlabel('Longitude')
-         plt.ylabel('Latitude')
-         plt.axis('normal'); plt.axis('tight')
-         plt.setp(plt.xticks()[1], rotation=30)
-         self._custom_save(sonpath,'raw_filt_pos')
-         del fig
+             self._custom_save(sonpath,'raw_dwnlow'+str(k))
+             del fig
 
-         if data_port!='':
-            if tonemap==1:
-               import ppdrc
-               # phase preserving dynamic range compression
-               dat = ppdrc.ppdrc(data_port.astype('float64'), 768)
-               data_port = dat.getdata()
-               del dat
+       if 'dwnhi_fp' in locals():
+          for k in xrange(len(dwnhi_fp)):
 
-            # port
-            nx, ny = np.shape(data_port)
-            if ny>10000:
-               Z,inds = humutils.sliding_window(data_port,(nx,10000))
-               del nx, ny, inds
-               if len(Z) != len(data_port):
-                  flag = 1
-               else:
-                  flag=0
-               del data_port
-            else:
-               Z = data_port.copy()
-               del data_port
-               flag = 0
-   
-            if flag==1:
-               for k in xrange(len(Z)):
-                  fig = plt.figure()
-                  plt.imshow(Z[k],cmap='gray', origin = 'upper'); plt.colorbar(); 
-                  plt.title('Portside Raw Scan'+str(k))
-                  plt.xlabel('Ping Number (Time)')
-                  plt.ylabel('Range (Distance)')
-                  plt.axis('normal'); plt.axis('tight')
-                  self._custom_save(sonpath,'raw_port'+str(k))
-                  del fig
-            else:
-               fig = plt.figure()
-               plt.imshow(Z,cmap='gray', origin = 'upper'); plt.colorbar(); 
-               plt.title('Portside Raw Scan')
-               plt.xlabel('Ping Number (Time)')
-               plt.ylabel('Range (Distance)')
-               plt.axis('normal'); plt.axis('tight')
-               self._custom_save(sonpath,'raw_port')
-               del fig
+             fig = plt.figure()
+             plt.imshow(dwnhi_fp[k],cmap='gray')
+             plt.axis('normal'); plt.axis('tight')
+             plt.xlabel('Ping Number (Time)')
+             plt.ylabel('Range (Distance)')
 
-            del Z
+             self._custom_save(sonpath,'raw_dwnhi'+str(k))
+             del fig
 
-         if data_star!='':
-            if tonemap==1:
-               import ppdrc
-               dat = ppdrc.ppdrc(data_star.astype('float64'), 768)
-               data_star = dat.getdata()
-               del dat
 
-            # starboard
-            nx, ny = np.shape(data_star)
-            if ny>10000:
-               Z,inds = humutils.sliding_window(data_star,(nx,10000))
-               del nx, ny, inds
-               if len(Z) != len(data_star):
-                  flag = 1
-               else:
-                  flag=0
-               del data_star
-            else:
-               Z = data_star.copy()
-               del data_star
-               flag = 0
-   
-            if flag==1:
-               for k in xrange(len(Z)):
-                  fig = plt.figure()
-                  plt.imshow(Z[k],cmap='gray', origin = 'upper'); plt.colorbar(); 
-                  plt.title('Starboardside Raw Scan'+str(k))
-                  plt.xlabel('Ping Number (Time)')
-                  plt.ylabel('Range (Distance)')
-                  plt.axis('normal'); plt.axis('tight')
-                  self._custom_save(sonpath,'raw_star'+str(k))
-                  del fig
-            else:
-               fig = plt.figure()
-               plt.imshow(Z,cmap='gray', origin = 'upper'); plt.colorbar(); 
-               plt.title('Starboardside Raw Scan')
-               plt.xlabel('Ping Number (Time)')
-               plt.ylabel('Range (Distance)')
-               plt.axis('normal'); plt.axis('tight')
-               self._custom_save(sonpath,'raw_star')
-               del fig
+    if os.name=='posix': # true if linux/mac
+       elapsed = (time.time() - start)
+    else: # windows
+       elapsed = (time.clock() - start)
+    print "Processing took ", elapsed , "seconds to analyse"
 
-            del Z
-
-         if data_dwnlow!='':
-  
-            if tonemap==1:
-               import ppdrc
-               dat = ppdrc.ppdrc(data_dwnlow.astype('float64'), 768)
-               data_dwnlow = dat.getdata()
-               del dat
-
-            # dwnlow
-            nx, ny = np.shape(data_dwnlow)
-            if ny>10000:
-               Z,inds = humutils.sliding_window(data_dwnlow,(nx,10000))
-               del nx, ny, inds
-               if len(Z) != len(data_dwnlow):
-                  flag = 1
-               else:
-                  flag=0
-               del data_dwnlow
-            else:
-               Z = data_dwnlow.copy()
-               del data_dwnlow
-               flag = 0
-   
-            if flag==1:
-               for k in xrange(len(Z)):
-                  fig = plt.figure()
-                  plt.imshow(Z[k],cmap='gray', origin = 'upper'); plt.colorbar(); 
-                  plt.title('Downward Low Raw Scan'+str(k))
-                  plt.xlabel('Ping Number (Time)')
-                  plt.ylabel('Range (Distance)')
-                  plt.axis('normal'); plt.axis('tight')
-                  self._custom_save(sonpath,'raw_dwnlow'+str(k))
-                  del fig
-            else:
-               fig = plt.figure()
-               plt.imshow(Z,cmap='gray', origin = 'upper'); plt.colorbar(); 
-               plt.title('Downward Low Raw Scan')
-               plt.xlabel('Ping Number (Time)')
-               plt.ylabel('Range (Distance)')
-               plt.axis('normal'); plt.axis('tight')
-               self._custom_save(sonpath,'raw_dwnlow')
-               del fig
-
-         if data_dwnhi!='':
-  
-            if tonemap==1:
-               import ppdrc
-               dat = ppdrc.ppdrc(data_dwnhi.astype('float64'), 768)
-               data_dwnhi = dat.getdata()
-               del dat
-
-            # dwnhigh
-            nx, ny = np.shape(data_dwnhi)
-            if ny>10000:
-               Z,inds = humutils.sliding_window(data_dwnhi,(nx,10000))
-               del nx, ny, inds
-               if len(Z) != len(data_dwnhi):
-                  flag = 1
-               else:
-                  flag=0
-               del data_dwnhi
-            else:
-               Z = data_dwnhi.copy()
-               del data_dwnhi
-               flag = 0
-   
-            if flag==1:
-               for k in xrange(len(Z)):
-                  fig = plt.figure()
-                  plt.imshow(Z[k],cmap='gray', origin = 'upper'); plt.colorbar(); 
-                  plt.title('Downward High Raw Scan'+str(k))
-                  plt.xlabel('Ping Number (Time)')
-                  plt.ylabel('Range (Distance)')
-                  plt.axis('normal'); plt.axis('tight')
-                  self._custom_save(sonpath,'raw_dwnhi'+str(k))
-                  del fig
-            else:
-               fig = plt.figure()
-               plt.imshow(Z,cmap='gray', origin = 'upper'); plt.colorbar(); 
-               plt.title('Downward High Raw Scan')
-               plt.xlabel('Ping Number (Time)')
-               plt.ylabel('Range (Distance)')
-               plt.axis('normal'); plt.axis('tight')
-               self._custom_save(sonpath,'raw_dwnhi')
-               del fig
-
-      if os.name=='posix': # true if linux/mac
-         elapsed = (time.time() - start)
-      else: # windows
-         elapsed = (time.clock() - start)
-      print "Processing took ", elapsed , "seconds to analyse"
-
-      print "Done!"
+    print "Done!"
 
 
    # =========================================================
@@ -784,6 +568,28 @@ class humread:
          plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
       except:
          plt.savefig(os.path.expanduser("~")+os.sep+root,bbox_inches='tight',dpi=400)      
+
+   # =========================================================
+   def _makechunks(self, dat):
+      Ny, Nx = np.shape(dat)
+
+      # get optimal number of slices
+      if Nx%2==0:
+         H = []
+         for k in xrange(2,30):
+            H.append(gcd(Nx,Nx/k))
+         hslice = np.max(H)
+      else:
+         dat = np.hstack( (dat,np.ones((Ny,1))) )
+         Ny, Nx = np.shape(dat)
+         H = []
+         for k in xrange(2,30):
+            H.append(gcd(Nx,Nx/k))
+         hslice = np.max(H)
+   
+      # get windowed data
+      Zt,ind = humutils.sliding_window(dat,(Ny,hslice))
+      return Zt, ind
 
 
 
