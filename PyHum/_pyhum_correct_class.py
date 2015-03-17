@@ -81,7 +81,7 @@ from tkFileDialog import askopenfilename, askdirectory
 #numerical
 import numpy as np
 #from pyhum_utils import rm_spikes, sliding_window, runningMeanFast, dpboundary, rescale
-#import PyHum.utils as humutils
+import PyHum.utils as humutils
 from scipy.stats import nanmean, nanmedian
 import ppdrc
 
@@ -148,233 +148,228 @@ class humcorrect:
       else: # windows
          start = time.clock()
 
-    # if son path name supplied has no separator at end, put one on
-    if sonpath[-1]!=os.sep:
-       sonpath = sonpath + os.sep
+      # if son path name supplied has no separator at end, put one on
+      if sonpath[-1]!=os.sep:
+         sonpath = sonpath + os.sep
 
-    base = humfile.split('.DAT') # get base of file name for output
-    base = base[0].split(os.sep)[-1]
+      base = humfile.split('.DAT') # get base of file name for output
+      base = base[0].split(os.sep)[-1]
 
-    # add wattage to metadata dict 
-    meta = loadmat(sonpath+base+'meta.mat')
-    meta['maxW'] = maxW
-    savemat(sonpath+base+'meta.mat', meta ,oned_as='row')
-    del meta
+      # add wattage to metadata dict 
+      meta = loadmat(sonpath+base+'meta.mat')
+      meta['maxW'] = maxW
+      savemat(sonpath+base+'meta.mat', meta ,oned_as='row')
+      del meta
 
-    bed = np.squeeze(loadmat(sonpath+base+'meta.mat')['bed'])
-    ft = 1/loadmat(sonpath+base+'meta.mat')['pix_m'] #np.squeeze(loadmat(sonpath+base+'meta.mat')['ft'])
-    dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
+      bed = np.squeeze(loadmat(sonpath+base+'meta.mat')['bed'])
+      ft = 1/loadmat(sonpath+base+'meta.mat')['pix_m'] #np.squeeze(loadmat(sonpath+base+'meta.mat')['ft'])
+      dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
 
-    # load memory mapped scans
-    shape_port = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_port'])
-    if shape_port!='':
-       port_fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='r', shape=tuple(shape_port))
+      # load memory mapped scans
+      shape_port = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_port'])
+      if shape_port!='':
+         port_fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='r', shape=tuple(shape_port))
 
-    shape_star = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_star'])
-    if shape_star!='':
-       star_fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='r', shape=tuple(shape_star))
+      shape_star = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_star'])
+      if shape_star!='':
+         star_fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='r', shape=tuple(shape_star))
 
-    extent = shape_star[1] #np.shape(data_port)[0]
+      extent = shape_star[1] #np.shape(data_port)[0]
 
-    bed = np.asarray(bed,'int')+int(0.25*ft)
+      bed = np.asarray(bed,'int')+int(0.25*ft)
 
+      # calculate in dB
+      ######### star
+      Zt = self._remove_water(star_fp, bed, shape_star, maxW)
 
-    # calculate in dB
-    ######### star
-    Zt = self._remove_water(star_fp, bed, shape_star)
+      # create memory mapped file for Z
+      fp = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
+      fp[:] = Zt[:]
+      del fp
+      shape_star = np.shape(Zt)
+      del Zt
+      #we are only going to access the portion of memory required
+      star_fp = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=shape_star)
 
-    # create memory mapped file for Z
-    fp = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
-    fp[:] = Zt[:]
-    del fp
-    shape_star = np.shape(Zt)
-    del Zt
-    #we are only going to access the portion of memory required
-    star_fp = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=shape_star)
+      Zt = self._correct_scans(star_fp)
+      for p in xrange(len(Zt)):
 
-    Zt = self._correct_scans(star_fp, maxW)
-    for p in xrange(len(Zt)):
+         dat1 = Zt[p].astype('float64')
+         dat1[np.isnan(dat1)] = 0
+         dat1 = ppdrc.ppdrc(dat1, shape_star[-1]/4)
+         dat1 = humutils.rescale(dat1.getdata(),0,255)
+         dat1[np.isnan(Zt[p])] = np.nan
+         Zt[p] = dat1.astype('float32')
+         del dat1
 
-       dat1 = Zt[p].astype('float64')
-       dat1[np.isnan(dat1)] = 0
-       dat1 = ppdrc.ppdrc(dat1, shape_star[-1]/4)
-       dat1 = rescale(dat1.getdata(),0,255)
-       dat1[np.isnan(Zt[p])] = np.nan
-       Zt[p] = dat1.astype('float32')
-       del dat1
+      # create memory mapped file for Z
+      fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
+      fp[:] = Zt[:]
+      del fp
+      shape_star = np.shape(Zt)
+      del Zt
+      #we are only going to access the portion of memory required
+      star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=shape_star)
 
-    # create memory mapped file for Z
-    fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
-    fp[:] = Zt[:]
-    del fp
-    shape_star = np.shape(Zt)
-    del Zt
-    #we are only going to access the portion of memory required
-    star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=shape_star)
+      ######### port
+      Zt = self._remove_water(port_fp, bed, shape_port, maxW)
 
+      # create memory mapped file for Z
+      fp = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
+      fp[:] = Zt[:]
+      del fp
+      shape_port = np.shape(Zt)
+      del Zt
+      #we are only going to access the portion of memory required
+      port_fp = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=shape_port)
 
-    ######### port
-    Zt = self._remove_water(port_fp, bed, shape_port)
+      Zt = self._correct_scans(port_fp)
+      for p in xrange(len(Zt)):
 
-    # create memory mapped file for Z
-    fp = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
-    fp[:] = Zt[:]
-    del fp
-    shape_port = np.shape(Zt)
-    del Zt
-    #we are only going to access the portion of memory required
-    port_fp = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=shape_port)
+         dat1 = Zt[p].astype('float64')
+         dat1[np.isnan(dat1)] = 0
+         dat1 = ppdrc.ppdrc(dat1, shape_port[-1]/4)
+         dat1 = humutils.rescale(dat1.getdata(),0,255)
+         dat1[np.isnan(Zt[p])] = np.nan
+         Zt[p] = dat1.astype('float32')
+         del dat1
 
-    Zt = self._correct_scans(port_fp, maxW)
-    for p in xrange(len(Zt)):
+      # create memory mapped file for Z
+      fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
+      fp[:] = Zt[:]
+      del fp
+      shape_port = np.shape(Zt)
+      del Zt
+      #we are only going to access the portion of memory required
+      port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=shape_port)
 
-       dat1 = Zt[p].astype('float64')
-       dat1[np.isnan(dat1)] = 0
-       dat1 = ppdrc.ppdrc(dat1, shape_port[-1]/4)
-       dat1 = rescale(dat1.getdata(),0,255)
-       dat1[np.isnan(Zt[p])] = np.nan
-       Zt[p] = dat1.astype('float32')
-       del dat1
+      ## do plots of merged scans
+      if doplot==1:
 
-    # create memory mapped file for Z
-    fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
-    fp[:] = Zt[:]
-    del fp
-    shape_port = np.shape(Zt)
-    del Zt
-    #we are only going to access the portion of memory required
-    port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=shape_port)
+         for p in xrange(len(port_fp)):
+            merge = np.vstack((np.flipud(port_fp[p]), star_fp[p]))
 
+            Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
 
-    ## do plots of merged scans
-    if doplot==1:
+            fig = plt.figure()
+            plt.imshow(merge, cmap='gray', extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)])
+            plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
 
-       for p in xrange(len(port_fp)):
-          merge = np.vstack((np.flipud(port_fp[p]), star_fp[p]))
+            plt.axis('normal'); plt.axis('tight')
+            self._custom_save(sonpath,'merge_corrected_scan'+str(p))
+            del fig
 
-          Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
+      # load memory mapped scans
+      shape_low = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_low'])
+      if shape_low!='':
+         low_fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='r', shape=tuple(shape_low))
 
-          fig = plt.figure()
-          plt.imshow(merge, cmap='gray', extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)])
-          plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
+      shape_hi = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_hi'])
+      if shape_hi!='':
+         hi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=tuple(shape_hi))
 
-          plt.axis('normal'); plt.axis('tight')
-          self._custom_save(sonpath,'merge_corrected_scan'+str(p))
-          del fig
+      if 'low_fp' in locals():
+         ######### low
+         Zt = self._remove_water(low_fp, bed, shape_low, maxW)
 
+         # create memory mapped file for Z
+         fp = np.memmap(sonpath+base+'_data_dwnlow_l.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
+         fp[:] = Zt[:]
+         del fp
+         shape_low = np.shape(Zt)
+         del Zt
+         #we are only going to access the portion of memory required
+         low_fp = np.memmap(sonpath+base+'_data_dwnlow_l.dat', dtype='float32', mode='r', shape=shape_low)
 
-    # load memory mapped scans
-    shape_low = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_low'])
-    if shape_low!='':
-       low_fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='r', shape=tuple(shape_low))
+         Zt = self._correct_scans(low_fp)
+         for p in xrange(len(Zt)):
 
-    shape_hi = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_hi'])
-    if shape_hi!='':
-       hi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=tuple(shape_hi))
+            dat1 = Zt[p].astype('float64')
+            dat1[np.isnan(dat1)] = 0
+            dat1 = ppdrc.ppdrc(dat1, shape_low[-1]/4)
+            dat1 = humutils.rescale(dat1.getdata(),0,255)
+            dat1[np.isnan(Zt[p])] = np.nan
+            Zt[p] = dat1.astype('float32')
+            del dat1
 
-    if 'low_fp' in locals():
-       ######### low
-       Zt = self._remove_water(low_fp, bed, shape_low)
+         # create memory mapped file for Z
+         fp = np.memmap(sonpath+base+'_data_dwnlow_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
+         fp[:] = Zt[:]
+         del fp
+         shape_low = np.shape(Zt)
+         del Zt
+         #we are only going to access the lowion of memory required
+         low_fp = np.memmap(sonpath+base+'_data_dwnlow_la.dat', dtype='float32', mode='r', shape=shape_low)
 
-       # create memory mapped file for Z
-       fp = np.memmap(sonpath+base+'_data_dwnlow_l.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_low = np.shape(Zt)
-       del Zt
-       #we are only going to access the portion of memory required
-       low_fp = np.memmap(sonpath+base+'_data_dwnlow_l.dat', dtype='float32', mode='r', shape=shape_low)
+         if doplot==1:
 
-       Zt = self._correct_scans(low_fp, maxW)
-       for p in xrange(len(Zt)):
+            for p in xrange(len(low_fp)):
 
-          dat1 = Zt[p].astype('float64')
-          dat1[np.isnan(dat1)] = 0
-          dat1 = ppdrc.ppdrc(dat1, shape_low[-1]/4)
-          dat1 = rescale(dat1.getdata(),0,255)
-          dat1[np.isnan(Zt[p])] = np.nan
-          Zt[p] = dat1.astype('float32')
-          del dat1
+               Zdist = dist_m[shape_low[-1]*p:shape_low[-1]*(p+1)]
 
-       # create memory mapped file for Z
-       fp = np.memmap(sonpath+base+'_data_dwnlow_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_low = np.shape(Zt)
-       del Zt
-       #we are only going to access the lowion of memory required
-       low_fp = np.memmap(sonpath+base+'_data_dwnlow_la.dat', dtype='float32', mode='r', shape=shape_low)
+               fig = plt.figure()
+               plt.imshow(low_fp[p], cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
+               plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
 
-       if doplot==1:
-
-          for p in xrange(len(low_fp)):
-
-             Zdist = dist_m[shape_low[-1]*p:shape_low[-1]*(p+1)]
-
-             fig = plt.figure()
-             plt.imshow(low_fp[p], cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
-             plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
-
-             plt.axis('normal'); plt.axis('tight')
-             self._custom_save(sonpath,'dwnlow_corrected_scan'+str(p))
-             del fig
+               plt.axis('normal'); plt.axis('tight')
+               self._custom_save(sonpath,'dwnlow_corrected_scan'+str(p))
+               del fig
 
 
-    if 'hi_fp' in locals():
-       ######### hi
-       Zt = self._remove_water(hi_fp, bed, shape_hi)
+      if 'hi_fp' in locals():
+         ######### hi
+         Zt = self._remove_water(hi_fp, bed, shape_hi, maxW)
 
-       # create memory mapped file for Z
-       fp = np.memmap(sonpath+base+'_data_dwnhi_l.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_hi = np.shape(Zt)
-       del Zt
-       #we are only going to access the portion of memory required
-       hi_fp = np.memmap(sonpath+base+'_data_dwnhi_l.dat', dtype='float32', mode='r', shape=shape_hi)
+         # create memory mapped file for Z
+         fp = np.memmap(sonpath+base+'_data_dwnhi_l.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
+         fp[:] = Zt[:]
+         del fp
+         shape_hi = np.shape(Zt)
+         del Zt
+         #we are only going to access the portion of memory required
+         hi_fp = np.memmap(sonpath+base+'_data_dwnhi_l.dat', dtype='float32', mode='r', shape=shape_hi)
 
-       Zt = self._correct_scans(hi_fp, maxW)
-       for p in xrange(len(Zt)):
+         Zt = self._correct_scans(hi_fp)
+         for p in xrange(len(Zt)):
 
-          dat1 = Zt[p].astype('float64')
-          dat1[np.isnan(dat1)] = 0
-          dat1 = ppdrc.ppdrc(dat1, shape_hi[-1]/4)
-          dat1 = rescale(dat1.getdata(),0,255)
-          dat1[np.isnan(Zt[p])] = np.nan
-          Zt[p] = dat1.astype('float32')
-          del dat1
+            dat1 = Zt[p].astype('float64')
+            dat1[np.isnan(dat1)] = 0
+            dat1 = ppdrc.ppdrc(dat1, shape_hi[-1]/4)
+            dat1 = humutils.rescale(dat1.getdata(),0,255)
+            dat1[np.isnan(Zt[p])] = np.nan
+            Zt[p] = dat1.astype('float32')
+            del dat1
 
-       # create memory mapped file for Z
-       fp = np.memmap(sonpath+base+'_data_dwnhi_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_hi = np.shape(Zt)
-       del Zt
-       #we are only going to access the hiion of memory required
-       hi_fp = np.memmap(sonpath+base+'_data_dwnhi_la.dat', dtype='float32', mode='r', shape=shape_hi)
+         # create memory mapped file for Z
+         fp = np.memmap(sonpath+base+'_data_dwnhi_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
+         fp[:] = Zt[:]
+         del fp
+         shape_hi = np.shape(Zt)
+         del Zt
+         #we are only going to access the hiion of memory required
+         hi_fp = np.memmap(sonpath+base+'_data_dwnhi_la.dat', dtype='float32', mode='r', shape=shape_hi)
 
-       if doplot==1:
+         if doplot==1:
 
-          for p in xrange(len(hi_fp)):
+            for p in xrange(len(hi_fp)):
+  
+               Zdist = dist_m[shape_hi[-1]*p:shape_hi[-1]*(p+1)]
 
-             Zdist = dist_m[shape_hi[-1]*p:shape_hi[-1]*(p+1)]
+               fig = plt.figure()
+               plt.imshow(hi_fp[p], cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
+               plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
 
-             fig = plt.figure()
-             plt.imshow(hi_fp[p], cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
-             plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
+               plt.axis('normal'); plt.axis('tight')
+               self._custom_save(sonpath,'dwnhi_corrected_scan'+str(p))
+               del fig
 
-             plt.axis('normal'); plt.axis('tight')
-             self._custom_save(sonpath,'dwnhi_corrected_scan'+str(p))
-             del fig
-             
+      if os.name=='posix': # true if linux/mac
+         elapsed = (time.time() - start)
+      else: # windows
+         elapsed = (time.clock() - start)
+      print "Processing took ", elapsed , "seconds to analyse"
 
-    if os.name=='posix': # true if linux/mac
-       elapsed = (time.time() - start)
-    else: # windows
-       elapsed = (time.clock() - start)
-    print "Processing took ", elapsed , "seconds to analyse"
-
-    print "Done!"
+      print "Done!"
 
 
    # =========================================================
@@ -386,7 +381,7 @@ class humcorrect:
 
 
    # =========================================================
-   def _remove_water(self, fp, bed,shape):
+   def _remove_water(self, fp, bed, shape, maxW):
       Zt = []
 
       for p in xrange(len(fp)):
@@ -406,14 +401,15 @@ class humcorrect:
       return Zt
 
    # =========================================================
-   def correct_scans(fp, maxW):
+   def _correct_scans(self, fp):
       Zt = []
 
       for p in xrange(len(fp)):
 
          mg = 10**np.log10(np.asarray(fp[p],'float32')+0.001)
          mg[fp[p]==0] = np.nan
-
+         extent = np.shape(mg)[0]
+         
          beam_av = nanmedian(mg, axis=1)+1 #nanmean(mg, axis=1)+1
          beam_av[np.isinf(beam_av)] = np.nan
          index = np.where( 1-np.sum(np.asarray(np.isnan(mg),'int'),axis=1)/extent <0)

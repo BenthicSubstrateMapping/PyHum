@@ -201,361 +201,357 @@ class humread:
 
       ##tonemap=1
 
+      # number of bytes in a header packet in SON file
+      headbytes = 67
 
-    # number of bytes in a header packet in SON file
-    headbytes = 67
+      # if son path name supplied has no separator at end, put one on
+      if sonpath[-1]!=os.sep:
+         sonpath = sonpath + os.sep
 
-    # if son path name supplied has no separator at end, put one on
-    if sonpath[-1]!=os.sep:
-       sonpath = sonpath + os.sep
+      base = humfile.split('.DAT') # get base of file name for output
+      base = base[0].split(os.sep)[-1]
 
-    base = humfile.split('.DAT') # get base of file name for output
-    base = base[0].split(os.sep)[-1]
-
-    # get the SON files from this directory
-    sonfiles = glob.glob(sonpath+'*.SON')
-    if not sonfiles:
+      # get the SON files from this directory
+      sonfiles = glob.glob(sonpath+'*.SON')
+      if not sonfiles:
         sonfiles = glob.glob(os.getcwd()+os.sep+sonpath+'*.SON')
 
-    print "WARNING: Because files have to be read in byte by byte,"
-    print "this could take a very long time ..."
+      print "WARNING: Because files have to be read in byte by byte,"
+      print "this could take a very long time ..."
 
-    data = pyread2.pyread(sonfiles, humfile, c, headbytes, cs2cs_args)
+      data = pyread.pyread(sonfiles, humfile, c, headbytes, cs2cs_args)
 
-    dat = data.gethumdat() 
-    metadat = data.getmetadata()
+      dat = data.gethumdat() 
+      metadat = data.getmetadata()
 
-    try:
-       if flip_lr==0:
-          data_port = data.getportscans().astype('int16')
-       else:
-          data_port = data.getstarscans().astype('int16')
+      try:
+         if flip_lr==0:
+            data_port = data.getportscans().astype('int16')
+         else:
+            data_port = data.getstarscans().astype('int16')
 
-       Zt, ind_port = makechunks(data_port)
-       del data_port
+         Zt, ind_port = self._makechunks(data_port)
+         del data_port
 
-       # create memory mapped file for Z
-       fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_port = np.shape(Zt)
-       del Zt
-       #we are only going to access the portion of memory required
-       port_fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='r', shape=shape_port)
+         # create memory mapped file for Z
+         fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
+         fp[:] = Zt[:]
+         del fp
+         shape_port = np.shape(Zt)
+         del Zt
+         #we are only going to access the portion of memory required
+         port_fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='r', shape=shape_port)
 
-    except:
-       data_port = ''
-       print "portside scan not available"
+      except:
+         data_port = ''
+         print "portside scan not available"
 
-    try:
-       if flip_lr==0:
-          data_star = data.getstarscans().astype('int16')
-       else:
-          data_star = data.getportscans().astype('int16')
+      try:
+         if flip_lr==0:
+            data_star = data.getstarscans().astype('int16')
+         else:
+            data_star = data.getportscans().astype('int16')
 
-       Zt, ind_star = makechunks(data_star)
-       del data_star
+         Zt, ind_star = self._makechunks(data_star)
+         del data_star
 
-       # create memory mapped file for Z
-       fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_star = np.shape(Zt)
-       del Zt
-       #we are only going to access the portion of memory required
-       star_fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='r', shape=shape_star)
+         # create memory mapped file for Z
+         fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
+         fp[:] = Zt[:]
+         del fp
+         shape_star = np.shape(Zt)
+         del Zt
+         #we are only going to access the portion of memory required
+         star_fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='r', shape=shape_star)
 
-    except:
-       data_star = ''
-       print "starboardside scan not available"
+      except:
+         data_star = ''
+         print "starboardside scan not available"
 
-    try:
-       data_dwnlow = data.getlowscans().astype('int16')
+      try:
+         data_dwnlow = data.getlowscans().astype('int16')
 
-       Zt, ind_low = makechunks2(data_dwnlow)
-       del data_dwnlow
+         Zt, ind_low = self._makechunks(data_dwnlow)
+         del data_dwnlow
 
-       # create memory mapped file for Z
-       fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_low = np.shape(Zt)
-       del Zt
-       #we are only going to access the portion of memory required
-       dwnlow_fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='r', shape=shape_low)
+         # create memory mapped file for Z
+         fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
+         fp[:] = Zt[:]
+         del fp
+         shape_low = np.shape(Zt)
+         del Zt
+         #we are only going to access the portion of memory required
+         dwnlow_fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='r', shape=shape_low)
 
-    except:
-       data_dwnlow = ''
-       print "low-freq. scan not available"
+      except:
+         data_dwnlow = ''
+         print "low-freq. scan not available"
 
-    try:
-       data_dwnhi = data.gethiscans().astype('int16')
+      try:
+         data_dwnhi = data.gethiscans().astype('int16')
 
-       Zt, ind_hi = makechunks2(data_dwnhi)
-       del data_dwnhi
+         Zt, ind_hi = self._makechunks(data_dwnhi)
+         del data_dwnhi
 
-       # create memory mapped file for Z
-       fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_hi = np.shape(Zt)
-       del Zt
-       #we are only going to access the portion of memory required
-       dwnhi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=shape_hi)
+         # create memory mapped file for Z
+         fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
+         fp[:] = Zt[:]
+         del fp
+         shape_hi = np.shape(Zt)
+         del Zt
+         #we are only going to access the portion of memory required
+         dwnhi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=shape_hi)
 
-    except:
-       data_dwnhi = ''
-       print "high-freq. scan not available"
+      except:
+         data_dwnhi = ''
+         print "high-freq. scan not available"
 
-    del data
+      del data
 
-    try:
-       es = humutils.runningMeanFast(metadat['e'],len(metadat['e'])/100)
-       ns = humutils.runningMeanFast(metadat['n'],len(metadat['n'])/100)
-    except:
-       es = metadat['e']
-       ns = metadat['n']
+      try:
+         es = humutils.runningMeanFast(metadat['e'],len(metadat['e'])/100)
+         ns = humutils.runningMeanFast(metadat['n'],len(metadat['n'])/100)
+      except:
+         es = metadat['e']
+         ns = metadat['n']
     
-    metadat['es'] = es
-    metadat['ns'] = ns
+      metadat['es'] = es
+      metadat['ns'] = ns
 
-    trans =  pyproj.Proj(init=cs2cs_args)
-    lon, lat = trans(es, ns, inverse=True)
-    metadat['lon'] = lon
-    metadat['lat'] = lat
+      trans =  pyproj.Proj(init=cs2cs_args)
+      lon, lat = trans(es, ns, inverse=True)
+      metadat['lon'] = lon
+      metadat['lat'] = lat
 
-    if 'shape_port' in locals():
-       metadat['shape_port'] = shape_port
-    else:
-       metadat['shape_port'] = ''   
+      if 'shape_port' in locals():
+         metadat['shape_port'] = shape_port
+      else:
+         metadat['shape_port'] = ''   
 
-    if 'shape_star' in locals():
-       metadat['shape_star'] = shape_star
-    else:
-       metadat['shape_star'] = ''   
+      if 'shape_star' in locals():
+         metadat['shape_star'] = shape_star
+      else:
+         metadat['shape_star'] = ''   
 
-    if 'shape_hi' in locals():
-       metadat['shape_hi'] = shape_hi
-    else:
-       metadat['shape_hi'] = ''   
+      if 'shape_hi' in locals():
+         metadat['shape_hi'] = shape_hi
+      else:
+         metadat['shape_hi'] = ''   
 
-    if 'shape_low' in locals():
-       metadat['shape_low'] = shape_low
-    else:
-       metadat['shape_low'] = ''   
+      if 'shape_low' in locals():
+         metadat['shape_low'] = shape_low
+      else:
+         metadat['shape_low'] = ''   
 
-    try:
-       # create kml for loading path into google earth
-       kml = simplekml.Kml()
-       ls = kml.newlinestring(name='trackline')
-       ls.coords = zip(lon,lat)
-       ls.extrude = 1
-       ls.altitudemode = simplekml.AltitudeMode.relativetoground
-       ls.style.linestyle.width = 5
-       ls.style.linestyle.color = simplekml.Color.red
-       kml.save(sonpath+base+"trackline.kml")
-    except:
-       print "install simplekml for kml plots"
+      try:
+         # create kml for loading path into google earth
+         kml = simplekml.Kml()
+         ls = kml.newlinestring(name='trackline')
+         ls.coords = zip(lon,lat)
+         ls.extrude = 1
+         ls.altitudemode = simplekml.AltitudeMode.relativetoground
+         ls.style.linestyle.width = 5
+         ls.style.linestyle.color = simplekml.Color.red
+         kml.save(sonpath+base+"trackline.kml")
+      except:
+         print "install simplekml for kml plots"
 
-    dist = np.zeros(len(lat))
-    for k in xrange(len(lat)-1):
-       dist[k] = self._distBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+      dist = np.zeros(len(lat))
+      for k in xrange(len(lat)-1):
+         dist[k] = self._distBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
 
-    dist_m = np.cumsum(dist)
+      dist_m = np.cumsum(dist)
 
-    # theta at 3dB in the horizontal
-    theta3dB = np.arcsin(c/(t*(f*1000)))
-    #resolution of 1 sidescan pixel to nadir
-    ft = (np.pi/2)*(1/theta3dB)
+      # theta at 3dB in the horizontal
+      theta3dB = np.arcsin(c/(t*(f*1000)))
+      #resolution of 1 sidescan pixel to nadir
+      ft = (np.pi/2)*(1/theta3dB)
 
-    dep_m = np.squeeze(metadat['dep_m']) #loadmat(sonpath+base+'meta.mat')['dep_m'])
+      dep_m = np.squeeze(metadat['dep_m']) #loadmat(sonpath+base+'meta.mat')['dep_m'])
 
-    dep_m = humutils.rm_spikes(dep_m,2)
+      dep_m = humutils.rm_spikes(dep_m,2)
 
-    metadat['dist_m'] = dist_m
+      metadat['dist_m'] = dist_m
 
+      if bedpick == 1: # auto
 
-    if bedpick == 1: # auto
+         # get bed from depth trace
+         bed = ft*dep_m
 
-       # get bed from depth trace
-       bed = ft*dep_m
+         imu = []
+         for k in xrange(len(port_fp)):
+            imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
+         imu = np.hstack(imu)
 
-       imu = []
-       for k in xrange(len(port_fp)):
-          imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
-       imu = np.hstack(imu)
+         ## narrow image to within range of estimated bed
+         #imu = data_port[int(np.min(bed)):int(np.max(bed)),:]
+         # use dynamic boundary tracing to get 2nd estimate of bed  
+         x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T))
+         del imu 
 
-       ## narrow image to within range of estimated bed
-       #imu = data_port[int(np.min(bed)):int(np.max(bed)),:]
-       # use dynamic boundary tracing to get 2nd estimate of bed  
-       x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T))
-       del imu 
+         if doplot==1:
 
-       if doplot==1:
+            #dist_mi = np.linspace(np.min(dist_m),np.max(dist_m),len(dist_m))
 
-          #dist_mi = np.linspace(np.min(dist_m),np.max(dist_m),len(dist_m))
+            for k in xrange(len(port_fp)):
+               Zbed = bed[ind_port[-1]*k:ind_port[-1]*(k+1)]
+               Zdist = dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)]
+               Zx = x[ind_port[-1]*k:ind_port[-1]*(k+1)]
 
-          for k in xrange(len(port_fp)):
-             Zbed = bed[ind_port[-1]*k:ind_port[-1]*(k+1)]
-             Zdist = dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)]
-             Zx = x[ind_port[-1]*k:ind_port[-1]*(k+1)]
+               extent = np.shape(port_fp[k])[0]
 
-             extent = np.shape(port_fp[k])[0]
+               fig = plt.figure()
+               fig.subplots_adjust(wspace = 0.1, hspace=0.1)
+               plt.subplot(2,2,1)
+               ax = plt.gca()
+               im = ax.imshow(np.flipud(port_fp[k]),cmap='gray',extent=[min(Zdist), max(Zdist), 0, extent*(1/ft)],origin='upper')
+               plt.ylabel('Range (m)'); #plt.xlabel('Distance along track (m)')  
+               plt.axis('normal'); plt.axis('tight')
 
-             fig = plt.figure()
-             fig.subplots_adjust(wspace = 0.1, hspace=0.1)
-             plt.subplot(2,2,1)
-             ax = plt.gca()
-             im = ax.imshow(np.flipud(port_fp[k]),cmap='gray',extent=[min(Zdist), max(Zdist), 0, extent*(1/ft)],origin='upper')
-             plt.ylabel('Range (m)'); #plt.xlabel('Distance along track (m)')  
-             plt.axis('normal'); plt.axis('tight')
+               plt.subplot(2,2,3)
+               ax = plt.gca()
+               im = ax.imshow(star_fp[k],cmap='gray',extent=[min(Zdist), max(Zdist), extent*(1/ft), 0],origin='upper')
+               plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
+               plt.axis('normal'); plt.axis('tight')
 
-             plt.subplot(2,2,3)
-             ax = plt.gca()
-             im = ax.imshow(star_fp[k],cmap='gray',extent=[min(Zdist), max(Zdist), extent*(1/ft), 0],origin='upper')
-             plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
-             plt.axis('normal'); plt.axis('tight')
+               axR=plt.subplot(1,2,2); 
+               axR.yaxis.tick_right()
+               axR.yaxis.set_label_position("right")
+               axR.imshow(star_fp[k],cmap='gray',extent=[min(Zdist), max(Zdist), extent*(1/ft), 0],origin='upper')
+               plt.plot(Zdist,Zbed/ft,'k')
+               plt.plot(Zdist,Zx[:len(Zdist)]/ft,'r')
+               plt.axis('normal'); plt.axis('tight')
+               plt.ylim(10,0)
+               plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
+               self._custom_save(sonpath,'bed_2picks'+str(k))
+               del fig
 
-             axR=plt.subplot(1,2,2); 
-             axR.yaxis.tick_right()
-             axR.yaxis.set_label_position("right")
-             axR.imshow(star_fp[k],cmap='gray',extent=[min(Zdist), max(Zdist), extent*(1/ft), 0],origin='upper')
-             plt.plot(Zdist,Zbed/ft,'k')
-             plt.plot(Zdist,Zx[:len(Zdist)]/ft,'r')
-             plt.axis('normal'); plt.axis('tight')
-             plt.ylim(10,0)
-             plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
-             self._custom_save(sonpath,'bed_2picks'+str(k))
-             del fig
+            del Zbed, Zdist, Zx
 
-          del Zbed, Zdist, Zx
+         # 'real' bed is estimated to be the minimum of the two
+         #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
+         bed = np.min(np.vstack((bed,np.squeeze(x[:len(bed)]))),axis=0) 
+         del x
 
-       # 'real' bed is estimated to be the minimum of the two
-       #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
-       bed = np.min(np.vstack((bed,np.squeeze(x[:len(bed)]))),axis=0) 
-       del x
+      else: #manual
 
+         beds=[]
+         for k in xrange(len(port_fp)):
+            raw_input("Bed picking "+str(k+1)+" of "+str(len(port_fp))+", are you ready? 30 seconds. Press Enter to continue...")
+            bed={}
+            fig = plt.figure()
+            ax = plt.gca()
+            im = ax.imshow(port_fp[k], cmap = 'gray', origin = 'upper')
+            pts1 = plt.ginput(n=300, timeout=15) # it will wait for 200 clicks or 60 seconds
+            x1=map(lambda x: x[0],pts1) # map applies the function passed as 
+            y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
+            bed = np.interp(np.r_[:ind_port[-1]],x1,y1)
+            plt.close()
+            del fig
+            beds.append(bed)
+            extent = np.shape(port_fp[k])[0]
+         bed = np.asarray(np.hstack(beds),'float')
 
-    else: #manual
+      # now revise the depth in metres
+      dep_m = (1/ft)*bed
 
-       beds=[]
-       for k in xrange(len(port_fp)):
-          raw_input("Bed picking "+str(k+1)+" of "+str(len(port_fp))+", are you ready? 30 seconds. Press Enter to continue...")
-          bed={}
-          fig = plt.figure()
-          ax = plt.gca()
-          im = ax.imshow(port_fp[k], cmap = 'gray', origin = 'upper')
-          pts1 = plt.ginput(n=300, timeout=15) # it will wait for 200 clicks or 60 seconds
-          x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-          y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-          bed = np.interp(np.r_[:ind_port[-1]],x1,y1)
-          plt.close()
-          del fig
-          beds.append(bed)
-          extent = np.shape(port_fp[k])[0]
-       bed = np.asarray(np.hstack(beds),'float')
+      if doplot==1:
+         for k in xrange(len(star_fp)):
 
-    # now revise the depth in metres
-    dep_m = (1/ft)*bed
+            Zbed = (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)]
+            Zdist = dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)]
 
-    if doplot==1:
-       for k in xrange(len(star_fp)):
+            fig = plt.figure()
+            plt.subplot(2,2,1)
+            plt.imshow(np.flipud(star_fp[k]),cmap='gray', extent=[min(Zdist), max(Zdist), 0, extent*(1/ft)], origin='upper')
+            plt.plot(np.linspace(min(Zdist), max(Zdist),len(Zbed)), Zbed,'r')
+            plt.axis('normal'); plt.axis('tight')
+            plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
 
-          Zbed = (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)]
-          Zdist = dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)]
+            plt.subplot(2,2,3)
+            plt.imshow(port_fp[k],cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0], origin='upper')
+            plt.plot(np.linspace(min(Zdist), max(Zdist),len(Zbed)), Zbed,'r')
+            plt.axis('normal'); plt.axis('tight')
+            plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
 
-          fig = plt.figure()
-          plt.subplot(2,2,1)
-          plt.imshow(np.flipud(star_fp[k]),cmap='gray', extent=[min(Zdist), max(Zdist), 0, extent*(1/ft)], origin='upper')
-          plt.plot(np.linspace(min(Zdist), max(Zdist),len(Zbed)), Zbed,'r')
-          plt.axis('normal'); plt.axis('tight')
-          plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
+            self._custom_save(sonpath,'bed_pick'+str(k))
+            del fig
 
-          plt.subplot(2,2,3)
-          plt.imshow(port_fp[k],cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0], origin='upper')
-          plt.plot(np.linspace(min(Zdist), max(Zdist),len(Zbed)), Zbed,'r')
-          plt.axis('normal'); plt.axis('tight')
-          plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
+      metadat['dist_m'] = dist_m
+      metadat['dep_m'] = dep_m
+      metadat['pix_m'] = 1/ft
+      metadat['bed'] = bed
 
-          self._custom_save(sonpath,'bed_pick'+str(k))
-          del fig
+      metadat['c'] = c
+      metadat['t'] = t
+      metadat['f'] = f
 
-    metadat['dist_m'] = dist_m
-    metadat['dep_m'] = dep_m
-    metadat['pix_m'] = 1/ft
-    metadat['bed'] = bed
+      savemat(sonpath+base+'meta.mat', metadat ,oned_as='row')
 
-    metadat['c'] = c
-    metadat['t'] = t
-    metadat['f'] = f
+      heading = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
 
-    savemat(sonpath+base+'meta.mat', metadat ,oned_as='row')
+      f = open(sonpath+base+'rawdat.csv', 'wt')
+      writer = csv.writer(f)
+      writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth (m)', 'distance (m)', 'heading (deg.)' ) )
+      for i in range(0, len(lon)):
+         writer.writerow(( float(lon[i]),float(lat[i]),float(es[i]),float(ns[i]),float(dep_m[i]),float(dist_m[i]), float(heading[i]) ))
+      f.close()
 
-    heading = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
+      del heading, lat, lon, dep_m #, dist_m
 
-    f = open(sonpath+base+'rawdat.csv', 'wt')
-    writer = csv.writer(f)
-    writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth (m)', 'distance (m)', 'heading (deg.)' ) )
-    for i in range(0, len(lon)):
-       writer.writerow(( float(lon[i]),float(lat[i]),float(es[i]),float(ns[i]),float(dep_m[i]),float(dist_m[i]), float(heading[i]) ))
-    f.close()
+      if doplot==1:
 
-    del heading, lat, lon, dep_m #, dist_m
+         fig = plt.figure()
+         fig.subplots_adjust(wspace = 0.5, hspace=0.5)
+         plt.subplot(221)
+         plt.plot(metadat['e'],metadat['n'],'k')
+         plt.plot(es,ns,'r.')
+         #plt.plot(esi,nsi,'b.')
+         plt.xlabel('Easting (m)')
+         plt.ylabel('Northing (m)')
+         plt.setp(plt.xticks()[1], rotation=30)
+         plt.axis('normal'); plt.axis('tight')
 
-    if doplot==1:
+         plt.subplot(222)
+         plt.plot(metadat['lon'],metadat['lat'],'k')
+         plt.xlabel('Longitude')
+         plt.ylabel('Latitude')
+         plt.axis('normal'); plt.axis('tight')
+         plt.setp(plt.xticks()[1], rotation=30)
+         self._custom_save(sonpath,'raw_filt_pos')
+         del fig
 
-       fig = plt.figure()
-       fig.subplots_adjust(wspace = 0.5, hspace=0.5)
-       plt.subplot(221)
-       plt.plot(metadat['e'],metadat['n'],'k')
-       plt.plot(es,ns,'r.')
-       #plt.plot(esi,nsi,'b.')
-       plt.xlabel('Easting (m)')
-       plt.ylabel('Northing (m)')
-       plt.setp(plt.xticks()[1], rotation=30)
-       plt.axis('normal'); plt.axis('tight')
+         if 'dwnlow_fp' in locals():
+            for k in xrange(len(dwnlow_fp)):
 
-       plt.subplot(222)
-       plt.plot(metadat['lon'],metadat['lat'],'k')
-       plt.xlabel('Longitude')
-       plt.ylabel('Latitude')
-       plt.axis('normal'); plt.axis('tight')
-       plt.setp(plt.xticks()[1], rotation=30)
-       self._custom_save(sonpath,'raw_filt_pos')
-       del fig
+               fig = plt.figure()
+               plt.imshow(dwnlow_fp[k],cmap='gray')
+               plt.axis('normal'); plt.axis('tight')
+               plt.xlabel('Ping Number (Time)')
+               plt.ylabel('Range (Distance)')
 
-       if 'dwnlow_fp' in locals():
-          for k in xrange(len(dwnlow_fp)):
+               self._custom_save(sonpath,'raw_dwnlow'+str(k))
+               del fig
 
-             fig = plt.figure()
-             plt.imshow(dwnlow_fp[k],cmap='gray')
-             plt.axis('normal'); plt.axis('tight')
-             plt.xlabel('Ping Number (Time)')
-             plt.ylabel('Range (Distance)')
+         if 'dwnhi_fp' in locals():
+            for k in xrange(len(dwnhi_fp)):
 
-             self._custom_save(sonpath,'raw_dwnlow'+str(k))
-             del fig
+               fig = plt.figure()
+               plt.imshow(dwnhi_fp[k],cmap='gray')
+               plt.axis('normal'); plt.axis('tight')
+               plt.xlabel('Ping Number (Time)')
+               plt.ylabel('Range (Distance)')
 
-       if 'dwnhi_fp' in locals():
-          for k in xrange(len(dwnhi_fp)):
+               self._custom_save(sonpath,'raw_dwnhi'+str(k))
+               del fig
 
-             fig = plt.figure()
-             plt.imshow(dwnhi_fp[k],cmap='gray')
-             plt.axis('normal'); plt.axis('tight')
-             plt.xlabel('Ping Number (Time)')
-             plt.ylabel('Range (Distance)')
+      if os.name=='posix': # true if linux/mac
+         elapsed = (time.time() - start)
+      else: # windows
+         elapsed = (time.clock() - start)
+      print "Processing took ", elapsed , "seconds to analyse"
 
-             self._custom_save(sonpath,'raw_dwnhi'+str(k))
-             del fig
-
-
-    if os.name=='posix': # true if linux/mac
-       elapsed = (time.time() - start)
-    else: # windows
-       elapsed = (time.clock() - start)
-    print "Processing took ", elapsed , "seconds to analyse"
-
-    print "Done!"
+      print "Done!"
 
 
    # =========================================================

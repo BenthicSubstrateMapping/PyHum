@@ -72,8 +72,6 @@ def dotest():
    numclasses = 4
    maxscale = 20
    notes = 4
-   shorepick = 0
-   do_two = 0
 
    # for mapping
    imagery = 1 # server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery'
@@ -82,7 +80,7 @@ def dotest():
 
    PyHum.humcorrect(humfile, sonpath, maxW, doplot)
 
-   PyHum.humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes, shorepick, do_two)
+   PyHum.humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
    PyHum.domap(humfile, sonpath, cs2cs_args, imagery)
 

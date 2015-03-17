@@ -200,7 +200,8 @@ def domap(humfile, sonpath, cs2cs_args, imagery):
 
       theta = np.asarray(bearing, 'float')/(180/np.pi)
 
-
+      dep_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dep_m'])
+      c = np.squeeze(loadmat(sonpath+base+'meta.mat')['c'])
       tvg = ((8.5*10**-5)+(3/76923)+((8.5*10**-5)/4))*c
         
       dist_tvg = ((np.tan(np.radians(25)))*dep_m)-(tvg)
@@ -224,7 +225,7 @@ def domap(humfile, sonpath, cs2cs_args, imagery):
 
          print "getting point cloud ..."
          # get the points by rotating the [x,y] vector so it lines up with boat heading, assumed to be the same as the curvature of the [e,n] trace
-         X=[]; Y=[];
+         X=[]; Y=[]; R=[]
          for k in range(len(n)): 
             x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
             y = np.concatenate((n[k]+yvec, n[k]-yvec))
@@ -252,21 +253,21 @@ def domap(humfile, sonpath, cs2cs_args, imagery):
 
          # write raw bs to file
          try:
-            outfile = sonpath+'x_y_ss_raw.asc' 
+            outfile = sonpath+'x_y_ss_raw'+str(p)+'.asc' 
             with open(outfile, 'w') as f:
                np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
          except:
-            outfile = os.path.expanduser("~")+os.sep+'x_y_ss_raw.asc' 
+            outfile = os.path.expanduser("~")+os.sep+'x_y_ss_raw'+str(p)+'.asc' 
             with open(outfile, 'w') as f:
                np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
          # write range (m) to file
          try:
-            outfile = sonpath+'x_y_ss_raw.asc' 
+            outfile = sonpath+'x_y_range_raw'+str(p)+'.asc' 
             with open(outfile, 'w') as f:
                np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(R.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
          except:
-            outfile = os.path.expanduser("~")+os.sep+'x_y_ss_raw.asc' 
+            outfile = os.path.expanduser("~")+os.sep+'x_y_range_raw'+str(p)+'.asc' 
             with open(outfile, 'w') as f:
                np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(R.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
@@ -319,26 +320,33 @@ def domap(humfile, sonpath, cs2cs_args, imagery):
             x,y = map.projtran(humlon, humlat)
             map.scatter(x.flatten(), y.flatten(), 0.1, merge.flatten(), cmap='gray', linewidth = '0')
 
-         try;
+         try:
             custom_save(sonpath+base,'map'+str(p))
             del fig 
+            
+            kml = simplekml.Kml()
+            ground = kml.newgroundoverlay(name='GroundOverlay')
+            ground.icon.href = sonpath+base+'map'+str(p)+'.png'
+            ground.latlonbox.north = np.min(humlat)-0.001
+            ground.latlonbox.south = np.max(humlat)+0.001
+            ground.latlonbox.east =  np.max(humlon)+0.001
+            ground.latlonbox.west =  np.min(humlon)-0.001
+            ground.latlonbox.rotation = 0            
+            kml.save(sonpath+base+"GroundOverlay"+str(p)+".kml")
+                       
          except:
             custom_save(os.path.expanduser("~")+os.sep+base,'map'+str(p))
             del fig 
 
-         kml = simplekml.Kml()
-         ground = kml.newgroundoverlay(name='GroundOverlay')
-         ground.icon.href = sonpath+'map'+str(p)+'.png'
-         ground.latlonbox.north = np.min(humlat)-0.001
-         ground.latlonbox.south = np.max(humlat)+0.001
-         ground.latlonbox.east =  np.max(humlon)+0.001
-         ground.latlonbox.west =  np.min(humlon)-0.001
-         ground.latlonbox.rotation = 0
-
-         try:
-            kml.save(sonpath+base+"GroundOverlay.kml")
-         except:
-            kml.save(os.path.expanduser("~")+os.sep+base+"GroundOverlay.kml")
+            kml = simplekml.Kml()
+            ground = kml.newgroundoverlay(name='GroundOverlay')
+            ground.icon.href = os.path.expanduser("~")+os.sep+base+'map'+str(p)+'.png'
+            ground.latlonbox.north = np.min(humlat)-0.001
+            ground.latlonbox.south = np.max(humlat)+0.001
+            ground.latlonbox.east =  np.max(humlon)+0.001
+            ground.latlonbox.west =  np.min(humlon)-0.001
+            ground.latlonbox.rotation = 0
+            kml.save(os.path.expanduser("~")+os.sep+base+"GroundOverlay"+str(p)+".kml")
 
          del humlat, humlon
 
@@ -346,9 +354,9 @@ def domap(humfile, sonpath, cs2cs_args, imagery):
 # =========================================================
 def custom_save(figdirec,root):
    try:
-      plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
+      plt.savefig(figdirec+root,bbox_inches='tight',dpi=400,transparent=True)
    except:
-      plt.savefig(os.path.expanduser("~")+os.sep+root,bbox_inches='tight',dpi=400)      
+      plt.savefig(os.path.expanduser("~")+os.sep+root,bbox_inches='tight',dpi=400,transparent=True)      
 
 # =========================================================
 def calc_beam_pos(dist, bearing, x, y):

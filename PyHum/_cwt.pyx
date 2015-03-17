@@ -52,7 +52,7 @@ cdef class Cwt:
     @cython.cdivision(True)
     @cython.wraparound(False)
     @cython.nonecheck(False)
-    def __init__(self, np.ndarray[np.int8_t, ndim=2] matrix, int largestscale, int notes, int win, int density):
+    def __init__(self, np.ndarray[np.float32_t, ndim=2] matrix, int largestscale, int notes, int win, int density):
         """
         Continuous Morlet wavelet transform of data
 
@@ -89,7 +89,7 @@ cdef class Cwt:
         cdef np.ndarray[np.float64_t, ndim=1] omega = np.empty(ndata, dtype=np.float64)
         omega = np.array(range(0,np.int(ndata/2))+range(-np.int(ndata/2),0))*(2.0*pi/ndata)
         
-        cdef np.ndarray[np.int8_t,ndim=1] data = np.empty(self.win, dtype=np.int8)
+        cdef np.ndarray[np.float32_t,ndim=1] data = np.empty(self.win, dtype=np.float32)
         cdef np.ndarray[np.float64_t,ndim=1] data2 = np.empty(ndata, dtype=np.float64)
         cdef np.ndarray[np.complex128_t,ndim=1] datahat = np.empty(ndata, dtype=np.complex128)
         cdef np.ndarray[np.float64_t,ndim=1] s_omega = np.empty(ndata, dtype=np.float64)
