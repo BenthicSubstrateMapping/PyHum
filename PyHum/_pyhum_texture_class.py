@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.1.6      Revision: Mar, 2015
+Version: 1.1.7      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -242,7 +242,7 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
 
          #SRT = np.hstack(SRT)
 
-         Snn = shift*(SRT.copy()*1/(ft**0.5))
+         Snn = (shift**0.5)*SRT.copy()*((1/ft)**0.5)
          #Snn[Snn<0.05] = 0
          del SRT
          #Snn = np.asarray(Snn,'float64')
@@ -314,7 +314,7 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
 
          #SRT = np.hstack(SRT)
 
-         Snn = shift*(SRT.copy()*1/(ft**0.5))
+         Snn = (shift**0.5)*SRT.copy()*((1/ft)**0.5)
          #Snn[Snn<0.05] = 0
          del SRT
          #Snn = np.asarray(Snn,'float64')

@@ -4,7 +4,7 @@ PyHum - a Python framework for sidescan data texture classification.
 
 PyHum is an open-source project dedicated to provide a Python framework for
 processing low-cost sidescan data. It provides parsers for Humminbird file formats,
-and signal processing routines which allow the manipulation of sidescan data and automated texture classification (see Buscombe et al., in review).
+and signal processing routines which allow the manipulation of sidescan data and automated texture classification (see Buscombe et al., forthcoming).
 
 For more information visit http://dbuscombe-usgs.github.io/PyHum/
 
@@ -22,7 +22,7 @@ For more information visit http://dbuscombe-usgs.github.io/PyHum/
     
 """
 
-__version__ = '1.1.6'
+__version__ = '1.1.7'
 
 #-----------------------------------------------------------------------------
 # Imports
@@ -32,6 +32,7 @@ from PyHum._pyhum_read_class import humread
 from PyHum._pyhum_correct_class import humcorrect
 from PyHum._pyhum_texture_class import humtexture
 from PyHum._pyhum_map import domap
+from PyHum._pyhum_map_texture import domap_texture
 from PyHum.utils import *
 from PyHum.test import *
 

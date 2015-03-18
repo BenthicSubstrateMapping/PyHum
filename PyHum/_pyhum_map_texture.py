@@ -1,5 +1,5 @@
 '''
-pyhum_map.py
+pyhum_map_texture.py
 Part of PyHum software 
 
 INFO:
@@ -55,11 +55,12 @@ __all__ = [
     'domap',
     'custom_save',
     'bearingBetweenPoints',
+    'make_map',
     'calc_beam_pos',
     ]
 
 #################################################
-def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res):
+def domap_texture(humfile, sonpath, cs2cs_args, imagery):
          
       # prompt user to supply file if no input file given
       if not humfile:
@@ -82,6 +83,11 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
 
       if cs2cs_args:
          print 'cs2cs arguments are %s' % (cs2cs_args)
+
+      if imagery:
+         imagery = int(imagery)
+         if imagery==0:
+            print "ESRI_Imagery_World_2D will be used"
 
       if dogrid:
          dogrid = int(dogrid)
@@ -107,6 +113,11 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
          # arguments to pass to cs2cs for coordinate transforms
          cs2cs_args = "epsg:26949"
          print '[Default] cs2cs arguments are %s' % (cs2cs_args)
+
+      if not imagery:
+         if imagery != 0:
+            imagery = 1
+            print "[Default] World imagery will be used"
 
       if not dogrid:
          if dogrid != 0:
@@ -260,7 +271,7 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
 
          print "getting point cloud ..."
          # get the points by rotating the [x,y] vector so it lines up with boat heading, assumed to be the same as the curvature of the [e,n] trace
-         X=[]; Y=[];
+         X=[]; Y=[]; R=[]
          for k in range(len(n)): 
             x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
             y = np.concatenate((n[k]+yvec, n[k]-yvec))
@@ -270,7 +281,8 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
             xx, yy = calc_beam_pos(d[k], t[k], xx, yy)
             X.append(xx)
             Y.append(yy)     
-      
+            R.append(d[k] / np.sqrt( (e[k]-xx)**2 + (n[k]-yy)**2 ))  #range to point  
+
          del e, n, t, x, y #, X, Y
 
          # merge flatten and stack
@@ -281,30 +293,46 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
          Y = np.asarray(Y,'float').T
          Y = Y.flatten()
 
+         # merge flatten and stack
+         R = np.asarray(R,'float').T
+         R = R.flatten()
+
+         # write range (m) to file
+         try:
+            outfile = sonpath+'x_y_range_raw'+str(p)+'.asc' 
+            with open(outfile, 'w') as f:
+               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(R.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+         except:
+            outfile = os.path.expanduser("~")+os.sep+'x_y_range_raw'+str(p)+'.asc' 
+            with open(outfile, 'w') as f:
+               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(R.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+
+         merge2 = merge.flatten()* (R.flatten()**np.sqrt(pix_m))
+         del merge
+
          # write raw bs to file
          try:
             outfile = sonpath+'x_y_ss_raw'+str(p)+'.asc' 
             with open(outfile, 'w') as f:
-               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge2.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
          except:
             outfile = os.path.expanduser("~")+os.sep+'x_y_ss_raw'+str(p)+'.asc' 
             with open(outfile, 'w') as f:
-               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
-
+               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge2.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
          humlon, humlat = trans(X, Y, inverse=True)
 
          if dogrid==1:
             grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
 
-            dat = griddata(np.c_[X.flatten(),Y.flatten()], merge.flatten(), (grid_x, grid_y), method='nearest') 
+            dat = griddata(np.c_[X.flatten(),Y.flatten()], merge2.flatten(), (grid_x, grid_y), method='nearest') 
 
             ## create mask for where the data is not
             tree = KDTree(np.c_[X.flatten(),Y.flatten()])
             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
             dist = dist.reshape(grid_x.shape)
 
-         del X, Y #, bearing #, pix_m, yvec
+         del X, Y, R #, bearing #, pix_m, yvec
 
          if dogrid==1:
             ## mask
@@ -338,7 +366,7 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
          else: 
             ## draw point cloud
             x,y = map.projtran(humlon, humlat)
-            map.scatter(x.flatten(), y.flatten(), 0.1, merge.flatten(), cmap='gray', linewidth = '0')
+            map.scatter(x.flatten(), y.flatten(), 0.1, merge2.flatten(), cmap='gray', linewidth = '0')
 
          try:
             custom_save(sonpath+base,'map'+str(p))
@@ -352,7 +380,7 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
             ground.latlonbox.east =  np.max(humlon)+0.001
             ground.latlonbox.west =  np.min(humlon)-0.001
             ground.latlonbox.rotation = 0            
-            kml.save(sonpath+base+"GroundOverlay"+str(p)+".kml")
+            kml.save(sonpath+base+"class_GroundOverlay"+str(p)+".kml")
                        
          except:
             custom_save(os.path.expanduser("~")+os.sep+base,'map'+str(p))
@@ -369,7 +397,6 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
             kml.save(os.path.expanduser("~")+os.sep+base+"GroundOverlay"+str(p)+".kml")
 
          del humlat, humlon
-
 
 #      # treats each chunk in parallel for speed
 #      try:
@@ -405,120 +432,111 @@ def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
    db = np.rad2deg(bearing)
    return (90.0 - db + 360.0) % 360.0
 
-## =========================================================
-#def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, trans, dogrid, p):
-#   
-#   merge = np.vstack((dat_port,dat_star))
-#   #merge = np.vstack((np.flipud(port_fp[p]),star_fp[p]))
-#   
-#   merge[np.isnan(merge)] = 0
+# =========================================================
+def make_map(e, n, t, d, dat_port, dat_star, dat_class_port, dat_class_star, pix_m, res, cs2cs_args, sonpath, p):
+   
+   merge = np.vstack((dat_class_port,dat_class_star))
+   #merge = np.vstack((np.flipud(port_fp[p]),star_fp[p]))
+   
+   merge[np.isnan(merge)] = 0
 
-#   # get number pixels in scan line
-#   extent = int(np.shape(merge)[0]/2)
+   merge[np.vstack((dat_port, dat_star)) == 0 ] = 0      
 
-#   yvec = np.linspace(pix_m,extent*pix_m,extent)
+   # get number pixels in scan line
+   extent = int(np.shape(merge)[0]/2)
 
-#   print "getting point cloud ..."
-#   # get the points by rotating the [x,y] vector so it lines up with boat heading, assumed to be the same as the curvature of the [e,n] trace
-#   X=[]; Y=[]; R=[];
-#   for k in range(len(n)): 
-#      x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
-#      y = np.concatenate((n[k]+yvec, n[k]-yvec))
-#      # Rotate line around center point
-#      xx = e[k] - ((x - e[k]) * np.cos(t[k])) - ((y - n[k]) * np.sin(t[k]))
-#      yy = n[k] - ((x - e[k]) * np.sin(t[k])) + ((y - n[k]) * np.cos(t[k]))
-#      xx, yy = calc_beam_pos(d[k], t[k], xx, yy)
-#      X.append(xx)
-#      Y.append(yy) 
-#      R.append(d[k] / (np.sqrt( (e[k]-xx)**2 + (n[k]-yy)**2 )) )  #range to point  
+   yvec = np.linspace(pix_m,extent*pix_m,extent)
 
-#   del e, n, t, x, y #, X, Y
+   print "getting point cloud ..."
+   # get the points by rotating the [x,y] vector so it lines up with boat heading, assumed to be the same as the curvature of the [e,n] trace
+   X=[]; Y=[];
+   for k in range(len(n)): 
+      x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
+      y = np.concatenate((n[k]+yvec, n[k]-yvec))
+      # Rotate line around center point
+      xx = e[k] - ((x - e[k]) * np.cos(t[k])) - ((y - n[k]) * np.sin(t[k]))
+      yy = n[k] - ((x - e[k]) * np.sin(t[k])) + ((y - n[k]) * np.cos(t[k]))
+      xx, yy = calc_beam_pos(d[k], t[k], xx, yy)
+      X.append(xx)
+      Y.append(yy) 
 
-#   # merge flatten and stack
-#   X = np.asarray(X,'float').T
-#   X = X.flatten()
+   del e, n, t, x, y #, X, Y
 
-#   # merge flatten and stack
-#   Y = np.asarray(Y,'float').T
-#   Y = Y.flatten()
+   # merge flatten and stack
+   X = np.asarray(X,'float').T
+   X = X.flatten()
 
-#   # merge flatten and stack
-#   R = np.asarray(R,'float').T
-#   R = R.flatten()
+   # merge flatten and stack
+   Y = np.asarray(Y,'float').T
+   Y = Y.flatten()
 
-#   # write raw bs to file
-#   outfile = sonpath+'x_y_ss_raw'+str(p)+'.asc' 
-#   with open(outfile, 'w') as f:
-#      np.savetxt(f, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+   # write raw bs to file
+   outfile = sonpath+'x_y_class'+str(p)+'.asc' 
+   with open(outfile, 'w') as f:
+      np.savetxt(f, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
-#   # write raw bs to file
-#   outfile = sonpath+'x_y_range_raw'+str(p)+'.asc' 
-#   with open(outfile, 'w') as f:
-#      np.savetxt(f, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(R.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+   humlon, humlat = trans(X, Y, inverse=True)
 
-#   humlon, humlat = trans(X, Y, inverse=True)
+   if dogrid==1:
+      grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
 
-#   if dogrid==1:
-#      grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
+      dat = griddata(np.c_[X.flatten(),Y.flatten()], merge.flatten(), (grid_x, grid_y), method='nearest') 
 
-#      dat = griddata(np.c_[X.flatten(),Y.flatten()], merge.flatten(), (grid_x, grid_y), method='nearest') 
+      ## create mask for where the data is not
+      tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+      dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+      dist = dist.reshape(grid_x.shape)
 
-#      ## create mask for where the data is not
-#      tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-#      dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
-#      dist = dist.reshape(grid_x.shape)
+   del X, Y #, bearing #, pix_m, yvec
 
-#   del X, Y #, bearing #, pix_m, yvec
+   if dogrid==1:
+      ## mask
+      dat[dist> np.floor(np.sqrt(1/res))-1 ] = np.nan #np.floor(np.sqrt(1/res))-1 ] = np.nan
+      del dist, tree
 
-#   if dogrid==1:
-#      ## mask
-#      dat[dist> np.floor(np.sqrt(1/res))-1 ] = np.nan #np.floor(np.sqrt(1/res))-1 ] = np.nan
-#      del dist, tree
+      dat[dat==0] = np.nan
+      dat[np.isinf(dat)] = np.nan
+      datm = np.ma.masked_invalid(dat)
 
-#      dat[dat==0] = np.nan
-#      dat[np.isinf(dat)] = np.nan
-#      datm = np.ma.masked_invalid(dat)
+      glon, glat = trans(grid_x, grid_y, inverse=True)
+      del grid_x, grid_y
 
-#      glon, glat = trans(grid_x, grid_y, inverse=True)
-#      del grid_x, grid_y
+   print "drawing and printing map ..."
+   fig = plt.figure(frameon=False)
+   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
+    resolution = 'i', #h #f
+    llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
+    urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
 
-#   print "drawing and printing map ..."
-#   fig = plt.figure(frameon=False)
-#   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
-#    resolution = 'i', #h #f
-#    llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
-#    urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
+   if dogrid==1:
+      gx,gy = map.projtran(glon, glat)
 
-#   if dogrid==1:
-#      gx,gy = map.projtran(glon, glat)
+   ax = plt.Axes(fig, [0., 0., 1., 1.], )
+   ax.set_axis_off()
+   fig.add_axes(ax)
 
-#   ax = plt.Axes(fig, [0., 0., 1., 1.], )
-#   ax.set_axis_off()
-#   fig.add_axes(ax)
+   if dogrid==1:
+      map.pcolormesh(gx, gy, datm, cmap='hot', vmin=np.nanmin(dat), vmax=np.nanmax(dat))
+      del datm, dat
+   else: 
+      ## draw point cloud
+      x,y = map.projtran(humlon, humlat)
+      map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='hot', linewidth = '0')
 
-#   if dogrid==1:
-#      map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(dat), vmax=np.nanmax(dat))
-#      del datm, dat
-#   else: 
-#      ## draw point cloud
-#      x,y = map.projtran(humlon, humlat)
-#      map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='gray', linewidth = '0')
+   custom_save(sonpath,'class_map'+str(p))
+   del fig 
 
-#   custom_save(sonpath,'map'+str(p))
-#   del fig 
+   kml = simplekml.Kml()
+   ground = kml.newgroundoverlay(name='GroundOverlay')
+   ground.icon.href = sonpath+'class_map'+str(p)+'.png'
+   ground.latlonbox.north = np.min(humlat)-0.001
+   ground.latlonbox.south = np.max(humlat)+0.001
+   ground.latlonbox.east =  np.max(humlon)+0.001
+   ground.latlonbox.west =  np.min(humlon)-0.001
+   ground.latlonbox.rotation = 0
 
-#   kml = simplekml.Kml()
-#   ground = kml.newgroundoverlay(name='GroundOverlay')
-#   ground.icon.href = sonpath+'map'+str(p)+'.png'
-#   ground.latlonbox.north = np.min(humlat)-0.001
-#   ground.latlonbox.south = np.max(humlat)+0.001
-#   ground.latlonbox.east =  np.max(humlon)+0.001
-#   ground.latlonbox.west =  np.min(humlon)-0.001
-#   ground.latlonbox.rotation = 0
+   kml.save(sonpath+'class_GroundOverlay'+str(p)+'.kml')
 
-#   kml.save(sonpath+'GroundOverlay'+str(p)+'.kml')
-
-#   del humlat, humlon
-
+   del humlat, humlon
 
 

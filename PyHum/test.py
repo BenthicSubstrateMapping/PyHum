@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.1.6      Revision: Mar, 2015
+Version: 1.1.7      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -50,39 +50,44 @@ def dotest():
    # general settings   
    humfile = os.path.expanduser("~")+os.sep+'pyhum_test'+os.sep+'test.DAT' #PyHum.__path__[0]+os.sep+'test.DAT'
    sonpath = os.path.expanduser("~")+os.sep+'pyhum_test' #PyHum.__path__[0]
-   doplot = 1
+   doplot = 1 #yes
 
    # reading specific settings
-   cs2cs_args = "epsg:26949"
-   draft = 0
-   bedpick = 1
-   c = 1450
-   t = 0.108
-   f = 455
-   draft = 0.3
-   flip_lr = 1
+   cs2cs_args = "epsg:26949" #arizona central state plane
+   bedpick = 1 # auto bed pick
+   c = 1450 # speed of sound fresh water
+   t = 0.108 # length of transducer
+   f = 455 # frequency kHz
+   draft = 0.3 # draft in metres
+   flip_lr = 1 # flip port and starboard
 
    # correction specific settings
-   maxW = 1000
+   maxW = 1000 # rms output wattage
 
    # for texture calcs
-   win = 100
-   shift = 10
-   density = win/2
-   numclasses = 4
-   maxscale = 20
-   notes = 4
+   win = 100 # pixel window
+   shift = 10 # pixel shift
+   density = win/2 
+   numclasses = 4 # number of discrete classes for contouring and k-means
+   maxscale = 20 # Max scale as inverse fraction of data length (for wavelet analysis)
+   notes = 4 # Notes per octave (for wavelet analysis)
 
    # for mapping
-   imagery = 1 # server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery'
+   #imagery = 1 # server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery'
+   dogrid = 1 # yes
+   calc_bearing = 0 #no
+   filt_bearing = 1 #yes
+   res = 0.05 # grid resolution in metres
 
-   PyHum.humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr)
+   #PyHum.humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr)
 
-   PyHum.humcorrect(humfile, sonpath, maxW, doplot)
+   #PyHum.humcorrect(humfile, sonpath, maxW, doplot)
+
+   PyHum.domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
 
    PyHum.humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
-   PyHum.domap(humfile, sonpath, cs2cs_args, imagery)
+   PyHum.domap_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
 
 if __name__ == '__main__':
    dotest()
