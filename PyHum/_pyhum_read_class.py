@@ -10,7 +10,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.1.8      Revision: Mar, 2015
+Version: 1.1.9      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -398,12 +398,15 @@ def humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_
 
       if doplot==1:
 
-         # treats each chunk in parallel for speed
-         try:
-            d = Parallel(n_jobs = min(cpu_count(),len(star_fp)), verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
-         except:
-            print "memory error: trying serial"
-            d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
+         for k in xrange(len(star_fp)):
+            plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)      
+
+#         # treats each chunk in parallel for speed
+#         try:
+#            d = Parallel(n_jobs = min(cpu_count(),len(star_fp)), verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
+#         except:
+#            print "memory error: trying serial"
+#            d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
 
       # 'real' bed is estimated to be the minimum of the two
       #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
@@ -435,12 +438,15 @@ def humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_
 
    if doplot==1:
 
-      # treats each chunk in parallel for speed
-      try:
-         d = Parallel(n_jobs = min(cpu_count(),len(star_fp)), verbose=0)(delayed(plot_bedpick)(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
-      except:
-         print "memory error: trying serial"
-         d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_bedpick)(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
+      for k in xrange(len(star_fp)):
+         plot_bedpick(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+
+#      # treats each chunk in parallel for speed
+#      try:
+#         d = Parallel(n_jobs = min(cpu_count(),len(star_fp)), verbose=0)(delayed(plot_bedpick)(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
+#      except:
+#         print "memory error: trying serial"
+#         d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_bedpick)(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
 
    metadat['dist_m'] = dist_m
    metadat['dep_m'] = dep_m

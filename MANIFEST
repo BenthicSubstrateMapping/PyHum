@@ -14,6 +14,7 @@ PyHum/_cwt.pyx
 PyHum/_ppdrc.pyx
 PyHum/_pyhum_correct_class.py
 PyHum/_pyhum_map.py
+PyHum/_pyhum_map_texture.py
 PyHum/_pyhum_read_class.py
 PyHum/_pyhum_texture_class.py
 PyHum/_pyread.pyx
