@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.1.7      Revision: Mar, 2015
+Version: 1.1.8      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -90,9 +90,9 @@ from scipy.ndimage.filters import median_filter
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-rc('text', usetex=True)
+#from matplotlib import rc
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+#rc('text', usetex=True)
 
 # suppress divide and invalid warnings
 np.seterr(divide='ignore')
