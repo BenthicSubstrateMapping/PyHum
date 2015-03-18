@@ -79,9 +79,9 @@ def dotest():
    filt_bearing = 1 #yes
    res = 0.05 # grid resolution in metres
 
-   #PyHum.humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr)
+   PyHum.humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr)
 
-   #PyHum.humcorrect(humfile, sonpath, maxW, doplot)
+   PyHum.humcorrect(humfile, sonpath, maxW, doplot)
 
    PyHum.domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
 

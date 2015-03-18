@@ -16,6 +16,9 @@ Python/Cython scripts to:
 ![alt tag](http://dbuscombe-usgs.github.io/figs/R00426_map.jpg)
 *Dog River, Alabama. Credit: Allen Aven, Dauphin Island Sea Lab*
 
+![alt tag](http://dbuscombe-usgs.github.io/figs/PyHum_glencanyon.png)
+*Fine/coarse transition on the bed of the Colorado River in Glen Canyon*
+
 ### Contributing & Credits
 
  Author |    Daniel Buscombe 
@@ -24,7 +27,7 @@ Python/Cython scripts to:
           | United States Geological Survey
           | Flagstaff, AZ 86001
           | dbuscombe@usgs.gov
-Version: 1.1.6   |   Revision: Mar, 2015
+Version: 1.1.7    |  Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -62,6 +65,9 @@ script to read radiometrically corrected Humminbird data in MAT format (output f
 script to generate a point cloud (X,Y,sidescan intensity), save it to ascii format file, grid it and make a raster overlay on an aerial image (pulled automatically from the ESRI GIS image server), and a kml file for showing the same thing in google-earth
 
 These are all command-line programs which take a number of input (some required, some optional). Please see the individual files for a comprehensive list of input options
+
+![alt tag](http://dbuscombe-usgs.github.io/figs/PyHum_glencanyon_class.png)
+*Automated bed sediment measurement, Colorado River in Glen Canyon*
 
 ## Setup
 
@@ -232,10 +238,10 @@ and results in a set of outputs such as csv, mat and kml files, and including so
 ![alt tag](http://dbuscombe-usgs.github.io/figs/raw_dwnlow.png)
 *a raw 83 kHz downward sonar scan*
 
-![alt tag](http://dbuscombe-usgs.github.io/figs/class.png)
+![alt tag](http://dbuscombe-usgs.github.io/figs/testclass.png)
 *radiometrically corrected scan (top) and wavelet lengthscale classification (bottom)*
 
-![alt tag](http://dbuscombe-usgs.github.io/figs/class_kmeans.png)
+![alt tag](http://dbuscombe-usgs.github.io/figs/testclass_kmeans1.png)
 *k=4 means lengthscale classification*
 
 ### Support
