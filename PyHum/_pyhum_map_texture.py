@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.2.0      Revision: Mar, 2015
+Version: 1.2.1      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -361,12 +361,12 @@ def domap_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_beari
             map.scatter(x.flatten(), y.flatten(), 0.1, merge2.flatten(), cmap='hot', linewidth = '0')
 
          try:
-            custom_save(sonpath+base,'map'+str(p))
+            custom_save(sonpath+base,'class_map'+str(p))
             del fig 
             
             kml = simplekml.Kml()
             ground = kml.newgroundoverlay(name='GroundOverlay')
-            ground.icon.href = sonpath+base+'map'+str(p)+'.png'
+            ground.icon.href = sonpath+base+'class_map'+str(p)+'.png'
             ground.latlonbox.north = np.min(humlat)-0.001
             ground.latlonbox.south = np.max(humlat)+0.001
             ground.latlonbox.east =  np.max(humlon)+0.001
@@ -375,18 +375,18 @@ def domap_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_beari
             kml.save(sonpath+base+"class_GroundOverlay"+str(p)+".kml")
                        
          except:
-            custom_save(os.path.expanduser("~")+os.sep+base,'map'+str(p))
+            custom_save(os.path.expanduser("~")+os.sep+base,'class_map'+str(p))
             del fig 
 
             kml = simplekml.Kml()
             ground = kml.newgroundoverlay(name='GroundOverlay')
-            ground.icon.href = os.path.expanduser("~")+os.sep+base+'map'+str(p)+'.png'
+            ground.icon.href = os.path.expanduser("~")+os.sep+base+'class_map'+str(p)+'.png'
             ground.latlonbox.north = np.min(humlat)-0.001
             ground.latlonbox.south = np.max(humlat)+0.001
             ground.latlonbox.east =  np.max(humlon)+0.001
             ground.latlonbox.west =  np.min(humlon)-0.001
             ground.latlonbox.rotation = 0
-            kml.save(os.path.expanduser("~")+os.sep+base+"GroundOverlay"+str(p)+".kml")
+            kml.save(os.path.expanduser("~")+os.sep+base+"class_GroundOverlay"+str(p)+".kml")
 
          del humlat, humlon
 
