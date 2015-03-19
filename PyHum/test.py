@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.1.8      Revision: Mar, 2015
+Version: 1.2.0      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -74,7 +74,7 @@ def dotest():
 
    # for mapping
    #imagery = 1 # server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery'
-   dogrid = 1 # yes
+   dogrid = 0 # no
    calc_bearing = 0 #no
    filt_bearing = 1 #yes
    res = 0.05 # grid resolution in metres
@@ -83,9 +83,9 @@ def dotest():
 
    PyHum.humcorrect(humfile, sonpath, maxW, doplot)
 
-   PyHum.domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
-
    PyHum.humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+
+   PyHum.domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
 
    PyHum.domap_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
 
