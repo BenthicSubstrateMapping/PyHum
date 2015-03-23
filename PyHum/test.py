@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.2.1      Revision: Mar, 2015
+Version: 1.2.2      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -65,7 +65,7 @@ def dotest():
    maxW = 1000 # rms output wattage
 
    # for texture calcs
-   win = 100 # pixel window
+   win = 50 # pixel window
    shift = 10 # pixel shift
    density = win/2 
    numclasses = 4 # number of discrete classes for contouring and k-means
@@ -74,7 +74,7 @@ def dotest():
 
    # for mapping
    #imagery = 1 # server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery'
-   dogrid = 0 # no
+   dogrid = 1 # yes
    calc_bearing = 0 #no
    filt_bearing = 1 #yes
    res = 0.05 # grid resolution in metres
@@ -87,6 +87,8 @@ def dotest():
 
    PyHum.domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
 
+   res = 0.5 # grid resolution in metres
+   
    PyHum.domap_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
 
 if __name__ == '__main__':

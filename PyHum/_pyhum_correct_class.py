@@ -10,7 +10,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.2.1      Revision: Mar, 2015
+Version: 1.2.2      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs

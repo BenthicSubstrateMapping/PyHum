@@ -10,7 +10,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.2.1      Revision: Mar, 2015
+Version: 1.2.2      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -207,8 +207,6 @@ def humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_
    else: # windows
       start = time.clock()
 
-   ##tonemap=1
-
    # number of bytes in a header packet in SON file
    headbytes = 67
 
@@ -401,13 +399,6 @@ def humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_
          for k in xrange(len(star_fp)):
             plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)      
 
-#         # treats each chunk in parallel for speed
-#         try:
-#            d = Parallel(n_jobs = min(cpu_count(),len(star_fp)), verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
-#         except:
-#            print "memory error: trying serial"
-#            d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
-
       # 'real' bed is estimated to be the minimum of the two
       #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
       bed = np.min(np.vstack((bed,np.squeeze(x[:len(bed)]))),axis=0) 
@@ -440,13 +431,6 @@ def humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_
 
       for k in xrange(len(star_fp)):
          plot_bedpick(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
-
-#      # treats each chunk in parallel for speed
-#      try:
-#         d = Parallel(n_jobs = min(cpu_count(),len(star_fp)), verbose=0)(delayed(plot_bedpick)(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
-#      except:
-#         print "memory error: trying serial"
-#         d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_bedpick)(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
 
    metadat['dist_m'] = dist_m
    metadat['dep_m'] = dep_m
@@ -560,14 +544,14 @@ def makechunks(dat):
 # =========================================================
 def plot_2bedpicks(dat_port, dat_star, Zbed, Zdist, Zx, ft, shape_port, sonpath, k):
 
-   extent = shape_port[1] #np.shape(merge)[0]
+   extent = shape_port[1] 
 
    fig = plt.figure()
    fig.subplots_adjust(wspace = 0.1, hspace=0.1)
    plt.subplot(2,2,1)
    ax = plt.gca()
    im = ax.imshow(np.flipud(dat_port),cmap='gray',extent=[min(Zdist), max(Zdist), 0, extent*(1/ft)],origin='upper')
-   plt.ylabel('Range (m)'); #plt.xlabel('Distance along track (m)')  
+   plt.ylabel('Range (m)');  
    plt.axis('normal'); plt.axis('tight')
 
    plt.subplot(2,2,3)
@@ -592,7 +576,7 @@ def plot_2bedpicks(dat_port, dat_star, Zbed, Zdist, Zx, ft, shape_port, sonpath,
 # =========================================================
 def plot_bedpick(dat_port, dat_star, Zbed, Zdist, ft, shape_port, sonpath, k):
 
-   extent = shape_port[1] #np.shape(merge)[0]
+   extent = shape_port[1] 
    fig = plt.figure()
    plt.subplot(2,2,1)
    plt.imshow(np.flipud(dat_star),cmap='gray', extent=[min(Zdist), max(Zdist), 0, extent*(1/ft)], origin='upper')
@@ -609,62 +593,4 @@ def plot_bedpick(dat_port, dat_star, Zbed, Zdist, ft, shape_port, sonpath, k):
    custom_save(sonpath,'bed_pick'+str(k))
    del fig
 
-
-#            #dist_mi = np.linspace(np.min(dist_m),np.max(dist_m),len(dist_m))
-
-#            for k in xrange(len(port_fp)):
-#               Zbed = bed[ind_port[-1]*k:ind_port[-1]*(k+1)]
-#               Zdist = dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)]
-#               Zx = x[ind_port[-1]*k:ind_port[-1]*(k+1)]
-
-#               extent = np.shape(port_fp[k])[0]
-
-#               fig = plt.figure()
-#               fig.subplots_adjust(wspace = 0.1, hspace=0.1)
-#               plt.subplot(2,2,1)
-#               ax = plt.gca()
-#               im = ax.imshow(np.flipud(port_fp[k]),cmap='gray',extent=[min(Zdist), max(Zdist), 0, extent*(1/ft)],origin='upper')
-#               plt.ylabel('Range (m)'); #plt.xlabel('Distance along track (m)')  
-#               plt.axis('normal'); plt.axis('tight')
-
-#               plt.subplot(2,2,3)
-#               ax = plt.gca()
-#               im = ax.imshow(star_fp[k],cmap='gray',extent=[min(Zdist), max(Zdist), extent*(1/ft), 0],origin='upper')
-#               plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
-#               plt.axis('normal'); plt.axis('tight')
-
-#               axR=plt.subplot(1,2,2); 
-#               axR.yaxis.tick_right()
-#               axR.yaxis.set_label_position("right")
-#               axR.imshow(star_fp[k],cmap='gray',extent=[min(Zdist), max(Zdist), extent*(1/ft), 0],origin='upper')
-#               plt.plot(Zdist,Zbed/ft,'k')
-#               plt.plot(Zdist,Zx[:len(Zdist)]/ft,'r')
-#               plt.axis('normal'); plt.axis('tight')
-#               plt.ylim(10,0)
-#               plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
-#               self._custom_save(sonpath,'bed_2picks'+str(k))
-#               del fig
-
-#            del Zbed, Zdist, Zx
-
-#         for k in xrange(len(star_fp)):
-
-#            Zbed = (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)]
-#            Zdist = dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)]
-
-#            fig = plt.figure()
-#            plt.subplot(2,2,1)
-#            plt.imshow(np.flipud(star_fp[k]),cmap='gray', extent=[min(Zdist), max(Zdist), 0, extent*(1/ft)], origin='upper')
-#            plt.plot(np.linspace(min(Zdist), max(Zdist),len(Zbed)), Zbed,'r')
-#            plt.axis('normal'); plt.axis('tight')
-#            plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
-
-#            plt.subplot(2,2,3)
-#            plt.imshow(port_fp[k],cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0], origin='upper')
-#            plt.plot(np.linspace(min(Zdist), max(Zdist),len(Zbed)), Zbed,'r')
-#            plt.axis('normal'); plt.axis('tight')
-#            plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
-
-#            self._custom_save(sonpath,'bed_pick'+str(k))
-#            del fig
 

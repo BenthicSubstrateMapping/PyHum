@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.1.6      Revision: Mar, 2015
+Version: 1.2.1      Revision: Mar, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -70,12 +70,9 @@ OTHER LIBRARIES (CYTHON) NEED TO BE COMPILED FOR SPEED:
 # =========================================================
 
 # operational
-import sys, getopt, os
-from time import clock, time
+import sys, getopt, os, time
 from scipy.io import loadmat, savemat
-from PIL.Image import open as imopen
-#from joblib import Parallel, delayed, cpu_count
-from sklearn.externals.joblib import Parallel, delayed, cpu_count
+from joblib import Parallel, delayed, cpu_count
 from Tkinter import Tk
 from tkFileDialog import askopenfilename, askdirectory
 
@@ -85,24 +82,17 @@ warnings.simplefilter('ignore', RuntimeWarning)
 # numerical
 import numpy as np
 import cwt
-import ppdrc
-import spec_noise
 import replace_nans
 import PyHum.utils as humutils
-from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
 from scipy.ndimage.filters import median_filter
-from scipy.ndimage.measurements import label
-from fractions import gcd
-   
+
 # plotting
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+#from matplotlib import rc
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 #rc('text', usetex=True)
-
-import stdev
 
 # suppress divide and invalid warnings
 np.seterr(divide='ignore')
@@ -115,7 +105,7 @@ __all__ = [
     ]
 
 #################################################
-def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes, shorepick, do_two):
+def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes):
                                   
       # prompt user to supply file if no input file given
       if not humfile:
@@ -155,19 +145,7 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
       if doplot:
          doplot = int(doplot)
          if doplot==0:
-            print "Plots will not be made"
-      if shorepick:
-         shorepick = np.asarray(shorepick,int)
-         if shorepick==1:
-            print 'Shore picking is manual'
-         else: 
-            print 'Shore picking is auto'
-      if do_two:
-         do_two = np.asarray(do_two,int)
-         if do_two==1:
-            print 'Two sweeps of data (takes twice as long)'
-         else: 
-            print 'One sweep of data'      
+            print "Plots will not be made"    
       
       
       print '[Default] Number of processors is %s' % (str(cpu_count()))
@@ -201,25 +179,14 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
             doplot = 1
             print "[Default] Plots will be made"
 
-      if not shorepick:
-         shorepick = 0
-         print '[Default] Shore picking is auto'
-
-      if not do_two:
-         do_two = 0
-         print '[Default] One sweep of data'
-
-
       ########################################################
       ########################################################
-
-      kvals = 10
       
       # start timer
       if os.name=='posix': # true if linux/mac or cygwin on windows
-         start1 = time()
+         start = time.time()
       else: # windows
-         start1 = clock()
+         start = time.clock()
 
       # if son path name supplied has no separator at end, put one on
       if sonpath[-1]!=os.sep:
@@ -228,435 +195,305 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
       base = humfile.split('.DAT') # get base of file name for output
       base = base[0].split(os.sep)[-1]
 
-      #theta3dB = np.arcsin(c/(t*(f*1000))) # *(180/pi) # to see in degs
-      #ft = (np.pi/2)*(1/theta3dB)
-
-      try:
-         ft = 1/np.squeeze(loadmat(sonpath+base+'meta.mat')['pix_m'])
-      except:
-         ft = 1/np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['pix_m'])
-
-      # convert to float16 from float64 to conserve memory
-      try:
-         port_mg = np.asarray(loadmat(sonpath+base+'port_la.mat')['port_mg_la'],'float16')
-      except:
-         port_mg = np.asarray(loadmat(os.path.expanduser("~")+os.sep+base+'port_la.mat')['port_mg_la'],'float16')
-         
-      try:
-         star_mg = np.asarray(loadmat(sonpath+base+'star_la.mat')['star_mg_la'],'float16')
-      except:
-         star_mg = np.asarray(loadmat(os.path.expanduser("~")+os.sep+base+'star_la.mat')['star_mg_la'],'float16')
-
-      if shorepick==1:
-         raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue...")
-         shoreline_star={}
-         fig = plt.figure()
-         ax = plt.gca()
-         im = ax.imshow(star_mg, cmap = 'gray', origin = 'upper')
-         plt.axis('normal'); plt.axis('tight')
-         pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
-         x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-         y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-         shoreline_star = np.interp(np.r_[:np.shape(star_mg)[1]],x1,y1)
-         plt.close()
-         del fig
-
-         raw_input("Shore picking (port), are you ready? 30 seconds. Press Enter to continue...")
-         shoreline_port={}
-         fig = plt.figure()
-         ax = plt.gca()
-         im = ax.imshow(port_mg, cmap = 'gray', origin = 'upper')
-         plt.axis('normal'); plt.axis('tight')
-         pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
-         x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-         y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-         shoreline_port = np.interp(np.r_[:np.shape(port_mg)[1]],x1,y1)
-         plt.close()
-         del fig
-
-         shoreline_port = np.asarray(shoreline_port,'int')
-         shoreline_star = np.asarray(shoreline_star,'int')
-         # shift proportionally depending on where the bed is
-         for k in xrange(np.shape(star_mg)[1]):
-            star_mg[shoreline_star[k]:,k] = np.nan
-            port_mg[shoreline_port[k]:,k] = np.nan
-
-         del shoreline_port, shoreline_star
-
-      merge = np.vstack((np.flipud(port_mg),star_mg))
-      del port_mg, star_mg
-      merge = np.asarray(merge, 'float64')
-
-      # convert to float16 from float64 to conserve memory
-      try:
-         port_mg = loadmat(sonpath+base+'port_la.mat')['port_mg_la']
-         star_mg = loadmat(sonpath+base+'star_la.mat')['star_mg_la']
-      except:
-         port_mg = loadmat(os.path.expanduser("~")+os.sep+base+'port_la.mat')['port_mg_la']
-         star_mg = loadmat(os.path.expanduser("~")+os.sep+base+'star_la.mat')['star_mg_la']
-
-      merge_mask = np.vstack((np.flipud(port_mg),star_mg))
-      del port_mg, star_mg
-      #merge_mask = np.asarray(merge_mask, 'float64')
-
-      merge[merge_mask==0] = 0
-      del merge_mask
-
-      print "Pre-processing data ... "
-      # do some pre-processing to try to remove acoustic shadows
-      # first, make a mask of merged scans
-      mask = np.asarray(merge!=0,'int8') # only 8bit precision needed
-
-      Z,ind = humutils.sliding_window(merge,(win,win),(win/2,win/2))
-      if shorepick==0:
-
-         try: #parallel processing with all available cores
-            w = Parallel(n_jobs=-1, verbose=1)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z))) #backend="threading"
-         except: #fall back to serial
-            w = Parallel(n_jobs=1, verbose=1)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z)))
-
-         zmean,stdv= zip(*w)
-         del w, stdv
-
-         zmean = np.reshape(zmean , ( ind[0], ind[1] ) )
-
-         Ny, Nx = np.shape(merge)
-         M = humutils.im_resize(zmean,Nx,Ny)
-         M[mask==0] = 0
-         del zmean
-
-         # get a k-value segmentation   
-         wc, values = humutils.cut_kmeans(M, kvals) #merge,kvals)
-         del M, Ny, Nx
+      ft = 1/loadmat(sonpath+base+'meta.mat')['pix_m']
    
-         # the lowest value is zero, get the next lowest
-         bw = wc==np.sort(values)[-(kvals-1)]
-         del wc, values
+      ### port
+      print "processing port side ..."
+      # load memory mapped scan ... port
+      shape_port = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_port'])
+      if shape_port!='':
+         port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+         port_fp2 = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
 
-         # erode and dilate to remove splotches of no data
-         bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))
-   
-         # fill holes
-         bw2 = binary_fill_holes(bw2, structure=np.ones((3,3))).astype(int)
-         del bw
-         bw2 = np.asarray(bw2!=0,'int8') # we only need 8 bit precision
+      # create memory mapped file for Sp
+      fp = np.memmap(sonpath+base+'_data_port_class.dat', dtype='float32', mode='w+', shape=tuple(shape_port))
 
-         merge[bw2==1] = 0 #blank out bad data
-      else:
-         bw2 = np.asarray(np.isnan(merge),'int8')
+      #SRT = []
+      for p in xrange(len(port_fp)):
 
-      Z = None
-      merge[np.isnan(merge)] = 0
-      Ny, Nx = np.shape(merge)
+         Z,ind = humutils.sliding_window(port_fp[p],(win,win),(shift,shift))
 
-      print "padding with spectral noise ..."
-      # get some noise to plug the gaps for processing
-      sn = spec_noise.Noise(humutils.im_resize(merge,int(Nx/10),int(Ny/10)),1)
-      sn = humutils.im_resize(sn.getres(),Nx,Ny)
-   
-      # plug gaps that are not real data
-      sn[((bw2==1) - (mask==1)) ==1] = 0
-   
-      sn = np.asarray(sn,'float16')
-      #sn[mask==1] = 0
-
-      merge2 = sn+merge
-      #merge2[merge2<=0] = 100*np.random.rand()
-   
-      del sn, merge
-
-      dat = ppdrc.ppdrc(merge2, 768)
-      merge3 = dat.getdata()
-      del dat, merge2
-
-      Ny, Nx = np.shape(merge3)
-
-      # end of pre-processing
-   
-      # get optimal number of slices
-      if Nx%2==0:
-         H = []
-         for k in xrange(3,30):
-            H.append(gcd(Nx,Nx/k))
-         hslice = np.max(H)
-         print "processing into %s slices" % str(Nx/hslice) 
-      else:
-         merge3 = np.hstack( (merge3,np.ones((Ny,1))) )
-         Ny, Nx = np.shape(merge3)
-         H = []
-         for k in xrange(3,30):
-            H.append(gcd(Nx,Nx/k))
-         hslice = np.max(H)
-         print "processing into %s slices" % str(Nx/hslice)      
-   
-      # get windowed data
-      Zt,ind = humutils.sliding_window(merge3,(Ny,hslice))
-    
-      del merge3
-      numsegs = len(Zt)
-
-      # start timer
-      if os.name=='posix': # true if linux/mac or cygwin on windows
-         start = time()
-      else: # windows
-         start = clock()
-
-      SRT = []
-      for kk in xrange(numsegs):
-
-         print "Chunk %s out of %s" % (str(kk+1), str(numsegs))
-
-         # get windowed data
          try:
-            print "Sliding window with shift= %s" % (str(shift))
-            if numsegs==1:
-               Z,ind = humutils.sliding_window(np.asarray(Zt,'int8'),(win,win),(shift,shift)) #float16
-            else:
-               Z,ind = humutils.sliding_window(np.asarray(Zt[kk],'int8'),(win,win),(shift,shift)) #float16
-         except:
-            print "Sliding window failed with shift= %s, memory error" % (str(shift))
-         
-            shift = shift+1       
-            Z = None
-            while Z is None:         
-               try:
-                  print "trying shift= %s" % (str(shift))
-                  if numsegs==1:
-                     Z,ind = humutils.sliding_window(np.asarray(Zt,'int8'),(win,win),(shift,shift)) #float16
-                  else:
-                     Z,ind = humutils.sliding_window(np.asarray(Zt[kk],'int8'),(win,win),(shift,shift)) #float16
-               except:
-                  shift = shift+1    
-             
-         try:
-            filename1 = sonpath+'tmpfile'+humutils.id_generator()+'.dat'    
-            print "Memory mapping the data"
-            # create memory mapped file for Z
-            fp = np.memmap(filename1, dtype='int8', mode='w+', shape=np.shape(Z))
-            fp[:] = Z[:]
-            del fp
-            shapeZ = np.shape(Z)
-            Z = None
-            #we are only going to access the portion of memory required
-            newfp = np.memmap(filename1, dtype='int8', mode='r', shape=shapeZ)
-         except:
-            filename1 = os.path.expanduser("~")+os.sep+'tmpfile'+humutils.id_generator()+'.dat'    
-            print "Memory mapping the data"
-            # create memory mapped file for Z
-            fp = np.memmap(filename1, dtype='int8', mode='w+', shape=np.shape(Z))
-            fp[:] = Z[:]
-            del fp
-            shapeZ = np.shape(Z)
-            Z = None
-            #we are only going to access the portion of memory required
-            newfp = np.memmap(filename1, dtype='int8', mode='r', shape=shapeZ)
-	  
-         try:
-            print "Carrying out wavelet calculations ... round 1 ..."
-            print "%s windows to process with a density of %s" % (str(len(newfp)), str(density)) #% (str(len(Z)), str(density))
+            print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
             # do the wavelet clacs and get the stats
-            d = Parallel(n_jobs = -1, verbose=1)(delayed(parallel_me)(newfp[k], maxscale, notes, win, density) for k in xrange(len(newfp)))
+            d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
          except:
-            print "memory error: trying a lower pre-dispatch"
-            print "Carrying out wavelet calculations ... port ... takes a long time"
-            d = Parallel(n_jobs = 1, verbose=1)(delayed(parallel_me)(newfp[k], maxscale, notes, win, density) for k in xrange(len(newfp)))
+            print "memory error: trying serial"
+            d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
 
-         # reshape arrays
-         #mnsz = reshape(mnsz , ( ind[0], ind[1] ) )
          srt = np.reshape(d , ( ind[0], ind[1] ) )
          del d
 
-         if do_two==1: # analyze transpose as well
-            try:
-               print "Carrying out wavelet calculations ... round 2 ..."
-               print "%s windows to process with a density of %s" % (str(len(newfp)), str(density))
-               # do the wavelet clacs and get the stats
-               d = Parallel(n_jobs = -1, verbose=1)(delayed(parallel_me)(newfp[k].T, maxscale, notes, win, density) for k in xrange(len(newfp)))
-            except:
-               print "memory error: trying a lower pre-dispatch"
-               print "Carrying out wavelet calculations ... port ... takes a long time"
-               d = Parallel(n_jobs = 1, verbose=1)(delayed(parallel_me)(newfp[k].T, maxscale, notes, win, density) for k in xrange(len(newfp)))
-
-            srt2 = np.reshape(d , ( ind[0], ind[1] ) )
-            del d
-            #del newfp #Z
-
-            SRT.append(srt+srt2)
-            del srt, srt2
-         
-         else: # just one
-      
-            SRT.append(srt)
-            del srt #, newfp
-      
          try:
-            os.remove(filename1)
+            print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+            # do the wavelet clacs and get the stats
+            d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
          except:
-            print "Cannot remove %s" % (filename1)
+            print "memory error: trying serial"
+            d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
 
-      #del newfp
-      if os.name=='posix': # true if linux/mac
-         elapsed = (time() - start)
-      else: # windows
-         elapsed = (clock() - start)
-      print "Processing took ", elapsed/60 , "minutes to analyse"
+         srt2 = np.reshape(d , ( ind[0], ind[1] ) )
+         del d
+         Z = None
 
-      SRT = np.hstack(SRT)
+         SRT = srt+srt2
+         #SRT.append(srt+srt2)
+         del srt, srt2
 
-      Snn = shift*(SRT.copy()*1/(ft**0.5))
-      del SRT
-      Snn = np.asarray(Snn,'float64')
+         #SRT = np.hstack(SRT)
 
-      # replace nans using infilling algorithm
-      rn = replace_nans.RN(Snn,1000,0.01,2,'localmean')
-      Snn = rn.getdata()
-      del rn   
+         Snn = (shift**0.5)*SRT.copy()*((1/ft)**0.5)
+         #Snn[Snn<0.05] = 0
+         del SRT
+         #Snn = np.asarray(Snn,'float64')
 
-      Snn = median_filter(Snn,(int(Nx/100),int(Ny/100)))
+         # replace nans using infilling algorithm
+         rn = replace_nans.RN(Snn.astype('float64'),1000,0.01,2,'localmean')
+         Snn = rn.getdata()
+         del rn   
+
+         Ny, Nx = np.shape(port_fp[p])
+         Snn = median_filter(Snn,(int(Nx/100),int(Ny/100)))
    
-      S = humutils.im_resize(Snn,Nx,Ny)
-      del Snn
+         Sp = humutils.im_resize(Snn,Nx,Ny)
+         del Snn
 
-      S[mask==0] = np.nan
-      S[bw2==1] = np.nan
+         Sp[np.isnan(port_fp[p])] = np.nan
+         Sp[np.isnan(port_fp2[p])] = np.nan
+
+         fp[p] = Sp.astype('float32')
+         del Sp
+
+
+      del fp # flush data to file
+
+      ############################################################################
+
+      ### star
+      print "processing starboard side ..."
+      # load memory mapped scan ... port
+      shape_star = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_star'])
+      if shape_star!='':
+         star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+         star_fp2 = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+
+      # create memory mapped file for Ss
+      fp = np.memmap(sonpath+base+'_data_star_class.dat', dtype='float32', mode='w+', shape=tuple(shape_star))
+
+      #SRT = []
+      for p in xrange(len(star_fp)):
+
+         Z,ind = humutils.sliding_window(star_fp[p],(win,win),(shift,shift))
+
+         try:
+            print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+            # do the wavelet clacs and get the stats
+            d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+         except:
+            print "memory error: trying serial"
+            d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+
+         srt = np.reshape(d , ( ind[0], ind[1] ) )
+         del d
+
+         try:
+            print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+            # do the wavelet clacs and get the stats
+            d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+         except:
+            print "memory error: trying serial"
+            d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+
+         srt2 = np.reshape(d , ( ind[0], ind[1] ) )
+         del d
+         Z = None
+
+         SRT = srt+srt2
+         #SRT.append(srt+srt2)
+         del srt, srt2
+
+         #SRT = np.hstack(SRT)
+
+         Snn = (shift**0.5)*SRT.copy()*((1/ft)**0.5)
+         #Snn[Snn<0.05] = 0
+         del SRT
+         #Snn = np.asarray(Snn,'float64')
+
+         # replace nans using infilling algorithm
+         rn = replace_nans.RN(Snn.astype('float64'),1000,0.01,2,'localmean')
+         Snn = rn.getdata()
+         del rn   
+
+         Ny, Nx = np.shape(star_fp[p])
+         Snn = median_filter(Snn,(int(Nx/100),int(Ny/100)))
    
-      try:
-         dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
-         star_mg_la = np.asarray(loadmat(sonpath+base+'star_la.mat')['star_mg_la'],'float64')
-         port_mg_la = np.asarray(loadmat(sonpath+base+'port_la.mat')['port_mg_la'],'float64')
-      except:
-         dist_m = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['dist_m'])
-         star_mg_la = np.asarray(loadmat(os.path.expanduser("~")+os.sep+base+'star_la.mat')['star_mg_la'],'float64')
-         port_mg_la = np.asarray(loadmat(os.path.expanduser("~")+os.sep+base+'port_la.mat')['port_mg_la'],'float64')
+         Ss = humutils.im_resize(Snn,Nx,Ny)
+         del Snn
 
-      merge = np.vstack((np.flipud(port_mg_la),star_mg_la))
+         Ss[np.isnan(star_fp[p])] = np.nan
+         Ss[np.isnan(star_fp2[p])] = np.nan
 
-      extent = np.shape(merge)[0]   
-      del star_mg_la, port_mg_la
-   
-      merge[mask==0] = np.nan
-      merge[bw2==1] = np.nan   
-      del bw2, mask   
-      merge = np.asarray(merge,'float32')
+         fp[p] = Ss.astype('float32')
+         del Ss
+
+      del fp # flush data to file
+
+      star_class_fp = np.memmap(sonpath+base+'_data_star_class.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+      port_class_fp = np.memmap(sonpath+base+'_data_port_class.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+
+      #merge = np.vstack((np.flipud(Sp),Ss)).astype('float32')
+      #del Ss, Sp
+
+      dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
+
+      extent = shape_star[1] #np.shape(merge)[0]
 
       ########################################################
       ########################################################
       if doplot==1:
-         print "Plotting ... "
-         # create fig 1
-         fig = plt.figure()
-         fig.subplots_adjust(wspace = 0, hspace=0.075)
-         plt.subplot(2,1,1)
-         ax = plt.gca()
-         im = ax.imshow(-merge,cmap='gray',extent=[min(dist_m), max(dist_m), -extent*(1/ft), extent*(1/ft)],origin='upper')
-         plt.ylabel('Horizontal distance (m)'); 
-         plt.axis('tight')
 
-         plt.tick_params(\
-          axis='x',          # changes apply to the x-axis
-          which='both',      # both major and minor ticks are affected
-          bottom='off',      # ticks along the bottom edge are off
-          labelbottom='off') # labels along the bottom edge are off
+         for p in xrange(len(star_fp)):
 
-         if humfile=='test.DAT':
-            plt.ylim(-20, 20)
+            Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
 
-         divider = make_axes_locatable(ax)
-         cax = divider.append_axes("right", size="5%", pad=0.05)
-         plt.colorbar(im, cax=cax)
+            print "Plotting ... "
+            # create fig 1
+            fig = plt.figure()
+            fig.subplots_adjust(wspace = 0, hspace=0.075)
+            plt.subplot(2,1,1)
+            ax = plt.gca()
+            im = ax.imshow(np.vstack((np.flipud(port_fp[p]),star_fp[p])) ,cmap='gray',extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
+            plt.ylabel('Horizontal distance (m)'); 
+            plt.axis('tight')
 
-         plt.subplot(2,1,2)
-         ax = plt.gca()
-         plt.imshow(merge,cmap='gray',extent=[min(dist_m), max(dist_m), -extent*(1/ft), extent*(1/ft)],origin='upper')
-         im = ax.imshow(S, alpha=0.5,extent=[min(dist_m), max(dist_m), -extent*(1/ft), extent*(1/ft)],origin='upper', cmap='hot')
-         plt.ylabel('Horizontal distance (m)'); 
-         plt.xlabel('Distance along track (m)')
-         plt.axis('tight')
+            plt.tick_params(\
+             axis='x',          # changes apply to the x-axis
+             which='both',      # both major and minor ticks are affected
+             bottom='off',      # ticks along the bottom edge are off
+             labelbottom='off') # labels along the bottom edge are off
 
-         if humfile=='test.DAT':
-            plt.ylim(-20, 20)
+            if humfile=='test.DAT':
+               plt.ylim(-25, 25)
 
-         divider = make_axes_locatable(ax)
-         cax = divider.append_axes("right", size="5%", pad=0.05)
-         plt.colorbar(im, cax=cax)
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size="5%", pad=0.05)
+            plt.colorbar(im, cax=cax)
 
-         custom_save(sonpath,'class')
-         del fig
+            plt.subplot(2,1,2)
+            ax = plt.gca()
+            plt.imshow(np.vstack((np.flipud(port_fp[p]),star_fp[p])),cmap='gray',extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
+            im = ax.imshow(np.vstack((np.flipud(port_class_fp[p]),star_class_fp[p])), alpha=0.5,extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper', cmap='hot')
+            plt.ylabel('Horizontal distance (m)'); 
+            plt.xlabel('Distance along track (m)')
+            plt.axis('tight')
 
-         ########################################################
-         levels = np.linspace(np.nanmin(S),np.nanmax(S),numclasses+1)
-         X, Y = np.meshgrid(dist_m, np.linspace(-extent*(1/ft),extent*(1/ft),extent))
+            if humfile=='test.DAT':
+               plt.ylim(-25, 25)
 
-         fig = plt.figure()
-         plt.subplot(2,1,1)
-         ax = plt.gca()
-         CS = plt.contourf(X, Y, S, levels, extent=[min(dist_m), max(dist_m), -extent*(1/ft), extent*(1/ft)], cmap='hot',origin='upper')
-         plt.ylabel('Horizontal distance (m)'); plt.xlabel('Distance along track (m)')
-         plt.axis('tight')
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size="5%", pad=0.05)
+            plt.colorbar(im, cax=cax)
 
-         if humfile=='test.DAT':
-            plt.ylim(-20, 20)
-            plt.gca().invert_yaxis()
+            custom_save(sonpath,base+'class'+str(p))
+            del fig
+ 
+            merge = np.vstack((np.flipud(port_class_fp[p]),star_class_fp[p]))
+            ########################################################
+            levels = np.linspace(np.nanmin(merge),np.nanmax(merge),numclasses+1)
+            #X, Y = np.meshgrid(dist_m, np.linspace(-extent*(1/ft),extent*(1/ft),extent))
 
-         divider = make_axes_locatable(ax)
-         cax = divider.append_axes("right", size="5%", pad=0.05)
-         plt.colorbar(CS, cax=cax)
+            fig = plt.figure()
+            plt.subplot(2,1,1)
+            ax = plt.gca()
+            CS = plt.contourf(merge.astype('float64'), levels, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)], cmap='hot',origin='upper')
+            plt.ylabel('Horizontal distance (m)'); plt.xlabel('Distance along track (m)')
+            plt.axis('tight')
 
-         custom_save(sonpath,'class_contours')
-         del fig
-         del X, Y, CS, levels
+            if humfile=='test.DAT':
+               plt.ylim(-25, 25)
+               plt.gca().invert_yaxis()
+
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size="5%", pad=0.05)
+            plt.colorbar(CS, cax=cax)
+
+            custom_save(sonpath,base+'class_contours'+str(p))
+            del fig
+            del CS, levels, merge #X, Y, 
 
       #######################################################
       # k-means 
-      S4k = S.copy()
-      S4k[np.isnan(S4k)] = 0
-      wc, values = humutils.cut_kmeans(S4k,numclasses+1)
-      wc[S4k==0] = np.nan
-      del S4k
+      # create memory mapped file for Sp kmeans
+      fp = np.memmap(sonpath+base+'_data_port_kclass.dat', dtype='float32', mode='w+', shape=tuple(shape_port))
+
+      for p in xrange(len(port_fp)):
+         Sk = port_class_fp[p].copy()
+         Sk[np.isnan(Sk)] = 0
+         wc, values = humutils.cut_kmeans(Sk,numclasses+1)
+         wc[Sk==0] = np.nan
+         del Sk
+         fp[p] = wc.astype('float32')
+         del wc
+
+      del fp
+
+      # create memory mapped file for Sp kmeans
+      fp = np.memmap(sonpath+base+'_data_star_kclass.dat', dtype='float32', mode='w+', shape=tuple(shape_star))
+
+      for p in xrange(len(star_fp)):
+         Sk = star_class_fp[p].copy()
+         Sk[np.isnan(Sk)] = 0
+         wc, values = humutils.cut_kmeans(Sk,numclasses+1)
+         wc[Sk==0] = np.nan
+         del Sk
+         fp[p] = wc.astype('float32')
+         del wc
+
+      del fp
+
+      star_kclass_fp = np.memmap(sonpath+base+'_data_star_kclass.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+      port_kclass_fp = np.memmap(sonpath+base+'_data_port_kclass.dat', dtype='float32', mode='r', shape=tuple(shape_star))
 
       if doplot==1:
+
          if humfile=='test.DAT':
             cols = ['w','y',[.5,.5,.5],'r'] # for size fractions
             gscmap = colors.ListedColormap(cols)
 
-         fig = plt.figure()
-         plt.subplot(2,1,1)
-         ax = plt.gca()
-         plt.imshow(-merge,cmap='gray',extent=[min(dist_m), max(dist_m), -extent*(1/ft), extent*(1/ft)],origin='upper')
-         if humfile=='test.DAT':
-            im = ax.imshow(wc, alpha=0.4, extent=[min(dist_m), max(dist_m), -extent*(1/ft), extent*(1/ft)],origin='upper', cmap=gscmap)
-         else:
-            im = ax.imshow(wc, alpha=0.4, extent=[min(dist_m), max(dist_m), -extent*(1/ft), extent*(1/ft)],origin='upper', cmap='hot')   
-         plt.ylabel('Horizontal distance (m)')
-         plt.xlabel('Distance along track (m)')
-         plt.axis('tight')
+         for p in xrange(len(star_kclass_fp)):
 
-         if humfile=='test.DAT':
-            plt.ylim(-20, 20)
+            Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
 
-         divider = make_axes_locatable(ax)
-         cax = divider.append_axes("right", size="5%", pad=0.05)
-         plt.colorbar(im, cax=cax)
+            fig = plt.figure()
+            plt.subplot(2,1,1)
+            ax = plt.gca()
+            plt.imshow(np.vstack((np.flipud(port_fp[p]),star_fp[p])), cmap='gray',extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
+            if humfile=='test.DAT':
+               im = ax.imshow(np.vstack((np.flipud(port_kclass_fp[p]),star_kclass_fp[p])), alpha=0.4, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper', cmap=gscmap)
+            else:
+               im = ax.imshow(np.vstack((np.flipud(port_kclass_fp[p]),star_kclass_fp[p])), alpha=0.4, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper', cmap='hot')   
+            plt.ylabel('Horizontal distance (m)')
+            plt.xlabel('Distance along track (m)')
+            plt.axis('tight')
 
-         custom_save(sonpath,'class_kmeans')
-         del fig
+            if humfile=='test.DAT':
+               plt.ylim(-25, 25)
 
-         ########################################################
-         ########################################################
-         # save away data
-         try:
-            savemat(sonpath+base+'class.mat', mdict={'numclasses': numclasses, 'S': S, 'kclass': wc, 'ft': ft, 'dist_m': dist_m, 'merge': merge },oned_as='row')
-         except:
-            savemat(os.path.expanduser("~")+os.sep+base+'class.mat', mdict={'numclasses': numclasses, 'S': S, 'kclass': wc, 'ft': ft, 'dist_m': dist_m, 'merge': merge },oned_as='row')
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size="5%", pad=0.05)
+            plt.colorbar(im, cax=cax)
 
-         if os.name=='posix': # true if linux/mac
-            elapsed = (time() - start1)
-         else: # windows
-            elapsed = (clock() - start1)
-         print "Processing took ", elapsed/60 , "minutes to analyse"
+            custom_save(sonpath,base+'class_kmeans'+str(p))
+            del fig
 
-         print "Done!"
+      if os.name=='posix': # true if linux/mac
+         elapsed = (time.time() - start)
+      else: # windows
+         elapsed = (time.clock() - start)
+      print "Processing took ", elapsed , "seconds to analyse"
 
+      print "Done!"
+      
 # =========================================================
 def custom_save(figdirec,root):
    try:
@@ -668,14 +505,6 @@ def custom_save(figdirec,root):
 def parallel_me(x, maxscale, notes, win, density):
    dat = cwt.Cwt(x, maxscale, notes, win, density)
    return dat.getvar()
-
-#==================================================
-def get_stats(pts):
-   '''
-   call the analysis routine. Gets called by the parallel processing queue
-   '''
-   return stdev.proc(pts).getdata()
-
 
 
 #import stdev

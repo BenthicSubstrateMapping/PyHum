@@ -1,5 +1,5 @@
 '''
-pyhum_map.py
+pyhum_map_texture.py
 Part of PyHum software 
 
 INFO:
@@ -59,7 +59,7 @@ __all__ = [
     ]
 
 #################################################
-def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res):
+def domap_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res):
          
       # prompt user to supply file if no input file given
       if not humfile:
@@ -160,16 +160,17 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
          else:       # reported bearing by instrument (Kalman filtered?)
             bearing = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
 
-
          # load memory mapped scans
          shape_port = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_port'])
          if shape_port!='':
+            port_class_fp = np.memmap(sonpath+base+'_data_port_class.dat', dtype='float32', mode='r', shape=tuple(shape_port))
             port_fp = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
 
          shape_star = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_star'])
          if shape_star!='':
+            star_class_fp = np.memmap(sonpath+base+'_data_star_class.dat', dtype='float32', mode='r', shape=tuple(shape_star))
             star_fp = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
-
+            
          #port_la = np.asarray(np.squeeze(loadmat(sonpath+base+'port_la.mat')['port_mg_la']),'float16')
          #star_la = np.asarray(np.squeeze(loadmat(sonpath+base+'star_la.mat')['star_mg_la']),'float16')
       except:
@@ -193,12 +194,14 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
          # load memory mapped scans
          shape_port = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['shape_port'])
          if shape_port!='':
+            port_class_fp = np.memmap(os.path.expanduser("~")+os.sep+base+'_data_port_class.dat', dtype='float32', mode='r', shape=tuple(shape_port))
             port_fp = np.memmap(os.path.expanduser("~")+os.sep+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
 
          shape_star = np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'meta.mat')['shape_star'])
          if shape_star!='':
+            star_class_fp = np.memmap(os.path.expanduser("~")+os.sep+base+'_data_star_class.dat', dtype='float32', mode='r', shape=tuple(shape_star))
             star_fp = np.memmap(os.path.expanduser("~")+os.sep+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
-
+            
          #port_la = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'port_la.mat')['port_mg_la']),'float16')
          #star_la = np.asarray(np.squeeze(loadmat(os.path.expanduser("~")+os.sep+base+'star_la.mat')['star_mg_la']),'float16')
 
@@ -248,11 +251,11 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
          t = theta[shape_port[-1]*p:shape_port[-1]*(p+1)]
          d = dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)]
    
-         merge = np.vstack((port_fp[p],star_fp[p]))
-         #merge = np.vstack((np.flipud(port_fp[p]),star_fp[p]))
+         merge = np.vstack((port_class_fp[p],star_class_fp[p]))
    
          merge[np.isnan(merge)] = 0
-
+         merge[np.isnan(np.vstack((port_fp[p],star_fp[p])))] = 0
+   
          # get number pixels in scan line
          extent = int(np.shape(merge)[0]/2)
 
@@ -260,7 +263,7 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
 
          print "getting point cloud ..."
          # get the points by rotating the [x,y] vector so it lines up with boat heading, assumed to be the same as the curvature of the [e,n] trace
-         X=[]; Y=[];
+         X=[]; Y=[]; R=[]
          for k in range(len(n)): 
             x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
             y = np.concatenate((n[k]+yvec, n[k]-yvec))
@@ -270,7 +273,8 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
             xx, yy = calc_beam_pos(d[k], t[k], xx, yy)
             X.append(xx)
             Y.append(yy)     
-      
+            R.append(d[k] / np.sqrt( (e[k]-xx)**2 + (n[k]-yy)**2 ))  #range to point  
+
          del e, n, t, x, y #, X, Y
 
          # merge flatten and stack
@@ -281,30 +285,46 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
          Y = np.asarray(Y,'float').T
          Y = Y.flatten()
 
+         # merge flatten and stack
+         R = np.asarray(R,'float').T
+         R = R.flatten()
+
+         # write range (m) to file
+         try:
+            outfile = sonpath+'x_y_range_raw'+str(p)+'.asc' 
+            with open(outfile, 'w') as f:
+               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(R.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+         except:
+            outfile = os.path.expanduser("~")+os.sep+'x_y_range_raw'+str(p)+'.asc' 
+            with open(outfile, 'w') as f:
+               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(R.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+
+         merge2 = merge.flatten()* (R.flatten()**np.sqrt(pix_m))
+         del merge
+
          # write raw bs to file
          try:
             outfile = sonpath+'x_y_ss_raw'+str(p)+'.asc' 
             with open(outfile, 'w') as f:
-               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge2.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
          except:
             outfile = os.path.expanduser("~")+os.sep+'x_y_ss_raw'+str(p)+'.asc' 
             with open(outfile, 'w') as f:
-               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
-
+               np.savetxt(f, np.hstack((humutils.ascol(X.flatten()), humutils.ascol(Y.flatten()), humutils.ascol(merge2.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
          humlon, humlat = trans(X, Y, inverse=True)
 
          if dogrid==1:
             grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
 
-            dat = griddata(np.c_[X.flatten(),Y.flatten()], merge.flatten(), (grid_x, grid_y), method='nearest') 
+            dat = griddata(np.c_[X.flatten(),Y.flatten()], merge2.flatten(), (grid_x, grid_y), method='nearest') 
 
             ## create mask for where the data is not
             tree = KDTree(np.c_[X.flatten(),Y.flatten()])
             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
             dist = dist.reshape(grid_x.shape)
 
-         del X, Y #, bearing #, pix_m, yvec
+         del X, Y, R #, bearing #, pix_m, yvec
 
          if dogrid==1:
             ## mask
@@ -333,43 +353,42 @@ def domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
          fig.add_axes(ax)
 
          if dogrid==1:
-            map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(dat), vmax=np.nanmax(dat))
+            map.pcolormesh(gx, gy, datm, cmap='hot', vmin=np.nanmin(dat), vmax=np.nanmax(dat))
             del datm, dat
          else: 
             ## draw point cloud
             x,y = map.projtran(humlon, humlat)
-            map.scatter(x.flatten(), y.flatten(), 0.1, merge.flatten(), cmap='gray', linewidth = '0')
+            map.scatter(x.flatten(), y.flatten(), 0.1, merge2.flatten(), cmap='hot', linewidth = '0')
 
          try:
-            custom_save(sonpath+base,'map'+str(p))
+            custom_save(sonpath+base,'class_map'+str(p))
             del fig 
             
             kml = simplekml.Kml()
             ground = kml.newgroundoverlay(name='GroundOverlay')
-            ground.icon.href = sonpath+base+'map'+str(p)+'.png'
+            ground.icon.href = sonpath+base+'class_map'+str(p)+'.png'
             ground.latlonbox.north = np.min(humlat)-0.001
             ground.latlonbox.south = np.max(humlat)+0.001
             ground.latlonbox.east =  np.max(humlon)+0.001
             ground.latlonbox.west =  np.min(humlon)-0.001
             ground.latlonbox.rotation = 0            
-            kml.save(sonpath+base+"GroundOverlay"+str(p)+".kml")
+            kml.save(sonpath+base+"class_GroundOverlay"+str(p)+".kml")
                        
          except:
-            custom_save(os.path.expanduser("~")+os.sep+base,'map'+str(p))
+            custom_save(os.path.expanduser("~")+os.sep+base,'class_map'+str(p))
             del fig 
 
             kml = simplekml.Kml()
             ground = kml.newgroundoverlay(name='GroundOverlay')
-            ground.icon.href = os.path.expanduser("~")+os.sep+base+'map'+str(p)+'.png'
+            ground.icon.href = os.path.expanduser("~")+os.sep+base+'class_map'+str(p)+'.png'
             ground.latlonbox.north = np.min(humlat)-0.001
             ground.latlonbox.south = np.max(humlat)+0.001
             ground.latlonbox.east =  np.max(humlon)+0.001
             ground.latlonbox.west =  np.min(humlon)-0.001
             ground.latlonbox.rotation = 0
-            kml.save(os.path.expanduser("~")+os.sep+base+"GroundOverlay"+str(p)+".kml")
+            kml.save(os.path.expanduser("~")+os.sep+base+"class_GroundOverlay"+str(p)+".kml")
 
          del humlat, humlon
-
 
 #      # treats each chunk in parallel for speed
 #      try:
@@ -406,12 +425,14 @@ def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
    return (90.0 - db + 360.0) % 360.0
 
 ## =========================================================
-#def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, trans, dogrid, p):
+#def make_map(e, n, t, d, dat_port, dat_star, dat_class_port, dat_class_star, pix_m, res, cs2cs_args, sonpath, p):
 #   
-#   merge = np.vstack((dat_port,dat_star))
+#   merge = np.vstack((dat_class_port,dat_class_star))
 #   #merge = np.vstack((np.flipud(port_fp[p]),star_fp[p]))
 #   
 #   merge[np.isnan(merge)] = 0
+
+#   merge[np.vstack((dat_port, dat_star)) == 0 ] = 0      
 
 #   # get number pixels in scan line
 #   extent = int(np.shape(merge)[0]/2)
@@ -420,7 +441,7 @@ def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
 
 #   print "getting point cloud ..."
 #   # get the points by rotating the [x,y] vector so it lines up with boat heading, assumed to be the same as the curvature of the [e,n] trace
-#   X=[]; Y=[]; R=[];
+#   X=[]; Y=[];
 #   for k in range(len(n)): 
 #      x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
 #      y = np.concatenate((n[k]+yvec, n[k]-yvec))
@@ -430,7 +451,6 @@ def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
 #      xx, yy = calc_beam_pos(d[k], t[k], xx, yy)
 #      X.append(xx)
 #      Y.append(yy) 
-#      R.append(d[k] / (np.sqrt( (e[k]-xx)**2 + (n[k]-yy)**2 )) )  #range to point  
 
 #   del e, n, t, x, y #, X, Y
 
@@ -442,19 +462,10 @@ def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
 #   Y = np.asarray(Y,'float').T
 #   Y = Y.flatten()
 
-#   # merge flatten and stack
-#   R = np.asarray(R,'float').T
-#   R = R.flatten()
-
 #   # write raw bs to file
-#   outfile = sonpath+'x_y_ss_raw'+str(p)+'.asc' 
+#   outfile = sonpath+'x_y_class'+str(p)+'.asc' 
 #   with open(outfile, 'w') as f:
 #      np.savetxt(f, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
-
-#   # write raw bs to file
-#   outfile = sonpath+'x_y_range_raw'+str(p)+'.asc' 
-#   with open(outfile, 'w') as f:
-#      np.savetxt(f, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(R.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
 #   humlon, humlat = trans(X, Y, inverse=True)
 
@@ -497,28 +508,27 @@ def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
 #   fig.add_axes(ax)
 
 #   if dogrid==1:
-#      map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(dat), vmax=np.nanmax(dat))
+#      map.pcolormesh(gx, gy, datm, cmap='hot', vmin=np.nanmin(dat), vmax=np.nanmax(dat))
 #      del datm, dat
 #   else: 
 #      ## draw point cloud
 #      x,y = map.projtran(humlon, humlat)
-#      map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='gray', linewidth = '0')
+#      map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='hot', linewidth = '0')
 
-#   custom_save(sonpath,'map'+str(p))
+#   custom_save(sonpath,'class_map'+str(p))
 #   del fig 
 
 #   kml = simplekml.Kml()
 #   ground = kml.newgroundoverlay(name='GroundOverlay')
-#   ground.icon.href = sonpath+'map'+str(p)+'.png'
+#   ground.icon.href = sonpath+'class_map'+str(p)+'.png'
 #   ground.latlonbox.north = np.min(humlat)-0.001
 #   ground.latlonbox.south = np.max(humlat)+0.001
 #   ground.latlonbox.east =  np.max(humlon)+0.001
 #   ground.latlonbox.west =  np.min(humlon)-0.001
 #   ground.latlonbox.rotation = 0
 
-#   kml.save(sonpath+'GroundOverlay'+str(p)+'.kml')
+#   kml.save(sonpath+'class_GroundOverlay'+str(p)+'.kml')
 
 #   del humlat, humlon
-
 
 

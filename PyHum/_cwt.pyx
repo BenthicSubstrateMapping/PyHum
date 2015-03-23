@@ -208,6 +208,7 @@ cdef class Cwt:
         dat = dat/np.sum(dat) * np.exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
         dat = dat/np.sum(dat)
            
-        return sqrt(np.sum(dat*((self.scales- np.sum(dat*self.scales) )**2)))
+        #return sqrt(np.sum(dat*((self.scales- np.sum(dat*self.scales) )**2)))
+        return np.sum(dat*self.scales)
         
         
