@@ -161,6 +161,9 @@ def domap_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_beari
        # reported bearing by instrument (Kalman filtered?)
        bearing = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
 
+    # bearing can only be observed modulo 2*pi, therefore phase unwrap
+    bearing = np.unwrap(bearing)
+
     # if stdev in heading is large, there's probably noise that needs to be filtered out
     if np.std(bearing)>90:
        print "WARNING: large heading stdev - attempting filtering"
@@ -233,7 +236,9 @@ def domap_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_beari
        X=[]; Y=[]; 
        for k in range(len(n)): 
           x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
-          y = np.concatenate((n[k]+yvec, n[k]-yvec))
+          #y = np.concatenate((n[k]+yvec, n[k]-yvec))
+          rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d[k], 2.0))
+          y = np.concatenate((n[k]+rangedist, n[k]-rangedist))
           # Rotate line around center point
           xx = e[k] - ((x - e[k]) * np.cos(t[k])) - ((y - n[k]) * np.sin(t[k]))
           yy = n[k] - ((x - e[k]) * np.sin(t[k])) + ((y - n[k]) * np.cos(t[k]))
@@ -263,6 +268,20 @@ def domap_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_beari
        X = X.flatten()[index]
        Y = Y.flatten()[index]
        merge = merge.flatten()[index]
+
+       X = X[np.where(np.logical_not(np.isnan(Y)))]
+       merge = merge.flatten()[np.where(np.logical_not(np.isnan(Y)))]
+       Y = Y[np.where(np.logical_not(np.isnan(Y)))]
+
+       Y = Y[np.where(np.logical_not(np.isnan(X)))]
+       merge = merge.flatten()[np.where(np.logical_not(np.isnan(X)))]
+       X = X[np.where(np.logical_not(np.isnan(X)))]
+
+
+       X = X[np.where(np.logical_not(np.isnan(merge)))]
+       Y = Y[np.where(np.logical_not(np.isnan(merge)))]
+       merge = merge[np.where(np.logical_not(np.isnan(merge)))]
+
 
        # write raw bs to file
        outfile = sonpath+'x_y_class'+str(p)+'.asc' 
