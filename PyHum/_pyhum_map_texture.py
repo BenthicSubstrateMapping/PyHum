@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.2.2      Revision: Mar, 2015
+Version: 1.2.3      Revision: Apr, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -412,8 +412,8 @@ def domap_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_beari
     try:
        map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
     except:
-       print "servor error: trying again"
-       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+       print "servor error: no imagery"
+       #map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
 
     if dogrid==1:
        gx,gy = map.projtran(glon, glat)

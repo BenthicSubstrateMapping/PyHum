@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.2.2      Revision: Mar, 2015
+Version: 1.2.3      Revision: Apr, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -78,8 +78,9 @@ def dotest():
    calc_bearing = 0 #no
    filt_bearing = 1 #yes
    res = 0.05 # grid resolution in metres
+   chunk_size = 0 # auto chunk size
 
-   PyHum.humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr)
+   PyHum.humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size)
 
    PyHum.humcorrect(humfile, sonpath, maxW, doplot)
 

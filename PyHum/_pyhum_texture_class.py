@@ -9,7 +9,7 @@ Author:    Daniel Buscombe
            United States Geological Survey
            Flagstaff, AZ 86001
            dbuscombe@usgs.gov
-Version: 1.2.2      Revision: Mar, 2015
+Version: 1.2.3      Revision: Apr, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -275,27 +275,31 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
          yvec = np.linspace(pix_m,extent*pix_m,extent)
          d = dep_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
 
-         R = np.ones(np.shape(Sp))
-         for k in range(len(d)): 
-            R[:,k] = np.hstack((np.flipud(d[k]/yvec), d[k]/yvec))
+         R_fp = np.memmap(sonpath+base+'_data_range.dat', dtype='float32', mode='r', shape=tuple(shape_star))
 
-         if len(d)<np.shape(port_fp[p])[1]:
-            d = np.append(d,d[-1])
-         Zbed = np.squeeze(d*ft)
+         #R = np.ones(np.shape(Sp))
+         #for k in range(len(d)): 
+         #   R[:,k] = np.hstack((np.flipud(d[k]/yvec), d[k]/yvec))
 
-         R1 = R[extent:,:]
-         R2 = np.flipud(R[:extent,:])
+         #if len(d)<np.shape(port_fp[p])[1]:
+         #   d = np.append(d,d[-1])
+         #Zbed = np.squeeze(d*ft)
 
-         # shift proportionally depending on where the bed is
-         for k in xrange(np.shape(R1)[1]):
-            R1[:,k] = np.r_[R1[Zbed[k]:,k], np.zeros( (np.shape(R1)[0] -  np.shape(R1[Zbed[k]:,k])[0] ,) )]
+         #R1 = R[extent:,:]
+         #R2 = np.flipud(R[:extent,:])
 
-         for k in xrange(np.shape(R2)[1]):
-            R2[:,k] = np.r_[R2[Zbed[k]:,k], np.zeros( (np.shape(R2)[0] -  np.shape(R2[Zbed[k]:,k])[0] ,) )]
+         ## shift proportionally depending on where the bed is
+         #for k in xrange(np.shape(R1)[1]):
+         #   R1[:,k] = np.r_[R1[Zbed[k]:,k], np.zeros( (np.shape(R1)[0] -  np.shape(R1[Zbed[k]:,k])[0] ,) )]
 
-         R = np.vstack((np.flipud(R2),R1))
-         del R1, R2
+         #for k in xrange(np.shape(R2)[1]):
+         #   R2[:,k] = np.r_[R2[Zbed[k]:,k], np.zeros( (np.shape(R2)[0] -  np.shape(R2[Zbed[k]:,k])[0] ,) )]
 
+         #R = np.vstack((np.flipud(R2),R1))
+         #del R1, R2
+
+         R = np.vstack((np.flipud(R_fp[0]),R_fp[0]))
+         
          R[R>0.8] = np.nan
 
          rn = replace_nans.RN(R.astype('float64'),1000,0.01,2,'localmean')
