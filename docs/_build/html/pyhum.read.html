@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>&lt;no title&gt; &mdash; PyHum 1.2.3 documentation</title>
+    <title>pyhum.read module &mdash; PyHum 1.2.3 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -23,7 +23,10 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyHum 1.2.3 documentation" href="index.html" /> 
+    <link rel="top" title="PyHum 1.2.3 documentation" href="index.html" />
+    <link rel="up" title="PyHum package" href="pyhum.html" />
+    <link rel="next" title="&lt;no title&gt;" href="pyhum.correct.html" />
+    <link rel="prev" title="PyHum package" href="pyhum.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -32,7 +35,14 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.3 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="pyhum.correct.html" title="&lt;no title&gt;"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pyhum.html" title="PyHum package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.3 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="pyhum.html" accesskey="U">PyHum package</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -41,7 +51,122 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  
+  <div class="section" id="pyhum-read-module">
+<h1>pyhum.read module<a class="headerlink" href="#pyhum-read-module" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><p>Read a .DAT and associated set of .SON files recorded by a Humminbird(R)
+instrument.</p>
+<p>Parse the data into a set of memory mapped files that will
+subsequently be used by the other functions of the PyHum module.</p>
+<p>Export time-series data and metadata in other formats.</p>
+<p>Create a kml file for visualising boat track</p>
+</div></blockquote>
+<div class="section" id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
+<p>You call the function like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">draft</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bedpick</span><span class="p">,</span> <span class="n">flip_lr</span><span class="p">,</span> <span class="n">chunksize</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><dl class="docutils">
+<dt>humfile <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>path to the .DAT file</dd>
+<dt>sonpath <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>path where the <a href="#id1"><span class="problematic" id="id2">*</span></a>.SON files are</dd>
+<dt>cs2cs_args <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=&#8221;epsg:26949&#8221;]</span></dt>
+<dd>arguments to create coordinates in a projected coordinate system
+this argument gets given to pyproj to turn wgs84 (lat/lon) coordinates
+into any projection supported by the proj.4 libraries</dd>
+<dt>c <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=1450.0]</span></dt>
+<dd>speed of sound in water (m/s). Defaults to a value of freshwater</dd>
+<dt>draft <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=0]</span></dt>
+<dd>draft from water surface to transducer face (m)</dd>
+<dt>doplot <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=1]</span></dt>
+<dd>if 1, plots will be made</dd>
+<dt>t <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=0.108]</span></dt>
+<dd>length of transducer array (m).
+Default value is that of the 998 series Humminbird(R)</dd>
+<dt>f <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=455]</span></dt>
+<dd>frequency of sidescan transducer in kHz</dd>
+<dt>bedpick <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=1]</span></dt>
+<dd>if 1, bedpicking with be carried out automatically
+if 0, user will be prompted to pick the bed location on screen</dd>
+<dt>flip_lr <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=0]</span></dt>
+<dd>if 1, port and starboard scans will be flipped
+(for situations where the transducer is flipped 180 degrees)</dd>
+<dt>chunksize <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=0]</span></dt>
+<dd>if not 0, the data will be parsed into &#8216;chunks&#8217; of data which
+are &#8216;chunksize&#8217; scans long. A scan is a ping, or the simultaneous
+acquisition of a port and starboard scan. A typical value to keep
+data chunks a manageable (small) size is 10,000 - 50,000</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="returns">
+<h2>Returns<a class="headerlink" href="#returns" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><blockquote>
+<div><dl class="docutils">
+<dt>sonpath+base+&#8217;_data_port.dat&#8217;: memory-mapped file</dt>
+<dd>contains the raw echogram from the port side
+sidescan sonar (where present)</dd>
+<dt>sonpath+base+&#8217;_data_port.dat&#8217;: memory-mapped file</dt>
+<dd>contains the raw echogram from the starboard side
+sidescan sonar (where present)</dd>
+<dt>sonpath+base+&#8217;_data_dwnhi.dat&#8217;: memory-mapped file</dt>
+<dd>contains the raw echogram from the high-frequency
+echosounder (where present)</dd>
+<dt>sonpath+base+&#8217;_data_dwnlow.dat&#8217;: memory-mapped file</dt>
+<dd>contains the raw echogram from the low-frequency
+echosounder (where present)</dd>
+<dt>sonpath+base+&#8221;trackline.kml&#8221;: google-earth kml file</dt>
+<dd>contains the trackline of the vessel during data
+acquisition</dd>
+<dt>sonpath+base+&#8217;rawdat.csv&#8217;: comma separated value file</dt>
+<dd><p class="first">contains time-series data. columns corresponding to</p>
+<p>longitude</p>
+<p>latitude</p>
+<p>easting (m)</p>
+<p>northing (m)</p>
+<p>depth to bed (m)</p>
+<p>alongtrack cumulative distance (m)</p>
+<p class="last">vessel heading (deg.)</p>
+</dd>
+<dt>sonpath+base+&#8217;meta.mat&#8217;: .mat file</dt>
+<dd><p class="first">matlab format file containing a dictionary object</p>
+<p>holding metadata information. Fields are:</p>
+<p>e : ndarray, easting (m)</p>
+<p>n : ndarray, northing (m)</p>
+<p>es : ndarray, low-pass filtered easting (m)</p>
+<p>ns : ndarray, low-pass filtered northing (m)</p>
+<p>lat : ndarray, latitude</p>
+<p>lon : ndarray, longitude</p>
+<p>shape_port : tuple, shape of port scans in memory mapped file</p>
+<p>shape_star : tuple, shape of starboard scans in memory mapped file</p>
+<p>shape_hi : tuple, shape of high-freq. scans in memory mapped file</p>
+<p>shape_low : tuple, shape of low-freq. scans in memory mapped file</p>
+<p>dep_m : ndarray, depth to bed (m)</p>
+<p>dist_m : ndarray, distance along track (m)</p>
+<p>heading : ndarray, heading of vessel (deg. N)</p>
+<p>pix_m: float, size of 1 pixel in across-track dimension (m)</p>
+<p>bed : ndarray, depth to bed (m)</p>
+<p>c : float, speed of sound in water (m/s)</p>
+<p>t : length of sidescan transducer array (m)</p>
+<p>f : frequency of sidescan sound (kHz)</p>
+<p>spd : ndarray, vessel speed (m/s)</p>
+<p>time_s : ndarray, time elapsed (s)</p>
+<p class="last">caltime : ndarray, unix epoch time (s)</p>
+</dd>
+</dl>
+</div></blockquote>
+<img alt="_images/pyhum_logo_colour_sm.png" src="_images/pyhum_logo_colour_sm.png" />
+</div></blockquote>
+</div>
+</div>
+
 
           </div>
         </div>
@@ -51,6 +176,22 @@
             <p class="logo"><a href="index.html">
               <img class="logo" src="_static/pyhum_logo_white.png" alt="Logo"/>
             </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pyhum.read module</a><ul>
+<li><a class="reference internal" href="#syntax">Syntax</a></li>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#returns">Returns</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pyhum.html"
+                        title="previous chapter">PyHum package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pyhum.correct.html"
+                        title="next chapter">&lt;no title&gt;</a></p>
 
     <hr/>
 
@@ -89,7 +230,14 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.3 documentation</a> &raquo;</li> 
+        <li class="right" >
+          <a href="pyhum.correct.html" title="&lt;no title&gt;"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pyhum.html" title="PyHum package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.3 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="pyhum.html" >PyHum package</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

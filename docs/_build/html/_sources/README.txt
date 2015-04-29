@@ -37,8 +37,6 @@ and does not imply endorsement by the U.S. government.
 
 This software is issued under the `GNU Lesser General Public License, Version 3 <http://www.gnu.org/copyleft/lesser.html>`_
 
-Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government. 
-
 Thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info
 
 .. _setup:
