@@ -1,26 +1,48 @@
 # encoding: utf-8
-"""
-PyHum - a Python framework for sidescan data texture classification.
+## PyHum (Python program for Humminbird(R) data processing) 
+## has been developed at the Grand Canyon Monitoring & Research Center,
+## U.S. Geological Survey
+##
+## Author: Daniel Buscombe
+## Project homepage: <https://github.com/dbuscombe-usgs/PyHum>
+##
+##This software is in the public domain because it contains materials that originally came from 
+##the United States Geological Survey, an agency of the United States Department of Interior. 
+##For more information, see the official USGS copyright policy at 
+##http://www.usgs.gov/visual-id/credit_usgs.html#copyright
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## See the GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-PyHum is an open-source project dedicated to provide a Python framework for
-processing low-cost sidescan data. It provides parsers for Humminbird file formats,
-and signal processing routines which allow the manipulation of sidescan data and automated texture classification (see Buscombe et al., forthcoming).
+#"""
+# ____        _   _                         
+#|  _ \ _   _| | | |_   _ _ __ ___    _   _ 
+#| |_) | | | | |_| | | | | '_ ` _ \  (_) (_)
+#|  __/| |_| |  _  | |_| | | | | | |  _   _ 
+#|_|    \__, |_| |_|\__,_|_| |_| |_| (_) (_)
+#       |___/                               
+#
+##+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
+#|b|y| |D|a|n|i|e|l| |B|u|s|c|o|m|b|e|
+#+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+#|d|b|u|s|c|o|m|b|e|@|u|s|g|s|.|g|o|v|
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
+#|U|.|S|.| |G|e|o|l|o|g|i|c|a|l| |S|u|r|v|e|y|
+#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
 
-For more information visit http://dbuscombe-usgs.github.io/PyHum/
-
-:license:
-    GNU Lesser General Public License, Version 3
-    (http://www.gnu.org/copyleft/lesser.html)
-    
-    This software is in the public domain because it contains materials that
-    originally came from the United States Geological Survey, an agency of the
-    United States Department of Interior. For more information, 
-    see the official USGS copyright policy at
-    http://www.usgs.gov/visual-id/credit_usgs.html#copyright
-    Any use of trade, product, or firm names is for descriptive purposes only 
-    and does not imply endorsement by the U.S. government.
-    
-"""
+#"""
 
 __version__ = '1.2.3'
 
@@ -28,11 +50,11 @@ __version__ = '1.2.3'
 # Imports
 #-----------------------------------------------------------------------------
 
-from PyHum._pyhum_read_class import humread
-from PyHum._pyhum_correct_class import humcorrect
-from PyHum._pyhum_texture_class import humtexture
-from PyHum._pyhum_map import domap
-from PyHum._pyhum_map_texture import domap_texture
+from PyHum._pyhum_read import read
+from PyHum._pyhum_correct import correct
+from PyHum._pyhum_texture import texture
+from PyHum._pyhum_map import map
+from PyHum._pyhum_map_texture import map_texture
 from PyHum.utils import *
 from PyHum.test import *
 

@@ -100,6 +100,12 @@ sudo python setup.py install
 
 ### Notes for Windows/Anaconda users
 
+Before installing PyHum, install Basemap using::
+
+```
+conda install basemap
+```
+
 Assuming a Anaconda distribution which comes with almost all required program dependencies:
 
 ```
@@ -194,7 +200,7 @@ which carries out the following operations:
    maxW = 1000 # rms output wattage
 
    # for texture calcs
-   win = 100 # pixel window
+   win = 50 # pixel window
    shift = 10 # pixel shift
    density = win/2 
    numclasses = 4 # number of discrete classes for contouring and k-means
@@ -207,15 +213,18 @@ which carries out the following operations:
    calc_bearing = 0 #no
    filt_bearing = 1 #yes
    res = 0.05 # grid resolution in metres
+   chunk_size = 0 # auto chunk size
 
-   PyHum.humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr)
+   PyHum.humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size)
 
    PyHum.humcorrect(humfile, sonpath, maxW, doplot)
 
-   PyHum.domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
-
    PyHum.humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
+   PyHum.domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
+
+   res = 0.5 # grid resolution in metres
+   
    PyHum.domap_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
 
 ```

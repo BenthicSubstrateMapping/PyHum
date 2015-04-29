@@ -1,69 +1,54 @@
-'''
-pyhum_texture.py
-Part of PyHum software 
+## PyHum (Python program for Humminbird(R) data processing) 
+## has been developed at the Grand Canyon Monitoring & Research Center,
+## U.S. Geological Survey
+##
+## Author: Daniel Buscombe
+## Project homepage: <https://github.com/dbuscombe-usgs/PyHum>
+##
+##This software is in the public domain because it contains materials that originally came from 
+##the United States Geological Survey, an agency of the United States Department of Interior. 
+##For more information, see the official USGS copyright policy at 
+##http://www.usgs.gov/visual-id/credit_usgs.html#copyright
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## See the GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-INFO:
+#"""
+# ____        _   _                         
+#|  _ \ _   _| | | |_   _ _ __ ___    _   _ 
+#| |_) | | | | |_| | | | | '_ ` _ \  (_) (_)
+#|  __/| |_| |  _  | |_| | | | | | |  _   _ 
+#|_|    \__, |_| |_|\__,_|_| |_| |_| (_) (_)
+#       |___/                               
+#
+#   __            __                
+#  / /____  _  __/ /___  __________ 
+# / __/ _ \| |/_/ __/ / / / ___/ _ \
+#/ /_/  __/>  </ /_/ /_/ / /  /  __/
+#\__/\___/_/|_|\__/\__,_/_/   \___/ 
+#                                   
+#
+##+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
+#|b|y| |D|a|n|i|e|l| |B|u|s|c|o|m|b|e|
+#+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+#|d|b|u|s|c|o|m|b|e|@|u|s|g|s|.|g|o|v|
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
+#|U|.|S|.| |G|e|o|l|o|g|i|c|a|l| |S|u|r|v|e|y|
+#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
 
-Author:    Daniel Buscombe
-           Grand Canyon Monitoring and Research Center
-           United States Geological Survey
-           Flagstaff, AZ 86001
-           dbuscombe@usgs.gov
-Version: 1.2.3      Revision: Apr, 2015
-
-For latest code version please visit:
-https://github.com/dbuscombe-usgs
-
-This function is part of 'PyHum' software
-This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
-For more information, see the official USGS copyright policy at 
-http://www.usgs.gov/visual-id/credit_usgs.html#copyright
-
-This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4, and Windows 7.
-This software has (so far) been used only with Humminbird 998 and 1198 series instruments. 
-
-SYNTAX:
-python pyhum_texture.py -i datfile -s sonpath
-where datfile is the .DAT file associated with the survey, and sonpath is the (absolute or relative) path to where the associated .SON files are
-
-Optional arguments:
-
-EXAMPLES:
-1) show help
-python pyhum_texture.py -h
-
-2) run the provided test case with all defaults
-python pyhum_texture.py -i ./test.DAT -s ./test_data/ (linux)
-python pyhum_texture.py -i test.DAT -s \test_data\ (windows)
-
-OUTPUTS:
-Files are created which contain the raw and parsed meta data. They are prefixed by the root of the input file (*) followed by:
-
-These are python/matlab/octave .mat data format. To read use, for example:
-data = loadmat('test.mat')
-
-If doplot =1 (see above) the program will also create some rudimentary plots of the data (mainly to check everything is ok). These are stored in the same directory as the .son files and are hopefully self explanatory
-
-Installation:
-
-PYTHON LIBRARIES YOU MAY NEED TO INSTALL TO USE PyHum:
-1) Pyproj: http://code.google.com/p/pyproj/
-2) SciPy: http://www.scipy.org/scipylib/download.html
-3) Numpy: http://www.scipy.org/scipylib/download.html
-4) Matplotlib: http://matplotlib.org/downloads.html
-5) Scikit-learn: http://scikit-learn.org/stable/
-6) Python Image LIbrary (PIL) http://www.pythonware.com/products/pil/
-
-All of the above are available through pip (https://pypi.python.org/pypi/pip) and easy_install (https://pythonhosted.org/setuptools/easy_install.html)
-
-OTHER LIBRARIES (CYTHON) NEED TO BE COMPILED FOR SPEED:
-1) pyread.pyx
-2) cwt.pyx
-3) replace_nans.pyx
-4) ppdrc.pyx
-5) spec_noise.pyx
-
-'''
+#"""
 
 # =========================================================
 # ====================== libraries ======================
@@ -73,9 +58,11 @@ OTHER LIBRARIES (CYTHON) NEED TO BE COMPILED FOR SPEED:
 import sys, getopt, os, time
 from scipy.io import loadmat, savemat
 from joblib import Parallel, delayed, cpu_count
-from Tkinter import Tk
-from tkFileDialog import askopenfilename, askdirectory
-
+try:
+   from Tkinter import Tk
+   from tkFileDialog import askopenfilename, askdirectory
+except:
+   pass
 import warnings
 warnings.simplefilter('ignore', RuntimeWarning)
 
@@ -99,14 +86,61 @@ np.seterr(divide='ignore')
 np.seterr(invalid='ignore')
 
 __all__ = [
-    'humtexture',
+    'texture',
     'custom_save',
     'parallel_me',
     ]
 
 #################################################
-def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes):
-                                  
+def texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes):
+          
+     '''
+     Create a texture lengthscale map using the algorithm detailed by Buscombe et al. (forthcoming)
+     This textural lengthscale is not a direct measure of grain size. Rather, it is a statistical 
+     representation that integrates over many attributes of bed texture, of which grain size is the most important. 
+     The technique is a physically based means to identify regions of texture within a sidescan echogram, 
+     and could provide a basis for objective, automated riverbed sediment classification.
+
+     Syntax
+     ----------
+     [] = PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+
+     Parameters
+     ----------
+     humfile : str
+       path to the .DAT file
+     sonpath : str
+       path where the *.SON files are
+     win : int, *optional* [Default=100]
+       pixel in pixels of the moving window
+     shift : int, *optional* [Default=10]
+       shift in pixels for moving window operation
+     doplot : int, *optional* [Default=1]
+       if 1, make plots, otherwise do not make plots
+     density : int, *optional* [Default=win/2]
+       echogram will be sampled every 'density' pixels
+     numclasses : int, *optional* [Default=4]
+       number of 'k means' that the texture lengthscale will be segmented into
+     maxscale : int, *optional* [Default=20]
+       Max scale as inverse fraction of data length for wavelet analysis
+     notes : int, *optional* [Default=100]
+       notes per octave for wavelet analysis
+
+     Returns
+     -------
+     sonpath+base+'_data_class.dat': memory-mapped file
+        contains the texture lengthscale map
+
+     sonpath+base+'_data_kclass.dat': memory-mapped file
+        contains the k-means segmented texture lengthscale map
+
+     References
+     ----------
+     .. [1] Buscombe, D., Grams, P.E., and Smith, S.M.C., Automated riverbed sediment
+       classification using low-cost sidescan sonar. submitted to
+       Journal of Hydraulic Engineering
+     '''
+                        
       # prompt user to supply file if no input file given
       if not humfile:
          print 'An input file is required!!!!!!'
@@ -160,7 +194,7 @@ def humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxsca
 
       if not density:
          density = win/2
-         print '[Default] Image will be sampled every %s pixels' % (str(density))
+         print '[Default] Echogram will be sampled every %s pixels' % (str(density))
 
       if not numclasses:
          numclasses = 4

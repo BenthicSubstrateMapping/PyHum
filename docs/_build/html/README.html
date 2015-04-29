@@ -1,0 +1,321 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting started &mdash; PyHum 1.2.3 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyHum 1.2.3 documentation" href="index.html" />
+    <link rel="next" title="Modules" href="modules.html" />
+    <link rel="prev" title="PyHum: Python program for reading and processing low-cost sidescan sonar data" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="modules.html" title="Modules"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="PyHum: Python program for reading and processing low-cost sidescan sonar data"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="getting-started">
+<span id="id1"></span><h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="about">
+<span id="id2"></span><h2>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h2>
+<p>PyHum - a Python framework for reading and processing data from low-cost sidescan sonar</p>
+<p>PyHum is an open-source project dedicated to provide a generic Python framework
+for reading and exporting data from Humminbird(R) instruments, carrying out rudimentary radiometric corrections to the data,
+classify bed texture, and produce some maps on aerial photos and kml files for google-earth</p>
+<p>Some aspects of the program are detailed in:
+Buscombe, D., Grams, P.E., and Smith, S. &#8220;Automated riverbed sediment classification using low-cost sidescan sonar&#8221;, forthcoming.</p>
+<p>For the source code visit <a class="reference external" href="https://github.com/dbuscombe-usgs/PyHum/">the project github site</a></p>
+</div>
+<div class="section" id="license">
+<span id="id3"></span><h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>This software is in the public domain because it contains materials that
+originally came from the United States Geological Survey, an agency of the
+United States Department of Interior. For more information,
+see <a class="reference external" href="http://www.usgs.gov/visual-id/credit_usgs.html#copyright">the official USGS copyright policy</a></p>
+<p>Any use of trade, product, or firm names is for descriptive purposes only
+and does not imply endorsement by the U.S. government.</p>
+<p>This software is issued under the <a class="reference external" href="http://www.gnu.org/copyleft/lesser.html">GNU Lesser General Public License, Version 3</a></p>
+<p>Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government.</p>
+<p>Thanks to Barb Fagetter (<a class="reference external" href="mailto:blueseas&#37;&#52;&#48;oceanecology&#46;ca">blueseas<span>&#64;</span>oceanecology<span>&#46;</span>ca</a>) for some format info</p>
+</div>
+<div class="section" id="setup">
+<span id="id4"></span><h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
+<p>Automatic Installation from PyPI:</p>
+<div class="highlight-python"><div class="highlight"><pre>pip uninstall PyHum (removes previous installation)
+pip install PyHum
+</pre></div>
+</div>
+<p>Automatic Installation from github:</p>
+<div class="highlight-python"><div class="highlight"><pre>git clone git@github.com:dbuscombe-usgs/PyHum.git
+cd PyHum
+python setup.py install
+</pre></div>
+</div>
+<p>or a local installation:</p>
+<div class="highlight-python"><div class="highlight"><pre>python setup.py install --user
+</pre></div>
+</div>
+<p>or with admin privileges, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo python setup.py install
+</pre></div>
+</div>
+</div>
+<div class="section" id="setup-on-anaconda-for-windows">
+<h2>Setup on Anaconda for Windows<a class="headerlink" href="#setup-on-anaconda-for-windows" title="Permalink to this headline">¶</a></h2>
+<p>Before installing PyHum, install Basemap using:</p>
+<div class="highlight-python"><div class="highlight"><pre>conda install basemap
+</pre></div>
+</div>
+<p>Assuming a Anaconda distribution which comes with almost all required program dependencies:</p>
+<div class="highlight-python"><div class="highlight"><pre>pip install simplekml
+pip uninstall PyHum (removes previous installation)
+pip install PyHum
+</pre></div>
+</div>
+<p>pip seems to have a bug with pyproj depending on what c-compiler your python distribution uses. Therefore, you may have to install pyproj (and other dependencies) from <a class="reference external" href="http://www.lfd.uci.edu/~gohlke/pythonlibs/">here</a></p>
+<p>Download the .whl file, then use pip to install it, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>pip install pyproj-1.9.4-cp27-none-win_amd64.whl
+</pre></div>
+</div>
+<p>This software has been tested with Python 2.7 on Linux Fedora 16 &amp; 20, Ubuntu 12.4 &amp; 13.4 &amp; 14.4, Windows 7. This software has (so far) been used only with Humminbird 998 and 1198 series instruments.</p>
+</div>
+<div class="section" id="virtual-environment">
+<span id="virtualenv"></span><h2>Virtual environment<a class="headerlink" href="#virtual-environment" title="Permalink to this headline">¶</a></h2>
+<p>You could try before you install, using a virtual environment:</p>
+<div class="highlight-python"><div class="highlight"><pre>virtualenv venv
+source venv/bin/activate
+pip install numpy
+pip install cython
+pip install scipy
+pip install joblib
+pip install simplekml
+pip install pyproj
+pip install scikit-learn
+pip install Pillow
+pip install matplotlib
+pip install basemap --allow-external basemap --allow-unverified basemap
+pip install PyHum
+python -c &quot;import PyHum; PyHum.test()&quot;
+deactivate #(or source venv/bin/deactivate)
+</pre></div>
+</div>
+<p>The results will live in &#8220;venv/lib/python2.7/site-packages/PyHum&#8221;</p>
+</div>
+<div class="section" id="manual-installation">
+<span id="manualinstall"></span><h2>Manual installation<a class="headerlink" href="#manual-installation" title="Permalink to this headline">¶</a></h2>
+<p>Python libraries you need to have installed to use PyHum:</p>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://www.mpa-garching.mpg.de/ift/nifty/index.html">Nifty</a></li>
+<li><a class="reference external" href="http://www.scipy.org/scipylib/download.html">SciPy</a></li>
+<li><a class="reference external" href="http://www.scipy.org/scipylib/download.html">Numpy</a></li>
+<li><a class="reference external" href="http://matplotlib.org/downloads.html">Matplotlib</a></li>
+<li><a class="reference external" href="http://cython.org/">cython</a></li>
+<li><a class="reference external" href="https://pythonhosted.org/joblib/">joblib</a></li>
+<li><a class="reference external" href="http://scikit-learn.org/stable/">Scikit-learn</a></li>
+<li><a class="reference external" href="http://www.pythonware.com/products/pil/">Python Image LIbrary (PIL)</a></li>
+<li><a class="reference external" href="http://simplekml.readthedocs.org/en/latest/index.html">simplekml</a></li>
+<li><a class="reference external" href="https://pypi.python.org/pypi/pyproj">pyproj</a></li>
+<li><a class="reference external" href="http://matplotlib.org/basemap/">basemap</a></li>
+</ol>
+<p>All of the above are available through <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> and <a class="reference external" href="https://pythonhosted.org/setuptools/easy_install.html">easy_install</a></p>
+</div>
+<div class="section" id="installation-on-amazon-linux-ec-2-instance">
+<h2>Installation on Amazon Linux EC-2 instance<a class="headerlink" href="#installation-on-amazon-linux-ec-2-instance" title="Permalink to this headline">¶</a></h2>
+<p>It&#8217;s best to install numpy, scipy, cython and matplotlib through the OS package manager:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo yum install gcc gcc-c++
+sudo yum install python27-numpy python27-Cython python27-scipy python27-matplotlib
+</pre></div>
+</div>
+<p>Then install geos libraries using yum and Basemap using pip:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo yum install geos geos-devel geos-python27
+sudo pip install basemap --allow-external basemap --allow-unverified basemap
+</pre></div>
+</div>
+<p>Then PyHum using pip (which will install Pillow, pyproj, simplekml, joblib and scikit-learn):</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo pip install PyHum
+</pre></div>
+</div>
+</div>
+<div class="section" id="test">
+<span id="id5"></span><h2>Test<a class="headerlink" href="#test" title="Permalink to this headline">¶</a></h2>
+<p>A test can be carried out by running the supplied script:</p>
+<div class="highlight-python"><div class="highlight"><pre>python -c &quot;import PyHum; PyHum.test()&quot;
+</pre></div>
+</div>
+<p>which carries out the following operations:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># general settings</span>
+<span class="n">humfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">&quot;~&quot;</span><span class="p">)</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s">&#39;pyhum_test&#39;</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s">&#39;test.DAT&#39;</span> <span class="c">#PyHum.__path__[0]+os.sep+&#39;test.DAT&#39;</span>
+<span class="n">sonpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s">&quot;~&quot;</span><span class="p">)</span><span class="o">+</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="o">+</span><span class="s">&#39;pyhum_test&#39;</span> <span class="c">#PyHum.__path__[0]</span>
+<span class="n">doplot</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">#yes</span>
+
+<span class="c"># reading specific settings</span>
+<span class="n">cs2cs_args</span> <span class="o">=</span> <span class="s">&quot;epsg:26949&quot;</span> <span class="c">#arizona central state plane</span>
+<span class="n">bedpick</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># auto bed pick</span>
+<span class="n">c</span> <span class="o">=</span> <span class="mi">1450</span> <span class="c"># speed of sound fresh water</span>
+<span class="n">t</span> <span class="o">=</span> <span class="mf">0.108</span> <span class="c"># length of transducer</span>
+<span class="n">f</span> <span class="o">=</span> <span class="mi">455</span> <span class="c"># frequency kHz</span>
+<span class="n">draft</span> <span class="o">=</span> <span class="mf">0.3</span> <span class="c"># draft in metres</span>
+<span class="n">flip_lr</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># flip port and starboard</span>
+
+<span class="c"># correction specific settings</span>
+<span class="n">maxW</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c"># rms output wattage</span>
+
+<span class="c"># for texture calcs</span>
+<span class="n">win</span> <span class="o">=</span> <span class="mi">50</span> <span class="c"># pixel window</span>
+<span class="n">shift</span> <span class="o">=</span> <span class="mi">10</span> <span class="c"># pixel shift</span>
+<span class="n">density</span> <span class="o">=</span> <span class="n">win</span><span class="o">/</span><span class="mi">2</span>
+<span class="n">numclasses</span> <span class="o">=</span> <span class="mi">4</span> <span class="c"># number of discrete classes for contouring and k-means</span>
+<span class="n">maxscale</span> <span class="o">=</span> <span class="mi">20</span> <span class="c"># Max scale as inverse fraction of data length (for wavelet analysis)</span>
+<span class="n">notes</span> <span class="o">=</span> <span class="mi">4</span> <span class="c"># Notes per octave (for wavelet analysis)</span>
+
+<span class="c"># for mapping</span>
+<span class="c">#imagery = 1 # server=&#39;http://server.arcgisonline.com/ArcGIS&#39;, service=&#39;World_Imagery&#39;</span>
+<span class="n">dogrid</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># yes</span>
+<span class="n">calc_bearing</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#no</span>
+<span class="n">filt_bearing</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">#yes</span>
+<span class="n">res</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="c"># grid resolution in metres</span>
+<span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># auto chunk size</span>
+
+<span class="n">PyHum</span><span class="o">.</span><span class="n">humread</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">draft</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bedpick</span><span class="p">,</span> <span class="n">flip_lr</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">)</span>
+
+<span class="n">PyHum</span><span class="o">.</span><span class="n">humcorrect</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
+
+<span class="n">PyHum</span><span class="o">.</span><span class="n">humtexture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">numclasses</span><span class="p">,</span> <span class="n">maxscale</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span>
+
+<span class="n">PyHum</span><span class="o">.</span><span class="n">domap</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+
+<span class="n">res</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="c"># grid resolution in metres</span>
+
+<span class="n">PyHum</span><span class="o">.</span><span class="n">domap_texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="support">
+<span id="id6"></span><h2>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h2>
+<p>This is a new project written and maintained by Daniel Buscombe. Bugs are expected - please report them, I will fix them quickly. Feedback and suggestions for improvements are <em>very</em> welcome</p>
+<p>Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please address all suggestions, comments and queries to: <a class="reference external" href="mailto:dbuscombe&#37;&#52;&#48;usgs&#46;gov">dbuscombe<span>&#64;</span>usgs<span>&#46;</span>gov</a>. Thanks for stopping by!</p>
+<blockquote>
+<div><img alt="_images/pyhum_logo_colour_sm.png" src="_images/pyhum_logo_colour_sm.png" />
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pyhum_logo_white.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Getting started</a><ul>
+<li><a class="reference internal" href="#about">About</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
+<li><a class="reference internal" href="#setup">Setup</a></li>
+<li><a class="reference internal" href="#setup-on-anaconda-for-windows">Setup on Anaconda for Windows</a></li>
+<li><a class="reference internal" href="#virtual-environment">Virtual environment</a></li>
+<li><a class="reference internal" href="#manual-installation">Manual installation</a></li>
+<li><a class="reference internal" href="#installation-on-amazon-linux-ec-2-instance">Installation on Amazon Linux EC-2 instance</a></li>
+<li><a class="reference internal" href="#test">Test</a></li>
+<li><a class="reference internal" href="#support">Support</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">PyHum: Python program for reading and processing low-cost sidescan sonar data</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="modules.html"
+                        title="next chapter">Modules</a></p>
+
+    <hr/>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+    <hr/>
+    <div>
+	<h3>Mailing list</h3>
+	<a href="https://github.com/dbuscombe-usgs/PyHum/">dbuscombe@usgs.gov</a>
+    <p class="searchtip" style="font-size: 80%">
+    Send an email to subscribe</p>
+    </div>
+<hr/>
+<small><a href="_sources/README.txt"
+           rel="nofollow">Show this page source</a>
+</small>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="modules.html" title="Modules"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="PyHum: Python program for reading and processing low-cost sidescan sonar data"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Daniel Buscombe.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

@@ -1,71 +1,54 @@
-'''
-pyhum_correct.py
-Part of PyHum software 
+## PyHum (Python program for Humminbird(R) data processing) 
+## has been developed at the Grand Canyon Monitoring & Research Center,
+## U.S. Geological Survey
+##
+## Author: Daniel Buscombe
+## Project homepage: <https://github.com/dbuscombe-usgs/PyHum>
+##
+##This software is in the public domain because it contains materials that originally came from 
+##the United States Geological Survey, an agency of the United States Department of Interior. 
+##For more information, see the official USGS copyright policy at 
+##http://www.usgs.gov/visual-id/credit_usgs.html#copyright
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+## See the GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-INFO:
+#"""
+# ____        _   _                         
+#|  _ \ _   _| | | |_   _ _ __ ___    _   _ 
+#| |_) | | | | |_| | | | | '_ ` _ \  (_) (_)
+#|  __/| |_| |  _  | |_| | | | | | |  _   _ 
+#|_|    \__, |_| |_|\__,_|_| |_| |_| (_) (_)
+#       |___/                               
+#
+#                                  __ 
+#  _________  _____________  _____/ /_
+# / ___/ __ \/ ___/ ___/ _ \/ ___/ __/
+#/ /__/ /_/ / /  / /  /  __/ /__/ /_  
+#\___/\____/_/  /_/   \___/\___/\__/  
+#                                     
+#
+##+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
+#|b|y| |D|a|n|i|e|l| |B|u|s|c|o|m|b|e|
+#+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+#|d|b|u|s|c|o|m|b|e|@|u|s|g|s|.|g|o|v|
+#+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
+#|U|.|S|.| |G|e|o|l|o|g|i|c|a|l| |S|u|r|v|e|y|
+#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
 
-
-Author:    Daniel Buscombe
-           Grand Canyon Monitoring and Research Center
-           United States Geological Survey
-           Flagstaff, AZ 86001
-           dbuscombe@usgs.gov
-Version: 1.2.3      Revision: Apr, 2015
-
-For latest code version please visit:
-https://github.com/dbuscombe-usgs
-
-This function is part of 'PyHum' software
-This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
-For more information, see the official USGS copyright policy at 
-http://www.usgs.gov/visual-id/credit_usgs.html#copyright
-
-This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4, and Windows 7.
-This software has (so far) been used only with Humminbird 998 and 1198 series instruments. 
-
-SYNTAX:
-python pyhum_correct.py -i datfile -s sonpath
-where datfile is the .DAT file associated with the survey, and sonpath is the (absolute or relative) path to where the associated .SON files are
-
-Optional arguments:
-
-
-EXAMPLES:
-1) show help
-python pyhum_correct.py -h
-
-2) run the provided test case with all defaults
-python pyhum_correct.py -i ./test.DAT -s ./test_data/ (linux)
-python pyhum_correct.py -i test.DAT -s \test_data\ (windows)
-
-
-OUTPUTS:
-Files are created which contain the raw and parsed meta data. They are prefixed by the root of the input file (*) followed by:
-
-These are python/matlab/octave .mat data format. To read use, for example:
-data = loadmat('test.mat')
-
-If doplot =1 (see above) the program will also create some rudimentary plots of the data (mainly to check everything is ok). These are stored in the same directory as the .son files and are hopefully self explanatory
-
-Installation:
-
-PYTHON LIBRARIES YOU MAY NEED TO INSTALL TO USE PyHum:
-1) Pyproj: http://code.google.com/p/pyproj/
-2) SciPy: http://www.scipy.org/scipylib/download.html
-3) Numpy: http://www.scipy.org/scipylib/download.html
-4) Matplotlib: http://matplotlib.org/downloads.html
-5) Scikit-learn: http://scikit-learn.org/stable/
-6) Python Image LIbrary (PIL) http://www.pythonware.com/products/pil/
-
-All of the above are available through pip (https://pypi.python.org/pypi/pip) and easy_install (https://pythonhosted.org/setuptools/easy_install.html)
-
-OTHER LIBRARIES (CYTHON) NEED TO BE COMPILED FOR SPEED:
-1) pyread.pyx
-2) cwt.pyx
-3) replace_nans.pyx
-- use the shell script "compile_pyhum.sh" on linux/mac
-
-'''
+#"""
 
 # =========================================================
 # ====================== libraries ======================
@@ -75,8 +58,11 @@ OTHER LIBRARIES (CYTHON) NEED TO BE COMPILED FOR SPEED:
 from __future__ import division
 from scipy.io import savemat, loadmat
 import os, time, sys, getopt
-from Tkinter import Tk
-from tkFileDialog import askopenfilename, askdirectory
+try:
+   from Tkinter import Tk
+   from tkFileDialog import askopenfilename, askdirectory
+except:
+   pass
 from joblib import Parallel, delayed, cpu_count
 
 #numerical
@@ -103,14 +89,47 @@ np.seterr(invalid='ignore')
 # ========================================================
 
 __all__ = [
-    'humcorrect',
+    'correct',
     'custom_save',
     'remove_water',
     'correct_scans',
     ]
 
 #################################################
-def humcorrect(humfile, sonpath, maxW, doplot):
+def correct(humfile, sonpath, maxW, doplot):
+
+    '''
+    Create a Savitsky-Golay digital filter from a 2D signal
+    based on code from http://www.scipy.org/Cookbook/SavitzkyGolay
+
+    Syntax
+    ----------
+    Z = pysesa.sgolay(z, window_size, order).getdata()
+
+    Parameters
+    ----------
+    z : array_like, shape (N,)
+      the 2D signal.
+    window_size : int
+       the length of the window. Must be an odd integer number.
+    order : int
+       the order of the polynomial used in the filtering.
+       Must be less than `window_size` - 1.
+
+    Returns
+    -------
+    self.data : ndarray, shape (N)
+       the smoothed signal.
+
+    References
+    ----------
+    .. [1] A. Savitzky, M. J. E. Golay, Smoothing and Differentiation of
+       Data by Simplified Least Squares Procedures. Analytical
+       Chemistry, 1964, 36 (8), pp 1627-1639.
+    .. [2] Numerical Recipes 3rd Edition: The Art of Scientific Computing
+       W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery
+       Cambridge University Press ISBN-13: 9780521880688
+    '''
 
     # prompt user to supply file if no input file given
     if not humfile:
