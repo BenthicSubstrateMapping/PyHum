@@ -95,36 +95,46 @@ __all__ = [
 def map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res):
          
     '''
-    Create a Savitsky-Golay digital filter from a 2D signal
-    based on code from http://www.scipy.org/Cookbook/SavitzkyGolay
+    Create plots of the spatially referenced sidescan echograms
+    using the algorithm detailed by Buscombe et al. (forthcoming)
 
     Syntax
     ----------
-    Z = pysesa.sgolay(z, window_size, order).getdata()
+    [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
 
     Parameters
     ----------
-    z : array_like, shape (N,)
-      the 2D signal.
-    window_size : int
-       the length of the window. Must be an odd integer number.
-    order : int
-       the order of the polynomial used in the filtering.
-       Must be less than `window_size` - 1.
+    humfile : str
+       path to the .DAT file
+    sonpath : str
+       path where the *.SON files are
+    cs2cs_args : int, *optional* [Default="epsg:26949"]
+       arguments to create coordinates in a projected coordinate system
+       this argument gets given to pyproj to turn wgs84 (lat/lon) coordinates
+       into any projection supported by the proj.4 libraries
+    dogrid : float, *optional* [Default=1]
+       if 1, textures will be gridded with resolution 'res'. 
+       Otherwise, point cloud will be plotted
+    calc_bearing : float, *optional* [Default=1]
+       if 1, bearing will be calculated from coordinates
+    filt_bearing : float, *optional* [Default=1]
+       if 1, bearing will be filtered
+    res : float, *optional* [Default=1]
+       grid resolution of output gridded texture map
 
     Returns
     -------
-    self.data : ndarray, shape (N)
-       the smoothed signal.
+    sonpath+'x_y_ss_raw'+str(p)+'.asc'  : text file
+        contains the point cloud of easting, northing, and sidescan intensity
+        of the pth chunk
 
-    References
-    ----------
-    .. [1] A. Savitzky, M. J. E. Golay, Smoothing and Differentiation of
-       Data by Simplified Least Squares Procedures. Analytical
-       Chemistry, 1964, 36 (8), pp 1627-1639.
-    .. [2] Numerical Recipes 3rd Edition: The Art of Scientific Computing
-       W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery
-       Cambridge University Press ISBN-13: 9780521880688
+    sonpath+'GroundOverlay'+str(p)+'.kml': kml file
+        contains gridded (or point cloud) sidescan intensity map for importing into google earth
+        of the pth chunk
+
+    sonpath+'map'+str(p)+'.png' : 
+        image overlay associated with the kml file
+
     '''
 
     # prompt user to supply file if no input file given

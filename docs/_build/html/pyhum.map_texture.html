@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>&lt;no title&gt; &mdash; PyHum 1.2.3 documentation</title>
+    <title>pyhum.map_texture module &mdash; PyHum 1.2.3 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -51,7 +51,82 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  
+  <div class="section" id="pyhum-map-texture-module">
+<h1>pyhum.map_texture module<a class="headerlink" href="#pyhum-map-texture-module" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div>Create plots of the texture lengthscale maps made in PyHum.texture module
+using the algorithm detailed by Buscombe et al. (forthcoming)
+This textural lengthscale is not a direct measure of grain size. Rather, it is a statistical
+representation that integrates over many attributes of bed texture, of which grain size is the most important.
+The technique is a physically based means to identify regions of texture within a sidescan echogram,
+and could provide a basis for objective, automated riverbed sediment classification.</div></blockquote>
+<div class="section" id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
+<p>You call the function like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">map_texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><dl class="docutils">
+<dt>humfile <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>path to the .DAT file</dd>
+<dt>sonpath <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>path where the <a href="#id1"><span class="problematic" id="id2">*</span></a>.SON files are</dd>
+<dt>cs2cs_args <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=&#8221;epsg:26949&#8221;]</span></dt>
+<dd>arguments to create coordinates in a projected coordinate system
+this argument gets given to pyproj to turn wgs84 (lat/lon) coordinates
+into any projection supported by the proj.4 libraries</dd>
+<dt>dogrid <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=1]</span></dt>
+<dd>if 1, textures will be gridded with resolution &#8216;res&#8217;.
+Otherwise, point cloud will be plotted</dd>
+<dt>calc_bearing <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=1]</span></dt>
+<dd>if 1, bearing will be calculated from coordinates</dd>
+<dt>filt_bearing <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=1]</span></dt>
+<dd>if 1, bearing will be filtered</dd>
+<dt>res <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=1]</span></dt>
+<dd>grid resolution of output gridded texture map</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="returns">
+<h2>Returns<a class="headerlink" href="#returns" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><dl class="docutils">
+<dt>sonpath+&#8217;x_y_class&#8217;+str(p)+&#8217;.asc&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">text file</span></dt>
+<dd>contains the point cloud of easting, northing, and texture lengthscales
+of the pth chunk</dd>
+<dt>sonpath+&#8217;class_GroundOverlay&#8217;+str(p)+&#8217;.kml&#8217;: kml file</dt>
+<dd>contains gridded (or point cloud) texture lengthscale map for importing into google earth
+of the pth chunk</dd>
+<dt>sonpath+&#8217;class_map&#8217;+str(p)+&#8217;.png&#8217; :</dt>
+<dd>image overlay associated with the kml file</dd>
+<dt>sonpath+&#8217;class_map_imagery&#8217;+str(p)+&#8217;.png&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">png image file</span></dt>
+<dd>gridded (or point cloud) texture lengthscale map
+overlain onto an image pulled from esri image server</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><blockquote>
+<div><table class="docutils footnote" frame="void" id="id3" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[1]</td><td>Buscombe, D., Grams, P.E., and Smith, S.M.C., Automated riverbed sediment
+classification using low-cost sidescan sonar. submitted to
+Journal of Hydraulic Engineering</td></tr>
+</tbody>
+</table>
+</div></blockquote>
+<img alt="_images/pyhum_logo_colour_sm.png" src="_images/pyhum_logo_colour_sm.png" />
+</div></blockquote>
+</div>
+</div>
+
 
           </div>
         </div>
@@ -61,6 +136,17 @@
             <p class="logo"><a href="index.html">
               <img class="logo" src="_static/pyhum_logo_white.png" alt="Logo"/>
             </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pyhum.map_texture module</a><ul>
+<li><a class="reference internal" href="#syntax">Syntax</a></li>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#returns">Returns</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="pyhum.map.html"
                         title="previous chapter">&lt;no title&gt;</a></p>

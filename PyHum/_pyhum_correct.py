@@ -99,36 +99,57 @@ __all__ = [
 def correct(humfile, sonpath, maxW, doplot):
 
     '''
-    Create a Savitsky-Golay digital filter from a 2D signal
-    based on code from http://www.scipy.org/Cookbook/SavitzkyGolay
+    Remove water column and carry out some rudimentary radiometric corrections, 
+    accounting for directivity and attenuation with range
 
     Syntax
     ----------
-    Z = pysesa.sgolay(z, window_size, order).getdata()
+    [] = PyHum.correct(humfile, sonpath, maxW, doplot)
 
     Parameters
     ----------
-    z : array_like, shape (N,)
-      the 2D signal.
-    window_size : int
-       the length of the window. Must be an odd integer number.
-    order : int
-       the order of the polynomial used in the filtering.
-       Must be less than `window_size` - 1.
+    humfile : str
+       path to the .DAT file
+    sonpath : str
+       path where the *.SON files are
+    maxW : int, *optional* [Default=1000]
+       maximum transducer power
+    doplot : int, *optional* [Default=1]
+       1 = make plots, otherwise do not
 
     Returns
     -------
-    self.data : ndarray, shape (N)
-       the smoothed signal.
+    sonpath+base+'_data_star_l.dat': memory-mapped file
+        contains the starboard scan with water column removed
 
-    References
-    ----------
-    .. [1] A. Savitzky, M. J. E. Golay, Smoothing and Differentiation of
-       Data by Simplified Least Squares Procedures. Analytical
-       Chemistry, 1964, 36 (8), pp 1627-1639.
-    .. [2] Numerical Recipes 3rd Edition: The Art of Scientific Computing
-       W.H. Press, S.A. Teukolsky, W.T. Vetterling, B.P. Flannery
-       Cambridge University Press ISBN-13: 9780521880688
+    sonpath+base+'_data_port_l.dat': memory-mapped file
+        contains the portside scan with water column removed
+
+    sonpath+base+'_data_star_la.dat': memory-mapped file
+        contains the starboard scan with water column removed and 
+        radiometrically corrected
+
+    sonpath+base+'_data_port_la.dat': memory-mapped file
+        contains the portside scan with water column removed and
+        radiometrically corrected
+
+    sonpath+base+'_data_range.dat': memory-mapped file
+        contains the cosine of the range which is used to correct
+        for attenuation with range
+
+    sonpath+base+'_data_dwnlow_l.dat': memory-mapped file
+        contains the low freq. downward scan with water column removed
+
+    sonpath+base+'_data_dwnhi_l.dat': memory-mapped file
+        contains the high freq. downward  scan with water column removed
+
+    sonpath+base+'_data_dwnlow_la.dat': memory-mapped file
+        contains the low freq. downward  scan with water column removed and 
+        radiometrically corrected
+
+    sonpath+base+'_data_dwnhi_la.dat': memory-mapped file
+        contains the high freq. downward  scan with water column removed and
+        radiometrically corrected
     '''
 
     # prompt user to supply file if no input file given

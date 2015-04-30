@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>&lt;no title&gt; &mdash; PyHum 1.2.3 documentation</title>
+    <title>pyhum.correct module &mdash; PyHum 1.2.3 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -51,7 +51,68 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  
+  <div class="section" id="pyhum-correct-module">
+<h1>pyhum.correct module<a class="headerlink" href="#pyhum-correct-module" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div>Remove water column and carry out some rudimentary radiometric corrections,
+accounting for directivity and attenuation with range</div></blockquote>
+<div class="section" id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
+<p>You call the function like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><dl class="docutils">
+<dt>humfile <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>path to the .DAT file</dd>
+<dt>sonpath <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>path where the <a href="#id1"><span class="problematic" id="id2">*</span></a>.SON files are</dd>
+<dt>maxW <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=1000]</span></dt>
+<dd>maximum transducer power</dd>
+<dt>doplot <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=1]</span></dt>
+<dd>1 = make plots, otherwise do not</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="returns">
+<h2>Returns<a class="headerlink" href="#returns" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><blockquote>
+<div><dl class="docutils">
+<dt>sonpath+base+&#8217;_data_star_l.dat&#8217;: memory-mapped file</dt>
+<dd>contains the starboard scan with water column removed</dd>
+<dt>sonpath+base+&#8217;_data_port_l.dat&#8217;: memory-mapped file</dt>
+<dd>contains the portside scan with water column removed</dd>
+<dt>sonpath+base+&#8217;_data_star_la.dat&#8217;: memory-mapped file</dt>
+<dd>contains the starboard scan with water column removed and
+radiometrically corrected</dd>
+<dt>sonpath+base+&#8217;_data_port_la.dat&#8217;: memory-mapped file</dt>
+<dd>contains the portside scan with water column removed and
+radiometrically corrected</dd>
+<dt>sonpath+base+&#8217;_data_range.dat&#8217;: memory-mapped file</dt>
+<dd>contains the cosine of the range which is used to correct
+for attenuation with range</dd>
+<dt>sonpath+base+&#8217;_data_dwnlow_l.dat&#8217;: memory-mapped file</dt>
+<dd>contains the low freq. downward scan with water column removed</dd>
+<dt>sonpath+base+&#8217;_data_dwnhi_l.dat&#8217;: memory-mapped file</dt>
+<dd>contains the high freq. downward  scan with water column removed</dd>
+<dt>sonpath+base+&#8217;_data_dwnlow_la.dat&#8217;: memory-mapped file</dt>
+<dd>contains the low freq. downward  scan with water column removed and
+radiometrically corrected</dd>
+<dt>sonpath+base+&#8217;_data_dwnhi_la.dat&#8217;: memory-mapped file</dt>
+<dd>contains the high freq. downward  scan with water column removed and
+radiometrically corrected</dd>
+</dl>
+</div></blockquote>
+<img alt="_images/pyhum_logo_colour_sm.png" src="_images/pyhum_logo_colour_sm.png" />
+</div></blockquote>
+</div>
+</div>
+
 
           </div>
         </div>
@@ -61,6 +122,16 @@
             <p class="logo"><a href="index.html">
               <img class="logo" src="_static/pyhum_logo_white.png" alt="Logo"/>
             </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pyhum.correct module</a><ul>
+<li><a class="reference internal" href="#syntax">Syntax</a></li>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#returns">Returns</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="pyhum.read.html"
                         title="previous chapter">pyhum.read module</a></p>
