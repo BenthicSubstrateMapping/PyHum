@@ -63,7 +63,7 @@ try:
    from tkFileDialog import askopenfilename, askdirectory
 except:
    pass
-from joblib import Parallel, delayed, cpu_count
+#from joblib import Parallel, delayed, cpu_count
 
 #numerical
 import numpy as np
@@ -304,13 +304,15 @@ def correct(humfile, sonpath, maxW, doplot):
 
     ## do plots of merged scans
     if doplot==1:
-      # treats each chunk in parallel for speed
-      try:
-         d = Parallel(n_jobs = min(cpu_count(),len(star_fp)), verbose=0)(delayed(plot_merged_scans)(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p) for p in xrange(len(star_fp)))
-      except:
-         print "memory error: trying serial"
-         d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_merged_scans)(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p) for p in xrange(len(star_fp)))
+       for p in xrange(len(star_fp)):
+          plot_merged_scans(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p)
 
+      ## treats each chunk in parallel for speed
+      #try:
+      #   d = Parallel(n_jobs = min(cpu_count(),len(star_fp)), verbose=0)(delayed(plot_merged_scans)(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p) for p in xrange(len(star_fp)))
+      #except:
+      #   print "memory error: trying serial"
+      #   d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_merged_scans)(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p) for p in xrange(len(star_fp)))
 
     # load memory mapped scans
     shape_low = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_low'])
@@ -354,12 +356,15 @@ def correct(humfile, sonpath, maxW, doplot):
        low_fp = np.memmap(sonpath+base+'_data_dwnlow_la.dat', dtype='float32', mode='r', shape=shape_low)
 
        if doplot==1:
-          # treats each chunk in parallel for speed
-          try:
-             d = Parallel(n_jobs = min(cpu_count(),len(low_fp)), verbose=0)(delayed(plot_dwnlow_scans)(low_fp[p], dist_m, shape_low, ft, sonpath, p) for p in xrange(len(low_fp)))
-          except:
-             print "memory error: trying serial"
-             d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_dwnlow_scans)(low_fp[p], dist_m, shape_low, ft, sonpath, p) for p in xrange(len(low_fp)))
+          for p in xrange(len(low_fp)):
+             plot_dwnlow_scans(low_fp[p], dist_m, shape_low, ft, sonpath, p)
+
+          ## treats each chunk in parallel for speed
+          #try:
+          #   d = Parallel(n_jobs = min(cpu_count(),len(low_fp)), verbose=0)(delayed(plot_dwnlow_scans)(low_fp[p], dist_m, shape_low, ft, sonpath, p) for p in xrange(len(low_fp)))
+          #except:
+          #   print "memory error: trying serial"
+          #   d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_dwnlow_scans)(low_fp[p], dist_m, shape_low, ft, sonpath, p) for p in xrange(len(low_fp)))
 
 
     if 'hi_fp' in locals():
@@ -395,12 +400,15 @@ def correct(humfile, sonpath, maxW, doplot):
        hi_fp = np.memmap(sonpath+base+'_data_dwnhi_la.dat', dtype='float32', mode='r', shape=shape_hi)
 
        if doplot==1:
-          # treats each chunk in parallel for speed
-          try:
-             d = Parallel(n_jobs = min(cpu_count(),len(hi_fp)), verbose=0)(delayed(plot_dwnhi_scans)(hi_fp[p], dist_m, shape_hi, ft, sonpath, p) for p in xrange(len(hi_fp)))
-          except:
-             print "memory error: trying serial"
-             d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_dwnhi_scans)(hi_fp[p], dist_m, shape_hi, ft, sonpath, p) for p in xrange(len(hi_fp)))
+          for p in xrange(len(hi_fp)):
+             plot_dwnhi_scans(hi_fp[p], dist_m, shape_low, ft, sonpath, p)
+
+          ## treats each chunk in parallel for speed
+          #try:
+          #   d = Parallel(n_jobs = min(cpu_count(),len(hi_fp)), verbose=0)(delayed(plot_dwnhi_scans)(hi_fp[p], dist_m, shape_hi, ft, sonpath, p) for p in xrange(len(hi_fp)))
+          #except:
+          #   print "memory error: trying serial"
+          #   d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_dwnhi_scans)(hi_fp[p], dist_m, shape_hi, ft, sonpath, p) for p in xrange(len(hi_fp)))
              
 
     if os.name=='posix': # true if linux/mac
