@@ -71,8 +71,8 @@ def dotest():
    shutil.copy(PyHum.__path__[0]+os.sep+'test.DAT', os.path.expanduser("~")+os.sep+'pyhum_test'+os.sep+'test.DAT')
 
    # general settings   
-   humfile = os.path.expanduser("~")+os.sep+'pyhum_test'+os.sep+'test.DAT'+os.sep #PyHum.__path__[0]+os.sep+'test.DAT'
-   sonpath = os.path.expanduser("~")+os.sep+'pyhum_test'+os.sep #PyHum.__path__[0]
+   humfile = os.path.expanduser("~")+os.sep+'pyhum_test'+os.sep+'test.DAT' #PyHum.__path__[0]+os.sep+'test.DAT'
+   sonpath = os.path.expanduser("~")+os.sep+'pyhum_test' #PyHum.__path__[0]
    doplot = 1 #yes
 
    # reading specific settings
