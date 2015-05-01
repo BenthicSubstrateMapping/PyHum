@@ -12,11 +12,11 @@ PyHum/RunningStats_wrap.cxx
 PyHum/__init__.py
 PyHum/_cwt.pyx
 PyHum/_ppdrc.pyx
-PyHum/_pyhum_correct_class.py
+PyHum/_pyhum_correct.py
 PyHum/_pyhum_map.py
 PyHum/_pyhum_map_texture.py
-PyHum/_pyhum_read_class.py
-PyHum/_pyhum_texture_class.py
+PyHum/_pyhum_read.py
+PyHum/_pyhum_texture.py
 PyHum/_pyread.pyx
 PyHum/_replace_nans.pyx
 PyHum/_spec_noise.pyx

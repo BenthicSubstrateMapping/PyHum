@@ -198,7 +198,7 @@ def correct(humfile, sonpath, maxW, doplot):
        sonpath = sonpath + os.sep
 
     base = humfile.split('.DAT') # get base of file name for output
-    base = base[0].split('/')[-1]
+    base = base[0].split(os.sep)[-1]
 
     # add wattage to metadata dict 
     meta = loadmat(sonpath+base+'meta.mat')
