@@ -83,6 +83,8 @@ def dotest():
    f = 455 # frequency kHz
    draft = 0.3 # draft in metres
    flip_lr = 1 # flip port and starboard
+   model = 998 # humminbird model
+   chunk_size = 0 # auto chunk size
 
    # correction specific settings
    maxW = 1000 # rms output wattage
@@ -101,9 +103,8 @@ def dotest():
    calc_bearing = 0 #no
    filt_bearing = 1 #yes
    res = 0.05 # grid resolution in metres
-   chunk_size = 0 # auto chunk size
 
-   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size)
+   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
 
    PyHum.correct(humfile, sonpath, maxW, doplot)
 

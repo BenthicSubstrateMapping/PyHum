@@ -304,24 +304,26 @@ def correct(humfile, sonpath, maxW, doplot):
 
     ## do plots of merged scans
     if doplot==1:
-       for p in xrange(len(star_fp)):
-          plot_merged_scans(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p)
-
-      ## treats each chunk in parallel for speed
-      #try:
-      #   d = Parallel(n_jobs = min(cpu_count(),len(star_fp)), verbose=0)(delayed(plot_merged_scans)(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p) for p in xrange(len(star_fp)))
-      #except:
-      #   print "memory error: trying serial"
-      #   d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_merged_scans)(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p) for p in xrange(len(star_fp)))
+      for p in xrange(len(star_fp)):
+         plot_merged_scans(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p)
 
     # load memory mapped scans
     shape_low = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_low'])
     if shape_low!='':
-       low_fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='r', shape=tuple(shape_low))
+       try:
+          low_fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='r', shape=tuple(shape_low))
+       except:
+          if 'shape_hi' in locals():
+             low_fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='r', shape=tuple(shape_hi))
 
     shape_hi = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_hi'])
     if shape_hi!='':
-       hi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=tuple(shape_hi))
+       try:
+          hi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=tuple(shape_hi))
+       except:
+          if 'shape_low' in locals():
+             hi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=tuple(shape_low))
+
 
     if 'low_fp' in locals():
        ######### low
@@ -359,14 +361,6 @@ def correct(humfile, sonpath, maxW, doplot):
           for p in xrange(len(low_fp)):
              plot_dwnlow_scans(low_fp[p], dist_m, shape_low, ft, sonpath, p)
 
-          ## treats each chunk in parallel for speed
-          #try:
-          #   d = Parallel(n_jobs = min(cpu_count(),len(low_fp)), verbose=0)(delayed(plot_dwnlow_scans)(low_fp[p], dist_m, shape_low, ft, sonpath, p) for p in xrange(len(low_fp)))
-          #except:
-          #   print "memory error: trying serial"
-          #   d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_dwnlow_scans)(low_fp[p], dist_m, shape_low, ft, sonpath, p) for p in xrange(len(low_fp)))
-
-
     if 'hi_fp' in locals():
        ######### hi
        Zt = remove_water(hi_fp, bed, shape_hi, dep_m, pix_m, 0,  maxW)
@@ -401,15 +395,7 @@ def correct(humfile, sonpath, maxW, doplot):
 
        if doplot==1:
           for p in xrange(len(hi_fp)):
-             plot_dwnhi_scans(hi_fp[p], dist_m, shape_low, ft, sonpath, p)
-
-          ## treats each chunk in parallel for speed
-          #try:
-          #   d = Parallel(n_jobs = min(cpu_count(),len(hi_fp)), verbose=0)(delayed(plot_dwnhi_scans)(hi_fp[p], dist_m, shape_hi, ft, sonpath, p) for p in xrange(len(hi_fp)))
-          #except:
-          #   print "memory error: trying serial"
-          #   d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_dwnhi_scans)(hi_fp[p], dist_m, shape_hi, ft, sonpath, p) for p in xrange(len(hi_fp)))
-             
+             plot_dwnhi_scans(hi_fp[p], dist_m, shape_hi, ft, sonpath, p)
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)

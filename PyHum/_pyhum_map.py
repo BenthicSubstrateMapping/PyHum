@@ -395,30 +395,34 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
       glon, glat = trans(grid_x, grid_y, inverse=True)
       del grid_x, grid_y
 
-   print "drawing and printing map ..."
-   fig = plt.figure(frameon=False)
-   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
-    resolution = 'i', #h #f
-    llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
-    urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
+   try:
+      print "drawing and printing map ..."
+      fig = plt.figure(frameon=False)
+      map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
+       resolution = 'i', #h #f
+       llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
+       urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
 
-   if dogrid==1:
-      gx,gy = map.projtran(glon, glat)
+      if dogrid==1:
+         gx,gy = map.projtran(glon, glat)
 
-   ax = plt.Axes(fig, [0., 0., 1., 1.], )
-   ax.set_axis_off()
-   fig.add_axes(ax)
+      ax = plt.Axes(fig, [0., 0., 1., 1.], )
+      ax.set_axis_off()
+      fig.add_axes(ax)
 
-   if dogrid==1:
-      map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(dat), vmax=np.nanmax(dat))
-      del datm, dat
-   else: 
-      ## draw point cloud
-      x,y = map.projtran(humlon, humlat)
-      map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='gray', linewidth = '0')
+      if dogrid==1:
+         map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(dat), vmax=np.nanmax(dat))
+         del datm, dat
+      else: 
+         ## draw point cloud
+         x,y = map.projtran(humlon, humlat)
+         map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='gray', linewidth = '0')
 
-   custom_save(sonpath,'map'+str(p))
-   del fig 
+      custom_save(sonpath,'map'+str(p))
+      del fig 
+
+   except:
+      print "error: map could not be created..."
 
    kml = simplekml.Kml()
    ground = kml.newgroundoverlay(name='GroundOverlay')

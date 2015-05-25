@@ -93,7 +93,7 @@ __all__ = [
     ]
 
 #################################################
-def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize):
+def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize, model):
 
     '''
     Read a .DAT and associated set of .SON files recorded by a Humminbird(R)
@@ -108,7 +108,7 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
 
     Syntax
     ----------
-    [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize)
+    [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize, model)
 
     Parameters
     ------------
@@ -142,6 +142,9 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
        are 'chunksize' scans long. A scan is a ping, or the simultaneous
        acquisition of a port and starboard scan. A typical value to keep 
        data chunks a manageable (small) size is 10,000 - 50,000
+    model: int, *optional* 9Default=998]
+       A 3 or 4 number code indicating the model number 
+       Examples: 998, 997, 1198, 1199
      
     Returns
     ---------
@@ -254,6 +257,9 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
       else:
          print 'Chunk size: %s' % (str(chunksize))
 
+    if model:
+       model = int(model)
+       print "Data is from the %s series"  % (str(model))
 
     if not t:
       t = 0.108
@@ -287,6 +293,9 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
       chunksize = 0
       print '[Default] Chunk size will be determined automatically'
       
+    if not model:
+       model = 998
+       print "[Default] Data is from the %s series"  % (str(model))
 
     ## for debugging
     #humfile = r"test.DAT"; sonpath = "test_data"
@@ -300,7 +309,7 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
        start = time.clock()
 
     # number of bytes in a header packet in SON file
-    headbytes = 67
+    #headbytes = 67
 
     # if son path name supplied has no separator at end, put one on
     if sonpath[-1]!=os.sep:
@@ -317,7 +326,7 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
     print "WARNING: Because files have to be read in byte by byte,"
     print "this could take a very long time ..."
 
-    data = pyread.pyread(sonfiles, humfile, c, headbytes, cs2cs_args)
+    data = pyread.pyread(sonfiles, humfile, c, model, cs2cs_args)
 
     dat = data.gethumdat() 
     metadat = data.getmetadata()
@@ -366,6 +375,47 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
        data_star = ''
        print "starboardside scan not available"
 
+
+    if 'star_fp' in locals() and 'port_fp' in locals():
+       # check that port and starboard are same size
+       # and trim if not
+       if np.shape(star_fp)!=np.shape(port_fp):
+          if np.shape(port_fp[0])[1] > np.shape(star_fp[0])[1]:
+             tmp = port_fp.copy()
+             tmp2 = np.empty_like(star_fp)
+             for k in xrange(len(tmp)):
+                 tmp2[k] = tmp[k][:,:np.shape(star_fp[k])[1]]
+             del tmp
+             # create memory mapped file for Z
+             fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='w+', shape=np.shape(tmp2))
+             fp[:] = tmp2[:]
+             del fp
+             shape_port = np.shape(tmp2)
+             del tmp2
+             #we are only going to access the portion of memory required
+             port_fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='r', shape=shape_port)
+             ind_port = list(ind_port)
+             ind_port[-1] = np.shape(star_fp[0])[1]
+             ind_port = tuple(ind_port)
+
+          elif np.shape(port_fp[0])[1] < np.shape(star_fp[0])[1]:
+             tmp = star_fp.copy()
+             tmp2 = np.empty_like(port_fp)
+             for k in xrange(len(tmp)):
+                 tmp2[k] = tmp[k][:,:np.shape(port_fp[k])[1]]
+             del tmp
+             # create memory mapped file for Z
+             fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='w+', shape=np.shape(tmp2))
+             fp[:] = tmp2[:]
+             del fp
+             shape_star = np.shape(tmp2)
+             del tmp2
+             #we are only going to access the portion of memory required
+             star_fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='r', shape=shape_star)
+             ind_star = list(ind_star)
+             ind_star[-1] = np.shape(port_fp[0])[1]
+             ind_star = tuple(ind_star)
+
     try:
        data_dwnlow = data.getlowscans().astype('int16')
 
@@ -411,6 +461,47 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
        data_dwnhi = ''
        print "high-freq. scan not available"
 
+
+    if 'dwnhi_fp' in locals() and 'dwnlow_fp' in locals():
+       # check that low and high are same size
+       # and trim if not
+       if np.shape(dwnhi_fp)!=np.shape(dwnlow_fp):
+          if np.shape(dwnhi_fp[0])[1] > np.shape(dwnlow_fp[0])[1]:
+             tmp = dwnhi_fp.copy()
+             tmp2 = np.empty_like(dwnlow_fp)
+             for k in xrange(len(tmp)):
+                 tmp2[k] = tmp[k][:,:np.shape(dwnlow_fp[k])[1]]
+             del tmp
+             # create memory mapped file for Z
+             fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='w+', shape=np.shape(tmp2))
+             fp[:] = tmp2[:]
+             del fp
+             shape_dwnhi = np.shape(tmp2)
+             del tmp2
+             #we are only going to access the portion of memory required
+             dwnhi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=shape_dwnhi)
+             ind_hi = list(ind_hi)
+             ind_hi[-1] = np.shape(dwnlow_fp[0])[1]
+             ind_hi = tuple(ind_hi)
+
+          elif np.shape(dwnhi_fp[0])[1] < np.shape(dwnlow_fp[0])[1]:
+             tmp = dwnlow_fp.copy()
+             tmp2 = np.empty_like(dwnhi_fp)
+             for k in xrange(len(tmp)):
+                 tmp2[k] = tmp[k][:,:np.shape(dwnhi_fp[k])[1]]
+             del tmp
+             # create memory mapped file for Z
+             fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='w+', shape=np.shape(tmp2))
+             fp[:] = tmp2[:]
+             del fp
+             shape_dwnlow = np.shape(tmp2)
+             del tmp2
+             #we are only going to access the portion of memory required
+             dwnlow_fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='r', shape=shape_dwnlow)
+             ind_low = list(ind_low)
+             ind_low[-1] = np.shape(dwnhi_fp[0])[1]
+             ind_low = tuple(ind_low)
+
     del data
 
     if chunksize!=0:
@@ -428,7 +519,11 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
     metadat['es'] = es
     metadat['ns'] = ns
 
-    trans =  pyproj.Proj(init=cs2cs_args)
+    try:
+       trans =  pyproj.Proj(init=cs2cs_args)
+    except:
+       trans =  pyproj.Proj(cs2cs_args.lstrip(), inverse=True)       
+
     lon, lat = trans(es, ns, inverse=True)
     metadat['lon'] = lon
     metadat['lat'] = lat
@@ -483,71 +578,74 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
 
     metadat['dist_m'] = dist_m
 
-    if bedpick == 1: # auto
+    if 'port_fp' in locals() and 'star_fp' in locals():
 
-       # get bed from depth trace
-       bed = ft*dep_m
+       if bedpick == 1: # auto
 
-       imu = []
-       for k in xrange(len(port_fp)):
-          imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
-       imu = np.hstack(imu)
+          # get bed from depth trace
+          bed = ft*dep_m
 
-       ## narrow image to within range of estimated bed
-       #imu = data_port[int(np.min(bed)):int(np.max(bed)),:]
-       # use dynamic boundary tracing to get 2nd estimate of bed  
-       x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T))
-       del imu 
+          imu = []
+
+          for k in xrange(len(port_fp)):
+             imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
+          imu = np.hstack(imu)
+
+          ## narrow image to within range of estimated bed
+          #imu = data_port[int(np.min(bed)):int(np.max(bed)),:]
+          # use dynamic boundary tracing to get 2nd estimate of bed  
+          x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T))
+          del imu 
+
+          if len(x)<len(bed):
+             x = np.append(x,x[-1]*np.ones(len(bed)-len(x)))
+          elif len(x)>len(bed):
+             bed = np.append(bed,bed[-1]*np.ones(len(x)-len(bed)))
+
+          if len(dist_m)<len(bed):
+             dist_m = np.append(dist_m,dist_m[-1]*np.ones(len(bed)-len(dist_m)))
+
+          if doplot==1:
+             for k in xrange(len(star_fp)):
+                plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+
+          # 'real' bed is estimated to be the minimum of the two
+          #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
+          bed = np.min(np.vstack((bed[:nrec],np.squeeze(x[:nrec]))),axis=0) 
+          del x
+
+       else: #manual
+  
+          beds=[]
+          for k in xrange(len(port_fp)):
+             raw_input("Bed picking "+str(k+1)+" of "+str(len(port_fp))+", are you ready? 30 seconds. Press Enter to continue...")
+             bed={}
+             fig = plt.figure()
+             ax = plt.gca()
+             im = ax.imshow(port_fp[k], cmap = 'gray', origin = 'upper')
+             pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 60 seconds
+             x1=map(lambda x: x[0],pts1) # map applies the function passed as 
+             y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
+             bed = np.interp(np.r_[:ind_port[-1]],x1,y1)
+             plt.close()
+             del fig
+             beds.append(bed)
+             extent = np.shape(port_fp[k])[0]
+          bed = np.asarray(np.hstack(beds),'float')
+
+       # now revise the depth in metres
+       dep_m = (1/ft)*bed
 
        if doplot==1:
+
           for k in xrange(len(star_fp)):
-             plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+             plot_bedpick(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
 
-          # treats each chunk in parallel for speed
-#          try:
-#             d = Parallel(n_jobs = min(cpu_count(),len(star_fp)), verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
-#          except:
-#             print "memory error: trying serial"
-#             d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
 
-       # 'real' bed is estimated to be the minimum of the two
-       #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
-       bed = np.min(np.vstack((bed,np.squeeze(x[:len(bed)]))),axis=0) 
-       del x
+       metadat['bed'] = bed[:nrec]
 
-    else: #manual
-
-       beds=[]
-       for k in xrange(len(port_fp)):
-          raw_input("Bed picking "+str(k+1)+" of "+str(len(port_fp))+", are you ready? 30 seconds. Press Enter to continue...")
-          bed={}
-          fig = plt.figure()
-          ax = plt.gca()
-          im = ax.imshow(port_fp[k], cmap = 'gray', origin = 'upper')
-          pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 60 seconds
-          x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-          y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-          bed = np.interp(np.r_[:ind_port[-1]],x1,y1)
-          plt.close()
-          del fig
-          beds.append(bed)
-          extent = np.shape(port_fp[k])[0]
-       bed = np.asarray(np.hstack(beds),'float')
-
-    # now revise the depth in metres
-    dep_m = (1/ft)*bed
-
-    if doplot==1:
-
-       for k in xrange(len(star_fp)):
-          plot_bedpick(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
-
-#       # treats each chunk in parallel for speed
-#       try:
-#          d = Parallel(n_jobs = min(cpu_count(),len(star_fp)), verbose=0)(delayed(plot_bedpick)(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
-#       except:
-#          print "memory error: trying serial"
-#          d = Parallel(n_jobs = 1, verbose=0)(delayed(plot_bedpick)(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
+    else:
+       metadat['bed'] = dep_m[:nrec]*ft
 
     #heading = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])[:nrec]
     metadat['heading'] = metadat['heading'][:nrec]

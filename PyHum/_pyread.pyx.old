@@ -43,7 +43,7 @@ cdef class pyread:
     cdef object humdat
     
     # =========================================================
-    def __init__(self, list sonfiles, str humfile, float c, int model=998, str cs2cs_args1="epsg:26949"):
+    def __init__(self, list sonfiles, str humfile, float c, int headbytes=67, str cs2cs_args1="epsg:26949"):
        """
        PyRead
 
@@ -52,18 +52,12 @@ cdef class pyread:
        cs2cs_args1: blah blah blah
        """
 
-       if model==798:
-          headbytes=72
-       elif model==1199:
-          headbytes=68
-       else: #tested so far 998, 1198
-          headbytes=67
+       trans =  pyproj.Proj(init=cs2cs_args1)
 
-       try:
-          trans =  pyproj.Proj(init=cs2cs_args1)
-       except:
-          trans =  pyproj.Proj(cs2cs_args1.lstrip(), inverse=True)       
-
+       # world mercator
+       #cdef str cs2cs_args2 = '+proj=merc +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs +proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs'
+       #transWGS84 =  pyproj.Proj(cs2cs_args2)
+       
        fid2 = open(humfile,'rb')
        humdat = self._decode_humdat(fid2, trans) #, transWGS84)
        self.humdat = humdat
@@ -96,7 +90,7 @@ cdef class pyread:
      
           fid = open(sonfile,'rb')
           for i from 0 <= i < len(dfbreak):              
-             tmpdata.append(self._gethead(fid,trans, c, model, humdat['linesize'])) # get header for packet transWGS84,
+             tmpdata.append(self._gethead(fid,trans, c)) # get header for packet transWGS84,
              ints_list = []
              for j from 0 <= j < dfbreak[i]-headbytes:                 
                 ints_list.append(struct.unpack('>B', ''.join(self._fread(fid,1,'c')) )[0])
@@ -166,7 +160,7 @@ cdef class pyread:
           return(list(dat))
 
     # =========================================================
-    def _gethead(self, fid, trans, float c, int model, int linesize): #transWGS84,
+    def _gethead(self, fid, trans, float c): #transWGS84,
        cdef list hd = self._fread(fid, 3, 'B')
        cdef list head=[] #pre-allocate list
        cdef int flag
@@ -200,62 +194,24 @@ cdef class pyread:
        head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps1
        head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # heading_deg    
 
-       if model==1199:  
-          spacer = self._fread(fid, 1, 'B')
-          head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps2
-          head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # speed_ms
-          spacer = self._fread(fid, 6, 'B')
-
-          head.append(float(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0])/10) # depth_m
-          spacer = self._fread(fid, 1, 'B')
-           #%0 (50 or 83 kHz), 1 (200 kHz), 2 (SI Poort), 3 (SI Starboard)
-          head.append(self._fread(fid, 1, 'B')[0]) #beam
-          spacer = self._fread(fid, 1, 'B')
-          head.append(self._fread(fid, 1, 'B')[0]) #voltscale
-          spacer = self._fread(fid, 1, 'B')
-          head.append(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0]/1000) # freq_khz
-          spacer = self._fread(fid, 15, 'B')
-          head.append(linesize) #struct.unpack('>i', ''.join(fread(fid,4,'c')) )[0]) #sentlen 2438
+       spacer = self._fread(fid, 1, 'B')
+       head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps2
+       head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # speed_ms
+       spacer = self._fread(fid, 1, 'B')
+       head.append(float(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0])/10) # depth_m
+       spacer = self._fread(fid, 1, 'B')
+       #%0 (50 or 83 kHz), 1 (200 kHz), 2 (SI Poort), 3 (SI Starboard)
+       head.append(self._fread(fid, 1, 'B')[0]) #beam
+       spacer = self._fread(fid, 1, 'B')
+       head.append(self._fread(fid, 1, 'B')[0]) #voltscale
+       spacer = self._fread(fid, 1, 'B')
+       head.append(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0]/1000) # freq_khz
+       spacer = self._fread(fid, 5, 'B')
+       spacer = self._fread(fid,4,'c')
+       spacer = self._fread(fid, 5, 'B')
+       head.append(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0]) #sentlen
+       spacer = self._fread(fid, 1, 'B')          
        
-       elif model==798:  
-          spacer = self._fread(fid, 1, 'B')
-          head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps2
-          head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # speed_ms
-          spacer = self._fread(fid, 6, 'B')
-          head.append(float(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0])/10) # depth_m
-
-          spacer = self._fread(fid, 1, 'B')  # 50
-          #%0 (50 or 83 kHz), 1 (200 kHz), 2 (SI Poort), 3 (SI Starboard)
-          head.append(self._fread(fid, 1, 'B')[0]) #beam
-          spacer = self._fread(fid, 1, 'B')  
-          head.append(self._fread(fid, 1, 'B')[0]) #voltscale
-          spacer = self._fread(fid, 1, 'B')  # 92
-          head.append(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0]/1000) # freq_khz
-          spacer = self._fread(fid, 1, 'B')   # 53
-          spacer = self._fread(fid, 12,'c')
-          spacer = self._fread(fid, 1, 'B')    # A0
-          head.append(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0]) #sentlen
-          spacer = self._fread(fid, 1, 'B')   # 21      then data  
-
-       else:
-          spacer = self._fread(fid, 1, 'B')
-          head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps2
-          head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # speed_ms
-          spacer = self._fread(fid, 1, 'B')
-          head.append(float(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0])/10) # depth_m
-          spacer = self._fread(fid, 1, 'B')
-          #%0 (50 or 83 kHz), 1 (200 kHz), 2 (SI Poort), 3 (SI Starboard)
-          head.append(self._fread(fid, 1, 'B')[0]) #beam
-          spacer = self._fread(fid, 1, 'B')
-          head.append(self._fread(fid, 1, 'B')[0]) #voltscale
-          spacer = self._fread(fid, 1, 'B')
-          head.append(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0]/1000) # freq_khz
-          spacer = self._fread(fid, 5, 'B')
-          spacer = self._fread(fid,4,'c')
-          spacer = self._fread(fid, 5, 'B')
-          head.append(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0]) #sentlen
-          spacer = self._fread(fid, 1, 'B')          
-
        # channel name
        if head[9]==0:
           head.append('down_lowfreq')
@@ -279,6 +235,7 @@ cdef class pyread:
           #x_utm, y_utm = self._calc_beam_pos(dist, bearing, (head[2],head[3]))
           x_utm = head[2]
           y_utm = head[3]
+          #lon, lat = transWGS84(x_utm,y_utm, inverse=True)
           lat = atan(tan(atan(exp(y_utm/ 6378388.0)) * 2.0 - 1.570796326794897) * 1.0067642927) * 57.295779513082302
           lon = x_utm * 57.295779513082302 / 6378388.0
            
@@ -286,10 +243,16 @@ cdef class pyread:
           head.append(lon)
           lon, lat = trans(lon, lat)
           head.append(lat)
-          head.append(lon)      
+          head.append(lon)
+
+       #lon, lat = transWGS84(head[2],head[3], inverse=True)
+       #head.append(lat)
+       #head.append(lon)
+       #lon, lat = trans(lon, lat)
+       #head.append(lat)
+       #head.append(lon)       
        
        return head
-
 
     # =========================================================
     def _decode_humdat(self, fid2, trans): #, transWGS84): 
