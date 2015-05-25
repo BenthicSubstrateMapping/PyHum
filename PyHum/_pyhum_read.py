@@ -142,7 +142,7 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
        are 'chunksize' scans long. A scan is a ping, or the simultaneous
        acquisition of a port and starboard scan. A typical value to keep 
        data chunks a manageable (small) size is 10,000 - 50,000
-    model: int, *optional* 9Default=998]
+    model: int, *optional* [Default=998]
        A 3 or 4 number code indicating the model number 
        Examples: 998, 997, 1198, 1199
      

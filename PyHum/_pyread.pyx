@@ -77,35 +77,63 @@ cdef class pyread:
        cdef list tmpdata = [] 
               
        for sonfile in sonfiles:
-          fid = open(sonfile,'rb')
-          dat = self._fread(fid,os.path.getsize(sonfile), 'c')
-          fid.close()
 
-          # unpack into integers
-          for i from 0 <= i < len(dat):
-             int_list.append(struct.unpack('>B', dat[i])[0])
-          dat = [] 
+          try: #faster to use the idx file, if it exists
+             idxfile = sonfile.split('.SON')[0]+'.IDX'
+             idxfid = open(idxfile,'rb')
+             result = None
+             while result is None:
+               try:
+                 spacer = self._fread(idxfid, 4, 'B')
+                 dfbreak.append(struct.unpack('>i', ''.join(self._fread(idxfid,4,'c')) )[0])
+               except:
+                 result = 1
+             idxfid.close()
+             dfbreak = np.diff(dfbreak).tolist()
 
-          # find the start sequences in the list of integers
-          for s in self._KnuthMorrisPratt(int_list, [192,222,171,33,128]): 
-             fbreak.append(s)
-          int_list = [] 
+             fid = open(sonfile,'rb')
+             for i from 0 <= i < len(dfbreak):       
+                tmpdata.append(self._gethead(fid,trans,c, humdat['linesize']))
+                ints_list = []
+                for j from 0 <= j < dfbreak[i]-headbytes:                 
+                   ints_list.append(struct.unpack('>B', ''.join(self._fread(fid,1,'c')) )[0])
+                tmpdata.append(ints_list) # grab the sonar data     
+             dfbreak = [] 
+             data.append(tmpdata)  
+             tmpdata = []   
+     
+             fid.close()
+
+          except: #if idx is absent, or empty, or if son files are corrupted
+             fid = open(sonfile,'rb')
+             dat = self._fread(fid,os.path.getsize(sonfile), 'c')
+             fid.close()
+
+             # unpack into integers
+             for i from 0 <= i < len(dat):
+                int_list.append(struct.unpack('>B', dat[i])[0])
+             dat = [] 
+
+             # find the start sequences in the list of integers
+             for s in self._KnuthMorrisPratt(int_list, [192,222,171,33,128]): 
+                fbreak.append(s)
+             int_list = [] 
           
-          dfbreak = [ x-y for (x,y) in zip(fbreak[1:],fbreak[:-1]) ]
-          fbreak = []
+             dfbreak = [ x-y for (x,y) in zip(fbreak[1:],fbreak[:-1]) ]
+             fbreak = []
      
-          fid = open(sonfile,'rb')
-          for i from 0 <= i < len(dfbreak):              
-             tmpdata.append(self._gethead(fid,trans, c, model, humdat['linesize'])) # get header for packet transWGS84,
-             ints_list = []
-             for j from 0 <= j < dfbreak[i]-headbytes:                 
-                ints_list.append(struct.unpack('>B', ''.join(self._fread(fid,1,'c')) )[0])
-             tmpdata.append(ints_list) # grab the sonar data     
-          dfbreak = [] 
-          data.append(tmpdata)  
-          tmpdata = []   
+             fid = open(sonfile,'rb')
+             for i from 0 <= i < len(dfbreak):              
+                tmpdata.append(self._gethead(fid,trans, c, model, humdat['linesize'])) # get header for packet transWGS84,
+                ints_list = []
+                for j from 0 <= j < dfbreak[i]-headbytes:                 
+                   ints_list.append(struct.unpack('>B', ''.join(self._fread(fid,1,'c')) )[0])
+                tmpdata.append(ints_list) # grab the sonar data     
+             dfbreak = [] 
+             data.append(tmpdata)  
+             tmpdata = []   
      
-          fid.close()
+             fid.close()
           
        self.data = data
        return
