@@ -100,7 +100,7 @@ def map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, c
 
     Syntax
     ----------
-    [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
+    [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
 
     Parameters
     ----------
