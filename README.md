@@ -27,7 +27,7 @@ Python/Cython scripts to:
           | United States Geological Survey
           | Flagstaff, AZ 86001
           | dbuscombe@usgs.gov
-Version: 1.1.7    |  Revision: Mar, 2015
+Version: 1.1.9    |  Revision: May, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -46,7 +46,7 @@ Any use of trade, product, or firm names is for descriptive purposes only and do
 thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info
 
 This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4 & 14.4, Windows 7.
-This software has (so far) been used only with Humminbird 998 and 1198 series instruments. 
+This software has (so far) been used only with Humminbird 798, 998, 1198 and 1199 series instruments. 
 
 ### Contents
 

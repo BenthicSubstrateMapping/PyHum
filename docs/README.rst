@@ -94,7 +94,7 @@ Download the .whl file, then use pip to install it, e.g.::
   pip install pyproj-1.9.4-cp27-none-win_amd64.whl
 
 
-This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4 & 14.4, Windows 7. This software has (so far) been used only with Humminbird 998 and 1198 series instruments. 
+This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4 & 14.4, Windows 7. This software has (so far) been used only with Humminbird 798, 998, 1198 and 1199 series instruments. 
 
 
 .. _virtualenv:
