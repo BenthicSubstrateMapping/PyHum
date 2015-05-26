@@ -194,7 +194,7 @@ def setupPackage():
          cmdclass = cmdclass,
          ext_modules=ext_modules,
          platforms='OS Independent',
-         package_data={'PyHum': ['*.SON', '*.DAT','*.h',]}
+         package_data={'PyHum': ['*.SON', '*.DAT','*.h']}
    )
 
 if __name__ == '__main__':

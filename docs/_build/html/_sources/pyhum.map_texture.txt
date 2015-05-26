@@ -14,7 +14,7 @@ Syntax
 ----------
 You call the function like this::
 
-  [] = PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
+  [] = PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
 
 Parameters
 ------------
@@ -29,12 +29,15 @@ Parameters
     dogrid : float, *optional* [Default=1]
        if 1, textures will be gridded with resolution 'res'. 
        Otherwise, point cloud will be plotted
-    calc_bearing : float, *optional* [Default=1]
+    calc_bearing : float, *optional* [Default=0]
        if 1, bearing will be calculated from coordinates
-    filt_bearing : float, *optional* [Default=1]
+    filt_bearing : float, *optional* [Default=0]
        if 1, bearing will be filtered
-    res : float, *optional* [Default=1]
+    res : float, *optional* [Default=0.1]
        grid resolution of output gridded texture map
+    cog : int, *optional* [Default=1]
+       if 1, heading calculated assuming GPS course-over-ground rather than
+       using a compass
 
 Returns
 ---------

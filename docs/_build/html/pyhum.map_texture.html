@@ -63,7 +63,7 @@ and could provide a basis for objective, automated riverbed sediment classificat
 <div class="section" id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
 <p>You call the function like this:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">map_texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">map_texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">cog</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -82,12 +82,15 @@ into any projection supported by the proj.4 libraries</dd>
 <dt>dogrid <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=1]</span></dt>
 <dd>if 1, textures will be gridded with resolution &#8216;res&#8217;.
 Otherwise, point cloud will be plotted</dd>
-<dt>calc_bearing <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=1]</span></dt>
+<dt>calc_bearing <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=0]</span></dt>
 <dd>if 1, bearing will be calculated from coordinates</dd>
-<dt>filt_bearing <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=1]</span></dt>
+<dt>filt_bearing <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=0]</span></dt>
 <dd>if 1, bearing will be filtered</dd>
-<dt>res <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=1]</span></dt>
+<dt>res <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=0.1]</span></dt>
 <dd>grid resolution of output gridded texture map</dd>
+<dt>cog <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=1]</span></dt>
+<dd>if 1, heading calculated assuming GPS course-over-ground rather than
+using a compass</dd>
 </dl>
 </div></blockquote>
 </div>

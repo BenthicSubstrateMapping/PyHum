@@ -92,7 +92,7 @@ __all__ = [
     ]
 
 #################################################
-def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res):
+def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog):
          
     '''
     Create plots of the texture lengthscale maps made in PyHum.texture module 
@@ -119,12 +119,15 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
     dogrid : float, *optional* [Default=1]
        if 1, textures will be gridded with resolution 'res'. 
        Otherwise, point cloud will be plotted
-    calc_bearing : float, *optional* [Default=1]
+    calc_bearing : float, *optional* [Default=0]
        if 1, bearing will be calculated from coordinates
-    filt_bearing : float, *optional* [Default=1]
+    filt_bearing : float, *optional* [Default=10
        if 1, bearing will be filtered
-    res : float, *optional* [Default=1]
+    res : float, *optional* [Default=0.5]
        grid resolution of output gridded texture map
+    cog : int, *optional* [Default=1]
+       if 1, heading calculated assuming GPS course-over-ground rather than
+       using a compass
 
     Returns
     -------
@@ -191,6 +194,11 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
        res = np.asarray(res,float)
        print 'Gridding resolution: %s' % (str(res))      
 
+    if cog:
+       cog = int(cog)
+       if cog==1:
+          print "Heading based on course-over-ground" 
+
     if not cs2cs_args:
        # arguments to pass to cs2cs for coordinate transforms
        cs2cs_args = "epsg:26949"
@@ -207,13 +215,18 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
           print "[Default] Heading recorded by instrument will be used"
 
     if not filt_bearing:
-       if filt_bearing != 0:
-          filt_bearing = 1
-          print "[Default] Heading will be filtered"
+       if filt_bearing != 1:
+          filt_bearing = 0
+          print "[Default] Heading will not be filtered"
 
     if not res:
        res = 0.5
        print '[Default] Grid resolution is %s m' % (str(res))
+
+    if not cog:
+       if cog != 0:
+          cog = 1
+          print "[Default] Heading based on course-over-ground"
 
     trans =  pyproj.Proj(init=cs2cs_args)
 
@@ -247,11 +260,11 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
        # reported bearing by instrument (Kalman filtered?)
        bearing = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
 
-    # bearing can only be observed modulo 2*pi, therefore phase unwrap
-    bearing = np.unwrap(bearing)
+    ## bearing can only be observed modulo 2*pi, therefore phase unwrap
+    #bearing = np.unwrap(bearing)
 
     # if stdev in heading is large, there's probably noise that needs to be filtered out
-    if np.std(bearing)>90:
+    if np.std(bearing)>180:
        print "WARNING: large heading stdev - attempting filtering"
        from sklearn.cluster import MiniBatchKMeans
        # can have two modes
@@ -274,6 +287,16 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
        bearing = humutils.runningMeanFast(bearing, len(bearing)/100)
 
     theta = np.asarray(bearing, 'float')/(180/np.pi)
+
+    # this is standard course over ground
+    if cog==1:
+       #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
+       #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU 
+       # (East-North-Up) coordinate frame. 
+       #Subtract pi/2 from your heading
+       theta = theta - np.pi/2
+       # (re-wrap to Pi to -Pi)
+       theta = np.unwrap(-theta)
 
     # load memory mapped scans
     shape_port = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_port'])

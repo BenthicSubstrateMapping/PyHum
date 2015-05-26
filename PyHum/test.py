@@ -102,7 +102,7 @@ def dotest():
    dogrid = 1 # yes
    calc_bearing = 0 #no
    filt_bearing = 1 #yes
-   res = 0.05 # grid resolution in metres
+   res = 0.1 # grid resolution in metres
 
    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
 
