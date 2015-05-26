@@ -103,6 +103,7 @@ def dotest():
    calc_bearing = 0 #no
    filt_bearing = 1 #yes
    res = 0.1 # grid resolution in metres
+   cog = 1 # GPS course-over-ground used for heading
 
    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
 
@@ -110,11 +111,11 @@ def dotest():
 
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
-   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
+   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
 
    res = 0.5 # grid resolution in metres
    
-   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
+   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
 
 if __name__ == '__main__':
    dotest()
