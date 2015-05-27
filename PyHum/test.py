@@ -84,8 +84,9 @@ def dotest():
    draft = 0.3 # draft in metres
    flip_lr = 1 # flip port and starboard
    model = 998 # humminbird model
-   chunk_size = 0 # auto chunk size
-
+   chunk_size = 1000 # chunk size = 1000 pings
+   #chunk_size = 0 # auto chunk size
+ 
    # correction specific settings
    maxW = 1000 # rms output wattage
 
