@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Getting started &mdash; PyHum 1.2.9 documentation</title>
+    <title>Getting started &mdash; PyHum 1.3.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.2.9',
+        VERSION:     '1.3.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyHum 1.2.9 documentation" href="index.html" />
+    <link rel="top" title="PyHum 1.3.0 documentation" href="index.html" />
     <link rel="next" title="Modules" href="modules.html" />
     <link rel="prev" title="PyHum: Python program for reading and processing low-cost sidescan sonar data" href="index.html" /> 
   </head>
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="index.html" title="PyHum: Python program for reading and processing low-cost sidescan sonar data"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.9 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -191,7 +191,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <span class="n">draft</span> <span class="o">=</span> <span class="mf">0.3</span> <span class="c"># draft in metres</span>
 <span class="n">flip_lr</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># flip port and starboard</span>
 <span class="n">model</span> <span class="o">=</span> <span class="mi">998</span> <span class="c"># humminbird model</span>
-<span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># auto chunk size</span>
+<span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c"># chunk size = 1000 pings</span>
 
 <span class="c"># correction specific settings</span>
 <span class="n">maxW</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c"># rms output wattage</span>
@@ -205,11 +205,10 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <span class="n">notes</span> <span class="o">=</span> <span class="mi">4</span> <span class="c"># Notes per octave (for wavelet analysis)</span>
 
 <span class="c"># for mapping</span>
-<span class="c">#imagery = 1 # server=&#39;http://server.arcgisonline.com/ArcGIS&#39;, service=&#39;World_Imagery&#39;</span>
 <span class="n">dogrid</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># yes</span>
 <span class="n">calc_bearing</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#no</span>
 <span class="n">filt_bearing</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">#yes</span>
-<span class="n">res</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c"># grid resolution in metres</span>
+<span class="n">res</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="c"># grid resolution in metres</span>
 <span class="n">cog</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># GPS course-over-ground used for heading</span>
 
 <span class="c"># for downward-looking echosounder echogram (e1-e2) analysis</span>
@@ -322,7 +321,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
         <li class="right" >
           <a href="index.html" title="PyHum: Python program for reading and processing low-cost sidescan sonar data"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.9 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

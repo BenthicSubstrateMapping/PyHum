@@ -188,7 +188,7 @@ which carries out the following operations::
    draft = 0.3 # draft in metres
    flip_lr = 1 # flip port and starboard
    model = 998 # humminbird model
-   chunk_size = 0 # auto chunk size
+   chunk_size = 1000 # chunk size = 1000 pings
 
    # correction specific settings
    maxW = 1000 # rms output wattage
@@ -202,11 +202,10 @@ which carries out the following operations::
    notes = 4 # Notes per octave (for wavelet analysis)
 
    # for mapping
-   #imagery = 1 # server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery'
    dogrid = 1 # yes
    calc_bearing = 0 #no
    filt_bearing = 1 #yes
-   res = 0.1 # grid resolution in metres
+   res = 0.2 # grid resolution in metres
    cog = 1 # GPS course-over-ground used for heading
 
    # for downward-looking echosounder echogram (e1-e2) analysis

@@ -99,11 +99,10 @@ def dotest():
    notes = 4 # Notes per octave (for wavelet analysis)
 
    # for mapping
-   #imagery = 1 # server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery'
    dogrid = 1 # yes
    calc_bearing = 0 #no
    filt_bearing = 1 #yes
-   res = 0.1 # grid resolution in metres
+   res = 0.2 # grid resolution in metres
    cog = 1 # GPS course-over-ground used for heading
 
    # for downward-looking echosounder echogram (e1-e2) analysis
