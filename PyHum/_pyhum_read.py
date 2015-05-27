@@ -762,7 +762,7 @@ def makechunks(dat, chunksize=0):
       Zt,ind = humutils.sliding_window(dat,(Ny,hslice))
 
    else:
-      if chunksize>np.shape(data_port)[1]:
+      if chunksize<np.shape(data_port)[1]:
          Zt,ind = humutils.sliding_window(dat,(Ny,chunksize))
       else:
          print "Error: chunk size is larger than number of scan lines. Please choose smaller chunk size ... exiting"
