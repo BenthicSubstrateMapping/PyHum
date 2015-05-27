@@ -76,7 +76,8 @@ from scipy.ndimage.filters import median_filter
 # plotting
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
-from mpl_toolkits.axes_grid1 import make_axes_locatable
+try:
+   from mpl_toolkits.axes_grid1 import make_axes_locatable
 #from matplotlib import rc
 #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 #rc('text', usetex=True)
@@ -427,9 +428,12 @@ def plot_class(dist_m, shape_port, dat_port, dat_star, dat_class, ft, humfile, s
    bottom='off',      # ticks along the bottom edge are off
    labelbottom='off') # labels along the bottom edge are off
 
-   divider = make_axes_locatable(ax)
-   cax = divider.append_axes("right", size="5%", pad=0.05)
-   plt.colorbar(im, cax=cax)
+   try:
+      divider = make_axes_locatable(ax)
+      cax = divider.append_axes("right", size="5%", pad=0.05)
+      plt.colorbar(im, cax=cax)
+   except:
+      plt.colorbar()
 
    plt.subplot(2,1,2)
    ax = plt.gca()
@@ -439,9 +443,12 @@ def plot_class(dist_m, shape_port, dat_port, dat_star, dat_class, ft, humfile, s
    plt.xlabel('Distance along track (m)')
    plt.axis('tight')
 
-   divider = make_axes_locatable(ax)
-   cax = divider.append_axes("right", size="5%", pad=0.05)
-   plt.colorbar(im, cax=cax)
+   try:
+      divider = make_axes_locatable(ax)
+      cax = divider.append_axes("right", size="5%", pad=0.05)
+      plt.colorbar(im, cax=cax)
+   except:
+      plt.colorbar()
 
    custom_save(sonpath,base+'class'+str(p))
    del fig
@@ -461,9 +468,12 @@ def plot_contours(dist_m, shape_port, dat_class, ft, humfile, sonpath, base, num
    plt.ylabel('Horizontal distance (m)'); plt.xlabel('Distance along track (m)')
    plt.axis('tight')
 
-   divider = make_axes_locatable(ax)
-   cax = divider.append_axes("right", size="5%", pad=0.05)
-   plt.colorbar(CS, cax=cax)
+   try:
+      divider = make_axes_locatable(ax)
+      cax = divider.append_axes("right", size="5%", pad=0.05)
+      plt.colorbar(CS, cax=cax)
+   except:
+      plt.colorbar()
 
    custom_save(sonpath,base+'class_contours'+str(p))
    del fig
@@ -487,9 +497,12 @@ def plot_kmeans(dist_m, shape_port, dat_port, dat_star, dat_kclass, ft, humfile,
    plt.xlabel('Distance along track (m)')
    plt.axis('tight')
 
-   divider = make_axes_locatable(ax)
-   cax = divider.append_axes("right", size="5%", pad=0.05)
-   plt.colorbar(CS, cax=cax)
+   try:
+      divider = make_axes_locatable(ax)
+      cax = divider.append_axes("right", size="5%", pad=0.05)
+      plt.colorbar(CS, cax=cax)
+   except:
+      plt.colorbar()
 
    custom_save(sonpath,base+'class_kmeans'+str(p))
    del fig
