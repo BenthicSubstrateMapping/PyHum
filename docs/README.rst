@@ -170,7 +170,7 @@ Test
 
 A test can be carried out by running the supplied script::
 
-  python -c "import PyHum; PyHum.test()"
+  python -c "import PyHum; PyHum.dotest()"
 
 which carries out the following operations::
 
