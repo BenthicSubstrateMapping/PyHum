@@ -652,7 +652,7 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
     metadat['dist_m'] = dist_m[:nrec]
     metadat['dep_m'] = dep_m[:nrec]
     metadat['pix_m'] = 1/ft
-    metadat['bed'] = bed[:nrec]
+    metadat['bed'] = metadat['bed'][:nrec]
     metadat['c'] = c
     metadat['t'] = t
     metadat['f'] = f

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Getting started &mdash; PyHum 1.2.7 documentation</title>
+    <title>Getting started &mdash; PyHum 1.2.9 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.2.7',
+        VERSION:     '1.2.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyHum 1.2.7 documentation" href="index.html" />
+    <link rel="top" title="PyHum 1.2.9 documentation" href="index.html" />
     <link rel="next" title="Modules" href="modules.html" />
     <link rel="prev" title="PyHum: Python program for reading and processing low-cost sidescan sonar data" href="index.html" /> 
   </head>
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="index.html" title="PyHum: Python program for reading and processing low-cost sidescan sonar data"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.7 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.9 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -111,7 +111,7 @@ pip install PyHum
 <div class="highlight-python"><div class="highlight"><pre>pip install pyproj-1.9.4-cp27-none-win_amd64.whl
 </pre></div>
 </div>
-<p>This software has been tested with Python 2.7 on Linux Fedora 16 &amp; 20, Ubuntu 12.4 &amp; 13.4 &amp; 14.4, Windows 7. This software has (so far) been used only with Humminbird 998 and 1198 series instruments.</p>
+<p>This software has been tested with Python 2.7 on Linux Fedora 16 &amp; 20, Ubuntu 12.4 &amp; 13.4 &amp; 14.4, Windows 7. This software has (so far) been used only with Humminbird 798, 998, 1198 and 1199 series instruments.</p>
 </div>
 <div class="section" id="virtual-environment">
 <span id="virtualenv"></span><h2>Virtual environment<a class="headerlink" href="#virtual-environment" title="Permalink to this headline">¶</a></h2>
@@ -190,6 +190,8 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <span class="n">f</span> <span class="o">=</span> <span class="mi">455</span> <span class="c"># frequency kHz</span>
 <span class="n">draft</span> <span class="o">=</span> <span class="mf">0.3</span> <span class="c"># draft in metres</span>
 <span class="n">flip_lr</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># flip port and starboard</span>
+<span class="n">model</span> <span class="o">=</span> <span class="mi">998</span> <span class="c"># humminbird model</span>
+<span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># auto chunk size</span>
 
 <span class="c"># correction specific settings</span>
 <span class="n">maxW</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c"># rms output wattage</span>
@@ -207,20 +209,31 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <span class="n">dogrid</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># yes</span>
 <span class="n">calc_bearing</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#no</span>
 <span class="n">filt_bearing</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">#yes</span>
-<span class="n">res</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="c"># grid resolution in metres</span>
-<span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># auto chunk size</span>
+<span class="n">res</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c"># grid resolution in metres</span>
+<span class="n">cog</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># GPS course-over-ground used for heading</span>
 
-<span class="n">PyHum</span><span class="o">.</span><span class="n">humread</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">draft</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bedpick</span><span class="p">,</span> <span class="n">flip_lr</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">)</span>
+<span class="c"># for downward-looking echosounder echogram (e1-e2) analysis</span>
+<span class="n">ph</span> <span class="o">=</span> <span class="mf">7.0</span> <span class="c"># acidity on the pH scale</span>
+<span class="n">temp</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="c"># water temperature in degrees Celsius</span>
+<span class="n">salinity</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">beam</span> <span class="o">=</span> <span class="mf">20.0</span>
+<span class="n">transfreq</span> <span class="o">=</span> <span class="mf">200.0</span>
+<span class="n">integ</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">numclusters</span> <span class="o">=</span> <span class="mi">3</span>
 
-<span class="n">PyHum</span><span class="o">.</span><span class="n">humcorrect</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
+<span class="n">PyHum</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">draft</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bedpick</span><span class="p">,</span> <span class="n">flip_lr</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 
-<span class="n">PyHum</span><span class="o">.</span><span class="n">humtexture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">numclasses</span><span class="p">,</span> <span class="n">maxscale</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span>
+<span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
 
-<span class="n">PyHum</span><span class="o">.</span><span class="n">domap</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+<span class="n">PyHum</span><span class="o">.</span><span class="n">texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">numclasses</span><span class="p">,</span> <span class="n">maxscale</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span>
+
+<span class="n">PyHum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">cog</span><span class="p">)</span>
 
 <span class="n">res</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="c"># grid resolution in metres</span>
 
-<span class="n">PyHum</span><span class="o">.</span><span class="n">domap_texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+<span class="n">PyHum</span><span class="o">.</span><span class="n">map_texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">cog</span><span class="p">)</span>
+
+<span class="n">PyHum</span><span class="o">.</span><span class="n">e1e2</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">salinity</span><span class="p">,</span> <span class="n">beam</span><span class="p">,</span> <span class="n">transfreq</span><span class="p">,</span> <span class="n">integ</span><span class="p">,</span> <span class="n">numclusters</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -309,7 +322,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
         <li class="right" >
           <a href="index.html" title="PyHum: Python program for reading and processing low-cost sidescan sonar data"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.7 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.9 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

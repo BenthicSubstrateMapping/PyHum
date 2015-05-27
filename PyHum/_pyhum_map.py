@@ -448,7 +448,7 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
 
    kml = simplekml.Kml()
    ground = kml.newgroundoverlay(name='GroundOverlay')
-   ground.icon.href = sonpath+'map'+str(p)+'.png'
+   ground.icon.href = 'map'+str(p)+'.png'
    ground.latlonbox.north = np.min(humlat)-0.001
    ground.latlonbox.south = np.max(humlat)+0.001
    ground.latlonbox.east =  np.max(humlon)+0.001

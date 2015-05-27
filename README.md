@@ -52,17 +52,23 @@ This software has (so far) been used only with Humminbird 798, 998, 1198 and 119
 
 The programs in this package are as follows:
 
-1. pyhum_read
-script to read Humminbird DAT and associated SON files, and export data in MAT format
+1. read
+script to read Humminbird DAT and associated SON files, export data, and produce some rudimentary plots
 
-2. pyhum_correct
-script to read Humminbird data in MAT format (output from pyhum_read.py) and perform some radiometric corrections and produce some rudimentary plots
+2. correct
+script to read Humminbird data (output from 'read') and perform some radiometric corrections and produce some rudimentary plots
 
-3. pyhum_texture
+3. texture
 script to read radiometrically corrected Humminbird data in MAT format (output from pyhum_correct.py) and perform a textural analysis using the spectral method of Buscombe et al (forthcoming) and produce some rudimentary plots
 
-4. pyhum_domap
+4. map
 script to generate a point cloud (X,Y,sidescan intensity), save it to ascii format file, grid it and make a raster overlay on an aerial image (pulled automatically from the ESRI GIS image server), and a kml file for showing the same thing in google-earth
+
+5. map_texture
+script to generate a point cloud (X,Y,texture lengthscale - calculated using pyhum_texture), save it to ascii format file, grid it and make a raster overlay on an aerial image (pulled automatically from the ESRI GIS image server), and a kml file for showing the same thing in google-earth
+
+6. e1e2
+script to analyse the first (e1, 'roughness') and second (e2, 'hardness') echo returns from the high-frequency downward looking echosounder, and generate generalised acoustic parameters for the purposes of point classification of submerged substrates/vegetation. The processing accounts for the absorption of sound in water, and does a basic k-means cluster of e1 and e2 coefficients into specified number of 'acoustic classes'. This code is based on code by Barb Fagetter (blueseas@oceanecology.ca). Georeferenced parameters are saved in csv form, and optionally plots and kml files are generated
 
 These are all command-line programs which take a number of input (some required, some optional). Please see the individual files for a comprehensive list of input options
 
@@ -195,6 +201,8 @@ which carries out the following operations:
    f = 455 # frequency kHz
    draft = 0.3 # draft in metres
    flip_lr = 1 # flip port and starboard
+   model = 998 # humminbird model
+   chunk_size = 0 # auto chunk size
 
    # correction specific settings
    maxW = 1000 # rms output wattage
@@ -212,20 +220,32 @@ which carries out the following operations:
    dogrid = 1 # yes
    calc_bearing = 0 #no
    filt_bearing = 1 #yes
-   res = 0.05 # grid resolution in metres
-   chunk_size = 0 # auto chunk size
+   res = 0.1 # grid resolution in metres
+   cog = 1 # GPS course-over-ground used for heading
 
-   PyHum.humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size)
+   # for downward-looking echosounder echogram (e1-e2) analysis
+   ph = 7.0 # acidity on the pH scale
+   temp = 10.0 # water temperature in degrees Celsius
+   salinity = 0.0
+   beam = 20.0
+   transfreq = 200.0
+   integ = 5
+   numclusters = 3
 
-   PyHum.humcorrect(humfile, sonpath, maxW, doplot)
+   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
 
-   PyHum.humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+   PyHum.correct(humfile, sonpath, maxW, doplot)
 
-   PyHum.domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
+   PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+
+   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
 
    res = 0.5 # grid resolution in metres
    
-   PyHum.domap_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
+   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
+
+   PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
+
 
 ```
 

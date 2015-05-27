@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyhum.e1e2 module &mdash; PyHum 1.2.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.2.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyHum 1.2.9 documentation" href="index.html" />
+    <link rel="up" title="PyHum package" href="pyhum.html" />
+    <link rel="next" title="&lt;no title&gt;" href="examples.html" />
+    <link rel="prev" title="pyhum.map_texture module" href="pyhum.map_texture.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="examples.html" title="&lt;no title&gt;"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pyhum.map_texture.html" title="pyhum.map_texture module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.9 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="pyhum.html" accesskey="U">PyHum package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="pyhum-e1e2-module">
+<h1>pyhum.e1e2 module<a class="headerlink" href="#pyhum-e1e2-module" title="Permalink to this headline">¶</a></h1>
+<p>Analysis of first (e1, &#8216;roughness&#8217;) and second (e2, &#8216;hardness&#8217;) echo returns from the high-frequency downward looking echosounder</p>
+<p>Generates generalised acoustic parameters for the purposes of point classification of submerged substrates/vegetation</p>
+<p>Accounts for the absorption of sound in water</p>
+<p>Does a basic k-means cluster of e1 and e2 coefficients into specified number of &#8216;acoustic classes&#8217;</p>
+<p>Based on code by Barb Fagetter (<a class="reference external" href="mailto:blueseas&#37;&#52;&#48;oceanecology&#46;ca">blueseas<span>&#64;</span>oceanecology<span>&#46;</span>ca</a>)</p>
+<div class="section" id="syntax">
+<h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
+<p>You call the function like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">e1e2</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">salinity</span><span class="p">,</span> <span class="n">beam</span><span class="p">,</span> <span class="n">transfreq</span><span class="p">,</span> <span class="n">integ</span><span class="p">,</span> <span class="n">numclusters</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><dl class="docutils">
+<dt>humfile <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>path to the .DAT file</dd>
+<dt>sonpath <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>path where the <a href="#id1"><span class="problematic" id="id2">*</span></a>.SON files are</dd>
+<dt>cs2cs_args <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=&#8221;epsg:26949&#8221;]</span></dt>
+<dd>arguments to create coordinates in a projected coordinate system
+this argument gets given to pyproj to turn wgs84 (lat/lon) coordinates
+into any projection supported by the proj.4 libraries</dd>
+<dt>ph <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=7.0]</span></dt>
+<dd>water acidity in pH</dd>
+<dt>temp <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=10.0]</span></dt>
+<dd>water temperature in degrees Celsius</dd>
+<dt>salinity <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=0.0]</span></dt>
+<dd>salinity of water in parts per thousand</dd>
+<dt>beam <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=20.0]</span></dt>
+<dd>beam width in degrees</dd>
+<dt>transfreq <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=200.0]</span></dt>
+<dd>transducer frequency in kHz</dd>
+<dt>integ <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=5]</span></dt>
+<dd>number of pings over which to integrate</dd>
+<dt>numclusters <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=3]</span></dt>
+<dd>transducer frequency in kHz</dd>
+<dt>doplot <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=1]</span></dt>
+<dd>1 = make plots, otherwise do not</dd>
+</dl>
+</div></blockquote>
+</div>
+<div class="section" id="returns">
+<h2>Returns<a class="headerlink" href="#returns" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><blockquote>
+<div><dl class="docutils">
+<dt>sonpath+base+&#8217;rough_and_hard&#8217;+str(p)+&#8217;.csv&#8217; <span class="classifier-delimiter">:</span> <span class="classifier">csv file</span></dt>
+<dd>contains the following fields: &#8216;longitude&#8217;, &#8216;latitude&#8217;, &#8216;easting&#8217;, &#8216;northing&#8217;, &#8216;depth&#8217;,
+&#8216;roughness&#8217;, &#8216;hardness&#8217;, &#8216;average roughness&#8217;, &#8216;average hardness&#8217;,&#8217;k-mean label&#8217;
+of the pth chunk
+&#8216;average&#8217; implies average over &#8216;integ&#8217; successive pings</dd>
+</dl>
+<p>The following are returned if doplot==1:</p>
+<dl class="docutils">
+<dt>sonpath+&#8217;e1e2_scan&#8217;+str(p).png <span class="classifier-delimiter">:</span> <span class="classifier">png image file</span></dt>
+<dd>png image file showing the downward echosounder echogram overlain with the locations of the start and
+end of the first and second echo region envelope</dd>
+<dt>sonpath+&#8217;e1e2_kmeans&#8217;+str(p).png: png image file</dt>
+<dd>png image file showing 1) (left) volume scattering coefficient 1 versus volume scattering coefficient 2, colour-coded
+by k-means acoustic class, and
+2) (right) e1 versus e2, colour-coded
+by k-means acoustic class</dd>
+<dt>sonpath+&#8217;rgh_hard_kmeans&#8217;+str(p).png <span class="classifier-delimiter">:</span> <span class="classifier">png image file</span></dt>
+<dd>png image file showing scatter plot of easting versus northing colour-coded by k-means acoustic class</dd>
+<dt>sonpath+&#8217;map_rgh&#8217;+str(p).png <span class="classifier-delimiter">:</span> <span class="classifier">png image file</span></dt>
+<dd>png image file showing scatter plot of &#8216;roughness&#8217; (e1) overlying an aerial image pulled from an ESRI image server</dd>
+<dt>sonpath+&#8217;map_hard&#8217;+str(p).png <span class="classifier-delimiter">:</span> <span class="classifier">png image file</span></dt>
+<dd>png image file showing scatter plot of &#8216;hardness&#8217; (e2) overlying an aerial image pulled from an ESRI image server</dd>
+<dt>sonpath,&#8217;Rough&#8217;+str(p).png <span class="classifier-delimiter">:</span> <span class="classifier">png image file</span></dt>
+<dd>png image overlay associated with the kml file, sonpath,&#8217;Hard&#8217;+str(p).kml</dd>
+<dt>sonpath,&#8217;Rough&#8217;+str(p).kml <span class="classifier-delimiter">:</span> <span class="classifier">kml file</span></dt>
+<dd>kml overlay for showing roughness scatter plot (sonpath,&#8217;Rough&#8217;+str(p).png)</dd>
+<dt>sonpath,&#8217;Hard&#8217;+str(p).png <span class="classifier-delimiter">:</span> <span class="classifier">png image file</span></dt>
+<dd>png image overlay associated with the kml file, sonpath,&#8217;Hard&#8217;+str(p).kml</dd>
+<dt>sonpath,&#8217;Hard&#8217;+str(p).kml <span class="classifier-delimiter">:</span> <span class="classifier">kml file</span></dt>
+<dd>kml overlay for showing harness scatter plot (sonpath,&#8217;Hard&#8217;+str(p).png)</dd>
+</dl>
+</div></blockquote>
+<img alt="_images/pyhum_logo_colour_sm.png" src="_images/pyhum_logo_colour_sm.png" />
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/pyhum_logo_white.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">pyhum.e1e2 module</a><ul>
+<li><a class="reference internal" href="#syntax">Syntax</a></li>
+<li><a class="reference internal" href="#parameters">Parameters</a></li>
+<li><a class="reference internal" href="#returns">Returns</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pyhum.map_texture.html"
+                        title="previous chapter">pyhum.map_texture module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples.html"
+                        title="next chapter">&lt;no title&gt;</a></p>
+
+    <hr/>
+
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+    <hr/>
+    <div>
+	<h3>Mailing list</h3>
+	<a href="https://github.com/dbuscombe-usgs/PyHum/">dbuscombe@usgs.gov</a>
+    <p class="searchtip" style="font-size: 80%">
+    Send an email to subscribe</p>
+    </div>
+<hr/>
+<small><a href="_sources/pyhum.e1e2.txt"
+           rel="nofollow">Show this page source</a>
+</small>
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="examples.html" title="&lt;no title&gt;"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pyhum.map_texture.html" title="pyhum.map_texture module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.2.9 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="pyhum.html" >PyHum package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, Daniel Buscombe.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

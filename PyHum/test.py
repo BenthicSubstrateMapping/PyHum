@@ -105,6 +105,15 @@ def dotest():
    res = 0.1 # grid resolution in metres
    cog = 1 # GPS course-over-ground used for heading
 
+   # for downward-looking echosounder echogram (e1-e2) analysis
+   ph = 7.0 # acidity on the pH scale
+   temp = 10.0 # water temperature in degrees Celsius
+   salinity = 0.0
+   beam = 20.0
+   transfreq = 200.0
+   integ = 5
+   numclusters = 3
+
    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
 
    PyHum.correct(humfile, sonpath, maxW, doplot)
@@ -116,6 +125,8 @@ def dotest():
    res = 0.5 # grid resolution in metres
    
    PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
+
+   PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
 
 if __name__ == '__main__':
    dotest()

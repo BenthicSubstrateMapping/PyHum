@@ -187,6 +187,8 @@ which carries out the following operations::
    f = 455 # frequency kHz
    draft = 0.3 # draft in metres
    flip_lr = 1 # flip port and starboard
+   model = 998 # humminbird model
+   chunk_size = 0 # auto chunk size
 
    # correction specific settings
    maxW = 1000 # rms output wattage
@@ -204,20 +206,32 @@ which carries out the following operations::
    dogrid = 1 # yes
    calc_bearing = 0 #no
    filt_bearing = 1 #yes
-   res = 0.05 # grid resolution in metres
-   chunk_size = 0 # auto chunk size
+   res = 0.1 # grid resolution in metres
+   cog = 1 # GPS course-over-ground used for heading
 
-   PyHum.humread(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size)
+   # for downward-looking echosounder echogram (e1-e2) analysis
+   ph = 7.0 # acidity on the pH scale
+   temp = 10.0 # water temperature in degrees Celsius
+   salinity = 0.0
+   beam = 20.0
+   transfreq = 200.0
+   integ = 5
+   numclusters = 3
 
-   PyHum.humcorrect(humfile, sonpath, maxW, doplot)
+   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
 
-   PyHum.humtexture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+   PyHum.correct(humfile, sonpath, maxW, doplot)
 
-   PyHum.domap(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
+   PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+
+   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
 
    res = 0.5 # grid resolution in metres
    
-   PyHum.domap_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res)
+   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
+
+   PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
+
 
 .. _support:
 

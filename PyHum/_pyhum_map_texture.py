@@ -121,9 +121,9 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
        Otherwise, point cloud will be plotted
     calc_bearing : float, *optional* [Default=0]
        if 1, bearing will be calculated from coordinates
-    filt_bearing : float, *optional* [Default=10
+    filt_bearing : float, *optional* [Default=0]
        if 1, bearing will be filtered
-    res : float, *optional* [Default=0.5]
+    res : float, *optional* [Default=0.1]
        grid resolution of output gridded texture map
     cog : int, *optional* [Default=1]
        if 1, heading calculated assuming GPS course-over-ground rather than
@@ -177,7 +177,7 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
 
     if dogrid:
        dogrid = int(dogrid)
-       if dogrid==0:
+       if dogrid==1:
           print "Data will be gridded"      
 
     if calc_bearing:
@@ -188,7 +188,7 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
     if filt_bearing:
        filt_bearing = int(filt_bearing)
        if filt_bearing==1:
-          print "Bearing will be filtered"      
+          print "Bearing will be filtered"    
 
     if res:
        res = np.asarray(res,float)
@@ -456,7 +456,7 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
 
        kml = simplekml.Kml()
        ground = kml.newgroundoverlay(name='GroundOverlay')
-       ground.icon.href = sonpath+'class_map'+str(p)+'.png'
+       ground.icon.href = 'class_map'+str(p)+'.png'
        ground.latlonbox.north = np.min(humlat)-0.001
        ground.latlonbox.south = np.max(humlat)+0.001
        ground.latlonbox.east =  np.max(humlon)+0.001

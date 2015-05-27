@@ -44,7 +44,7 @@
 
 #"""
 
-__version__ = '1.2.9'
+__version__ = '1.3.0'
 
 #-----------------------------------------------------------------------------
 # Imports
@@ -55,6 +55,7 @@ from PyHum._pyhum_correct import correct
 from PyHum._pyhum_texture import texture
 from PyHum._pyhum_map import map
 from PyHum._pyhum_map_texture import map_texture
+from PyHum._pyhum_e1e2 import e1e2
 from PyHum.utils import *
 from PyHum.test import *
 
