@@ -80,7 +80,11 @@ import PyHum.utils as humutils #runningMeanFast, nan_helper
 
 # plotting
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap
+try:
+   from mpl_toolkits.basemap import Basemap
+except:
+   print "Error: Basemap could not be imported"
+   pass
 import simplekml
 
 # suppress divide and invalid warnings
