@@ -78,6 +78,8 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 try:
    from mpl_toolkits.axes_grid1 import make_axes_locatable
+except:
+   pass
 #from matplotlib import rc
 #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 #rc('text', usetex=True)
