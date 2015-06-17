@@ -58,7 +58,7 @@
 <div class="section" id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
 <p>You call the function like this:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">cog</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">dowrite</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -86,6 +86,9 @@ Otherwise, point cloud will be plotted</dd>
 <dt>cog <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=1]</span></dt>
 <dd>if 1, heading calculated assuming GPS course-over-ground rather than
 using a compass</dd>
+<dt>dowrite: int, <em>optional</em> [Default=1]</dt>
+<dd>if 1, point cloud data from each chunk is written to ascii file
+if 0, processing times are speeded up considerably but point clouds are not available for further analysis</dd>
 </dl>
 </div></blockquote>
 </div>

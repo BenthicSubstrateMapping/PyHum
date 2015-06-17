@@ -289,6 +289,16 @@ def e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, inte
     base = humfile.split('.DAT') # get base of file name for output
     base = base[0].split(os.sep)[-1]
 
+    # remove underscores, negatives and spaces from basename
+    if base.find('_')>-1:
+       base = base[:base.find('_')]
+
+    if base.find('-')>-1:
+       base = base[:base.find('-')]
+
+    if base.find(' ')>-1:
+       base = base[:base.find(' ')]
+
     beamwidth = beam*(np.sqrt(0.5))
     equivbeam = (5.78/(np.power(1.6,2)))*(np.power((np.sin((beamwidth*np.pi)/(2*180))),2))
 
@@ -309,8 +319,13 @@ def e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, inte
     # load memory mapped scans
     shape_hi= np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_hi'])
     if shape_hi!='':
-       dwnhi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=tuple(shape_hi))  
+       try:
+          dwnhi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=tuple(shape_hi))
+       except:
+          shape_lo= np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_low'])
+          dwnhi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=tuple(shape_lo))
     
+
     if 'dwnhi_fp' in locals():
 
        theta3dB = np.arcsin(c/(t*(f*1000))) # *(180/pi) # to see in degs
@@ -366,17 +381,29 @@ def e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, inte
           sv_e2 = np.array(sv_e2,'float')
           sv_e2[sv_e2==0.0] = np.nan
 
-          nans, y= humutils.nan_helper(rough)
-          rough[nans]= np.interp(y(nans), y(~nans), rough[~nans])
+          try:
+             nans, y= humutils.nan_helper(rough)
+             rough[nans]= np.interp(y(nans), y(~nans), rough[~nans])
+          except:
+             continue
 
-          nans, y= humutils.nan_helper(hard)
-          hard[nans]= np.interp(y(nans), y(~nans), hard[~nans])
+          try:
+             nans, y= humutils.nan_helper(hard)
+             hard[nans]= np.interp(y(nans), y(~nans), hard[~nans])
+          except:
+             continue
 
-          nans, y= humutils.nan_helper(sv_e1)
-          sv_e1[nans]= np.interp(y(nans), y(~nans), sv_e1[~nans])
+          try:
+             nans, y= humutils.nan_helper(sv_e1)
+             sv_e1[nans]= np.interp(y(nans), y(~nans), sv_e1[~nans])
+          except:
+             continue
 
-          nans, y= humutils.nan_helper(sv_e2)
-          sv_e2[nans]= np.interp(y(nans), y(~nans), sv_e2[~nans])
+          try:
+             nans, y= humutils.nan_helper(sv_e2)
+             sv_e2[nans]= np.interp(y(nans), y(~nans), sv_e2[~nans])
+          except:
+             continue
 
           data = np.column_stack([sv_e1, sv_e2])
           k_means = MiniBatchKMeans(numclusters)

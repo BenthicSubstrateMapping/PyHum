@@ -96,7 +96,7 @@ __all__ = [
     ]
 
 #################################################
-def map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog):
+def map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite):
          
     '''
     Create plots of the spatially referenced sidescan echograms
@@ -104,7 +104,7 @@ def map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, c
 
     Syntax
     ----------
-    [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
+    [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
 
     Parameters
     ----------
@@ -128,6 +128,9 @@ def map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, c
     cog : int, *optional* [Default=1]
        if 1, heading calculated assuming GPS course-over-ground rather than
        using a compass
+    dowrite: int, *optional* [Default=1]
+       if 1, point cloud data from each chunk is written to ascii file
+       if 0, processing times are speeded up considerably but point clouds are not available for further analysis
 
     Returns
     -------
@@ -190,6 +193,11 @@ def map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, c
        if cog==1:
           print "Heading based on course-over-ground" 
 
+    if dowrite:
+       dowrite = int(dowrite)
+       if dowrite==0:
+          print "Point cloud data will be written to ascii file" 
+
     if not cs2cs_args:
        # arguments to pass to cs2cs for coordinate transforms
        cs2cs_args = "epsg:26949"
@@ -219,6 +227,12 @@ def map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, c
           cog = 1
           print "[Default] Heading based on course-over-ground"
 
+    if not dowrite:
+       if dowrite != 0:
+          dowrite = 1
+          print "[Default] Point cloud data will be written to ascii file"
+
+
     trans =  pyproj.Proj(init=cs2cs_args)
 
     # if son path name supplied has no separator at end, put one on
@@ -227,6 +241,16 @@ def map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, c
 
     base = humfile.split('.DAT') # get base of file name for output
     base = base[0].split(os.sep)[-1]
+
+    # remove underscores, negatives and spaces from basename
+    if base.find('_')>-1:
+       base = base[:base.find('_')]
+
+    if base.find('-')>-1:
+       base = base[:base.find('-')]
+
+    if base.find(' ')>-1:
+       base = base[:base.find(' ')]
 
     esi = np.squeeze(loadmat(sonpath+base+'meta.mat')['e'])
     nsi = np.squeeze(loadmat(sonpath+base+'meta.mat')['n']) 
@@ -309,7 +333,7 @@ def map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, c
     dist_tvg = ((np.tan(np.radians(25)))*dep_m)-(tvg)
 
     for p in xrange(len(star_fp)):
-       make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid)
+       make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite)
 
 
 # =========================================================
@@ -336,7 +360,7 @@ def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
    return (90.0 - db + 360.0) % 360.0
 
 # =========================================================
-def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p, dogrid):
+def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite):
    
    trans =  pyproj.Proj(init=cs2cs_args)   
    
@@ -390,10 +414,11 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
    Y = Y[np.where(np.logical_not(np.isnan(merge)))]
    merge = merge[np.where(np.logical_not(np.isnan(merge)))]
 
-   # write raw bs to file
-   outfile = sonpath+'x_y_ss_raw'+str(p)+'.asc' 
-   with open(outfile, 'w') as f:
-      np.savetxt(f, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+   if dowrite==1:
+      # write raw bs to file
+      outfile = sonpath+'x_y_ss_raw'+str(p)+'.asc' 
+      with open(outfile, 'w') as f:
+         np.savetxt(f, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
    humlon, humlat = trans(X, Y, inverse=True)
 

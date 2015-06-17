@@ -318,6 +318,16 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
     base = humfile.split('.DAT') # get base of file name for output
     base = base[0].split(os.sep)[-1]
 
+    # remove underscores, negatives and spaces from basename
+    if base.find('_')>-1:
+       base = base[:base.find('_')]
+
+    if base.find('-')>-1:
+       base = base[:base.find('-')]
+
+    if base.find(' ')>-1:
+       base = base[:base.find(' ')]
+
     # get the SON files from this directory
     sonfiles = glob.glob(sonpath+'*.SON')
     if not sonfiles:

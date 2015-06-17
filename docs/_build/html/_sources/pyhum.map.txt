@@ -9,7 +9,7 @@ Syntax
 ----------
 You call the function like this::
 
-  [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
+  [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
 
 
 Parameters
@@ -34,6 +34,10 @@ Parameters
     cog : int, *optional* [Default=1]
        if 1, heading calculated assuming GPS course-over-ground rather than
        using a compass
+    dowrite: int, *optional* [Default=1]
+       if 1, point cloud data from each chunk is written to ascii file
+       if 0, processing times are speeded up considerably but point clouds are not available for further analysis
+
 
 Returns
 ----------

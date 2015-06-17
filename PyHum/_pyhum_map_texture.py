@@ -96,7 +96,7 @@ __all__ = [
     ]
 
 #################################################
-def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog):
+def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite):
          
     '''
     Create plots of the texture lengthscale maps made in PyHum.texture module 
@@ -108,7 +108,7 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
 
     Syntax
     ----------
-    [] = PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
+    [] = PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
 
     Parameters
     ----------
@@ -132,6 +132,9 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
     cog : int, *optional* [Default=1]
        if 1, heading calculated assuming GPS course-over-ground rather than
        using a compass
+    dowrite: int, *optional* [Default=1]
+       if 1, point cloud data from each chunk is written to ascii file
+       if 0, processing times are speeded up considerably but point clouds are not available for further analysis
 
     Returns
     -------
@@ -203,6 +206,11 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
        if cog==1:
           print "Heading based on course-over-ground" 
 
+    if dowrite:
+       dowrite = int(dowrite)
+       if dowrite==0:
+          print "Point cloud data will be written to ascii file" 
+
     if not cs2cs_args:
        # arguments to pass to cs2cs for coordinate transforms
        cs2cs_args = "epsg:26949"
@@ -232,6 +240,11 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
           cog = 1
           print "[Default] Heading based on course-over-ground"
 
+    if not dowrite:
+       if dowrite != 0:
+          dowrite = 1
+          print "[Default] Point cloud data will be written to ascii file"
+
     trans =  pyproj.Proj(init=cs2cs_args)
 
     # if son path name supplied has no separator at end, put one on
@@ -240,6 +253,16 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
 
     base = humfile.split('.DAT') # get base of file name for output
     base = base[0].split(os.sep)[-1]
+
+    # remove underscores, negatives and spaces from basename
+    if base.find('_')>-1:
+       base = base[:base.find('_')]
+
+    if base.find('-')>-1:
+       base = base[:base.find('-')]
+
+    if base.find(' ')>-1:
+       base = base[:base.find(' ')]
 
     esi = np.squeeze(loadmat(sonpath+base+'meta.mat')['e'])
     nsi = np.squeeze(loadmat(sonpath+base+'meta.mat')['n']) 
@@ -395,11 +418,11 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
        Y = Y[np.where(np.logical_not(np.isnan(merge)))]
        merge = merge[np.where(np.logical_not(np.isnan(merge)))]
 
-
-       # write raw bs to file
-       outfile = sonpath+'x_y_class'+str(p)+'.asc' 
-       with open(outfile, 'w') as f:
-          np.savetxt(f, np.hstack((humutils.ascol(X),humutils.ascol(Y), humutils.ascol(merge))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+       if dowrite==1:
+          # write raw bs to file
+          outfile = sonpath+'x_y_class'+str(p)+'.asc' 
+          with open(outfile, 'w') as f:
+             np.savetxt(f, np.hstack((humutils.ascol(X),humutils.ascol(Y), humutils.ascol(merge))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
        humlon, humlat = trans(X, Y, inverse=True)
 
@@ -469,79 +492,81 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
 
        kml.save(sonpath+'class_GroundOverlay'+str(p)+'.kml')
 
-    X = []; Y = []; S = [];
-    for p in xrange(len(class_fp)):
-       dat = np.genfromtxt(sonpath+'x_y_class'+str(p)+'.asc', delimiter=' ')
-       X.append(dat[:,0])
-       Y.append(dat[:,1])
-       S.append(dat[:,2])
-       del dat
+    if dowrite==1:
 
-    # merge flatten and stack
-    X = np.asarray(np.hstack(X),'float')
-    X = X.flatten()
+       X = []; Y = []; S = [];
+       for p in xrange(len(class_fp)):
+          dat = np.genfromtxt(sonpath+'x_y_class'+str(p)+'.asc', delimiter=' ')
+          X.append(dat[:,0])
+          Y.append(dat[:,1])
+          S.append(dat[:,2])
+          del dat
 
-    # merge flatten and stack
-    Y = np.asarray(np.hstack(Y),'float')
-    Y = Y.flatten()
+       # merge flatten and stack
+       X = np.asarray(np.hstack(X),'float')
+       X = X.flatten()
 
-    # merge flatten and stack
-    S = np.asarray(np.hstack(S),'float')
-    S = S.flatten()
+       # merge flatten and stack
+       Y = np.asarray(np.hstack(Y),'float')
+       Y = Y.flatten()
 
-    humlon, humlat = trans(X, Y, inverse=True)
+       # merge flatten and stack
+       S = np.asarray(np.hstack(S),'float')
+       S = S.flatten()
 
-    if dogrid==1:
-       grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
-
-       dat = griddata(np.c_[X.flatten(),Y.flatten()], S.flatten(), (grid_x, grid_y), method='nearest')
-
-       ## create mask for where the data is not
-       tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-       dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
-       dist = dist.reshape(grid_x.shape)
-
-    del X, Y
-
-    if dogrid==1:
-       ## mask
-       dat[dist> 1 ] = np.nan
-
-       del dist, tree
-
-       dat[dat==0] = np.nan
-       dat[np.isinf(dat)] = np.nan
-
-       datm = np.ma.masked_invalid(dat)
-
-       glon, glat = trans(grid_x, grid_y, inverse=True)
-       del grid_x, grid_y
-
-    levels = [0.5,0.75,1.25,1.5,1.75,2,3]
-
-    try:
-       print "drawing and printing map ..."
-       fig = plt.figure()
-       map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1],
-        resolution = 'i',
-        llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
-        urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
-
-       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
-       if dogrid==1:
-          gx,gy = map.projtran(glon, glat)
+       humlon, humlat = trans(X, Y, inverse=True)
 
        if dogrid==1:
-          map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
-       else: 
-          ## draw point cloud
-          x,y = map.projtran(humlon, humlat)
-          map.scatter(x.flatten(), y.flatten(), 0.5, S.flatten(), cmap='YlOrRd', linewidth = '0')
+          grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
 
-       custom_save2(sonpath,'class_map_imagery'+str(p))
-       del fig 
-    except:
-       print "error: map could not be created..."
+          dat = griddata(np.c_[X.flatten(),Y.flatten()], S.flatten(), (grid_x, grid_y), method='nearest')
+
+          ## create mask for where the data is not
+          tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+          dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+          dist = dist.reshape(grid_x.shape)
+
+       del X, Y
+
+       if dogrid==1:
+          ## mask
+          dat[dist> 1 ] = np.nan
+
+          del dist, tree
+
+          dat[dat==0] = np.nan
+          dat[np.isinf(dat)] = np.nan
+
+          datm = np.ma.masked_invalid(dat)
+
+          glon, glat = trans(grid_x, grid_y, inverse=True)
+          del grid_x, grid_y
+
+       levels = [0.5,0.75,1.25,1.5,1.75,2,3]
+
+       try:
+          print "drawing and printing map ..."
+          fig = plt.figure()
+          map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1],
+           resolution = 'i',
+           llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
+           urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
+
+          map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+          if dogrid==1:
+             gx,gy = map.projtran(glon, glat)
+
+          if dogrid==1:
+             map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
+          else: 
+             ## draw point cloud
+             x,y = map.projtran(humlon, humlat)
+             map.scatter(x.flatten(), y.flatten(), 0.5, S.flatten(), cmap='YlOrRd', linewidth = '0')
+
+          custom_save2(sonpath,'class_map_imagery'+str(p))
+          del fig 
+       except:
+          print "error: map could not be created..."
 
 
 # =========================================================

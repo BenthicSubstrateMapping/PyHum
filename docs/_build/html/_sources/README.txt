@@ -175,8 +175,9 @@ A test can be carried out by running the supplied script::
 which carries out the following operations::
 
    # general settings   
-   humfile = os.path.expanduser("~")+os.sep+'pyhum_test'+os.sep+'test.DAT' #PyHum.__path__[0]+os.sep+'test.DAT'
-   sonpath = os.path.expanduser("~")+os.sep+'pyhum_test' #PyHum.__path__[0]
+   humfile = os.path.normpath(os.path.join(os.path.expanduser("~"),'pyhum_test','test.DAT'))
+   sonpath = os.path.normpath(os.path.join(os.path.expanduser("~"),'pyhum_test'))
+
    doplot = 1 #yes
 
    # reading specific settings
@@ -189,6 +190,7 @@ which carries out the following operations::
    flip_lr = 1 # flip port and starboard
    model = 998 # humminbird model
    chunk_size = 1000 # chunk size = 1000 pings
+   dowrite = 0 #disable writing of point cloud data to file
 
    # correction specific settings
    maxW = 1000 # rms output wattage
@@ -223,11 +225,11 @@ which carries out the following operations::
 
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
-   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
+   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
 
    res = 0.5 # grid resolution in metres
    
-   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog)
+   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
 
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
 

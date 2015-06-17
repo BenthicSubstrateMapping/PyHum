@@ -200,6 +200,16 @@ def correct(humfile, sonpath, maxW, doplot):
     base = humfile.split('.DAT') # get base of file name for output
     base = base[0].split(os.sep)[-1]
 
+    # remove underscores, negatives and spaces from basename
+    if base.find('_')>-1:
+       base = base[:base.find('_')]
+
+    if base.find('-')>-1:
+       base = base[:base.find('-')]
+
+    if base.find(' ')>-1:
+       base = base[:base.find(' ')]
+
     # add wattage to metadata dict 
     meta = loadmat(sonpath+base+'meta.mat')
 
