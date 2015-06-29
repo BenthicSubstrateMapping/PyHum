@@ -32,6 +32,8 @@ from array import array as arr
 import pyproj
 import os, struct
 
+import PyHum.utils as humutils
+
 # =========================================================
 cdef class pyread:
     """
@@ -477,6 +479,8 @@ cdef class pyread:
         cdef list dep_m = []
         cdef list e = []
         cdef list n = []
+        cdef list gps1 = []
+        cdef list gps2 = []
         for i in ind:
            lon.append(float(tmp[i-1][15]) )
            lat.append(float(tmp[i-1][14]) )
@@ -486,11 +490,24 @@ cdef class pyread:
            e.append(float(tmp[i-1][17]) )
            n.append(float(tmp[i-1][16]) )
            hdg.append(float(tmp[i-1][5]) )
+           gps1.append(float(tmp[i-1][4]))
+           gps2.append(float(tmp[i-1][6]))
+
+        cdef np.ndarray hdg2 = np.asarray(hdg, 'float')
+        cdef np.ndarray gps_a = np.asarray(gps1, 'float')
+        cdef np.ndarray gps_b = np.asarray(gps2, 'float')
+
+        # remove headings with bad gps flags
+        hdg2[gps_a==0] = np.nan
+        hdg2[gps_b==0] = np.nan  
+
+        nans, y= humutils.nan_helper(hdg2)
+        hdg2[nans]= np.interp(y(nans), y(~nans), hdg2[~nans])
 
         cdef np.ndarray starttime = np.asarray(self.humdat['unix_time'], 'float')
         cdef np.ndarray caltime = np.asarray(starttime + time_s, 'float')
 
-        cdef dict metadict={'lat': np.asarray(lat), 'lon': np.asarray(lon), 'spd': np.asarray(spd), 'time_s': np.asarray(time_s), 'e': np.asarray(e), 'n': np.asarray(n), 'dep_m': np.asarray(dep_m), 'caltime': np.asarray(caltime), 'heading': np.asarray(hdg) }
+        cdef dict metadict={'lat': np.asarray(lat), 'lon': np.asarray(lon), 'spd': np.asarray(spd), 'time_s': np.asarray(time_s), 'e': np.asarray(e), 'n': np.asarray(n), 'dep_m': np.asarray(dep_m), 'caltime': np.asarray(caltime), 'heading': hdg2 }
         return metadict
 
 # cython pyread.pyx
