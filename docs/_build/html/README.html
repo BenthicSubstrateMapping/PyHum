@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Getting started &mdash; PyHum 1.3.0 documentation</title>
+    <title>Getting started &mdash; PyHum 1.3.1 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.3.0',
+        VERSION:     '1.3.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyHum 1.3.0 documentation" href="index.html" />
+    <link rel="top" title="PyHum 1.3.1 documentation" href="index.html" />
     <link rel="next" title="Modules" href="modules.html" />
     <link rel="prev" title="PyHum: Python program for reading and processing low-cost sidescan sonar data" href="index.html" /> 
   </head>
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="index.html" title="PyHum: Python program for reading and processing low-cost sidescan sonar data"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -58,7 +58,7 @@
 for reading and exporting data from Humminbird(R) instruments, carrying out rudimentary radiometric corrections to the data,
 classify bed texture, and produce some maps on aerial photos and kml files for google-earth</p>
 <p>Some aspects of the program are detailed in:
-Buscombe, D., Grams, P.E., and Smith, S. &#8220;Automated riverbed sediment classification using low-cost sidescan sonar&#8221;, forthcoming.</p>
+Buscombe, D., Grams, P.E., and Smith, S. (2015) &#8220;Automated riverbed sediment classification using low-cost sidescan sonar&#8221;, Journal of Hydraulic Engineering, in press.</p>
 <p>For the source code visit <a class="reference external" href="https://github.com/dbuscombe-usgs/PyHum/">the project github site</a></p>
 </div>
 <div class="section" id="license">
@@ -193,10 +193,15 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <span class="n">flip_lr</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># flip port and starboard</span>
 <span class="n">model</span> <span class="o">=</span> <span class="mi">998</span> <span class="c"># humminbird model</span>
 <span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c"># chunk size = 1000 pings</span>
+<span class="c">#chunk_size = 0 # auto chunk size</span>
 <span class="n">dowrite</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#disable writing of point cloud data to file</span>
 
 <span class="c"># correction specific settings</span>
 <span class="n">maxW</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c"># rms output wattage</span>
+
+<span class="c"># for shadow removal</span>
+<span class="n">shadowmask</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#automatic shadow removal</span>
+<span class="n">kvals</span> <span class="o">=</span> <span class="mi">8</span> <span class="c"># number of k-means for automated shadow removal</span>
 
 <span class="c"># for texture calcs</span>
 <span class="n">win</span> <span class="o">=</span> <span class="mi">50</span> <span class="c"># pixel window</span>
@@ -222,18 +227,27 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <span class="n">integ</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">numclusters</span> <span class="o">=</span> <span class="mi">3</span>
 
+<span class="c"># read data in SON files into PyHum memory mapped format (.dat)</span>
 <span class="n">PyHum</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">draft</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bedpick</span><span class="p">,</span> <span class="n">flip_lr</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 
+<span class="c"># correct scans and remove water column</span>
 <span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
 
+<span class="c"># remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)</span>
+<span class="n">PyHum</span><span class="o">.</span><span class="n">rmshadows</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shadowmask</span><span class="p">,</span> <span class="n">kvals</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
+
+<span class="c"># Calculate texture lengthscale maps using the method of Buscombe et al. (2015)</span>
 <span class="n">PyHum</span><span class="o">.</span><span class="n">texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">numclasses</span><span class="p">,</span> <span class="n">maxscale</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span>
 
+<span class="c"># grid and map the scans</span>
 <span class="n">PyHum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">dowrite</span><span class="p">)</span>
 
 <span class="n">res</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="c"># grid resolution in metres</span>
 
+<span class="c"># grid and map the texture lengthscale maps</span>
 <span class="n">PyHum</span><span class="o">.</span><span class="n">map_texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">dowrite</span><span class="p">)</span>
 
+<span class="c"># calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar</span>
 <span class="n">PyHum</span><span class="o">.</span><span class="n">e1e2</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">salinity</span><span class="p">,</span> <span class="n">beam</span><span class="p">,</span> <span class="n">transfreq</span><span class="p">,</span> <span class="n">integ</span><span class="p">,</span> <span class="n">numclusters</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -323,7 +337,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
         <li class="right" >
           <a href="index.html" title="PyHum: Python program for reading and processing low-cost sidescan sonar data"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.0 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

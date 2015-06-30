@@ -94,6 +94,10 @@ def dotest():
    # correction specific settings
    maxW = 1000 # rms output wattage
 
+   # for shadow removal
+   shadowmask = 0 #automatic shadow removal
+   kvals = 8 # number of k-means for automated shadow removal
+
    # for texture calcs
    win = 50 # pixel window
    shift = 10 # pixel shift
@@ -118,18 +122,27 @@ def dotest():
    integ = 5
    numclusters = 3
 
+   # read data in SON files into PyHum memory mapped format (.dat)
    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
 
+   # correct scans and remove water column
    PyHum.correct(humfile, sonpath, maxW, doplot)
 
+   # remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
+   PyHum.rmshadows(humfile, sonpath, win, shadowmask, kvals, doplot)
+
+   # Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
+   # grid and map the scans
    PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
 
    res = 0.5 # grid resolution in metres
    
+   # grid and map the texture lengthscale maps
    PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
 
+   # calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
 
 if __name__ == '__main__':

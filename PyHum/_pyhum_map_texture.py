@@ -155,9 +155,8 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
 
     References
     ----------
-     .. [1] Buscombe, D., Grams, P.E., and Smith, S.M.C., Automated riverbed sediment
-       classification using low-cost sidescan sonar. submitted to
-       Journal of Hydraulic Engineering
+      .. [1] Buscombe, D., Grams, P.E., and Smith, S.M.C., 2015, Automated riverbed sediment
+       classification using low-cost sidescan sonar. Journal of Hydraulic Engineering
     '''
 
     # prompt user to supply file if no input file given
@@ -571,11 +570,11 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
 
 # =========================================================
 def custom_save(figdirec,root):
-    plt.savefig(figdirec+root,bbox_inches='tight',dpi=400,transparent=True)
+    plt.savefig(figdirec+root,bbox_inches='tight',dpi=600,transparent=True)
 
 # =========================================================
 def custom_save2(figdirec,root):
-    plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
+    plt.savefig(figdirec+root,bbox_inches='tight',dpi=600)
 
 # =========================================================
 def calc_beam_pos(dist, bearing, x, y):

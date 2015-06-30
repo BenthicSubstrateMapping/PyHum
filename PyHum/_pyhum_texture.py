@@ -139,9 +139,8 @@ def texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale,
 
       References
       ----------
-      .. [1] Buscombe, D., Grams, P.E., and Smith, S.M.C., Automated riverbed sediment
-       classification using low-cost sidescan sonar. submitted to
-       Journal of Hydraulic Engineering
+      .. [1] Buscombe, D., Grams, P.E., and Smith, S.M.C., 2015, Automated riverbed sediment
+       classification using low-cost sidescan sonar. Journal of Hydraulic Engineering
       '''
                         
       # prompt user to supply file if no input file given

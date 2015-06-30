@@ -15,6 +15,8 @@ The programs in this package are as follows:
 
 **correct**: read output **read**, perform some radiometric corrections and produce some rudimentary plots
 
+**rmshadows**: read output **correct**, and remove dark shadows in scans caused by shallows, shorelines, and attenuation of acoustics with distance
+
 **texture**: read radiometrically corrected Humminbird data (output from **correct**), perform a textural analysis using the spectral method of Buscombe et al (forthcoming) and produce some rudimentary plots
 
 **map**: script to generate a point cloud (X,Y,sidescan intensity), save it to ascii format file, grid it and make a raster overlay for a kml file for google-earth

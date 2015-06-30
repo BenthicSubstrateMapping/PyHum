@@ -5,7 +5,7 @@ Python/Cython scripts to:
 1. read Humminbird DAT and associated SON files
 2. export data
 3. carry out rudimentary radiometric corrections to data, and 
-4. classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", forthcoming.
+4. classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, in press.
 5. produce some maps on aerial photos and kml files for google-earth
 
 
@@ -58,16 +58,19 @@ script to read Humminbird DAT and associated SON files, export data, and produce
 2. correct
 script to read Humminbird data (output from 'read') and perform some radiometric corrections and produce some rudimentary plots
 
-3. texture
+3. rmshadows
+read output 'correct', and remove dark shadows in scans caused by shallows, shorelines, and attenuation of acoustics with distance
+
+4. texture
 script to read radiometrically corrected Humminbird data in MAT format (output from pyhum_correct.py) and perform a textural analysis using the spectral method of Buscombe et al (forthcoming) and produce some rudimentary plots
 
-4. map
+5. map
 script to generate a point cloud (X,Y,sidescan intensity), save it to ascii format file, grid it and make a raster overlay on an aerial image (pulled automatically from the ESRI GIS image server), and a kml file for showing the same thing in google-earth
 
-5. map_texture
+6. map_texture
 script to generate a point cloud (X,Y,texture lengthscale - calculated using pyhum_texture), save it to ascii format file, grid it and make a raster overlay on an aerial image (pulled automatically from the ESRI GIS image server), and a kml file for showing the same thing in google-earth
 
-6. e1e2
+7. e1e2
 script to analyse the first (e1, 'roughness') and second (e2, 'hardness') echo returns from the high-frequency downward looking echosounder, and generate generalised acoustic parameters for the purposes of point classification of submerged substrates/vegetation. The processing accounts for the absorption of sound in water, and does a basic k-means cluster of e1 and e2 coefficients into specified number of 'acoustic classes'. This code is based on code by Barb Fagetter (blueseas@oceanecology.ca). Georeferenced parameters are saved in csv form, and optionally plots and kml files are generated
 
 These are all command-line programs which take a number of input (some required, some optional). Please see the individual files for a comprehensive list of input options
@@ -204,10 +207,15 @@ which carries out the following operations:
    flip_lr = 1 # flip port and starboard
    model = 998 # humminbird model
    chunk_size = 1000 # chunk size = 1000 pings
+   #chunk_size = 0 # auto chunk size
    dowrite = 0 #disable writing of point cloud data to file
-
+ 
    # correction specific settings
    maxW = 1000 # rms output wattage
+
+   # for shadow removal
+   shadowmask = 0 #automatic shadow removal
+   kvals = 8 # number of k-means for automated shadow removal
 
    # for texture calcs
    win = 50 # pixel window
@@ -233,18 +241,27 @@ which carries out the following operations:
    integ = 5
    numclusters = 3
 
+   # read data in SON files into PyHum memory mapped format (.dat)
    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
 
+   # correct scans and remove water column
    PyHum.correct(humfile, sonpath, maxW, doplot)
 
+   # remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
+   PyHum.rmshadows(humfile, sonpath, win, shadowmask, kvals, doplot)
+
+   # Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
+   # grid and map the scans
    PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
 
    res = 0.5 # grid resolution in metres
    
+   # grid and map the texture lengthscale maps
    PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
 
+   # calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
 
 
