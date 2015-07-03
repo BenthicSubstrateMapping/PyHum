@@ -212,32 +212,44 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       if base.find(' ')>-1:
          base = base[:base.find(' ')]
 
+      meta = loadmat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')))
+
       ft = 1/loadmat(sonpath+base+'meta.mat')['pix_m']
-      pix_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['pix_m'])
-      dep_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dep_m'])
-      dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
+      pix_m = np.squeeze(meta['pix_m'])
+      dep_m = np.squeeze(meta['dep_m'])
+      dist_m = np.squeeze(meta['dist_m'])
 
       ### port
       print "processing port side ..."
       # load memory mapped scan ... port
-      shape_port = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_port'])
+      shape_port = np.squeeze(meta['shape_port'])
       if shape_port!='':
-         port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=tuple(shape_port))
-         port_fp2 = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+         #port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+         #port_fp2 = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+         with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
+            port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
+         with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_l.dat')), 'r') as ff:
+            port_fp2 = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
 
       ### star
       print "processing starboard side ..."
       # load memory mapped scan ... port
       shape_star = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_star'])
       if shape_star!='':
-         star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=tuple(shape_star))
-         star_fp2 = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+         #star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+         #star_fp2 = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+         with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
+            star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+         with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'r') as ff:
+            star_fp2 = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
       shape = shape_port.copy()
       shape[1] = shape_port[1] + shape_star[1]
 
       # create memory mapped file for Sp
-      fp = np.memmap(sonpath+base+'_data_class.dat', dtype='float32', mode='w+', shape=tuple(shape))
+      #fp = np.memmap(sonpath+base+'_data_class.dat', dtype='float32', mode='w+', shape=tuple(shape))
+      with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'w+') as ff:
+         fp = np.memmap(ff, dtype='float32', mode='w+', shape=tuple(shape))
 
       #SRT = []
       for p in xrange(len(port_fp)):
@@ -292,7 +304,10 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
          yvec = np.linspace(pix_m,extent*pix_m,extent)
          d = dep_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
 
-         R_fp = np.memmap(sonpath+base+'_data_range.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+         #R_fp = np.memmap(sonpath+base+'_data_range.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+         with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'r') as ff:
+            R_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+
 
          R = np.vstack((np.flipud(R_fp[0]),R_fp[0]))
          
@@ -309,7 +324,9 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
       del fp # flush data to file
 
-      class_fp = np.memmap(sonpath+base+'_data_class.dat', dtype='float32', mode='r', shape=tuple(shape))
+      #class_fp = np.memmap(sonpath+base+'_data_class.dat', dtype='float32', mode='r', shape=tuple(shape))
+      with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'r') as ff:
+         class_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
 
       dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
 
@@ -326,7 +343,9 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
       #######################################################
       # k-means 
-      fp = np.memmap(sonpath+base+'_data_kclass.dat', dtype='float32', mode='w+', shape=tuple(shape))
+      #fp = np.memmap(sonpath+base+'_data_kclass.dat', dtype='float32', mode='w+', shape=tuple(shape))
+      with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'w+') as ff:
+         fp = np.memmap(ff, dtype='float32', mode='w+', shape=tuple(shape))
 
       for p in xrange(len(port_fp)):
          Sk = class_fp[p].copy()
@@ -339,7 +358,9 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
       del fp
 
-      kclass_fp = np.memmap(sonpath+base+'_data_kclass.dat', dtype='float32', mode='r', shape=tuple(shape))
+      #kclass_fp = np.memmap(sonpath+base+'_data_kclass.dat', dtype='float32', mode='r', shape=tuple(shape))
+      with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'r') as ff:
+         kclass_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
 
       ########################################################
       if doplot==1:
@@ -360,7 +381,8 @@ def custom_save(figdirec,root):
     '''
     save with no bounding box
     '''
-    plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
+    #plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
+    plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=400)
 
 # =========================================================
 def parallel_me(x, maxscale, notes, win, density):

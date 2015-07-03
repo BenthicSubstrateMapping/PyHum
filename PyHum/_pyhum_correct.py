@@ -319,12 +319,12 @@ def correct(humfile, sonpath, maxW=1000, doplot=1):
 
     ## do plots of merged scans
     if doplot==1:
-       # treats each chunk in parallel for speed
-       try:
-          d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_merged_scans)(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p) for p in xrange(len(star_fp)))
-       except:
-          for p in xrange(len(star_fp)):
-             plot_merged_scans(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p)
+       ## treats each chunk in parallel for speed
+       #try:
+       #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_merged_scans)(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p) for p in xrange(len(star_fp)))
+       #except:
+       for p in xrange(len(star_fp)):
+          plot_merged_scans(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p)
 
 
     # load memory mapped scans
@@ -392,11 +392,11 @@ def correct(humfile, sonpath, maxW=1000, doplot=1):
 
        if doplot==1:
           # treats each chunk in parallel for speed
-          try:
-             d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_dwnlow_scans)(low_fp[p], dist_m, shape_low, ft, sonpath, p) for p in xrange(len(low_fp)))
-          except:
-             for p in xrange(len(hi_fp)):
-                plot_dwnlow_scans(low_fp[p], dist_m, shape_low, ft, sonpath, p)
+          #try:
+          #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_dwnlow_scans)(low_fp[p], dist_m, shape_low, ft, sonpath, p) for p in xrange(len(low_fp)))
+          #except:
+          for p in xrange(len(hi_fp)):
+             plot_dwnlow_scans(low_fp[p], dist_m, shape_low, ft, sonpath, p)
 
           #for p in xrange(len(low_fp)):
           #   plot_dwnlow_scans(low_fp[p], dist_m, shape_low, ft, sonpath, p)
@@ -434,12 +434,12 @@ def correct(humfile, sonpath, maxW=1000, doplot=1):
           hi_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_hi)
 
        if doplot==1:
-          # treats each chunk in parallel for speed
-          try:
-             d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_dwnhi_scans)(hi_fp[p], dist_m, shape_hi, ft, sonpath, p) for p in xrange(len(hi_fp)))
-          except:
-             for p in xrange(len(hi_fp)):
-                plot_dwnhi_scans(hi_fp[p], dist_m, shape_hi, ft, sonpath, p)
+          ## treats each chunk in parallel for speed
+          #try:
+          #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_dwnhi_scans)(hi_fp[p], dist_m, shape_hi, ft, sonpath, p) for p in xrange(len(hi_fp)))
+          #except:
+          for p in xrange(len(hi_fp)):
+             plot_dwnhi_scans(hi_fp[p], dist_m, shape_hi, ft, sonpath, p)
 
 
     if os.name=='posix': # true if linux/mac
@@ -500,6 +500,17 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
     else:
        return Zt
  
+## =========================================================
+#def correct_scans(fp, r_fp):
+#    Zt = Parallel(n_jobs = -1, verbose=0)(delayed(c_scans)(fp[p], r_fp[p]) for p in xrange(len(fp)))
+#    return np.hstack(Zt).tolist()
+
+## =========================================================
+#def c_scans(fp, r_fp):
+#   mg = 10**np.log10(np.asarray(fp*np.cos(r_fp),'float32')+0.001)
+#   mg[fp==0] = np.nan
+#   return mg
+
 # =========================================================
 def correct_scans(fp, r_fp):
     Zt = []
