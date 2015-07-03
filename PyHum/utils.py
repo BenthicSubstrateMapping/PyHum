@@ -31,8 +31,9 @@ from scipy.interpolate import RectBivariateSpline
 import string, random
 
 # suppress divide and invalid warnings
-seterr(divide='ignore')
-seterr(invalid='ignore')
+#seterr(divide='ignore')
+#seterr(invalid='ignore')
+seterr(all='ignore')
 
 __all__ = [
     'id_generator',

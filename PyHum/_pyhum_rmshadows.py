@@ -79,8 +79,9 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 
 # suppress divide and invalid warnings
-np.seterr(divide='ignore')
-np.seterr(invalid='ignore')
+#np.seterr(divide='ignore')
+#np.seterr(invalid='ignore')
+np.seterr(all='ignore')
 
 # =========================================================
 # =============== begin program ======================
