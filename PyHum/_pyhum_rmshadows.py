@@ -246,7 +246,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
 
        # create memory mapped file for Zs
        #fp = np.memmap(sonpath+base+'_data_star_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zs))
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'w+') as ff:
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'w+') as ff:
           fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
        fp[:] = Zt[:]
        del fp
@@ -289,7 +289,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
 
        # create memory mapped file for Zp
        #fp = np.memmap(sonpath+base+'_data_port_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zp))
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'w+') as ff:
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), 'w+') as ff:
           fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
        fp[:] = Zt[:]
        del fp
@@ -369,7 +369,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
        # create memory mapped file for Zp
        #fp = np.memmap(sonpath+base+'_data_port_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zp))
        #with open(sonpath+base+'_data_port_lar.dat', 'w+') as f:
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'w+') as ff:
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), 'w+') as ff:
           fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zp))
        fp[:] = Zp[:]
        del fp
@@ -381,7 +381,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
        # create memory mapped file for Zs
        #fp = np.memmap(sonpath+base+'_data_star_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zs))
        #with open(sonpath+base+'_data_star_lar.dat', 'w+') as f:
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'w+') as ff:
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'w+') as ff:
           fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zs))
        fp[:] = Zs[:]
        del fp
