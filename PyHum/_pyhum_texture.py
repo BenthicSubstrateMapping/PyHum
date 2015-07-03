@@ -95,7 +95,7 @@ __all__ = [
     ]
 
 #################################################
-def texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes):
+def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasses=4, maxscale=20, notes=4):
           
       '''
       Create a texture lengthscale map using the algorithm detailed by Buscombe et al. (forthcoming)
@@ -142,7 +142,7 @@ def texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale,
       .. [1] Buscombe, D., Grams, P.E., and Smith, S.M.C., 2015, Automated riverbed sediment
        classification using low-cost sidescan sonar. Journal of Hydraulic Engineering
       '''
-                        
+
       # prompt user to supply file if no input file given
       if not humfile:
          print 'An input file is required!!!!!!'
@@ -185,36 +185,7 @@ def texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale,
       
       
       print '[Default] Number of processors is %s' % (str(cpu_count()))
-
-      if not win:
-         win = 100
-         print '[Default] Window is %s square pixels' % (str(win))
-
-      if not shift:
-         shift = 10
-         print '[Default] Min shift is %s pixels' % (str(shift))
-
-      if not density:
-         density = win/2
-         print '[Default] Echogram will be sampled every %s pixels' % (str(density))
-
-      if not numclasses:
-         numclasses = 4
-         print '[Default] Number of sediment classes: %s' % (str(numclasses))
-
-      if not maxscale:
-         maxscale = 20
-         print '[Default] Max scale as inverse fraction of data length: %s ' % (str(maxscale))
-
-      if not notes:
-         notes = 4
-         print '[Default] Notes per octave: %s ' % (str(notes))
-
-      if not doplot:
-         if doplot != 0:
-            doplot = 1
-            print "[Default] Plots will be made"
-
+                        
       ########################################################
       ########################################################
       
@@ -322,27 +293,6 @@ def texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale,
          d = dep_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
 
          R_fp = np.memmap(sonpath+base+'_data_range.dat', dtype='float32', mode='r', shape=tuple(shape_star))
-
-         #R = np.ones(np.shape(Sp))
-         #for k in range(len(d)): 
-         #   R[:,k] = np.hstack((np.flipud(d[k]/yvec), d[k]/yvec))
-
-         #if len(d)<np.shape(port_fp[p])[1]:
-         #   d = np.append(d,d[-1])
-         #Zbed = np.squeeze(d*ft)
-
-         #R1 = R[extent:,:]
-         #R2 = np.flipud(R[:extent,:])
-
-         ## shift proportionally depending on where the bed is
-         #for k in xrange(np.shape(R1)[1]):
-         #   R1[:,k] = np.r_[R1[Zbed[k]:,k], np.zeros( (np.shape(R1)[0] -  np.shape(R1[Zbed[k]:,k])[0] ,) )]
-
-         #for k in xrange(np.shape(R2)[1]):
-         #   R2[:,k] = np.r_[R2[Zbed[k]:,k], np.zeros( (np.shape(R2)[0] -  np.shape(R2[Zbed[k]:,k])[0] ,) )]
-
-         #R = np.vstack((np.flipud(R2),R1))
-         #del R1, R2
 
          R = np.vstack((np.flipud(R_fp[0]),R_fp[0]))
          
@@ -517,5 +467,64 @@ def plot_kmeans(dist_m, shape_port, dat_port, dat_star, dat_kclass, ft, humfile,
 
    custom_save(sonpath,base+'class_kmeans'+str(p))
    del fig
+
+# =========================================================
+# =========================================================
+if __name__ == '__main__':
+
+   texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+
+
+#      if not win:
+#         win = 100
+#         print '[Default] Window is %s square pixels' % (str(win))
+
+#      if not shift:
+#         shift = 10
+#         print '[Default] Min shift is %s pixels' % (str(shift))
+
+#      if not density:
+#         density = win/2
+#         print '[Default] Echogram will be sampled every %s pixels' % (str(density))
+
+#      if not numclasses:
+#         numclasses = 4
+#         print '[Default] Number of sediment classes: %s' % (str(numclasses))
+
+#      if not maxscale:
+#         maxscale = 20
+#         print '[Default] Max scale as inverse fraction of data length: %s ' % (str(maxscale))
+
+#      if not notes:
+#         notes = 4
+#         print '[Default] Notes per octave: %s ' % (str(notes))
+
+#      if not doplot:
+#         if doplot != 0:
+#            doplot = 1
+#            print "[Default] Plots will be made"
+
+
+         #R = np.ones(np.shape(Sp))
+         #for k in range(len(d)): 
+         #   R[:,k] = np.hstack((np.flipud(d[k]/yvec), d[k]/yvec))
+
+         #if len(d)<np.shape(port_fp[p])[1]:
+         #   d = np.append(d,d[-1])
+         #Zbed = np.squeeze(d*ft)
+
+         #R1 = R[extent:,:]
+         #R2 = np.flipud(R[:extent,:])
+
+         ## shift proportionally depending on where the bed is
+         #for k in xrange(np.shape(R1)[1]):
+         #   R1[:,k] = np.r_[R1[Zbed[k]:,k], np.zeros( (np.shape(R1)[0] -  np.shape(R1[Zbed[k]:,k])[0] ,) )]
+
+         #for k in xrange(np.shape(R2)[1]):
+         #   R2[:,k] = np.r_[R2[Zbed[k]:,k], np.zeros( (np.shape(R2)[0] -  np.shape(R2[Zbed[k]:,k])[0] ,) )]
+
+         #R = np.vstack((np.flipud(R2),R1))
+         #del R1, R2
+
 
 

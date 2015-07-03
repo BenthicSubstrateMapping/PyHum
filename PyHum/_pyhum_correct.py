@@ -96,7 +96,7 @@ __all__ = [
     ]
 
 #################################################
-def correct(humfile, sonpath, maxW, doplot):
+def correct(humfile, sonpath, maxW=1000, doplot=1):
 
     '''
     Remove water column and carry out some rudimentary radiometric corrections, 
@@ -176,15 +176,6 @@ def correct(humfile, sonpath, maxW, doplot):
       doplot = int(doplot)
       if doplot==0:
          print "Plots will not be made"
-
-    if not maxW:
-      maxW = 1000
-      print '[Default] Max. transducr power is %s W' % (str(maxW))
-
-    if not doplot:
-      if doplot != 0:
-         doplot = 1
-         print "[Default] Plots will be made"
 
 
     # start timer
@@ -533,5 +524,19 @@ def plot_dwnhi_scans(dat_dwnhi, dist_m, shape_hi, ft, sonpath, p):
     del fig
 
 
+# =========================================================
+# =========================================================
+if __name__ == '__main__':
+
+   correct(humfile, sonpath, maxW, doplot)
+
+#    if not maxW:
+#      maxW = 1000
+#      print '[Default] Max. transducr power is %s W' % (str(maxW))
+
+#    if not doplot:
+#      if doplot != 0:
+#         doplot = 1
+#         print "[Default] Plots will be made"
 
 

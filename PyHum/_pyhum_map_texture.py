@@ -96,7 +96,7 @@ __all__ = [
     ]
 
 #################################################
-def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite):
+def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 0, filt_bearing = 0, res = 0.5, cog = 1, dowrite = 0):
          
     '''
     Create plots of the texture lengthscale maps made in PyHum.texture module 
@@ -127,12 +127,12 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
        if 1, bearing will be calculated from coordinates
     filt_bearing : float, *optional* [Default=0]
        if 1, bearing will be filtered
-    res : float, *optional* [Default=0.1]
+    res : float, *optional* [Default=0.5]
        grid resolution of output gridded texture map
     cog : int, *optional* [Default=1]
        if 1, heading calculated assuming GPS course-over-ground rather than
        using a compass
-    dowrite: int, *optional* [Default=1]
+    dowrite: int, *optional* [Default=0]
        if 1, point cloud data from each chunk is written to ascii file
        if 0, processing times are speeded up considerably but point clouds are not available for further analysis
 
@@ -209,40 +209,6 @@ def map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing
        dowrite = int(dowrite)
        if dowrite==0:
           print "Point cloud data will be written to ascii file" 
-
-    if not cs2cs_args:
-       # arguments to pass to cs2cs for coordinate transforms
-       cs2cs_args = "epsg:26949"
-       print '[Default] cs2cs arguments are %s' % (cs2cs_args)
-
-    if not dogrid:
-       if dogrid != 0:
-          dogrid = 1
-          print "[Default] Data will be gridded"
-
-    if not calc_bearing:
-       if calc_bearing != 1:
-          calc_bearing = 0
-          print "[Default] Heading recorded by instrument will be used"
-
-    if not filt_bearing:
-       if filt_bearing != 1:
-          filt_bearing = 0
-          print "[Default] Heading will not be filtered"
-
-    if not res:
-       res = 0.5
-       print '[Default] Grid resolution is %s m' % (str(res))
-
-    if not cog:
-       if cog != 0:
-          cog = 1
-          print "[Default] Heading based on course-over-ground"
-
-    if not dowrite:
-       if dowrite != 0:
-          dowrite = 1
-          print "[Default] Point cloud data will be written to ascii file"
 
     trans =  pyproj.Proj(init=cs2cs_args)
 
@@ -594,5 +560,47 @@ def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
 
    db = np.rad2deg(bearing)
    return (90.0 - db + 360.0) % 360.0
+
+
+# =========================================================
+# =========================================================
+if __name__ == '__main__':
+
+   map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
+
+
+#    if not cs2cs_args:
+#       # arguments to pass to cs2cs for coordinate transforms
+#       cs2cs_args = "epsg:26949"
+#       print '[Default] cs2cs arguments are %s' % (cs2cs_args)
+
+#    if not dogrid:
+#       if dogrid != 0:
+#          dogrid = 1
+#          print "[Default] Data will be gridded"
+
+#    if not calc_bearing:
+#       if calc_bearing != 1:
+#          calc_bearing = 0
+#          print "[Default] Heading recorded by instrument will be used"
+
+#    if not filt_bearing:
+#       if filt_bearing != 1:
+#          filt_bearing = 0
+#          print "[Default] Heading will not be filtered"
+
+#    if not res:
+#       res = 0.5
+#       print '[Default] Grid resolution is %s m' % (str(res))
+
+#    if not cog:
+#       if cog != 0:
+#          cog = 1
+#          print "[Default] Heading based on course-over-ground"
+
+#    if not dowrite:
+#       if dowrite != 0:
+#          dowrite = 1
+#          print "[Default] Point cloud data will be written to ascii file"
 
 

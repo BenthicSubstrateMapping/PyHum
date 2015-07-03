@@ -93,7 +93,7 @@ np.seterr(invalid='ignore')
 
 
 #################################################
-def e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot):
+def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=0.0, beam=20.0, transfreq=200.0, integ=5, numclusters=3, doplot=1):
          
     '''
     Analysis of first (e1, 'roughness') and second (e2, 'hardness') echo returns from the high-frequency downward looking echosounder
@@ -241,45 +241,6 @@ def e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, inte
       doplot = int(doplot)
       if doplot==0:
          print "Plots will not be made"
-
-    if not beam:
-       beam = 20.0
-       print '[Default] Beam is %s deg' % (str(beam))
-
-    if not salinity:
-       if salinity != 0.0:
-          salinity = 0.0
-          print '[Default] Salinity is %s ppt' % (str(salinity))
-
-    if not ph:
-       ph = 7.0
-       print '[Default] pH is %s' % (str(ph))
-
-    if not integ:
-       integ = 5
-       print '[Default] Number of records for integration is %s' % (str(ph))
-
-    if not numclusters:
-       numclusters = 3
-       print '[Default] Number of acoustic clusters is %s' % (str(ph))
-
-    if not temp:
-       temp = 10.0
-       print '[Default] Temperature is %s degC' % (str(temp))
-
-    if not transfreq:
-       transfreq = 200.0
-       print '[Default] Dwnward freq. is %s kHz' % (str(transfreq))
-
-    if not cs2cs_args:
-       # arguments to pass to cs2cs for coordinate transforms
-       cs2cs_args = "epsg:26949"
-       print '[Default] cs2cs arguments are %s' % (cs2cs_args)
-
-    if not doplot:
-      if doplot != 0:
-         doplot = 1
-         print "[Default] Plots will be made"
 
 
     # if son path name supplied has no separator at end, put one on
@@ -677,5 +638,49 @@ def get_rgh_hrd(beamdat,dep,absorp,c,nf,transfreq,equivbeam,maxW,pi,ft):
     return rough, hard, sv_e1, sv_e2, E1start, E1end, E2start, E2end
 
 
+# =========================================================
+# =========================================================
+if __name__ == '__main__':
+   
+   e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
 
+
+#    if not beam:
+#       beam = 20.0
+#       print '[Default] Beam is %s deg' % (str(beam))
+
+#    if not salinity:
+#       if salinity != 0.0:
+#          salinity = 0.0
+#          print '[Default] Salinity is %s ppt' % (str(salinity))
+
+#    if not ph:
+#       ph = 7.0
+#       print '[Default] pH is %s' % (str(ph))
+
+#    if not integ:
+#       integ = 5
+#       print '[Default] Number of records for integration is %s' % (str(ph))
+
+#    if not numclusters:
+#       numclusters = 3
+#       print '[Default] Number of acoustic clusters is %s' % (str(ph))
+
+#    if not temp:
+#       temp = 10.0
+#       print '[Default] Temperature is %s degC' % (str(temp))
+
+#    if not transfreq:
+#       transfreq = 200.0
+#       print '[Default] Dwnward freq. is %s kHz' % (str(transfreq))
+
+#    if not cs2cs_args:
+#       # arguments to pass to cs2cs for coordinate transforms
+#       cs2cs_args = "epsg:26949"
+#       print '[Default] cs2cs arguments are %s' % (cs2cs_args)
+
+#    if not doplot:
+#      if doplot != 0:
+#         doplot = 1
+#         print "[Default] Plots will be made"
 

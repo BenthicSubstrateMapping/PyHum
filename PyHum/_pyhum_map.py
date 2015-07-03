@@ -96,7 +96,7 @@ __all__ = [
     ]
 
 #################################################
-def map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite):
+def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 0, filt_bearing = 0, res = 0.1, cog = 1, dowrite = 0):
          
     '''
     Create plots of the spatially referenced sidescan echograms
@@ -128,7 +128,7 @@ def map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, c
     cog : int, *optional* [Default=1]
        if 1, heading calculated assuming GPS course-over-ground rather than
        using a compass
-    dowrite: int, *optional* [Default=1]
+    dowrite: int, *optional* [Default=0]
        if 1, point cloud data from each chunk is written to ascii file
        if 0, processing times are speeded up considerably but point clouds are not available for further analysis
 
@@ -197,40 +197,6 @@ def map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, c
        dowrite = int(dowrite)
        if dowrite==0:
           print "Point cloud data will be written to ascii file" 
-
-    if not cs2cs_args:
-       # arguments to pass to cs2cs for coordinate transforms
-       cs2cs_args = "epsg:26949"
-       print '[Default] cs2cs arguments are %s' % (cs2cs_args)
-
-    if not dogrid:
-       if dogrid != 0:
-          dogrid = 1
-          print "[Default] Data will be gridded"
-
-    if not calc_bearing:
-       if calc_bearing != 1:
-          calc_bearing = 0
-          print "[Default] Heading recorded by instrument will be used"
-
-    if not filt_bearing:
-       if filt_bearing != 1:
-          filt_bearing = 0
-          print "[Default] Heading will not be filtered"
-
-    if not res:
-       res = 0.05
-       print '[Default] Grid resolution is %s m' % (str(res))
-
-    if not cog:
-       if cog != 0:
-          cog = 1
-          print "[Default] Heading based on course-over-ground"
-
-    if not dowrite:
-       if dowrite != 0:
-          dowrite = 1
-          print "[Default] Point cloud data will be written to ascii file"
 
 
     trans =  pyproj.Proj(init=cs2cs_args)
@@ -492,4 +458,46 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
    kml.save(sonpath+'GroundOverlay'+str(p)+'.kml')
 
    del humlat, humlon
+
+
+# =========================================================
+# =========================================================
+if __name__ == '__main__':
+
+   map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
+
+#    if not cs2cs_args:
+#       # arguments to pass to cs2cs for coordinate transforms
+#       cs2cs_args = "epsg:26949"
+#       print '[Default] cs2cs arguments are %s' % (cs2cs_args)
+
+#    if not dogrid:
+#       if dogrid != 0:
+#          dogrid = 1
+#          print "[Default] Data will be gridded"
+
+#    if not calc_bearing:
+#       if calc_bearing != 1:
+#          calc_bearing = 0
+#          print "[Default] Heading recorded by instrument will be used"
+
+#    if not filt_bearing:
+#       if filt_bearing != 1:
+#          filt_bearing = 0
+#          print "[Default] Heading will not be filtered"
+
+#    if not res:
+#       res = 0.05
+#       print '[Default] Grid resolution is %s m' % (str(res))
+
+#    if not cog:
+#       if cog != 0:
+#          cog = 1
+#          print "[Default] Heading based on course-over-ground"
+
+#    if not dowrite:
+#       if dowrite != 0:
+#          dowrite = 1
+#          print "[Default] Point cloud data will be written to ascii file"
+
 

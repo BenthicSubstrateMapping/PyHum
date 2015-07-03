@@ -93,7 +93,7 @@ __all__ = [
     ]
 
 #################################################
-def rmshadows(humfile, sonpath, win, shadowmask, kvals, doplot):
+def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
     '''
     Remove dark shadows in scans caused by shallows, shorelines, and attenuation of acoustics with distance
     Manual or automated processing options available
@@ -165,23 +165,6 @@ def rmshadows(humfile, sonpath, win, shadowmask, kvals, doplot):
        doplot = int(doplot)
        if doplot==0:
           print "Plots will not be made"
-
-    if not kvals:
-       kvals = 8
-       print '[Default] %s discrete values for shoreline removal' % (str(kvals))
-      
-    if not win:
-       win = 100
-       print '[Default] Window is %s square pixels' % (str(win))
-
-    if not shadowmask:
-       shadowmask = 0
-       print '[Default] Shadow masking is auto'
-
-    if not doplot:
-       if doplot != 0:
-          doplot = 1
-          print "[Default] Plots will be made"
 
 
     # start timer
@@ -379,6 +362,31 @@ def custom_save(figdirec,root):
     save with no bounding box
     '''
     plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
+
+
+# =========================================================
+# =========================================================
+if __name__ == '__main__':
+
+   rmshadows(humfile, sonpath, win, shadowmask, kvals, doplot)
+
+
+#    if not kvals:
+#       kvals = 8
+#       print '[Default] %s discrete values for shoreline removal' % (str(kvals))
+#      
+#    if not win:
+#       win = 100
+#       print '[Default] Window is %s square pixels' % (str(win))
+
+#    if not shadowmask:
+#       shadowmask = 0
+#       print '[Default] Shadow masking is auto'
+
+#    if not doplot:
+#       if doplot != 0:
+#          doplot = 1
+#          print "[Default] Plots will be made"
 
 
 

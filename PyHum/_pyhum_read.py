@@ -93,7 +93,7 @@ __all__ = [
     ]
 
 #################################################
-def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize, model):
+def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=1, t=0.108, f=455, bedpick=1, flip_lr=0, chunksize=0, model=998):
 
     '''
     Read a .DAT and associated set of .SON files recorded by a Humminbird(R)
@@ -122,7 +122,7 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
        into any projection supported by the proj.4 libraries
     c : float, *optional* [Default=1450.0]
        speed of sound in water (m/s). Defaults to a value of freshwater
-    draft : float, *optional* [Default=0]
+    draft : float, *optional* [Default=0.3]
        draft from water surface to transducer face (m)
     doplot : float, *optional* [Default=1]
        if 1, plots will be made
@@ -261,41 +261,6 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
        model = int(model)
        print "Data is from the %s series"  % (str(model))
 
-    if not t:
-      t = 0.108
-      print '[Default] Transducer length is %s m' % (str(t))
-    if not f:
-      f = 455
-      print '[Default] Frequency is %s kHz' % (str(f))
-    if not c:
-      c = 1450.0
-      print '[Default] Celerity of sound = %s m/s' % (str(c))
-    if not draft:
-      draft = 0
-      print '[Default] Draft = %s metres' % (str(draft))
-    if not cs2cs_args:
-      # arguments to pass to cs2cs for coordinate transforms
-      cs2cs_args = "epsg:26949"
-      print '[Default] cs2cs arguments are %s' % (cs2cs_args)
-    if not doplot:
-      if doplot != 0:
-         doplot = 1
-         print "[Default] Plots will be made"
-    if not flip_lr:
-      if flip_lr != 1:
-         flip_lr = 0
-         print "[Default] No port/starboard flipping"
-    if not bedpick:
-      bedpick = 1
-      print '[Default] Bed picking is auto'
-      
-    if not chunksize:
-      chunksize = 0
-      print '[Default] Chunk size will be determined automatically'
-      
-    if not model:
-       model = 998
-       print "[Default] Data is from the %s series"  % (str(model))
 
     ## for debugging
     #humfile = r"test.DAT"; sonpath = "test_data"
@@ -307,9 +272,6 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr,
        start = time.time()
     else: # windows
        start = time.clock()
-
-    # number of bytes in a header packet in SON file
-    #headbytes = 67
 
     # if son path name supplied has no separator at end, put one on
     if sonpath[-1]!=os.sep:
@@ -833,4 +795,48 @@ def plot_bedpick(dat_port, dat_star, Zbed, Zdist, ft, shape_port, sonpath, k):
    plt.close(); del fig
 
 
+# =========================================================
+# =========================================================
+if __name__ == '__main__':
+
+   read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize, model)
+
+#    if not t:
+#      t = 0.108
+#      print '[Default] Transducer length is %s m' % (str(t))
+#    if not f:
+#      f = 455
+#      print '[Default] Frequency is %s kHz' % (str(f))
+#    if not c:
+#      c = 1450.0
+#      print '[Default] Celerity of sound = %s m/s' % (str(c))
+#    if not draft:
+#      draft = 0
+#      print '[Default] Draft = %s metres' % (str(draft))
+#    if not cs2cs_args:
+#      # arguments to pass to cs2cs for coordinate transforms
+#      cs2cs_args = "epsg:26949"
+#      print '[Default] cs2cs arguments are %s' % (cs2cs_args)
+#    if not doplot:
+#      if doplot != 0:
+#         doplot = 1
+#         print "[Default] Plots will be made"
+#    if not flip_lr:
+#      if flip_lr != 1:
+#         flip_lr = 0
+#         print "[Default] No port/starboard flipping"
+#    if not bedpick:
+#      bedpick = 1
+#      print '[Default] Bed picking is auto'
+#      
+#    if not chunksize:
+#      chunksize = 0
+#      print '[Default] Chunk size will be determined automatically'
+#      
+#    if not model:
+#       model = 998
+#       print "[Default] Data is from the %s series"  % (str(model))
+
+    # number of bytes in a header packet in SON file
+    #headbytes = 67
 
