@@ -260,6 +260,8 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
     if base.find(' ')>-1:
        base = base[:base.find(' ')]
 
+    meta = loadmat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')))
+
     beamwidth = beam*(np.sqrt(0.5))
     equivbeam = (5.78/(np.power(1.6,2)))*(np.power((np.sin((beamwidth*np.pi)/(2*180))),2))
 
@@ -278,13 +280,18 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
     del meta
 
     # load memory mapped scans
-    shape_hi= np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_hi'])
+    shape_hi= np.squeeze(meta['shape_hi'])
     if shape_hi!='':
        try:
-          dwnhi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=tuple(shape_hi))
+          #dwnhi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=tuple(shape_hi))
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
+             dwnhi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
+
        except:
-          shape_lo= np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_low'])
-          dwnhi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=tuple(shape_lo))
+          shape_lo= np.squeeze(meta['shape_low'])
+          #dwnhi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=tuple(shape_lo))
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
+             dwnhi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_lo))
     
 
     if 'dwnhi_fp' in locals():
@@ -376,7 +383,8 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
           hardav = humutils.runningMeanFast(hard,integ)
           roughav = humutils.runningMeanFast(rough,integ)
 
-          f = open(sonpath+base+'rough_and_hard'+str(p)+'.csv', 'wt')
+          #f = open(sonpath+base+'rough_and_hard'+str(p)+'.csv', 'wt')
+          f = open(os.path.normpath(os.path.join(sonpath,base+'rough_and_hard'+str(p)+'.csv')), 'wt')
           writer = csv.writer(f)
           writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth', 'roughness', 'hardness', 'average roughness', 'average hardness','k-mean label') )
           for i in range(0, len(rough)):
@@ -521,7 +529,8 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                 ground.latlonbox.west =  np.min(Zlon)-0.001
                 ground.latlonbox.rotation = 0
 
-                kml.save(sonpath+'Rough'+str(p)+'.kml')
+                #kml.save(sonpath+'Rough'+str(p)+'.kml')
+                kml.save(os.path.normpath(os.path.join(sonpath,'Rough'+str(p)+'.kml')))
 
              except:
                 print "plot could not be produced"
@@ -555,7 +564,8 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                 ground.latlonbox.west =  np.min(Zlon)-0.001
                 ground.latlonbox.rotation = 0
 
-                kml.save(sonpath+'Hard'+str(p)+'.kml')
+                #kml.save(sonpath+'Hard'+str(p)+'.kml')
+                kml.save(os.path.normpath(os.path.join(sonpath,'Hard'+str(p)+'.kml')))
 
              except:
                 print "plot could not be produced"
@@ -584,7 +594,8 @@ def water_atten(H,f,c,pH,T,S):
 
 # =========================================================
 def custom_save(figdirec,root):
-    plt.savefig(figdirec+root,bbox_inches='tight',dpi=400, transparent=True)
+    #plt.savefig(figdirec+root,bbox_inches='tight',dpi=400, transparent=True)
+    plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=400, transparent=True)
 
 # =========================================================
 def get_rgh_hrd(beamdat,dep,absorp,c,nf,transfreq,equivbeam,maxW,pi,ft):
