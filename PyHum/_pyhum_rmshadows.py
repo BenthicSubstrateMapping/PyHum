@@ -58,6 +58,7 @@
 from __future__ import division
 from scipy.io import savemat, loadmat
 import os, time, sys, getopt
+import shutil
 try:
    from Tkinter import Tk
    from tkFileDialog import askopenfilename, askdirectory
@@ -231,10 +232,21 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
 
           Zt.append(star_mg)
 
-       # create memory mapped file for Z
-       fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
+       ## create memory mapped file for Z
+       #p = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
+       #fp[:] = Zt[:]
+       #del fp
+
+       # create memory mapped file for Zs
+       #fp = np.memmap(sonpath+base+'_data_star_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zs))
+       with open(sonpath+base+'_data_star_lar.dat', 'w+') as f:
+          fp = np.memmap(f, dtype='float32', mode='w+', shape=np.shape(Zt))
        fp[:] = Zt[:]
        del fp
+       del Zt
+
+       shutil.move(sonpath+base+'_data_star_lar.dat', sonpath+base+'_data_star_la.dat')
+
 
        Zt = []
        for p in xrange(len(port_fp)):
@@ -263,10 +275,20 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
 
           Zt.append(port_mg)
 
-       # create memory mapped file for Z
-       fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
+       ## create memory mapped file for Z
+       #fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
+       #fp[:] = Zt[:]
+       #del fp
+
+       # create memory mapped file for Zp
+       #fp = np.memmap(sonpath+base+'_data_port_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zp))
+       with open(sonpath+base+'_data_port_lar.dat', 'w+') as f:
+          fp = np.memmap(f, dtype='float32', mode='w+', shape=np.shape(Zt))
        fp[:] = Zt[:]
        del fp
+       del Zt    
+
+       shutil.move(sonpath+base+'_data_port_lar.dat', sonpath+base+'_data_port_la.dat')
 
     else:
 
@@ -338,16 +360,32 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
           del merge, bw2
 
        # create memory mapped file for Zp
-       fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='w+', shape=np.shape(Zp))
+       #fp = np.memmap(sonpath+base+'_data_port_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zp))
+       with open(sonpath+base+'_data_port_lar.dat', 'w+') as f:
+          fp = np.memmap(f, dtype='float32', mode='w+', shape=np.shape(Zp))
        fp[:] = Zp[:]
        del fp
-       del Zp
+       del Zp    
+
+       shutil.move(sonpath+base+'_data_port_lar.dat', sonpath+base+'_data_port_la.dat')
 
        # create memory mapped file for Zs
-       fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='w+', shape=np.shape(Zs))
+       #fp = np.memmap(sonpath+base+'_data_star_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zs))
+       with open(sonpath+base+'_data_star_lar.dat', 'w+') as f:
+          fp = np.memmap(f, dtype='float32', mode='w+', shape=np.shape(Zs))
        fp[:] = Zs[:]
        del fp
        del Zs
+
+       shutil.move(sonpath+base+'_data_star_lar.dat', sonpath+base+'_data_star_la.dat')
+
+    if os.name=='posix': # true if linux/mac
+       elapsed = (time.time() - start)
+    else: # windows
+       elapsed = (time.clock() - start)
+    print "Processing took ", elapsed , "seconds to analyse"
+
+    print "Done!"
 
 #==================================================
 def get_stats(pts):

@@ -305,8 +305,13 @@ def correct(humfile, sonpath, maxW=1000, doplot=1):
 
     ## do plots of merged scans
     if doplot==1:
-      for p in xrange(len(star_fp)):
-         plot_merged_scans(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p)
+       # treats each chunk in parallel for speed
+       try:
+          d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_merged_scans)(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p) for p in xrange(len(star_fp)))
+       except:
+          for p in xrange(len(star_fp)):
+             plot_merged_scans(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p)
+
 
     # load memory mapped scans
     shape_low = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_low'])
@@ -359,8 +364,15 @@ def correct(humfile, sonpath, maxW=1000, doplot=1):
        low_fp = np.memmap(sonpath+base+'_data_dwnlow_la.dat', dtype='float32', mode='r', shape=shape_low)
 
        if doplot==1:
-          for p in xrange(len(low_fp)):
-             plot_dwnlow_scans(low_fp[p], dist_m, shape_low, ft, sonpath, p)
+          # treats each chunk in parallel for speed
+          try:
+             d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_dwnlow_scans)(low_fp[p], dist_m, shape_low, ft, sonpath, p) for p in xrange(len(low_fp)))
+          except:
+             for p in xrange(len(hi_fp)):
+                plot_dwnlow_scans(low_fp[p], dist_m, shape_low, ft, sonpath, p)
+
+          #for p in xrange(len(low_fp)):
+          #   plot_dwnlow_scans(low_fp[p], dist_m, shape_low, ft, sonpath, p)
 
     if 'hi_fp' in locals():
        ######### hi
@@ -395,8 +407,13 @@ def correct(humfile, sonpath, maxW=1000, doplot=1):
        hi_fp = np.memmap(sonpath+base+'_data_dwnhi_la.dat', dtype='float32', mode='r', shape=shape_hi)
 
        if doplot==1:
-          for p in xrange(len(hi_fp)):
-             plot_dwnhi_scans(hi_fp[p], dist_m, shape_hi, ft, sonpath, p)
+          # treats each chunk in parallel for speed
+          try:
+             d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_dwnhi_scans)(hi_fp[p], dist_m, shape_hi, ft, sonpath, p) for p in xrange(len(hi_fp)))
+          except:
+             for p in xrange(len(hi_fp)):
+                plot_dwnhi_scans(hi_fp[p], dist_m, shape_hi, ft, sonpath, p)
+
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
