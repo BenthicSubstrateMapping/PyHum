@@ -58,7 +58,7 @@
 from __future__ import division
 from scipy.io import savemat, loadmat
 import os, time, sys, getopt
-import shutil
+#import shutil
 try:
    from Tkinter import Tk
    from tkFileDialog import askopenfilename, askdirectory
@@ -198,14 +198,14 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
     shape_port = np.squeeze(meta['shape_port'])
     if shape_port!='':
        #port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=tuple(shape_port))
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as f:
-          port_fp = np.memmap(f, dtype='float32', mode='r', shape=tuple(shape_port))
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
+          port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
 
     shape_star = np.squeeze(meta['shape_star'])
     if shape_star!='':
        #star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=tuple(shape_star))
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as f:
-          star_fp = np.memmap(f, dtype='float32', mode='r', shape=tuple(shape_star))
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
+          star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
     dist_m = np.squeeze(meta['dist_m'])
     ft = 1/(meta['pix_m'])
@@ -246,13 +246,13 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
 
        # create memory mapped file for Zs
        #fp = np.memmap(sonpath+base+'_data_star_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zs))
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'w+') as f:
-          fp = np.memmap(f, dtype='float32', mode='w+', shape=np.shape(Zt))
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
        fp[:] = Zt[:]
        del fp
        del Zt
 
-       shutil.move(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')))
+       #shutil.move(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')))
 
 
        Zt = []
@@ -289,13 +289,13 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
 
        # create memory mapped file for Zp
        #fp = np.memmap(sonpath+base+'_data_port_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zp))
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), 'w+') as f:
-          fp = np.memmap(f, dtype='float32', mode='w+', shape=np.shape(Zt))
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
        fp[:] = Zt[:]
        del fp
        del Zt    
 
-       shutil.move(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')))
+       #shutil.move(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')))
 
     else:
 
@@ -369,26 +369,26 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
        # create memory mapped file for Zp
        #fp = np.memmap(sonpath+base+'_data_port_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zp))
        #with open(sonpath+base+'_data_port_lar.dat', 'w+') as f:
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), 'w+') as f:
-          fp = np.memmap(f, dtype='float32', mode='w+', shape=np.shape(Zp))
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zp))
        fp[:] = Zp[:]
        del fp
        del Zp    
 
        #shutil.move(sonpath+base+'_data_port_lar.dat', sonpath+base+'_data_port_la.dat')
-       shutil.move(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')))
+       #shutil.move(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')))
 
        # create memory mapped file for Zs
        #fp = np.memmap(sonpath+base+'_data_star_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zs))
        #with open(sonpath+base+'_data_star_lar.dat', 'w+') as f:
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'w+') as f:
-          fp = np.memmap(f, dtype='float32', mode='w+', shape=np.shape(Zs))
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zs))
        fp[:] = Zs[:]
        del fp
        del Zs
 
        #shutil.move(sonpath+base+'_data_star_lar.dat', sonpath+base+'_data_star_la.dat')
-       shutil.move(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')))
+       #shutil.move(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')))
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
