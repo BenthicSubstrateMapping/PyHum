@@ -308,7 +308,6 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
          with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'r') as ff:
             R_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
-
          R = np.vstack((np.flipud(R_fp[0]),R_fp[0]))
          
          R[R>0.8] = np.nan

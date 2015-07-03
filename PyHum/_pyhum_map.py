@@ -218,17 +218,19 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
     if base.find(' ')>-1:
        base = base[:base.find(' ')]
 
-    esi = np.squeeze(loadmat(sonpath+base+'meta.mat')['e'])
-    nsi = np.squeeze(loadmat(sonpath+base+'meta.mat')['n']) 
+    meta = loadmat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')))
 
-    pix_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['pix_m'])
-    dep_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dep_m'])
-    c = np.squeeze(loadmat(sonpath+base+'meta.mat')['c'])
+    esi = np.squeeze(meta['e'])
+    nsi = np.squeeze(meta['n']) 
+
+    pix_m = np.squeeze(meta['pix_m'])
+    dep_m = np.squeeze(meta['dep_m'])
+    c = np.squeeze(meta['c'])
 
     # over-ride measured bearing and calc from positions
     if calc_bearing==1:
-       lat = np.squeeze(loadmat(sonpath+base+'meta.mat')['lat'])
-       lon = np.squeeze(loadmat(sonpath+base+'meta.mat')['lon']) 
+       lat = np.squeeze(meta['lat'])
+       lon = np.squeeze(meta['lon']) 
 
        #point-to-point bearing
        bearing = np.zeros(len(lat))
@@ -238,7 +240,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
 
     else:
        # reported bearing by instrument (Kalman filtered?)
-       bearing = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
+       bearing = np.squeeze(meta['heading'])
 
     ## bearing can only be observed modulo 2*pi, therefore phase unwrap
     #bearing = np.unwrap(bearing)
@@ -264,10 +266,11 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
        bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans])
 
        # save this filtered version to file
-       meta = loadmat(sonpath+base+'meta.mat')
+       #meta = loadmat(sonpath+base+'meta.mat')
        meta['heading_filt'] = bearing
-       savemat(sonpath+base+'meta.mat', meta ,oned_as='row')
-       del meta   
+       #savemat(sonpath+base+'meta.mat', meta ,oned_as='row')
+       savemat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')), meta ,oned_as='row')
+       #del meta   
 
     if filt_bearing ==1:
        bearing = humutils.runningMeanFast(bearing, len(bearing)/100)
@@ -284,13 +287,17 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
        theta = np.unwrap(-theta)
 
     # load memory mapped scans
-    shape_port = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_port'])
+    shape_port = np.squeeze(meta['shape_port'])
     if shape_port!='':
-       port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+       #port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
+          port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
 
-    shape_star = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_star'])
+    shape_star = np.squeeze(meta['shape_star'])
     if shape_star!='':
-       star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+       #star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
+          star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
     # time varying gain
     tvg = ((8.5*10**-5)+(3/76923)+((8.5*10**-5)/4))*c
@@ -304,7 +311,8 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
 
 # =========================================================
 def custom_save(figdirec,root):
-    plt.savefig(figdirec+root,bbox_inches='tight',dpi=600,transparent=True)
+    #plt.savefig(figdirec+root,bbox_inches='tight',dpi=600,transparent=True)
+    plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=600, transparent=True)
 
 # =========================================================
 def calc_beam_pos(dist, bearing, x, y):
@@ -375,14 +383,14 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
    merge = merge.flatten()[np.where(np.logical_not(np.isnan(X)))]
    X = X[np.where(np.logical_not(np.isnan(X)))]
 
-
    X = X[np.where(np.logical_not(np.isnan(merge)))]
    Y = Y[np.where(np.logical_not(np.isnan(merge)))]
    merge = merge[np.where(np.logical_not(np.isnan(merge)))]
 
    if dowrite==1:
       # write raw bs to file
-      outfile = sonpath+'x_y_ss_raw'+str(p)+'.asc' 
+      #outfile = sonpath+'x_y_ss_raw'+str(p)+'.asc' 
+      outfile = os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc'))
       with open(outfile, 'w') as f:
          np.savetxt(f, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
@@ -422,8 +430,8 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
       fig = plt.figure(frameon=False)
       map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
        resolution = 'i', #h #f
-       llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
-       urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
+       llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
+       urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
 
       if dogrid==1:
          gx,gy = map.projtran(glon, glat)
@@ -449,13 +457,14 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
    kml = simplekml.Kml()
    ground = kml.newgroundoverlay(name='GroundOverlay')
    ground.icon.href = 'map'+str(p)+'.png'
-   ground.latlonbox.north = np.min(humlat)-0.001
-   ground.latlonbox.south = np.max(humlat)+0.001
-   ground.latlonbox.east =  np.max(humlon)+0.001
-   ground.latlonbox.west =  np.min(humlon)-0.001
+   ground.latlonbox.north = np.min(humlat)-0.0001
+   ground.latlonbox.south = np.max(humlat)+0.0001
+   ground.latlonbox.east =  np.max(humlon)+0.0001
+   ground.latlonbox.west =  np.min(humlon)-0.0001
    ground.latlonbox.rotation = 0
 
-   kml.save(sonpath+'GroundOverlay'+str(p)+'.kml')
+   #kml.save(sonpath+'GroundOverlay'+str(p)+'.kml')
+   kml.save(os.path.normpath(os.path.join(sonpath,'GroundOverlay'+str(p)+'.kml')))
 
    del humlat, humlon
 

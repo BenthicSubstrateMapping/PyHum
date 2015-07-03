@@ -63,7 +63,7 @@ try:
    from tkFileDialog import askopenfilename, askdirectory
 except:
    pass
-#from joblib import Parallel, delayed, cpu_count
+from joblib import Parallel, delayed, cpu_count
 
 #numerical
 import numpy as np
@@ -500,42 +500,26 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
     else:
        return Zt
  
-## =========================================================
-#def correct_scans(fp, r_fp):
-#    Zt = Parallel(n_jobs = -1, verbose=0)(delayed(c_scans)(fp[p], r_fp[p]) for p in xrange(len(fp)))
-#    return np.hstack(Zt).tolist()
-
-## =========================================================
-#def c_scans(fp, r_fp):
-#   mg = 10**np.log10(np.asarray(fp*np.cos(r_fp),'float32')+0.001)
-#   mg[fp==0] = np.nan
-#   return mg
-
 # =========================================================
 def correct_scans(fp, r_fp):
-    Zt = []
+    return Parallel(n_jobs = -1, verbose=0)(delayed(c_scans)(fp[p], r_fp[p]) for p in xrange(len(fp)))
 
-    for p in xrange(len(fp)):
-
-       mg = 10**np.log10(np.asarray(fp[p]*np.cos(r_fp[p]),'float32')+0.001)
-       mg[fp[p]==0] = np.nan
-
-       Zt.append(mg)
-
-    return Zt
+# =========================================================
+def c_scans(fp, r_fp):
+   mg = 10**np.log10(np.asarray(fp*np.cos(r_fp),'float32')+0.001)
+   mg[fp==0] = np.nan
+   return mg
 
 # =========================================================
 def correct_scans2(fp):
-    Zt = []
+    return Parallel(n_jobs = -1, verbose=0)(delayed(c_scans2)(fp[p]) for p in xrange(len(fp)))
 
-    for p in xrange(len(fp)):
+# =========================================================
+def c_scans2(fp):
+   mg = 10**np.log10(np.asarray(fp,'float32')+0.001)
+   mg[fp==0] = np.nan
+   return mg
 
-       mg = 10**np.log10(np.asarray(fp[p],'float32')+0.001)
-       mg[fp[p]==0] = np.nan
-
-       Zt.append(mg)
-
-    return Zt
 
 # =========================================================
 def plot_merged_scans(dat_port, dat_star, dist_m, shape_port, ft, sonpath, p):
@@ -632,3 +616,23 @@ if __name__ == '__main__':
        #   dat1[np.isnan(Zt[p])] = np.nan
        #   Zt[p] = dat1.astype('float32')
        #   del dat1
+
+## =========================================================
+#def correct_scans(fp, r_fp):
+#    Zt = []
+
+#    for p in xrange(len(fp)):
+#       mg = 10**np.log10(np.asarray(fp[p]*np.cos(r_fp[p]),'float32')+0.001)
+#       mg[fp[p]==0] = np.nan
+#       Zt.append(mg)
+#    return Zt
+
+## =========================================================
+#def correct_scans2(fp):
+#    Zt = []
+
+#    for p in xrange(len(fp)):
+#       mg = 10**np.log10(np.asarray(fp[p],'float32')+0.001)
+#       mg[fp[p]==0] = np.nan
+#       Zt.append(mg)
+#    return Zt
