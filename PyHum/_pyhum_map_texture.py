@@ -156,7 +156,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_be
     References
     ----------
       .. [1] Buscombe, D., Grams, P.E., and Smith, S.M.C., 2015, Automated riverbed sediment
-       classification using low-cost sidescan sonar. Journal of Hydraulic Engineering
+       classification using low-cost sidescan sonar. Journal of Hydraulic Engineering, accepted
     '''
 
     # prompt user to supply file if no input file given
@@ -229,18 +229,20 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_be
     if base.find(' ')>-1:
        base = base[:base.find(' ')]
 
-    esi = np.squeeze(loadmat(sonpath+base+'meta.mat')['e'])
-    nsi = np.squeeze(loadmat(sonpath+base+'meta.mat')['n']) 
+    meta = loadmat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')))
 
-    pix_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['pix_m'])
-    dep_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dep_m'])
-    c = np.squeeze(loadmat(sonpath+base+'meta.mat')['c'])
-    dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
+    esi = np.squeeze(meta['e'])
+    nsi = np.squeeze(meta['n']) 
+
+    pix_m = np.squeeze(meta['pix_m'])
+    dep_m = np.squeeze(meta['dep_m'])
+    c = np.squeeze(meta['c'])
+    dist_m = np.squeeze(meta['dist_m'])
 
     # over-ride measured bearing and calc from positions
     if calc_bearing==1:
-       lat = np.squeeze(loadmat(sonpath+base+'meta.mat')['lat'])
-       lon = np.squeeze(loadmat(sonpath+base+'meta.mat')['lon']) 
+       lat = np.squeeze(meta['lat'])
+       lon = np.squeeze(meta['lon']) 
 
        #point-to-point bearing
        bearing = np.zeros(len(lat))
@@ -250,7 +252,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_be
 
     else:
        # reported bearing by instrument (Kalman filtered?)
-       bearing = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])
+       bearing = np.squeeze(meta['heading'])
 
     ## bearing can only be observed modulo 2*pi, therefore phase unwrap
     #bearing = np.unwrap(bearing)
@@ -291,17 +293,32 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_be
        theta = np.unwrap(-theta)
 
     # load memory mapped scans
-    shape_port = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_port'])
+    shape_port = np.squeeze(meta['shape_port'])
     if shape_port!='':
-       port_fp = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+       #port_fp = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+       if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat'))):
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), 'r') as ff:
+             port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
+       else:
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
+             port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
 
-    shape_star = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_star'])
+    shape_star = np.squeeze(meta['shape_star'])
     if shape_star!='':
-       star_fp = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+       #star_fp = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+       if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat'))):
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'r') as ff:
+             star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+       else:
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
+             star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
     shape = shape_port.copy()
     shape[1] = shape_port[1] + shape_star[1]
-    class_fp = np.memmap(sonpath+base+'_data_class.dat', dtype='float32', mode='r', shape=tuple(shape))
+    #class_fp = np.memmap(sonpath+base+'_data_class.dat', dtype='float32', mode='r', shape=tuple(shape))
+    with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'r') as ff:
+       class_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
+
 
     tvg = ((8.5*10**-5)+(3/76923)+((8.5*10**-5)/4))*c
     dist_tvg = ((np.tan(np.radians(25)))*dep_m)-(tvg)
@@ -332,30 +349,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_be
 
        yvec = np.linspace(pix_m,extent*pix_m,extent)
 
-       print "getting point cloud ..."
-       # get the points by rotating the [x,y] vector so it lines up with boat heading
-       X=[]; Y=[]; 
-       for k in range(len(n)): 
-          x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
-          #y = np.concatenate((n[k]+yvec, n[k]-yvec))
-          rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d[k], 2.0))
-          y = np.concatenate((n[k]+rangedist, n[k]-rangedist))
-          # Rotate line around center point
-          xx = e[k] - ((x - e[k]) * np.cos(t[k])) - ((y - n[k]) * np.sin(t[k]))
-          yy = n[k] - ((x - e[k]) * np.sin(t[k])) + ((y - n[k]) * np.cos(t[k]))
-          xx, yy = calc_beam_pos(d[k], t[k], xx, yy)
-          X.append(xx)
-          Y.append(yy) 
-
-       del e, n, t, x, y
-
-       # merge flatten and stack
-       X = np.asarray(X,'float')
-       X = X.flatten()
-
-       # merge flatten and stack
-       Y = np.asarray(Y,'float')
-       Y = Y.flatten()
+       X, Y  = getXY(e,n,yvec,d,t,extent)
 
        merge[merge==0] = np.nan
 
@@ -378,27 +372,43 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_be
        merge = merge.flatten()[np.where(np.logical_not(np.isnan(X)))]
        X = X[np.where(np.logical_not(np.isnan(X)))]
 
-
        X = X[np.where(np.logical_not(np.isnan(merge)))]
        Y = Y[np.where(np.logical_not(np.isnan(merge)))]
        merge = merge[np.where(np.logical_not(np.isnan(merge)))]
 
        if dowrite==1:
           # write raw bs to file
-          outfile = sonpath+'x_y_class'+str(p)+'.asc' 
+          #outfile = sonpath+'x_y_class'+str(p)+'.asc' 
+          outfile = os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc'))
           with open(outfile, 'w') as f:
              np.savetxt(f, np.hstack((humutils.ascol(X),humutils.ascol(Y), humutils.ascol(merge))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
        humlon, humlat = trans(X, Y, inverse=True)
 
        if dogrid==1:
+
           grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
 
-          dat = griddata(np.c_[X.flatten(),Y.flatten()], merge.flatten(), (grid_x, grid_y), method='nearest')
+          #dat = griddata(np.c_[X.flatten(),Y.flatten()], S.flatten(), (grid_x, grid_y), method='nearest')
+          ### create mask for where the data is not
+          #tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+          #dist = dist.reshape(grid_x.shape)
+
+          tree = KDTree(zip(X.flatten(), Y.flatten()))
+
+          #nearest neighbour
+          dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
+          dat = merge.flatten()[inds].reshape(grid_x.shape)
+
+          ## inverse distance weighting, using 10 nearest neighbours
+          #d, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 10)
+          #w = 1.0 / d**2
+          #dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
+          #dat.shape = grid_x.shape
 
           ## create mask for where the data is not
-          tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-          dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
           dist = dist.reshape(grid_x.shape)
 
        del X, Y
@@ -422,8 +432,8 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_be
           fig = plt.figure(frameon=False)
           map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
            resolution = 'i', #h #f
-           llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
-           urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
+           llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
+           urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
 
           if dogrid==1:
              gx,gy = map.projtran(glon, glat)
@@ -449,19 +459,21 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_be
        kml = simplekml.Kml()
        ground = kml.newgroundoverlay(name='GroundOverlay')
        ground.icon.href = 'class_map'+str(p)+'.png'
-       ground.latlonbox.north = np.min(humlat)-0.001
-       ground.latlonbox.south = np.max(humlat)+0.001
-       ground.latlonbox.east =  np.max(humlon)+0.001
-       ground.latlonbox.west =  np.min(humlon)-0.001
+       ground.latlonbox.north = np.min(humlat)-0.0001
+       ground.latlonbox.south = np.max(humlat)+0.0001
+       ground.latlonbox.east =  np.max(humlon)+0.0001
+       ground.latlonbox.west =  np.min(humlon)-0.0001
        ground.latlonbox.rotation = 0
 
-       kml.save(sonpath+'class_GroundOverlay'+str(p)+'.kml')
+       #kml.save(sonpath+'class_GroundOverlay'+str(p)+'.kml')
+       kml.save(os.path.normpath(os.path.join(sonpath,'class_GroundOverlay'+str(p)+'.kml')))
 
     if dowrite==1:
 
        X = []; Y = []; S = [];
        for p in xrange(len(class_fp)):
-          dat = np.genfromtxt(sonpath+'x_y_class'+str(p)+'.asc', delimiter=' ')
+          #dat = np.genfromtxt(sonpath+'x_y_class'+str(p)+'.asc', delimiter=' ')
+          dat = np.genfromtxt(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')), delimiter=' ')
           X.append(dat[:,0])
           Y.append(dat[:,1])
           S.append(dat[:,2])
@@ -484,11 +496,26 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_be
        if dogrid==1:
           grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
 
-          dat = griddata(np.c_[X.flatten(),Y.flatten()], S.flatten(), (grid_x, grid_y), method='nearest')
+          #dat = griddata(np.c_[X.flatten(),Y.flatten()], S.flatten(), (grid_x, grid_y), method='nearest')
+          ### create mask for where the data is not
+          #tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+          #dist = dist.reshape(grid_x.shape)
+
+          tree = KDTree(zip(X.flatten(), Y.flatten()))
+
+          #nearest neighbour
+          dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
+          dat = S.flatten()[inds].reshape(grid_x.shape)
+
+          ## inverse distance weighting, using 10 nearest neighbours
+          #d, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 10)
+          #w = 1.0 / d**2
+          #dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
+          #dat.shape = grid_x.shape
 
           ## create mask for where the data is not
-          tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-          dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
           dist = dist.reshape(grid_x.shape)
 
        del X, Y
@@ -535,12 +562,44 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_be
 
 
 # =========================================================
+def getxy(e, n, yvec, d, t,extent):
+   x = np.concatenate((np.tile(e,extent) , np.tile(e,extent)))
+   rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d, 2.0))
+   y = np.concatenate((n+rangedist, n-rangedist))
+   # Rotate line around center point
+   xx = e - ((x - e) * np.cos(t)) - ((y - n) * np.sin(t))
+   yy = n - ((x - e) * np.sin(t)) + ((y - n) * np.cos(t))
+   xx, yy = calc_beam_pos(d, t, xx, yy)
+   return xx, yy 
+
+
+# =========================================================
+def getXY(e,n,yvec,d,t,extent):
+   print "getting point cloud ..." 
+
+   o = Parallel(n_jobs = -1, verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
+
+   X, Y = zip(*o)
+
+   # merge flatten and stack
+   X = np.asarray(X,'float')
+   X = X.flatten()
+
+   # merge flatten and stack
+   Y = np.asarray(Y,'float')
+   Y = Y.flatten()
+
+   return X, Y
+
+# =========================================================
 def custom_save(figdirec,root):
-    plt.savefig(figdirec+root,bbox_inches='tight',dpi=600,transparent=True)
+    #plt.savefig(figdirec+root,bbox_inches='tight',dpi=600,transparent=True)
+    plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=600, transparent=True)
 
 # =========================================================
 def custom_save2(figdirec,root):
-    plt.savefig(figdirec+root,bbox_inches='tight',dpi=600)
+    #plt.savefig(figdirec+root,bbox_inches='tight',dpi=600)
+    plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=600)
 
 # =========================================================
 def calc_beam_pos(dist, bearing, x, y):
@@ -603,4 +662,27 @@ if __name__ == '__main__':
 #          dowrite = 1
 #          print "[Default] Point cloud data will be written to ascii file"
 
+#       print "getting point cloud ..."
+#       # get the points by rotating the [x,y] vector so it lines up with boat heading
+#       X=[]; Y=[]; 
+#       for k in range(len(n)): 
+#          x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
+#          #y = np.concatenate((n[k]+yvec, n[k]-yvec))
+#          rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d[k], 2.0))
+#          y = np.concatenate((n[k]+rangedist, n[k]-rangedist))
+#          # Rotate line around center point
+#          xx = e[k] - ((x - e[k]) * np.cos(t[k])) - ((y - n[k]) * np.sin(t[k]))
+#          yy = n[k] - ((x - e[k]) * np.sin(t[k])) + ((y - n[k]) * np.cos(t[k]))
+#          xx, yy = calc_beam_pos(d[k], t[k], xx, yy)
+#          X.append(xx)
+#          Y.append(yy) 
 
+#       del e, n, t, x, y
+
+#       # merge flatten and stack
+#       X = np.asarray(X,'float')
+#       X = X.flatten()
+
+#       # merge flatten and stack
+#       Y = np.asarray(Y,'float')
+#       Y = Y.flatten()

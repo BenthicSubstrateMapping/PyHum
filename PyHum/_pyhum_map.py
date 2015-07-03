@@ -70,9 +70,8 @@ import pyproj
 import numpy as np
 import pyproj
 import PyHum.utils as humutils
-from scipy.interpolate import griddata
+#from scipy.interpolate import griddata
 from scipy.spatial import cKDTree as KDTree
-from scipy.ndimage.filters import median_filter
 
 # plotting
 import matplotlib.pyplot as plt
@@ -199,6 +198,12 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
           print "Point cloud data will be written to ascii file" 
 
 
+    # start timer
+    if os.name=='posix': # true if linux/mac or cygwin on windows
+       start = time.time()
+    else: # windows
+       start = time.clock()
+
     trans =  pyproj.Proj(init=cs2cs_args)
 
     # if son path name supplied has no separator at end, put one on
@@ -289,15 +294,23 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
     # load memory mapped scans
     shape_port = np.squeeze(meta['shape_port'])
     if shape_port!='':
-       #port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=tuple(shape_port))
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
-          port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
+       #port_fp = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+       if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat'))):
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), 'r') as ff:
+             port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
+       else:
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
+             port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
 
     shape_star = np.squeeze(meta['shape_star'])
     if shape_star!='':
-       #star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=tuple(shape_star))
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
-          star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+       #star_fp = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+       if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat'))):
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'r') as ff:
+             star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+       else:
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
+             star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
     # time varying gain
     tvg = ((8.5*10**-5)+(3/76923)+((8.5*10**-5)/4))*c
@@ -307,6 +320,14 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
 
     for p in xrange(len(star_fp)):
        make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite)
+
+    if os.name=='posix': # true if linux/mac
+       elapsed = (time.time() - start)
+    else: # windows
+       elapsed = (time.clock() - start)
+    print "Processing took ", elapsed , "seconds to analyse"
+
+    print "Done!"
 
 
 # =========================================================
@@ -350,30 +371,7 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
 
    yvec = np.linspace(pix_m,extent*pix_m,extent)
 
-   print "getting point cloud ..."
-   # get the points by rotating the [x,y] vector so it lines up with boat heading, assumed to be the same as the curvature of the [e,n] trace
-   X=[]; Y=[];
-   for k in range(len(n)): 
-      x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
-      #y = np.concatenate((n[k]+yvec, n[k]-yvec))
-      rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d[k], 2.0))
-      y = np.concatenate((n[k]+rangedist, n[k]-rangedist))
-      # Rotate line around center point
-      xx = e[k] - ((x - e[k]) * np.cos(t[k])) - ((y - n[k]) * np.sin(t[k]))
-      yy = n[k] - ((x - e[k]) * np.sin(t[k])) + ((y - n[k]) * np.cos(t[k]))
-      xx, yy = calc_beam_pos(d[k], t[k], xx, yy)
-      X.append(xx)
-      Y.append(yy) 
-
-   del e, n, t, x, y #, X, Y
-
-   # merge flatten and stack
-   X = np.asarray(X,'float').T
-   X = X.flatten()
-
-   # merge flatten and stack
-   Y = np.asarray(Y,'float').T
-   Y = Y.flatten()
+   X, Y  = getXY(e,n,yvec,d,t,extent)
 
    X = X[np.where(np.logical_not(np.isnan(Y)))]
    merge = merge.flatten()[np.where(np.logical_not(np.isnan(Y)))]
@@ -399,11 +397,25 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
    if dogrid==1:
       grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
 
-      dat = griddata(np.c_[X.flatten(),Y.flatten()], merge.flatten(), (grid_x, grid_y), method='nearest') 
+      #dat = griddata(np.c_[X.flatten(),Y.flatten()], merge.flatten(), (grid_x, grid_y), method='nearest') 
+      #tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+      #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+      #dist = dist.reshape(grid_x.shape)
+
+      tree = KDTree(zip(X.flatten(), Y.flatten()))
+
+      #nearest neighbour
+      dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
+      dat = merge.flatten()[inds].reshape(grid_x.shape)
+
+      ## inverse distance weighting, using 10 nearest neighbours
+      #dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 10)
+      #w = 1.0 / dist**2
+      #dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
+      #dat.shape = grid_x.shape
 
       ## create mask for where the data is not
-      tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-      dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+      #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
       dist = dist.reshape(grid_x.shape)
 
    del X, Y #, bearing #, pix_m, yvec
@@ -470,6 +482,36 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
 
 
 # =========================================================
+def getxy(e, n, yvec, d, t,extent):
+   x = np.concatenate((np.tile(e,extent) , np.tile(e,extent)))
+   #y = np.concatenate((n[k]+yvec, n[k]-yvec))
+   rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d, 2.0))
+   y = np.concatenate((n+rangedist, n-rangedist))
+   # Rotate line around center point
+   xx = e - ((x - e) * np.cos(t)) - ((y - n) * np.sin(t))
+   yy = n - ((x - e) * np.sin(t)) + ((y - n) * np.cos(t))
+   xx, yy = calc_beam_pos(d, t, xx, yy)
+   return xx, yy 
+
+# =========================================================
+def getXY(e,n,yvec,d,t,extent):
+   print "getting point cloud ..." 
+
+   o = Parallel(n_jobs = -1, verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
+
+   X, Y = zip(*o)
+
+   # merge flatten and stack
+   X = np.asarray(X,'float').T
+   X = X.flatten()
+
+   # merge flatten and stack
+   Y = np.asarray(Y,'float').T
+   Y = Y.flatten()
+
+   return X, Y
+
+# =========================================================
 # =========================================================
 if __name__ == '__main__':
 
@@ -509,4 +551,27 @@ if __name__ == '__main__':
 #          dowrite = 1
 #          print "[Default] Point cloud data will be written to ascii file"
 
+#   print "getting point cloud ..."
+#   # get the points by rotating the [x,y] vector so it lines up with boat heading, assumed to be the same as the curvature of the [e,n] trace
+#   X=[]; Y=[];
+#   for k in range(len(n)): 
+#      x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
+#      #y = np.concatenate((n[k]+yvec, n[k]-yvec))
+#      rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d[k], 2.0))
+#      y = np.concatenate((n[k]+rangedist, n[k]-rangedist))
+#      # Rotate line around center point
+#      xx = e[k] - ((x - e[k]) * np.cos(t[k])) - ((y - n[k]) * np.sin(t[k]))
+#      yy = n[k] - ((x - e[k]) * np.sin(t[k])) + ((y - n[k]) * np.cos(t[k]))
+#      xx, yy = calc_beam_pos(d[k], t[k], xx, yy)
+#      X.append(xx)
+#      Y.append(yy) 
 
+#   del e, n, t, x, y #, X, Y
+
+#   # merge flatten and stack
+#   X = np.asarray(X,'float').T
+#   X = X.flatten()
+
+#   # merge flatten and stack
+#   Y = np.asarray(Y,'float').T
+#   Y = Y.flatten()

@@ -226,8 +226,16 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       if shape_port!='':
          #port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=tuple(shape_port))
          #port_fp2 = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
-         with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
-            port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
+         #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
+         #   port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
+
+         if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat'))):
+            with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), 'r') as ff:
+               port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
+         else:
+            with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
+               port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
+
          with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_l.dat')), 'r') as ff:
             port_fp2 = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
 
@@ -238,8 +246,15 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       if shape_star!='':
          #star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=tuple(shape_star))
          #star_fp2 = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
-         with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
-            star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+         #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
+         #   star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+         if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat'))):
+            with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'r') as ff:
+               star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+         else:
+            with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
+               star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+
          with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'r') as ff:
             star_fp2 = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
