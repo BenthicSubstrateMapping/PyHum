@@ -197,14 +197,18 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
     # load memory mapped scans
     shape_port = np.squeeze(meta['shape_port'])
     if shape_port!='':
-       port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+       #port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as f:
+          port_fp = np.memmap(f, dtype='float32', mode='r', shape=tuple(shape_port))
 
     shape_star = np.squeeze(meta['shape_star'])
     if shape_star!='':
-       star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+       #star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as f:
+          star_fp = np.memmap(f, dtype='float32', mode='r', shape=tuple(shape_star))
 
     dist_m = np.squeeze(meta['dist_m'])
-    ft = 1/loadmat(meta['pix_m'])
+    ft = 1/(meta['pix_m'])
     extent = shape_star[1] 
 
     if shadowmask==1:

@@ -821,7 +821,6 @@ def plot_bedpick(dat_port, dat_star, Zbed, Zdist, ft, shape_port, sonpath, k):
    custom_save(sonpath,'bed_pick'+str(k))
    plt.close(); del fig
 
-
 # =========================================================
 # =========================================================
 if __name__ == '__main__':
