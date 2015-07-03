@@ -277,7 +277,7 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
     es = np.squeeze(meta['es'])
     ns = np.squeeze(meta['ns'])
     dep = np.squeeze(meta['dep_m'])
-    del meta
+    #del meta
 
     # load memory mapped scans
     shape_hi= np.squeeze(meta['shape_hi'])
