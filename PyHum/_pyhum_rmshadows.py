@@ -191,17 +191,19 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
     if base.find(' ')>-1:
        base = base[:base.find(' ')]
 
+    meta = loadmat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')))
+
     # load memory mapped scans
-    shape_port = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_port'])
+    shape_port = np.squeeze(meta['shape_port'])
     if shape_port!='':
        port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=tuple(shape_port))
 
-    shape_star = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_star'])
+    shape_star = np.squeeze(meta['shape_star'])
     if shape_star!='':
        star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=tuple(shape_star))
 
-    dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
-    ft = 1/loadmat(sonpath+base+'meta.mat')['pix_m']
+    dist_m = np.squeeze(meta['dist_m'])
+    ft = 1/loadmat(meta['pix_m'])
     extent = shape_star[1] 
 
     if shadowmask==1:
