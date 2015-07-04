@@ -74,6 +74,9 @@ import PyHum.utils as humutils
 import numpy as np
 import pyproj
 
+import ppdrc
+from scipy.ndimage.filters import median_filter
+
 #plotting
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
@@ -604,25 +607,39 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
        if bedpick == 1: # auto
 
+          buff = 10
+
           # get bed from depth trace
           bed = ft*dep_m
 
           imu = []
 
           for k in xrange(len(port_fp)):
-             imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
+             #imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
+             imu.append(port_fp[k][np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
           imu = np.hstack(imu)
+
+          imu = np.asarray(imu, 'float64')
+
+          imu = ppdrc.ppdrc(imu, np.shape(imu)[1]/2).getdata()
+
+          imu = median_filter(imu,(20,20))
 
           ## narrow image to within range of estimated bed
           #imu = data_port[int(np.min(bed)):int(np.max(bed)),:]
           # use dynamic boundary tracing to get 2nd estimate of bed  
           x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T))
+          #x = np.squeeze(humutils.dpboundary(-imu.T))
           del imu 
 
           if len(x)<len(bed):
              x = np.append(x,x[-1]*np.ones(len(bed)-len(x)))
           elif len(x)>len(bed):
              bed = np.append(bed,bed[-1]*np.ones(len(x)-len(bed)))
+
+          # if standard deviation of auto bed pick is too small, then use acoustic bed pick
+          if np.std(x)<5:
+             x = bed.copy()
 
           if len(dist_m)<len(bed):
              dist_m = np.append(dist_m,dist_m[-1]*np.ones(len(bed)-len(dist_m)))
@@ -637,7 +654,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
           # 'real' bed is estimated to be the minimum of the two
           #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
-          bed = np.min(np.vstack((bed[:nrec],np.squeeze(x[:nrec]))),axis=0) 
+          bed = bed[:nrec] #np.min(np.vstack((bed[:nrec],np.squeeze(x[:nrec]))),axis=0) 
           #del x
 
        else: #manual
