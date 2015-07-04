@@ -333,7 +333,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
 # =========================================================
 def custom_save(figdirec,root):
     #plt.savefig(figdirec+root,bbox_inches='tight',dpi=600,transparent=True)
-    plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=600, transparent=True)
+    plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=1000, transparent=True)
 
 # =========================================================
 def calc_beam_pos(dist, bearing, x, y):
