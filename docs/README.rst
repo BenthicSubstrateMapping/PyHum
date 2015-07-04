@@ -56,7 +56,7 @@ Step 1. Before installing PyHum, install Basemap using::
 Step 2. Install pyproj. pip seems to have a bug with pyproj depending on what c-compiler your python distribution uses. Therefore, you may have to install pyproj (and other dependencies) from `here <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyproj>`_
 
 a) download the .whl file. Choose the file associated with python 2.7 ("cp27") and the architecture you are using, i.e. 32-bit (win32) or 64-bit (amd64)
-b) then move that file to your root Anaconda directory. This is probably C:\Users\yourusername\AppData\Local\Continuum\Anaconda (when you open an Anaconda command prompt it's the directory that's listed before the prompt '>')
+b) then move that file to your root Anaconda directory (when you open an Anaconda command prompt it's the directory that's listed before the prompt '>')
 c) then use pip to install it, e.g.::
 
   pip install pyproj-1.9.4-cp27-none-win_amd64.whl
@@ -71,6 +71,7 @@ Step 3. Assuming a Anaconda distribution which comes with almost all required pr
   pip uninstall PyHum (removes any previous installation)
   pip install PyHum
 
+If you get C++ compiler errors (such as "Unable to find vcvarsall.bat"), you will need to install the Microsoft Visual C++ compiler from `here <http://aka.ms/vcpython27>`_
 
 (Advanced) If you have git installed (from `here <https://git-scm.com/download/win>`_), you can install the latest 'bleeding edge' (pre-release) version directly from github::
 

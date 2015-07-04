@@ -83,7 +83,7 @@ and does not imply endorsement by the U.S. government.</p>
 <p>Step 2. Install pyproj. pip seems to have a bug with pyproj depending on what c-compiler your python distribution uses. Therefore, you may have to install pyproj (and other dependencies) from <a class="reference external" href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyproj">here</a></p>
 <ol class="loweralpha simple">
 <li>download the .whl file. Choose the file associated with python 2.7 (&#8220;cp27&#8221;) and the architecture you are using, i.e. 32-bit (win32) or 64-bit (amd64)</li>
-<li>then move that file to your root Anaconda directory. This is probably C:UsersyourusernameAppDataLocalContinuumAnaconda (when you open an Anaconda command prompt it&#8217;s the directory that&#8217;s listed before the prompt &#8216;&gt;&#8217;)</li>
+<li>then move that file to your root Anaconda directory (when you open an Anaconda command prompt it&#8217;s the directory that&#8217;s listed before the prompt &#8216;&gt;&#8217;)</li>
 <li>then use pip to install it, e.g.:</li>
 </ol>
 <blockquote>
@@ -97,13 +97,14 @@ and does not imply endorsement by the U.S. government.</p>
 pip install PyHum
 </pre></div>
 </div>
+<p>If you get C++ compiler errors (such as &#8220;Unable to find vcvarsall.bat&#8221;), you will need to install the Microsoft Visual C++ compiler from <a class="reference external" href="http://aka.ms/vcpython27">here</a></p>
 <p>(Advanced) If you have git installed (from <a class="reference external" href="https://git-scm.com/download/win">here</a>), you can install the latest &#8216;bleeding edge&#8217; (pre-release) version directly from github:</p>
 <div class="highlight-python"><div class="highlight"><pre>pip install git+https://github.com/dbuscombe-usgs/PyHum.git
 </pre></div>
 </div>
 </div>
-<div class="section" id="id5">
-<h2>Setup<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id6">
+<h2>Setup<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
 <p>Automatic Installation from PyPI:</p>
 <div class="highlight-python"><div class="highlight"><pre>pip uninstall PyHum (removes previous installation)
 pip install PyHum
@@ -187,7 +188,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 </div>
 </div>
 <div class="section" id="test">
-<span id="id6"></span><h2>Test<a class="headerlink" href="#test" title="Permalink to this headline">¶</a></h2>
+<span id="id7"></span><h2>Test<a class="headerlink" href="#test" title="Permalink to this headline">¶</a></h2>
 <p>A test can be carried out by running the supplied script:</p>
 <div class="highlight-python"><div class="highlight"><pre>python -c &quot;import PyHum; PyHum.dotest()&quot;
 </pre></div>
@@ -269,7 +270,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 </div>
 </div>
 <div class="section" id="gettingstarted">
-<span id="id7"></span><h2>Getting Started<a class="headerlink" href="#gettingstarted" title="Permalink to this headline">¶</a></h2>
+<span id="id8"></span><h2>Getting Started<a class="headerlink" href="#gettingstarted" title="Permalink to this headline">¶</a></h2>
 <p>PyHum is modular so can be called from within a python or ipython console, from an IDE (such as IDLE or Spyder), or by running a script.</p>
 <p>The following example script:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">getopt</span>
@@ -369,7 +370,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 </div>
 </div>
 <div class="section" id="support">
-<span id="id8"></span><h2>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h2>
+<span id="id9"></span><h2>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h2>
 <p>This is a new project written and maintained by Daniel Buscombe. Bugs are expected - please report them, I will fix them quickly. Feedback and suggestions for improvements are <em>very</em> welcome</p>
 <p>Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please address all suggestions, comments and queries to: <a class="reference external" href="mailto:dbuscombe&#37;&#52;&#48;usgs&#46;gov">dbuscombe<span>&#64;</span>usgs<span>&#46;</span>gov</a>. Thanks for stopping by!</p>
 <blockquote>
@@ -393,7 +394,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <li><a class="reference internal" href="#about">About</a></li>
 <li><a class="reference internal" href="#license">License</a></li>
 <li><a class="reference internal" href="#setup-on-anaconda-for-windows">Setup on Anaconda for Windows</a></li>
-<li><a class="reference internal" href="#id5">Setup</a></li>
+<li><a class="reference internal" href="#id6">Setup</a></li>
 <li><a class="reference internal" href="#virtual-environment">Virtual environment</a></li>
 <li><a class="reference internal" href="#manual-installation">Manual installation</a></li>
 <li><a class="reference internal" href="#installation-on-amazon-linux-ec-2-instance">Installation on Amazon Linux EC-2 instance</a></li>

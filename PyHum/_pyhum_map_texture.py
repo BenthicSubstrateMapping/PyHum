@@ -72,7 +72,7 @@ import pyproj
 import PyHum.utils as humutils
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree as KDTree
-from scipy.ndimage.filters import median_filter
+#from scipy.ndimage.filters import median_filter
 
 # plotting
 import matplotlib.pyplot as plt

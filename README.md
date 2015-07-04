@@ -125,7 +125,10 @@ pip uninstall PyHum (removes any previous installation)
 pip install PyHum
 ```
 
-If you have git installed (from `here <https://git-scm.com/download/win>`_), you can install the latest 'bleeding edge' (pre-release) version directly from github:
+If you get C++ compiler errors (such as "Unable to find vcvarsall.bat"), you will need to install the Microsoft Visual C++ compiler from `here <http://aka.ms/vcpython27>`_
+
+
+(Advanced) If you have git installed (from `here <https://git-scm.com/download/win>`_), you can install the latest 'bleeding edge' (pre-release) version directly from github:
 
 ```
 pip install git+https://github.com/dbuscombe-usgs/PyHum.git
