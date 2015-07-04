@@ -17,6 +17,7 @@ PyHum/_pyhum_e1e2.py
 PyHum/_pyhum_map.py
 PyHum/_pyhum_map_texture.py
 PyHum/_pyhum_read.py
+PyHum/_pyhum_rmshadows.py
 PyHum/_pyhum_texture.py
 PyHum/_pyread.pyx
 PyHum/_replace_nans.pyx

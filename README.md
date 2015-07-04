@@ -1,12 +1,23 @@
 ### PyHum
 
-Python/Cython scripts to: 
+
+PyHum - a Python framework for reading and processing data from a Humminbird low-cost sidescan sonar
+
+PyHum is an open-source project dedicated to provide a generic Python framework 
+for reading and exporting data from Humminbird(R) instruments, carrying out rudimentary radiometric corrections to the data,
+classify bed texture, and produce some maps on aerial photos and kml files for google-earth
+
 
 1. read Humminbird DAT and associated SON files
 2. export data
 3. carry out rudimentary radiometric corrections to data, and 
 4. classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, in press.
 5. produce some maps on aerial photos and kml files for google-earth
+
+The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) and works on both sidescan and downward-looking echosounder data, where available.
+
+Some aspects of the program are detailed in:
+Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, in press.
 
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/class_R01560.png)
@@ -27,7 +38,7 @@ Python/Cython scripts to:
           | United States Geological Survey
           | Flagstaff, AZ 86001
           | dbuscombe@usgs.gov
-Version: 1.1.9    |  Revision: May, 2015
+Version: 1.3.1    |  Revision: July, 2015
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -43,7 +54,7 @@ http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 
 Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government. 
 
-thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info
+Thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info, Dan Hamill (Utah State University) and Paul Anderson (Quest Geophysical Asia) for debugging and suggestions for improvements
 
 This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4 & 14.4, Windows 7.
 This software has (so far) been used only with Humminbird 798, 998, 1198 and 1199 series instruments. 
@@ -80,11 +91,58 @@ These are all command-line programs which take a number of input (some required,
 
 ## Setup
 
-### Automatic Installation from PyPI 
+### Notes for Windows/Anaconda users
+
+PyHum currently has only been tested with Python 2.7, so you'll need that version of Anaconda
+
+Step 1. Before installing PyHum, install Basemap using:
+
+```
+conda install basemap
+```
+
+Step 2. Install pyproj. pip seems to have a bug with pyproj depending on what c-compiler your python distribution uses. Therefore, you may have to install pyproj (and other dependencies) from `here <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyproj>`_
+
+a) download the .whl file. Choose the file associated with python 2.7 ("cp27") and the architecture you are using, i.e. 32-bit (win32) or 64-bit (amd64)
+b) then move that file to your root Anaconda directory. This is probably C:\Users\yourusername\AppData\Local\Continuum\Anaconda (when you open an Anaconda command prompt it's the directory that's listed before the prompt '>')
+c) then use pip to install it, e.g.:
+
+
+```
+pip install pyproj-1.9.4-cp27-none-win_amd64.whl
+```
+
+Step 4. Install simplekml, using:
+
+```
+pip install simplekml
+```
+
+Step 3. Assuming a Anaconda distribution which comes with almost all required program dependencies:
+
+```
+pip uninstall PyHum (removes any previous installation)
+pip install PyHum
+```
+
+If you have git installed (from `here <https://git-scm.com/download/win>`_), you can install the latest 'bleeding edge' (pre-release) version directly from github:
+
+```
+pip install git+https://github.com/dbuscombe-usgs/PyHum.git
+```
+
+
+### Notes for Linux users
 
 ```
 pip uninstall PyHum (removes previous installation)
 pip install PyHum
+```
+
+or:
+
+```
+pip install git+https://github.com/dbuscombe-usgs/PyHum.git
 ```
 
 Automatic Installation from github:
@@ -107,34 +165,6 @@ or with admin privileges, e.g.:
 sudo python setup.py install
 ```
 
-### Notes for Windows/Anaconda users
-
-Before installing PyHum, install Basemap using::
-
-```
-conda install basemap
-```
-
-Assuming a Anaconda distribution which comes with almost all required program dependencies:
-
-```
-pip install simplekml
-pip uninstall PyHum (removes previous installation)
-pip install PyHum
-```
-
-pip seems to have a bug with pyproj depending on what c-compiler your python distribution uses. Therefore, you may have to install pyproj (and other dependencies) from here:
-
-http://www.lfd.uci.edu/~gohlke/pythonlibs/
-
-Download the .whl file, then use pip to install it, e.g.
-
-```
-pip install pyproj-1.9.4-cp27-none-win_amd64.whl
-```
-
-
-### Notes for Linux users
 
 You could try before you install, using a virtual environment:
 
@@ -294,6 +324,113 @@ and results in a set of outputs such as csv, mat and kml files, and including so
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/testclass_kmeans1.png)
 *k=4 means lengthscale classification*
+
+
+### Getting Started
+
+PyHum is modular so can be called from within a python or ipython console, from an IDE (such as IDLE or Spyder), or by running a script.
+
+The following example script could be saved as, for example "proc_mysidescandata.py" and run from the command line using
+
+```
+python proc_mysidescandata.py -i C:\MyData\R0087.DAT -s C:\MyData\R0087
+```
+
+
+```
+import sys, getopt
+
+from Tkinter import Tk
+from tkFileDialog import askopenfilename, askdirectory
+
+import PyHum
+import os
+
+if __name__ == '__main__': 
+
+    argv = sys.argv[1:]
+    humfile = ''; sonpath = ''
+    
+    # parse inputs to variables
+    try:
+       opts, args = getopt.getopt(argv,"hi:s:")
+    except getopt.GetoptError:
+         print 'error'
+         sys.exit(2)
+    for opt, arg in opts:
+       if opt == '-h':
+         print 'help'
+         sys.exit()
+       elif opt in ("-i"):
+          humfile = arg
+       elif opt in ("-s"):
+          sonpath = arg
+
+    # prompt user to supply file if no input file given
+    if not humfile:
+       print 'An input file is required!!!!!!'
+       Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
+       humfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
+
+    # prompt user to supply directory if no input sonpath is given
+    if not sonpath:
+       print 'A *.SON directory is required!!!!!!'
+       Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
+       sonpath = askdirectory() 
+
+    # print given arguments to screen and convert data type where necessary
+    if humfile:
+       print 'Input file is %s' % (humfile)
+
+    if sonpath:
+       print 'Son files are in %s' % (sonpath)
+                 
+    # general settings   
+    doplot = 1 #yes
+
+    # reading specific settings
+    cs2cs_args = "epsg:32100" #NAD83 / Montana
+    bedpick = 2 # manual bed pick
+    c = 1450 # speed of sound fresh water
+    t = 0.108 # length of transducer
+    f = 455 # frequency kHz
+    draft = 0.3 # draft in metres
+    flip_lr = 1 # flip port and starboard
+    model = 1199 # humminbird model
+    #chunk_size = 1000 # chunk size = 1000 pings
+    chunk_size = 0 # auto chunk size
+    dowrite = 0 #disable writing of point cloud data to file
+ 
+    # correction specific settings
+    maxW = 1000 # rms output wattage
+
+    # for shadow removal
+    shadowmask = 1 #manual shadow removal
+    kvals = 8 # number of k-means for automated shadow removal
+    win = 100
+
+    # for mapping
+    dogrid = 1 # yes
+    calc_bearing = 0 #no
+    filt_bearing = 0 #no
+    res = 0.05 # grid resolution in metres
+    cog = 1 # GPS course-over-ground used for heading
+
+    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
+
+    PyHum.correct(humfile, sonpath, maxW, doplot)
+
+    PyHum.rmshadows(humfile, sonpath, win, shadowmask, kvals, doplot)
+
+    PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
+```
+
+or from within ipython (with a GUI prompt to navigate to the files):
+
+```
+   run proc_mysidescandata.py
+```
+
 
 ### Support
 

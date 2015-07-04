@@ -53,10 +53,11 @@
 <span id="id1"></span><h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="about">
 <span id="id2"></span><h2>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h2>
-<p>PyHum - a Python framework for reading and processing data from low-cost sidescan sonar</p>
+<p>PyHum - a Python framework for reading and processing data from a Humminbird low-cost sidescan sonar</p>
 <p>PyHum is an open-source project dedicated to provide a generic Python framework
 for reading and exporting data from Humminbird(R) instruments, carrying out rudimentary radiometric corrections to the data,
 classify bed texture, and produce some maps on aerial photos and kml files for google-earth</p>
+<p>The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) and works on both sidescan and downward-looking echosounder data, where available.</p>
 <p>Some aspects of the program are detailed in:
 Buscombe, D., Grams, P.E., and Smith, S. (2015) &#8220;Automated riverbed sediment classification using low-cost sidescan sonar&#8221;, Journal of Hydraulic Engineering, in press.</p>
 <p>For the source code visit <a class="reference external" href="https://github.com/dbuscombe-usgs/PyHum/">the project github site</a></p>
@@ -70,10 +71,39 @@ see <a class="reference external" href="http://www.usgs.gov/visual-id/credit_usg
 <p>Any use of trade, product, or firm names is for descriptive purposes only
 and does not imply endorsement by the U.S. government.</p>
 <p>This software is issued under the <a class="reference external" href="http://www.gnu.org/copyleft/lesser.html">GNU Lesser General Public License, Version 3</a></p>
-<p>Thanks to Barb Fagetter (<a class="reference external" href="mailto:blueseas&#37;&#52;&#48;oceanecology&#46;ca">blueseas<span>&#64;</span>oceanecology<span>&#46;</span>ca</a>) for some format info</p>
+<p>Thanks to Barb Fagetter (<a class="reference external" href="mailto:blueseas&#37;&#52;&#48;oceanecology&#46;ca">blueseas<span>&#64;</span>oceanecology<span>&#46;</span>ca</a>) for some format info, Dan Hamill (Utah State University) and Paul Anderson (Quest Geophysical Asia) for debugging and suggestions for improvements</p>
 </div>
-<div class="section" id="setup">
-<span id="id4"></span><h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="setup-on-anaconda-for-windows">
+<span id="setup"></span><h2>Setup on Anaconda for Windows<a class="headerlink" href="#setup-on-anaconda-for-windows" title="Permalink to this headline">¶</a></h2>
+<p>PyHum currently has only been tested with Python 2.7, so you&#8217;ll need that version of Anaconda</p>
+<p>Step 1. Before installing PyHum, install Basemap using:</p>
+<div class="highlight-python"><div class="highlight"><pre>conda install basemap
+</pre></div>
+</div>
+<p>Step 2. Install pyproj. pip seems to have a bug with pyproj depending on what c-compiler your python distribution uses. Therefore, you may have to install pyproj (and other dependencies) from <a class="reference external" href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyproj">here</a></p>
+<ol class="loweralpha simple">
+<li>download the .whl file. Choose the file associated with python 2.7 (&#8220;cp27&#8221;) and the architecture you are using, i.e. 32-bit (win32) or 64-bit (amd64)</li>
+<li>then move that file to your root Anaconda directory. This is probably C:UsersyourusernameAppDataLocalContinuumAnaconda (when you open an Anaconda command prompt it&#8217;s the directory that&#8217;s listed before the prompt &#8216;&gt;&#8217;)</li>
+<li>then use pip to install it, e.g.:</li>
+</ol>
+<blockquote>
+<div>pip install pyproj-1.9.4-cp27-none-win_amd64.whl</div></blockquote>
+<p>Step 4. Install simplekml, using:</p>
+<div class="highlight-python"><div class="highlight"><pre>pip install simplekml
+</pre></div>
+</div>
+<p>Step 3. Assuming a Anaconda distribution which comes with almost all required program dependencies:</p>
+<div class="highlight-python"><div class="highlight"><pre>pip uninstall PyHum (removes any previous installation)
+pip install PyHum
+</pre></div>
+</div>
+<p>(Advanced) If you have git installed (from <a class="reference external" href="https://git-scm.com/download/win">here</a>), you can install the latest &#8216;bleeding edge&#8217; (pre-release) version directly from github:</p>
+<div class="highlight-python"><div class="highlight"><pre>pip install git+https://github.com/dbuscombe-usgs/PyHum.git
+</pre></div>
+</div>
+</div>
+<div class="section" id="id5">
+<h2>Setup<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
 <p>Automatic Installation from PyPI:</p>
 <div class="highlight-python"><div class="highlight"><pre>pip uninstall PyHum (removes previous installation)
 pip install PyHum
@@ -93,25 +123,11 @@ python setup.py install
 <div class="highlight-python"><div class="highlight"><pre>sudo python setup.py install
 </pre></div>
 </div>
-</div>
-<div class="section" id="setup-on-anaconda-for-windows">
-<h2>Setup on Anaconda for Windows<a class="headerlink" href="#setup-on-anaconda-for-windows" title="Permalink to this headline">¶</a></h2>
-<p>Before installing PyHum, install Basemap using:</p>
-<div class="highlight-python"><div class="highlight"><pre>conda install basemap
-</pre></div>
-</div>
-<p>Assuming a Anaconda distribution which comes with almost all required program dependencies:</p>
-<div class="highlight-python"><div class="highlight"><pre>pip install simplekml
-pip uninstall PyHum (removes previous installation)
-pip install PyHum
-</pre></div>
-</div>
-<p>pip seems to have a bug with pyproj depending on what c-compiler your python distribution uses. Therefore, you may have to install pyproj (and other dependencies) from <a class="reference external" href="http://www.lfd.uci.edu/~gohlke/pythonlibs/">here</a></p>
-<p>Download the .whl file, then use pip to install it, e.g.:</p>
-<div class="highlight-python"><div class="highlight"><pre>pip install pyproj-1.9.4-cp27-none-win_amd64.whl
-</pre></div>
-</div>
-<p>This software has been tested with Python 2.7 on Linux Fedora 16 &amp; 20, Ubuntu 12.4 &amp; 13.4 &amp; 14.4, Windows 7. This software has (so far) been used only with Humminbird 798, 998, 1198 and 1199 series instruments.</p>
+<p>This software has been tested with Python 2.7 on
+1. Windows 7
+2. Linux Fedora (16 &amp; 20)
+3. Linux Ubuntu (12.4 &amp; 13.4 &amp; 14.4)</p>
+<p>This software has (so far) been used only with Humminbird 798, 998, 1198 and 1199 series instruments.</p>
 </div>
 <div class="section" id="virtual-environment">
 <span id="virtualenv"></span><h2>Virtual environment<a class="headerlink" href="#virtual-environment" title="Permalink to this headline">¶</a></h2>
@@ -171,7 +187,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 </div>
 </div>
 <div class="section" id="test">
-<span id="id5"></span><h2>Test<a class="headerlink" href="#test" title="Permalink to this headline">¶</a></h2>
+<span id="id6"></span><h2>Test<a class="headerlink" href="#test" title="Permalink to this headline">¶</a></h2>
 <p>A test can be carried out by running the supplied script:</p>
 <div class="highlight-python"><div class="highlight"><pre>python -c &quot;import PyHum; PyHum.dotest()&quot;
 </pre></div>
@@ -252,8 +268,108 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 </pre></div>
 </div>
 </div>
+<div class="section" id="gettingstarted">
+<span id="id7"></span><h2>Getting Started<a class="headerlink" href="#gettingstarted" title="Permalink to this headline">¶</a></h2>
+<p>PyHum is modular so can be called from within a python or ipython console, from an IDE (such as IDLE or Spyder), or by running a script.</p>
+<p>The following example script:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">getopt</span>
+
+<span class="kn">from</span> <span class="nn">Tkinter</span> <span class="kn">import</span> <span class="n">Tk</span>
+<span class="kn">from</span> <span class="nn">tkFileDialog</span> <span class="kn">import</span> <span class="n">askopenfilename</span><span class="p">,</span> <span class="n">askdirectory</span>
+
+<span class="kn">import</span> <span class="nn">PyHum</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="n">argv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">humfile</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="p">;</span> <span class="n">sonpath</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+    <span class="c"># parse inputs to variables</span>
+    <span class="k">try</span><span class="p">:</span>
+       <span class="n">opts</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">getopt</span><span class="o">.</span><span class="n">getopt</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span><span class="s">&quot;hi:s:&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">getopt</span><span class="o">.</span><span class="n">GetoptError</span><span class="p">:</span>
+         <span class="k">print</span> <span class="s">&#39;error&#39;</span>
+         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">opt</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+       <span class="k">if</span> <span class="n">opt</span> <span class="o">==</span> <span class="s">&#39;-h&#39;</span><span class="p">:</span>
+         <span class="k">print</span> <span class="s">&#39;help&#39;</span>
+         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+       <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-i&quot;</span><span class="p">):</span>
+          <span class="n">humfile</span> <span class="o">=</span> <span class="n">arg</span>
+       <span class="k">elif</span> <span class="n">opt</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&quot;-s&quot;</span><span class="p">):</span>
+          <span class="n">sonpath</span> <span class="o">=</span> <span class="n">arg</span>
+
+    <span class="c"># prompt user to supply file if no input file given</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">humfile</span><span class="p">:</span>
+       <span class="k">print</span> <span class="s">&#39;An input file is required!!!!!!&#39;</span>
+       <span class="n">Tk</span><span class="p">()</span><span class="o">.</span><span class="n">withdraw</span><span class="p">()</span> <span class="c"># we don&#39;t want a full GUI, so keep the root window from appearing</span>
+       <span class="n">humfile</span> <span class="o">=</span> <span class="n">askopenfilename</span><span class="p">(</span><span class="n">filetypes</span><span class="o">=</span><span class="p">[(</span><span class="s">&quot;DAT files&quot;</span><span class="p">,</span><span class="s">&quot;*.DAT&quot;</span><span class="p">)])</span>
+
+    <span class="c"># prompt user to supply directory if no input sonpath is given</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sonpath</span><span class="p">:</span>
+       <span class="k">print</span> <span class="s">&#39;A *.SON directory is required!!!!!!&#39;</span>
+       <span class="n">Tk</span><span class="p">()</span><span class="o">.</span><span class="n">withdraw</span><span class="p">()</span> <span class="c"># we don&#39;t want a full GUI, so keep the root window from appearing</span>
+       <span class="n">sonpath</span> <span class="o">=</span> <span class="n">askdirectory</span><span class="p">()</span>
+
+    <span class="c"># print given arguments to screen and convert data type where necessary</span>
+    <span class="k">if</span> <span class="n">humfile</span><span class="p">:</span>
+       <span class="k">print</span> <span class="s">&#39;Input file is </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">humfile</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">sonpath</span><span class="p">:</span>
+       <span class="k">print</span> <span class="s">&#39;Son files are in </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sonpath</span><span class="p">)</span>
+
+    <span class="c"># general settings</span>
+    <span class="n">doplot</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">#yes</span>
+
+    <span class="c"># reading specific settings</span>
+    <span class="n">cs2cs_args</span> <span class="o">=</span> <span class="s">&quot;epsg:32100&quot;</span> <span class="c">#NAD83 / Montana</span>
+    <span class="n">bedpick</span> <span class="o">=</span> <span class="mi">2</span> <span class="c"># manual bed pick</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="mi">1450</span> <span class="c"># speed of sound fresh water</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="mf">0.108</span> <span class="c"># length of transducer</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="mi">455</span> <span class="c"># frequency kHz</span>
+    <span class="n">draft</span> <span class="o">=</span> <span class="mf">0.3</span> <span class="c"># draft in metres</span>
+    <span class="n">flip_lr</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># flip port and starboard</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="mi">1199</span> <span class="c"># humminbird model</span>
+    <span class="c">#chunk_size = 1000 # chunk size = 1000 pings</span>
+    <span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># auto chunk size</span>
+    <span class="n">dowrite</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#disable writing of point cloud data to file</span>
+
+    <span class="c"># correction specific settings</span>
+    <span class="n">maxW</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c"># rms output wattage</span>
+
+    <span class="c"># for shadow removal</span>
+    <span class="n">shadowmask</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">#manual shadow removal</span>
+    <span class="n">kvals</span> <span class="o">=</span> <span class="mi">8</span> <span class="c"># number of k-means for automated shadow removal</span>
+    <span class="n">win</span> <span class="o">=</span> <span class="mi">100</span>
+
+    <span class="c"># for mapping</span>
+    <span class="n">dogrid</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># yes</span>
+    <span class="n">calc_bearing</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#no</span>
+    <span class="n">filt_bearing</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#no</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="c"># grid resolution in metres</span>
+    <span class="n">cog</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># GPS course-over-ground used for heading</span>
+
+    <span class="n">PyHum</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">draft</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bedpick</span><span class="p">,</span> <span class="n">flip_lr</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+    <span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
+
+    <span class="n">PyHum</span><span class="o">.</span><span class="n">rmshadows</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shadowmask</span><span class="p">,</span> <span class="n">kvals</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
+
+    <span class="n">PyHum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">dowrite</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>could be saved as, for example &#8220;proc_mysidescandata.py&#8221; and run from the command line using:</p>
+<div class="highlight-python"><div class="highlight"><pre>python proc_mysidescandata.py -i C:\MyData\R0087.DAT -s C:\MyData\R0087
+</pre></div>
+</div>
+<p>or from within ipython (with a GUI prompt to navigate to the files):</p>
+<div class="highlight-python"><div class="highlight"><pre>%run proc_mysidescandata.py
+</pre></div>
+</div>
+</div>
 <div class="section" id="support">
-<span id="id6"></span><h2>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h2>
+<span id="id8"></span><h2>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h2>
 <p>This is a new project written and maintained by Daniel Buscombe. Bugs are expected - please report them, I will fix them quickly. Feedback and suggestions for improvements are <em>very</em> welcome</p>
 <p>Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please address all suggestions, comments and queries to: <a class="reference external" href="mailto:dbuscombe&#37;&#52;&#48;usgs&#46;gov">dbuscombe<span>&#64;</span>usgs<span>&#46;</span>gov</a>. Thanks for stopping by!</p>
 <blockquote>
@@ -276,12 +392,13 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <li><a class="reference internal" href="#">Getting started</a><ul>
 <li><a class="reference internal" href="#about">About</a></li>
 <li><a class="reference internal" href="#license">License</a></li>
-<li><a class="reference internal" href="#setup">Setup</a></li>
 <li><a class="reference internal" href="#setup-on-anaconda-for-windows">Setup on Anaconda for Windows</a></li>
+<li><a class="reference internal" href="#id5">Setup</a></li>
 <li><a class="reference internal" href="#virtual-environment">Virtual environment</a></li>
 <li><a class="reference internal" href="#manual-installation">Manual installation</a></li>
 <li><a class="reference internal" href="#installation-on-amazon-linux-ec-2-instance">Installation on Amazon Linux EC-2 instance</a></li>
 <li><a class="reference internal" href="#test">Test</a></li>
+<li><a class="reference internal" href="#gettingstarted">Getting Started</a></li>
 <li><a class="reference internal" href="#support">Support</a></li>
 </ul>
 </li>
