@@ -66,6 +66,8 @@ except:
 from joblib import Parallel, delayed, cpu_count
 import pyproj
 
+import write
+
 # numerical
 import numpy as np
 import pyproj
@@ -95,15 +97,14 @@ __all__ = [
     ]
 
 #################################################
-def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 0, filt_bearing = 0, res = 0.1, cog = 1, dowrite = 0):
+def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 0, filt_bearing = 0, res = 0.1, cog = 1, dowrite = 0, interpk = 10):
          
     '''
     Create plots of the spatially referenced sidescan echograms
-    using the algorithm detailed by Buscombe et al. (forthcoming)
 
     Syntax
     ----------
-    [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
+    [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, interpk)
 
     Parameters
     ----------
@@ -130,6 +131,11 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
     dowrite: int, *optional* [Default=0]
        if 1, point cloud data from each chunk is written to ascii file
        if 0, processing times are speeded up considerably but point clouds are not available for further analysis
+    interpk: int, *optional* [Default=10]
+       number of nearest neighbours to use in gridding. 
+       If k>1, inverse distance weighting is used and a smoother map is map
+       the greater k, the greater the spatial averaging and the smoother the map, but also
+       the slower the processing
 
     Returns
     -------
@@ -197,6 +203,9 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
        if dowrite==0:
           print "Point cloud data will be written to ascii file" 
 
+    if interpk:
+       interpk = int(interpk)
+       print 'Number of nearest neighbours used for gridding: %s' % (str(interpk))      
 
     # start timer
     if os.name=='posix': # true if linux/mac or cygwin on windows
@@ -246,9 +255,6 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
     else:
        # reported bearing by instrument (Kalman filtered?)
        bearing = np.squeeze(meta['heading'])
-
-    ## bearing can only be observed modulo 2*pi, therefore phase unwrap
-    #bearing = np.unwrap(bearing)
 
     # if stdev in heading is large, there's probably noise that needs to be filtered out
     if np.std(bearing)>180:
@@ -319,7 +325,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
     dist_tvg = ((np.tan(np.radians(25)))*dep_m)-(tvg)
 
     for p in xrange(len(star_fp)):
-       make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite)
+       make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, interpk)
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
@@ -355,7 +361,7 @@ def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
    return (90.0 - db + 360.0) % 360.0
 
 # =========================================================
-def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite):
+def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, interpk):
    
    trans =  pyproj.Proj(init=cs2cs_args)   
    
@@ -389,8 +395,7 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
       # write raw bs to file
       #outfile = sonpath+'x_y_ss_raw'+str(p)+'.asc' 
       outfile = os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc'))
-      with open(outfile, 'w') as f:
-         np.savetxt(f, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+      write.txtwrite( outfile, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))) )
 
    humlon, humlat = trans(X, Y, inverse=True)
 
@@ -404,15 +409,18 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
 
       tree = KDTree(zip(X.flatten(), Y.flatten()))
 
-      #nearest neighbour
-      dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
-      dat = merge.flatten()[inds].reshape(grid_x.shape)
+      if interpk==1:
+         #nearest neighbour
+         dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
+         dat = merge.flatten()[inds].reshape(grid_x.shape)
 
-      ## inverse distance weighting, using 10 nearest neighbours
-      #dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 10)
-      #w = 1.0 / dist**2
-      #dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
-      #dat.shape = grid_x.shape
+      else:
+         # inverse distance weighting, using 'interpk' nearest neighbours
+         dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = interpk)
+         w = 1.0 / dist**2
+         dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
+         dat.shape = grid_x.shape
+         dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
 
       ## create mask for where the data is not
       #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
@@ -515,7 +523,7 @@ def getXY(e,n,yvec,d,t,extent):
 # =========================================================
 if __name__ == '__main__':
 
-   map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
+   map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, interpk)
 
 #    if not cs2cs_args:
 #       # arguments to pass to cs2cs for coordinate transforms
@@ -575,3 +583,6 @@ if __name__ == '__main__':
 #   # merge flatten and stack
 #   Y = np.asarray(Y,'float').T
 #   Y = Y.flatten()
+
+      #with open(outfile, 'w') as f:
+      #   np.savetxt(f, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")

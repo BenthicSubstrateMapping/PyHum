@@ -143,6 +143,8 @@ if USE_CYTHON:
         include_dirs=[np.get_include()]),
         Extension("PyHum.stdev", [ "PyHum/_stdev.pyx" ],
         include_dirs=[np.get_include()]),
+        Extension("PyHum.write", [ "PyHum/_write.pyx" ],
+        include_dirs=[np.get_include()]),
         Extension('_RunningStats',sources=['PyHum/RunningStats_wrap.cxx', 'PyHum/RunningStats.cpp']),
     ]
     cmdclass.update({ 'build_ext': build_ext })
@@ -159,6 +161,8 @@ else:
         Extension("PyHum.spec_noise", [ "PyHum/_spec_noise.c" ],
         include_dirs=[np.get_include()]),
         Extension("PyHum.stdev", [ "PyHum/_stdev.c" ],
+        include_dirs=[np.get_include()]),
+        Extension("PyHum.write", [ "PyHum/_write.c" ],
         include_dirs=[np.get_include()]),
         Extension('_RunningStats',sources=['PyHum/RunningStats_wrap.cxx', 'PyHum/RunningStats.cpp']),
     ]

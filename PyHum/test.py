@@ -89,14 +89,12 @@ def dotest():
    model = 998 # humminbird model
    chunk_size = 1000 # chunk size = 1000 pings
    #chunk_size = 0 # auto chunk size
-   dowrite = 0 #disable writing of point cloud data to file
  
    # correction specific settings
    maxW = 1000 # rms output wattage
 
    # for shadow removal
    shadowmask = 0 #automatic shadow removal
-   kvals = 8 # number of k-means for automated shadow removal
 
    # for texture calcs
    win = 50 # pixel window
@@ -112,6 +110,8 @@ def dotest():
    filt_bearing = 1 #yes
    res = 0.2 # grid resolution in metres
    cog = 1 # GPS course-over-ground used for heading
+   interpk = 10 # number of nearest neighbours used in gridding
+   dowrite = 0 #disable writing of point cloud data to file
 
    # for downward-looking echosounder echogram (e1-e2) analysis
    ph = 7.0 # acidity on the pH scale
@@ -129,13 +129,13 @@ def dotest():
    PyHum.correct(humfile, sonpath, maxW, doplot)
 
    # remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
-   PyHum.rmshadows(humfile, sonpath, win, shadowmask, kvals, doplot)
+   PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
    # Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
    # grid and map the scans
-   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
+   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, interpk)
 
    res = 0.5 # grid resolution in metres
    

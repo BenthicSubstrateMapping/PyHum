@@ -68,11 +68,13 @@ except:
 
 #numerical
 import numpy as np
-import stdev
 import PyHum.utils as humutils
 #from pyhum_utils import sliding_window, im_resize, cut_kmeans
 from joblib import Parallel, delayed, cpu_count
 from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
+
+#import stdev
+from skimage.feature import greycomatrix, greycoprops
 
 #plotting
 import matplotlib.pyplot as plt
@@ -95,7 +97,7 @@ __all__ = [
     ]
 
 #################################################
-def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
+def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
     '''
     Remove dark shadows in scans caused by shallows, shorelines, and attenuation of acoustics with distance
     Manual or automated processing options available
@@ -115,9 +117,6 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
        window size (pixels) for the automated shadow removal algorithm
     shadowmask : int, *optional* [Default=0]
        1 = do manual shadow masking, otherwise do automatic shadow masking
-    kvals : int, *optional* [Default=8]
-       if automatic shadowmask, this parameter sets the number of k-means to calculate 
-       (the one with the lowest value will be the shadow which is removed)
     doplot : int, *optional* [Default=1]
        1 = make plots, otherwise do not
 
@@ -154,9 +153,6 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
     if win:
        win = np.asarray(win,int)
        print 'Window is %s square pixels' % (str(win))
-    if kvals:
-       kvals = np.asarray(kvals,int)
-       print '%s discrete values for shadow removal' % (str(kvals))
     if shadowmask:
        shadowmask = np.asarray(shadowmask,int)
        if shadowmask==1:
@@ -299,6 +295,8 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
 
     else:
 
+       win = 31
+
        Zs = []; Zp = []
        for p in xrange(len(star_fp)):
           merge = np.vstack((np.flipud(port_fp[p]),star_fp[p]))
@@ -313,35 +311,47 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
 
           merge[np.isnan(merge)] = 0
 
-          Z,ind = humutils.sliding_window(merge,(win,win),(win/2,win/2))
+          #Z,ind = humutils.sliding_window(merge,(win,win),(win/2,win/2))
+          Z,ind = humutils.sliding_window(merge,(win,win/2),(win,win/2))
 
-          try: #parallel processing with all available cores
-             w = Parallel(n_jobs=-1, verbose=0)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z))) #backend="threading"
-          except: #fall back to serial
-             w = Parallel(n_jobs=1, verbose=0)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z)))
+          #try: #parallel processing with all available cores
+          #   w = Parallel(n_jobs=-1, verbose=0)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z))) #backend="threading"
+          #except: #fall back to serial
+          #   w = Parallel(n_jobs=1, verbose=0)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z)))
 
-          zmean,stdv= zip(*w)
-          del w, stdv
+          #zmean,stdv= zip(*w)
+          #del w, stdv
 
-          zmean = np.reshape(zmean, ( ind[0], ind[1] ) )
+          #zmean = np.reshape(zmean, ( ind[0], ind[1] ) )
           Ny, Nx = np.shape(merge)
-          zmean[np.isnan(zmean)] = 0
-
+          #zmean[np.isnan(zmean)] = 0
+          
+          try: #parallel processing with all available cores     
+             w = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k]) for k in xrange(len(Z)))
+          except: #fall back to serial
+             w = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k]) for k in xrange(len(Z)))          
+          
+          zmean = np.reshape(w , ( ind[0], ind[1] ) )
+          del w
+        
           M = humutils.im_resize(zmean,Nx,Ny)
           M[mask==0] = 0
           del zmean
 
-          # get a k-value segmentation   
-          wc, values = humutils.cut_kmeans(merge, kvals) #merge,kvals)
-          del M, Ny, Nx
+          ## get a k-value segmentation   
+          #wc, values = humutils.cut_kmeans(merge, kvals) #merge,kvals)
+          #del M, Ny, Nx
    
-          # the lowest value is zero, get the next lowest
-          bw = wc==np.sort(values)[-(kvals-1)]
-          del wc, values
+          ## the lowest value is zero, get the next lowest
+          #bw = wc==np.sort(values)[-(kvals-1)]
+          #del wc, values
+
+          bw = M>0.5  
 
           # erode and dilate to remove splotches of no data
-          bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))
-   
+          #bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))
+          bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((win,win)))
+             
           # fill holes
           bw2 = binary_fill_holes(bw2, structure=np.ones((3,3))).astype(int)
           del bw
@@ -398,13 +408,6 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, kvals=8, doplot=1):
 
     print "Done!"
 
-#==================================================
-def get_stats(pts):
-   '''
-   call the analysis routine. Gets called by the parallel processing queue
-   '''
-   return stdev.proc(pts).getdata()
-
 # =========================================================
 def custom_save(figdirec,root):
     '''
@@ -414,10 +417,21 @@ def custom_save(figdirec,root):
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=400)
 
 # =========================================================
+def parallel_me(Z):
+    try:
+       glcm = greycomatrix(Z, [5], [0], 256, symmetric=True, normed=True)
+       if (greycoprops(glcm, 'dissimilarity')[0, 0] < 3) and (greycoprops(glcm, 'correlation')[0, 0] < 0.2) and (greycoprops(glcm, 'contrast')[0, 0] < 8) and (greycoprops(glcm, 'energy')[0, 0] > 0.15) and (np.mean(Z)<8):
+          return 1
+       else:
+          return 0
+    except:
+       return 0
+       
+# =========================================================
 # =========================================================
 if __name__ == '__main__':
 
-   rmshadows(humfile, sonpath, win, shadowmask, kvals, doplot)
+   rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
 
 #    if not kvals:
@@ -437,5 +451,17 @@ if __name__ == '__main__':
 #          doplot = 1
 #          print "[Default] Plots will be made"
 
+#    kvals : int, *optional* [Default=8]
+#       if automatic shadowmask, this parameter sets the number of k-means to calculate 
+#       (the one with the lowest value will be the shadow which is removed)
 
-
+    #if kvals:
+    #   kvals = np.asarray(kvals,int)
+    #   print '%s discrete values for shadow removal' % (str(kvals))
+    
+##==================================================
+#def get_stats(pts):
+#   '''
+#   call the analysis routine. Gets called by the parallel processing queue
+#   '''
+#   return stdev.proc(pts).getdata()
