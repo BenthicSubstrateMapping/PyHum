@@ -101,14 +101,14 @@ __all__ = [
     ]
 
 #################################################
-def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 0, filt_bearing = 0, res = 0.1, cog = 1, dowrite = 0, mode=3):
+def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 0, filt_bearing = 0, res = 0.1, cog = 1, dowrite = 0, interpk = 10):
          
     '''
     Create plots of the spatially referenced sidescan echograms
 
     Syntax
     ----------
-    [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, mode)
+    [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, interpk)
 
     Parameters
     ----------
@@ -135,10 +135,11 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
     dowrite: int, *optional* [Default=0]
        if 1, point cloud data from each chunk is written to ascii file
        if 0, processing times are speeded up considerably but point clouds are not available for further analysis
-    mode: int, *optional* [Default=3]
-       gridding mode. 1 = nearest neighbour
-                      2 = inverse weighted nearest neighbour
-                      3 = Gaussian weighted nearest neighbour
+    interpk: int, *optional* [Default=10]
+       number of nearest neighbours to use in gridding. 
+       If k>1, inverse distance weighting is used and a smoother map is map
+       the greater k, the greater the spatial averaging and the smoother the map, but also
+       the slower the processing
 
     Returns
     -------
@@ -206,9 +207,9 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
        if dowrite==0:
           print "Point cloud data will be written to ascii file" 
 
-    if mode:
-       mode = int(mode)
-       print 'Mode for gridding: %s' % (str(mode))      
+    if interpk:
+       interpk = int(interpk)
+       print 'Number of nearest neighbours used for gridding: %s' % (str(interpk))      
 
     # start timer
     if os.name=='posix': # true if linux/mac or cygwin on windows
@@ -327,12 +328,13 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
     # depth correction
     dist_tvg = ((np.tan(np.radians(25)))*dep_m)-(tvg)
 
-    # read in range data
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'r') as ff:
        R_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
+    mode = 3
+
     for p in xrange(len(star_fp)):
-       make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, mode)
+       make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, interpk, mode)
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
@@ -368,7 +370,7 @@ def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
    return (90.0 - db + 360.0) % 360.0
 
 # =========================================================
-def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, mode):
+def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, interpk, mode):
    
    trans =  pyproj.Proj(init=cs2cs_args)   
    
@@ -386,42 +388,34 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
    yvec = np.linspace(pix_m,extent*pix_m,extent)
 
-   X, Y, D, h, t  = getXY(e,n,yvec,d,t,extent)
-   
-   D[np.isnan(D)] = 0
-   h[np.isnan(h)] = 0
-   t[np.isnan(t)] = 0
-       
+   X, Y, D  = getXY(e,n,yvec,d,t,extent)
+
    X = X[np.where(np.logical_not(np.isnan(Y)))]
    merge = merge.flatten()[np.where(np.logical_not(np.isnan(Y)))]
    Y = Y[np.where(np.logical_not(np.isnan(Y)))]
    D = D[np.where(np.logical_not(np.isnan(Y)))]
    R = R.flatten()[np.where(np.logical_not(np.isnan(Y)))]
-   h = h[np.where(np.logical_not(np.isnan(Y)))]
-   t = t[np.where(np.logical_not(np.isnan(Y)))]   
-         
+      
    Y = Y[np.where(np.logical_not(np.isnan(X)))]
    merge = merge.flatten()[np.where(np.logical_not(np.isnan(X)))]
    X = X[np.where(np.logical_not(np.isnan(X)))]
    D = D[np.where(np.logical_not(np.isnan(X)))]
    R = R.flatten()[np.where(np.logical_not(np.isnan(X)))]
-   h = h[np.where(np.logical_not(np.isnan(X)))]
-   t = t[np.where(np.logical_not(np.isnan(X)))]   
-         
+     
    X = X[np.where(np.logical_not(np.isnan(merge)))]
    Y = Y[np.where(np.logical_not(np.isnan(merge)))]
    merge = merge[np.where(np.logical_not(np.isnan(merge)))]
    D = D[np.where(np.logical_not(np.isnan(merge)))]
    R = R[np.where(np.logical_not(np.isnan(merge)))]
-   h = h[np.where(np.logical_not(np.isnan(merge)))]
-   t = t[np.where(np.logical_not(np.isnan(merge)))]   
-         
+     
    if dowrite==1:
       ## write raw bs to file
       outfile = os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc'))
-      write.txtwrite( outfile, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()), humutils.ascol(D.flatten()), humutils.ascol(np.cos(R.flatten())), humutils.ascol(h.flatten()), humutils.ascol(t.flatten())  )) )
-      
-   del D, R, h, t
+      write.txtwrite( outfile, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()), humutils.ascol(D.flatten()), humutils.ascol(np.cos(R.flatten()))  )) )
+      #del D, R
+  
+   del merge
+   merge = R.copy()
   
    humlon, humlat = trans(X, Y, inverse=True)
 
@@ -467,6 +461,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
             dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=numneighbours, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
          except:
             dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=numneighbours, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = 1, epsilon = eps)
+
 
       dat = dat.reshape(shape)
 
@@ -570,8 +565,7 @@ def getxy(e, n, yvec, d, t,extent):
    xx = e - ((x - e) * np.cos(t)) - ((y - n) * np.sin(t))
    yy = n - ((x - e) * np.sin(t)) + ((y - n) * np.cos(t))
    xx, yy = calc_beam_pos(d, t, xx, yy)
-   #x, y, eucl. dist, depth, theta 
-   return xx, yy, np.sqrt((xx-e)**2 + (yy-n)**2), np.ones(len(xx))*d, np.ones(len(xx))*t
+   return xx, yy, np.sqrt((xx-e)**2 + (yy-n)**2)
 
 # =========================================================
 def getXY(e,n,yvec,d,t,extent):
@@ -579,8 +573,7 @@ def getXY(e,n,yvec,d,t,extent):
 
    o = Parallel(n_jobs = -1, verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
 
-   #eating, northing, distance to sonar, depth, heading
-   X, Y, D, h, t = zip(*o)
+   X, Y, D = zip(*o)
 
    # merge flatten and stack
    X = np.asarray(X,'float').T
@@ -593,22 +586,39 @@ def getXY(e,n,yvec,d,t,extent):
    # merge flatten and stack
    D = np.asarray(D,'float').T
    D = D.flatten()
-
-   # merge flatten and stack
-   h = np.asarray(h,'float').T
-   h = h.flatten()
    
-   # merge flatten and stack
-   t = np.asarray(t,'float').T
-   t = t.flatten()
-         
-   return X, Y, D, h, t
+   return X, Y, D
 
 # =========================================================
 # =========================================================
 if __name__ == '__main__':
 
-   map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, mode)
+   map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, interpk, mode)
 
+#      #dat = griddata(np.c_[X.flatten(),Y.flatten()], merge.flatten(), (grid_x, grid_y), method='nearest') 
+#      #tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+#      #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+#      #dist = dist.reshape(grid_x.shape)
+
+#      tree = KDTree(zip(X.flatten(), Y.flatten()))
+
+#      if interpk==1:
+#         #nearest neighbour
+#         dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
+#         dat = merge.flatten()[inds].reshape(grid_x.shape)
+
+#      else:
+#         # inverse distance weighting, using 'interpk' nearest neighbours
+#         dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = interpk)
+#         w = 1.0 / dist**2
+#         dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
+#         dat.shape = grid_x.shape
+#         dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
+
+#      ## create mask for where the data is not
+#      #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+#      dist = dist.reshape(grid_x.shape)
+
+#   del X, Y #, bearing #, pix_m, yvec
 
 

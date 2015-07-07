@@ -22,12 +22,7 @@ def txtwrite(str outfile, np.ndarray[np.float64_t, ndim=2] towrite):
    outfile : str
    	name of file to write to
    towrite : ndarray
-   	ndarray containing Nx3 point cloud
-
-   Other Parameters
-   -----------------
-   header : str, *optional* [default = None]
-   	header string
+   	ndarray containing Nx4 point cloud
 
    Returns
    ----------
@@ -36,5 +31,5 @@ def txtwrite(str outfile, np.ndarray[np.float64_t, ndim=2] towrite):
    '''
    with open(outfile, 'wb') as f:
 
-      np.savetxt(f, towrite, fmt="%8.6f %8.6f %8.6f") 
+      np.savetxt(f, towrite, fmt="%8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f") 
 

@@ -110,7 +110,7 @@ def dotest():
    filt_bearing = 1 #yes
    res = 0.1 # grid resolution in metres
    cog = 1 # GPS course-over-ground used for heading
-   interpk = 10 # number of nearest neighbours used in gridding
+   mode = 3 # gridding mode (gaussian weighted nearest neighbour)
    dowrite = 0 #disable writing of point cloud data to file
 
    # for downward-looking echosounder echogram (e1-e2) analysis
@@ -135,7 +135,7 @@ def dotest():
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
    # grid and map the scans
-   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, interpk)
+   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, mode)
 
    res = 0.5 # grid resolution in metres
    
