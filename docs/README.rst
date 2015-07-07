@@ -135,6 +135,7 @@ You could try before you install, using a virtual environment::
   pip install Pillow
   pip install matplotlib
   pip install basemap --allow-external basemap --allow-unverified basemap
+  pip install pyresample
   pip install PyHum
   python -c "import PyHum; PyHum.test()"
   deactivate #(or source venv/bin/deactivate)
@@ -149,9 +150,9 @@ Manual installation
 
 Python libraries you need to have installed to use PyHum:
 
-1. `Nifty <http://www.mpa-garching.mpg.de/ift/nifty/index.html>`_
-2. `SciPy <http://www.scipy.org/scipylib/download.html>`_
-3. `Numpy <http://www.scipy.org/scipylib/download.html>`_
+1. `SciPy <http://www.scipy.org/scipylib/download.html>`_
+2. `Numpy <http://www.scipy.org/scipylib/download.html>`_
+3. `pyresample <http://pyresample.readthedocs.org/en/latest/index.html#>`_
 4. `Matplotlib <http://matplotlib.org/downloads.html>`_
 5. `cython <http://cython.org/>`_
 6. `joblib <https://pythonhosted.org/joblib/>`_

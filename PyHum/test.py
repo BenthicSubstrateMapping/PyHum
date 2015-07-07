@@ -108,7 +108,7 @@ def dotest():
    dogrid = 1 # yes
    calc_bearing = 0 #no
    filt_bearing = 1 #yes
-   res = 0.2 # grid resolution in metres
+   res = 0.1 # grid resolution in metres
    cog = 1 # GPS course-over-ground used for heading
    interpk = 10 # number of nearest neighbours used in gridding
    dowrite = 0 #disable writing of point cloud data to file

@@ -64,15 +64,18 @@ try:
 except:
    pass
 from joblib import Parallel, delayed, cpu_count
-import pyproj
 
 # numerical
 import numpy as np
 import pyproj
 import PyHum.utils as humutils
-from scipy.interpolate import griddata
-from scipy.spatial import cKDTree as KDTree
+#from scipy.interpolate import griddata
+#from scipy.spatial import cKDTree as KDTree
 #from scipy.ndimage.filters import median_filter
+
+import pyresample
+import replace_nans
+from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
 
 # plotting
 import matplotlib.pyplot as plt
@@ -209,6 +212,9 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_be
        dowrite = int(dowrite)
        if dowrite==0:
           print "Point cloud data will be written to ascii file" 
+
+
+    mode = 3
 
     trans =  pyproj.Proj(init=cs2cs_args)
 
@@ -389,35 +395,83 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_be
 
           grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
 
-          #dat = griddata(np.c_[X.flatten(),Y.flatten()], S.flatten(), (grid_x, grid_y), method='nearest')
-          ### create mask for where the data is not
-          #tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
-          #dist = dist.reshape(grid_x.shape)
+          del X, Y
+          longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+          shape = np.shape(grid_x)
+          #del grid_y, grid_x
 
-          tree = KDTree(zip(X.flatten(), Y.flatten()))
+          targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+          del longrid, latgrid
 
-          #nearest neighbour
-          dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
-          dat = merge.flatten()[inds].reshape(grid_x.shape)
+          orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
+          #del humlat, humlon
 
-          ## inverse distance weighting, using 10 nearest neighbours
-          #d, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 10)
-          #w = 1.0 / d**2
-          #dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
-          #dat.shape = grid_x.shape
+          influence = 1 #m
+          numneighbours = 64
 
-          ## create mask for where the data is not
-          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
-          dist = dist.reshape(grid_x.shape)
+          if mode==1:
+             try:
+                # nearest neighbour
+                dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
+             except:
+                # nearest neighbour
+                dat, stdev, counts = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, with_uncert = True, nprocs = 1)
 
-       del X, Y
+          elif mode==2:
+             # custom inverse distance 
+             wf = lambda r: 1/r**2
+
+             try:
+                dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=numneighbours, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+             except:
+                dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=numneighbours, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = 1)   
+
+          elif mode==3:
+             sigmas = 1 #m
+             eps = 2
+
+             try:
+                dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=numneighbours, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+             except:
+                dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=numneighbours, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = 1, epsilon = eps)
+
+
+          dat = dat.reshape(shape)
+
+          if mode>1:
+             stdev = stdev.reshape(shape)
+             counts = counts.reshape(shape)
+
+          mask = dat.mask.copy()
+
+          dat[mask==1] = 0
+
+          if mode>1:
+             dat[(stdev>3) & (mask!=0)] = np.nan
+             dat[(counts<numneighbours) & (counts>0)] = np.nan
+
+          dat2 = replace_nans.RN(dat.astype('float64'),1000,0.01,2,'localmean').getdata()
+          dat2[dat==0] = np.nan
+
+          # get a new mask
+          mask = np.isnan(dat2)
+
+          mask = ~binary_dilation(binary_erosion(~mask,structure=np.ones((15,15))), structure=np.ones((15,15)))
+          #mask = binary_fill_holes(mask, structure=np.ones((15,15)))
+          #mask = ~binary_fill_holes(~mask, structure=np.ones((15,15)))
+
+          dat2[mask==1] = np.nan
+          dat2[dat2<1] = np.nan
+
+          del dat
+          dat = dat2
+          del dat2
 
        if dogrid==1:
           ## mask
-          dat[dist> 1 ] = np.nan 
+          #dat[dist> 1 ] = np.nan 
 
-          del dist, tree
+          #del dist, tree
 
           dat[dat==0] = np.nan
           dat[np.isinf(dat)] = np.nan
@@ -494,37 +548,87 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_be
        humlon, humlat = trans(X, Y, inverse=True)
 
        if dogrid==1:
+
           grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
 
-          #dat = griddata(np.c_[X.flatten(),Y.flatten()], S.flatten(), (grid_x, grid_y), method='nearest')
-          ### create mask for where the data is not
-          #tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
-          #dist = dist.reshape(grid_x.shape)
+          del X, Y
+          longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+          shape = np.shape(grid_x)
+          #del grid_y, grid_x
 
-          tree = KDTree(zip(X.flatten(), Y.flatten()))
+          targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+          del longrid, latgrid
 
-          #nearest neighbour
-          dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
-          dat = S.flatten()[inds].reshape(grid_x.shape)
+          orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
+          #del humlat, humlon
 
-          ## inverse distance weighting, using 10 nearest neighbours
-          #d, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 10)
-          #w = 1.0 / d**2
-          #dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
-          #dat.shape = grid_x.shape
+          influence = 1 #m
+          numneighbours = 64
 
-          ## create mask for where the data is not
-          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
-          dist = dist.reshape(grid_x.shape)
+          if mode==1:
+             try:
+                # nearest neighbour
+                dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
+             except:
+                # nearest neighbour
+                dat, stdev, counts = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, with_uncert = True, nprocs = 1)
 
-       del X, Y
+          elif mode==2:
+             # custom inverse distance 
+             wf = lambda r: 1/r**2
+
+             try:
+                dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=numneighbours, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+             except:
+                dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=numneighbours, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = 1)   
+
+          elif mode==3:
+             sigmas = 1 #m
+             eps = 2
+
+             try:
+                dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=numneighbours, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+             except:
+                dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=numneighbours, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = 1, epsilon = eps)
+
+
+          dat = dat.reshape(shape)
+
+          if mode>1:
+             stdev = stdev.reshape(shape)
+             counts = counts.reshape(shape)
+
+          mask = dat.mask.copy()
+
+          dat[mask==1] = 0
+
+          if mode>1:
+             dat[(stdev>3) & (mask!=0)] = np.nan
+             dat[(counts<numneighbours) & (counts>0)] = np.nan
+
+          dat2 = replace_nans.RN(dat.astype('float64'),1000,0.01,2,'localmean').getdata()
+          dat2[dat==0] = np.nan
+
+          # get a new mask
+          mask = np.isnan(dat2)
+
+          mask = ~binary_dilation(binary_erosion(~mask,structure=np.ones((15,15))), structure=np.ones((15,15)))
+          #mask = binary_fill_holes(mask, structure=np.ones((15,15)))
+          #mask = ~binary_fill_holes(~mask, structure=np.ones((15,15)))
+
+          dat2[mask==1] = np.nan
+          dat2[dat2<1] = np.nan
+
+          del dat
+          dat = dat2
+          del dat2
+
 
        if dogrid==1:
           ## mask
-          dat[dist> 1 ] = np.nan
+          #dat[dist> 1 ] = np.nan
 
-          del dist, tree
+          #el dist, tree
 
           dat[dat==0] = np.nan
           dat[np.isinf(dat)] = np.nan
@@ -627,6 +731,59 @@ if __name__ == '__main__':
 
    map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
 
+
+
+
+#          grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
+
+#          #dat = griddata(np.c_[X.flatten(),Y.flatten()], S.flatten(), (grid_x, grid_y), method='nearest')
+#          ### create mask for where the data is not
+#          #tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+#          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+#          #dist = dist.reshape(grid_x.shape)
+
+#          tree = KDTree(zip(X.flatten(), Y.flatten()))
+
+#          #nearest neighbour
+#          dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
+#          dat = S.flatten()[inds].reshape(grid_x.shape)
+
+#          ## inverse distance weighting, using 10 nearest neighbours
+#          #d, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 10)
+#          #w = 1.0 / d**2
+#          #dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
+#          #dat.shape = grid_x.shape
+
+#          ## create mask for where the data is not
+#          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+#          dist = dist.reshape(grid_x.shape)
+
+
+
+
+#          #dat = griddata(np.c_[X.flatten(),Y.flatten()], S.flatten(), (grid_x, grid_y), method='nearest')
+#          ### create mask for where the data is not
+#          #tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+#          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+#          #dist = dist.reshape(grid_x.shape)
+
+#          tree = KDTree(zip(X.flatten(), Y.flatten()))
+
+#          #nearest neighbour
+#          dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
+#          dat = merge.flatten()[inds].reshape(grid_x.shape)
+
+#          ## inverse distance weighting, using 10 nearest neighbours
+#          #d, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 10)
+#          #w = 1.0 / d**2
+#          #dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
+#          #dat.shape = grid_x.shape
+
+#          ## create mask for where the data is not
+#          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+#          dist = dist.reshape(grid_x.shape)
+
+#       del X, Y
 
 #    if not cs2cs_args:
 #       # arguments to pass to cs2cs for coordinate transforms

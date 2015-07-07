@@ -167,7 +167,7 @@ else:
         Extension('_RunningStats',sources=['PyHum/RunningStats_wrap.cxx', 'PyHum/RunningStats.cpp']),
     ]
 install_requires = [
-    'numpy','scipy','Pillow','matplotlib', 'cython', 'pyproj', 'scikit-image', 'simplekml', 'joblib', 'basemap', 'scikit-learn'
+    'numpy','scipy','Pillow','matplotlib', 'cython', 'pyproj', 'scikit-image', 'simplekml', 'joblib', 'basemap', 'scikit-learn', 'pyresample'
 ]
 #'scikit-learn',
 #long_description = open('README.md').read()

@@ -73,7 +73,11 @@ import numpy as np
 import pyproj
 import PyHum.utils as humutils
 #from scipy.interpolate import griddata
-from scipy.spatial import cKDTree as KDTree
+#from scipy.spatial import cKDTree as KDTree
+
+import pyresample
+import replace_nans
+from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
 
 # plotting
 import matplotlib.pyplot as plt
@@ -324,8 +328,10 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
     # depth correction
     dist_tvg = ((np.tan(np.radians(25)))*dep_m)-(tvg)
 
+    mode = 3
+
     for p in xrange(len(star_fp)):
-       make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, interpk)
+       make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, interpk, mode)
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
@@ -361,7 +367,7 @@ def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
    return (90.0 - db + 360.0) % 360.0
 
 # =========================================================
-def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, interpk):
+def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, interpk, mode):
    
    trans =  pyproj.Proj(init=cs2cs_args)   
    
@@ -402,41 +408,87 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
    if dogrid==1:
       grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
 
-      #dat = griddata(np.c_[X.flatten(),Y.flatten()], merge.flatten(), (grid_x, grid_y), method='nearest') 
-      #tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-      #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
-      #dist = dist.reshape(grid_x.shape)
+      del X, Y
+      longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+      shape = np.shape(grid_x)
+      #del grid_y, grid_x
 
-      tree = KDTree(zip(X.flatten(), Y.flatten()))
+      targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+      del longrid, latgrid
 
-      if interpk==1:
-         #nearest neighbour
-         dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
-         dat = merge.flatten()[inds].reshape(grid_x.shape)
+      orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
+      #del humlat, humlon
 
-      else:
-         # inverse distance weighting, using 'interpk' nearest neighbours
-         dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = interpk)
-         w = 1.0 / dist**2
-         dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
-         dat.shape = grid_x.shape
-         dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
+      influence = 1 #m
+      numneighbours = 64
 
-      ## create mask for where the data is not
-      #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
-      dist = dist.reshape(grid_x.shape)
+      if mode==1:
+         try:
+            # nearest neighbour
+            dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
+         except:
+            # nearest neighbour
+            dat, stdev, counts = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, with_uncert = True, nprocs = 1)
 
-   del X, Y #, bearing #, pix_m, yvec
+      elif mode==2:
+         # custom inverse distance 
+         wf = lambda r: 1/r**2
+
+         try:
+            dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=numneighbours, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+         except:
+            dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=numneighbours, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = 1)   
+
+      elif mode==3:
+         sigmas = 1 #m
+         eps = 2
+
+         try:
+            dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=numneighbours, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+         except:
+            dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=numneighbours, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = 1, epsilon = eps)
+
+
+      dat = dat.reshape(shape)
+
+      if mode>1:
+         stdev = stdev.reshape(shape)
+         counts = counts.reshape(shape)
+
+      mask = dat.mask.copy()
+
+      dat[mask==1] = 0
+
+      if mode>1:
+         dat[(stdev>3) & (mask!=0)] = np.nan
+         dat[(counts<numneighbours) & (counts>0)] = np.nan
+
+      dat2 = replace_nans.RN(dat.astype('float64'),1000,0.01,2,'localmean').getdata()
+      dat2[dat==0] = np.nan
+
+      # get a new mask
+      mask = np.isnan(dat2)
+
+      mask = ~binary_dilation(binary_erosion(~mask,structure=np.ones((15,15))), structure=np.ones((15,15)))
+      #mask = binary_fill_holes(mask, structure=np.ones((15,15)))
+      #mask = ~binary_fill_holes(~mask, structure=np.ones((15,15)))
+
+      dat2[mask==1] = np.nan
+      dat2[dat2<1] = np.nan
+
+      del dat
+      dat = dat2
+      del dat2
+
 
    if dogrid==1:
-      ## mask
-      if np.floor(np.sqrt(1/res))-1 > 0.0:
-         dat[dist> np.floor(np.sqrt(1/res))-1 ] = np.nan #np.floor(np.sqrt(1/res))-1 ] = np.nan
-      else:
-         dat[dist> np.sqrt(1/res) ] = np.nan #np.floor(np.sqrt(1/res))-1 ] = np.nan
+      ### mask
+      #if np.floor(np.sqrt(1/res))-1 > 0.0:
+      #   dat[dist> np.floor(np.sqrt(1/res))-1 ] = np.nan #np.floor(np.sqrt(1/res))-1 ] = np.nan
+      #else:
+      #   dat[dist> np.sqrt(1/res) ] = np.nan #np.floor(np.sqrt(1/res))-1 ] = np.nan
 
-      #dat[dist> np.floor(np.sqrt(1/res))-1 ] = np.nan #np.floor(np.sqrt(1/res))-1 ] = np.nan
-      del dist, tree
+      #del dist, tree
 
       dat[dat==0] = np.nan
       dat[np.isinf(dat)] = np.nan
@@ -461,7 +513,7 @@ def make_map(e, n, t, d, dat_port, dat_star, pix_m, res, cs2cs_args, sonpath, p,
       fig.add_axes(ax)
 
       if dogrid==1:
-         map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(dat), vmax=np.nanmax(dat))
+         map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(datm), vmax=np.nanmax(datm))
          del datm, dat
       else: 
          ## draw point cloud
@@ -523,66 +575,32 @@ def getXY(e,n,yvec,d,t,extent):
 # =========================================================
 if __name__ == '__main__':
 
-   map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, interpk)
+   map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, interpk, mode)
 
-#    if not cs2cs_args:
-#       # arguments to pass to cs2cs for coordinate transforms
-#       cs2cs_args = "epsg:26949"
-#       print '[Default] cs2cs arguments are %s' % (cs2cs_args)
+#      #dat = griddata(np.c_[X.flatten(),Y.flatten()], merge.flatten(), (grid_x, grid_y), method='nearest') 
+#      #tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+#      #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+#      #dist = dist.reshape(grid_x.shape)
 
-#    if not dogrid:
-#       if dogrid != 0:
-#          dogrid = 1
-#          print "[Default] Data will be gridded"
+#      tree = KDTree(zip(X.flatten(), Y.flatten()))
 
-#    if not calc_bearing:
-#       if calc_bearing != 1:
-#          calc_bearing = 0
-#          print "[Default] Heading recorded by instrument will be used"
+#      if interpk==1:
+#         #nearest neighbour
+#         dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
+#         dat = merge.flatten()[inds].reshape(grid_x.shape)
 
-#    if not filt_bearing:
-#       if filt_bearing != 1:
-#          filt_bearing = 0
-#          print "[Default] Heading will not be filtered"
+#      else:
+#         # inverse distance weighting, using 'interpk' nearest neighbours
+#         dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = interpk)
+#         w = 1.0 / dist**2
+#         dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
+#         dat.shape = grid_x.shape
+#         dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
 
-#    if not res:
-#       res = 0.05
-#       print '[Default] Grid resolution is %s m' % (str(res))
+#      ## create mask for where the data is not
+#      #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+#      dist = dist.reshape(grid_x.shape)
 
-#    if not cog:
-#       if cog != 0:
-#          cog = 1
-#          print "[Default] Heading based on course-over-ground"
+#   del X, Y #, bearing #, pix_m, yvec
 
-#    if not dowrite:
-#       if dowrite != 0:
-#          dowrite = 1
-#          print "[Default] Point cloud data will be written to ascii file"
 
-#   print "getting point cloud ..."
-#   # get the points by rotating the [x,y] vector so it lines up with boat heading, assumed to be the same as the curvature of the [e,n] trace
-#   X=[]; Y=[];
-#   for k in range(len(n)): 
-#      x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
-#      #y = np.concatenate((n[k]+yvec, n[k]-yvec))
-#      rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d[k], 2.0))
-#      y = np.concatenate((n[k]+rangedist, n[k]-rangedist))
-#      # Rotate line around center point
-#      xx = e[k] - ((x - e[k]) * np.cos(t[k])) - ((y - n[k]) * np.sin(t[k]))
-#      yy = n[k] - ((x - e[k]) * np.sin(t[k])) + ((y - n[k]) * np.cos(t[k]))
-#      xx, yy = calc_beam_pos(d[k], t[k], xx, yy)
-#      X.append(xx)
-#      Y.append(yy) 
-
-#   del e, n, t, x, y #, X, Y
-
-#   # merge flatten and stack
-#   X = np.asarray(X,'float').T
-#   X = X.flatten()
-
-#   # merge flatten and stack
-#   Y = np.asarray(Y,'float').T
-#   Y = Y.flatten()
-
-      #with open(outfile, 'w') as f:
-      #   np.savetxt(f, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
