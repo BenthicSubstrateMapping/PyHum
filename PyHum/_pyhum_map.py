@@ -428,7 +428,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    if dogrid==1:
       grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
 
-      del X, Y
+      #del X, Y
       longrid, latgrid = trans(grid_x, grid_y, inverse=True)
       shape = np.shape(grid_x)
       #del grid_y, grid_x
@@ -446,9 +446,25 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
          try:
             # nearest neighbour
             dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
+
          except:
-            # nearest neighbour
-            dat, stdev, counts = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, with_uncert = True, nprocs = 1)
+
+            print "Memory error: trying a grid resolution twice as big"
+            res = res*2
+
+            grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
+
+            #del X, Y
+            longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+            shape = np.shape(grid_x)
+            #del grid_y, grid_x
+
+            targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+            del longrid, latgrid
+
+            orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
+
+            dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
 
       elif mode==2:
          # custom inverse distance 
@@ -456,8 +472,25 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
          try:
             dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=numneighbours, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+
          except:
-            dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=numneighbours, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = 1)   
+
+            print "Memory error: trying a grid resolution twice as big"
+            res = res*2
+
+            grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
+
+            #del X, Y
+            longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+            shape = np.shape(grid_x)
+            #del grid_y, grid_x
+
+            targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+            del longrid, latgrid
+
+            orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten()) 
+
+            dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=numneighbours, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count()) 
 
       elif mode==3:
          sigmas = 1 #m
@@ -466,7 +499,25 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
          try:
             dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=numneighbours, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
          except:
-            dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=numneighbours, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = 1, epsilon = eps)
+
+            print "Memory error: trying a grid resolution twice as big"
+            res = res*2
+
+            grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
+
+            #del X, Y
+            longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+            shape = np.shape(grid_x)
+            #del grid_y, grid_x
+
+            targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+            del longrid, latgrid
+
+            orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten()) 
+
+            dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=numneighbours, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+
+      del X, Y
 
       dat = dat.reshape(shape)
 
