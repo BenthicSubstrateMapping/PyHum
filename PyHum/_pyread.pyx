@@ -125,10 +125,10 @@ cdef class pyread:
              fbreak = []
      
              fid = open(sonfile,'rb')
-             for i from 0 <= i < len(dfbreak):              
+             for i from 0 <= i < len(dfbreak):
                 tmpdata.append(self._gethead(fid,trans, c, model, humdat['linesize'])) # get header for packet transWGS84,
                 ints_list = []
-                for j from 0 <= j < dfbreak[i]-headbytes:                 
+                for j from 0 <= j < dfbreak[i]-headbytes: 
                    ints_list.append(struct.unpack('>B', ''.join(self._fread(fid,1,'c')) )[0])
                 tmpdata.append(ints_list) # grab the sonar data     
              dfbreak = [] 

@@ -74,7 +74,7 @@ import PyHum.utils as humutils
 import numpy as np
 import pyproj
 
-import ppdrc
+#import ppdrc
 from scipy.ndimage.filters import median_filter
 
 #plotting
@@ -96,7 +96,7 @@ __all__ = [
     ]
 
 #################################################
-def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=1, t=0.108, f=455, bedpick=1, flip_lr=0, chunksize=0, model=998):
+def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=1, t=0.108, f=455, bedpick=1, flip_lr=0, chunksize=0, model=998, calc_bearing = 0, filt_bearing = 0, cog = 1):
 
     '''
     Read a .DAT and associated set of .SON files recorded by a Humminbird(R)
@@ -111,7 +111,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     Syntax
     ----------
-    [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize, model)
+    [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize, model, calc_bearing, filt_bearing, cog)
 
     Parameters
     ------------
@@ -148,7 +148,14 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     model: int, *optional* [Default=998]
        A 3 or 4 number code indicating the model number 
        Examples: 998, 997, 1198, 1199
-     
+    cog : int, *optional* [Default=1]
+       if 1, heading calculated assuming GPS course-over-ground rather than
+       using a compass
+    calc_bearing : float, *optional* [Default=0]
+       if 1, bearing will be calculated from coordinates
+    filt_bearing : float, *optional* [Default=0]
+       if 1, bearing will be filtered
+            
     Returns
     ---------
     sonpath+base+'_data_port.dat': memory-mapped file
@@ -264,6 +271,20 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        model = int(model)
        print "Data is from the %s series"  % (str(model))
 
+    if cog:
+       cog = int(cog)
+       if cog==1:
+          print "Heading based on course-over-ground" 
+
+    if calc_bearing:
+       calc_bearing = int(calc_bearing)
+       if calc_bearing==1:
+          print "Bearing will be calculated from coordinates"     
+ 
+    if filt_bearing:
+       filt_bearing = int(filt_bearing)
+       if filt_bearing==1:
+          print "Bearing will be filtered"    
 
     ## for debugging
     #humfile = r"test.DAT"; sonpath = "test_data"
@@ -316,8 +337,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        del data_port
 
        # create memory mapped file for Z
-       #fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
-       #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), dtype='int16', mode='w+', shape=np.shape(Zt))
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'w+') as ff:
           fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
        fp[:] = Zt[:]
@@ -325,8 +344,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        shape_port = np.shape(Zt)
        del Zt
        #we are only going to access the portion of memory required
-       #port_fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='r', shape=shape_port)
-       #port_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), dtype='int16', mode='r', shape=shape_port)
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'r') as ff:
           port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_port)
 
@@ -344,8 +361,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        del data_star
 
        # create memory mapped file for Z
-       #fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
-       #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), dtype='int16', mode='w+', shape=np.shape(Zt))
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'w+') as ff:
           fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
        fp[:] = Zt[:]
@@ -353,8 +368,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        shape_star = np.shape(Zt)
        del Zt
        #we are only going to access the portion of memory required
-       #star_fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='r', shape=shape_star)
-       #star_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), dtype='int16', mode='r', shape=shape_star)
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'r') as ff:
           star_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_star)
 
@@ -374,8 +387,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
                  tmp2[k] = tmp[k][:,:np.shape(star_fp[k])[1]]
              del tmp
              # create memory mapped file for Z
-             #fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='w+', shape=np.shape(tmp2))
-             #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), dtype='int16', mode='w+', shape=np.shape(tmp2))
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'w+') as ff:
                 fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
              fp[:] = tmp2[:]
@@ -383,8 +394,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              shape_port = np.shape(tmp2)
              del tmp2
              #we are only going to access the portion of memory required
-             #port_fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='r', shape=shape_port)
-             #port_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), dtype='int16', mode='r', shape=shape_port)
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'r') as ff:
                 port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_port)
              ind_port = list(ind_port)
@@ -398,8 +407,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
                  tmp2[k] = tmp[k][:,:np.shape(port_fp[k])[1]]
              del tmp
              # create memory mapped file for Z
-             #fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='w+', shape=np.shape(tmp2))
-             #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), dtype='int16', mode='w+', shape=np.shape(tmp2))
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'w+') as ff:
                 fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
              fp[:] = tmp2[:]
@@ -407,8 +414,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              shape_star = np.shape(tmp2)
              del tmp2
              #we are only going to access the portion of memory required
-             #star_fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='r', shape=shape_star)
-             #star_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), dtype='int16', mode='r', shape=shape_star)
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'r') as ff:
                 port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_star)
              ind_star = list(ind_star)
@@ -426,17 +431,13 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        del data_dwnlow
 
        # create memory mapped file for Z
-       #fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
-       #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), dtype='int16', mode='w+', shape=np.shape(Zt))
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'w+') as ff:
           fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
        fp[:] = Zt[:]
        del fp
        shape_low = np.shape(Zt)
        del Zt
-       #we are only going to access the portion of memory required
-       #dwnlow_fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='r', shape=shape_low)
-       #dwnlow_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), dtype='int16', mode='r', shape=shape_low)
+       #we are only going to access the portion of memory required      
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'r') as ff:
           dwnlow_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_low)
 
@@ -454,8 +455,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        del data_dwnhi
 
        # create memory mapped file for Z
-       #fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
-       #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), dtype='int16', mode='w+', shape=np.shape(Zt))
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'w+') as ff:
           fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
 
@@ -464,8 +463,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        shape_hi = np.shape(Zt)
        del Zt
        #we are only going to access the portion of memory required
-       #dwnhi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=shape_hi)
-       #dwnhi_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), dtype='int16', mode='r', shape=shape_hi)
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
           dwnhi_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_hi)
 
@@ -485,8 +482,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
                  tmp2[k] = tmp[k][:,:np.shape(dwnlow_fp[k])[1]]
              del tmp
              # create memory mapped file for Z
-             #fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='w+', shape=np.shape(tmp2))
-             #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), dtype='int16', mode='w+', shape=np.shape(tmp2))
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'w+') as ff:
                 fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
              fp[:] = tmp2[:]
@@ -494,8 +489,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              shape_dwnhi = np.shape(tmp2)
              del tmp2
              #we are only going to access the portion of memory required
-             #dwnhi_fp = np.memmap(sonpath+base+'_data_dwnhi.dat', dtype='int16', mode='r', shape=shape_dwnhi)
-             #dwnhi_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), dtype='int16', mode='r', shape=shape_dwnhi)
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
                 dwnhi_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_dwnhi)
              ind_hi = list(ind_hi)
@@ -509,8 +502,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
                  tmp2[k] = tmp[k][:,:np.shape(dwnhi_fp[k])[1]]
              del tmp
              # create memory mapped file for Z
-             #fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='w+', shape=np.shape(tmp2))
-             #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), dtype='int16', mode='w+', shape=np.shape(tmp2))
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'w+') as ff:
                 fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
              fp[:] = tmp2[:]
@@ -518,8 +509,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              shape_dwnlow = np.shape(tmp2)
              del tmp2
              #we are only going to access the portion of memory required
-             #dwnlow_fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='r', shape=shape_dwnlow)
-             #dwnlow_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), dtype='int16', mode='r', shape=shape_dwnlow)
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'r') as ff:
                 dwnlow_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_dwnlow)
              ind_low = list(ind_low)
@@ -600,6 +589,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     dep_m = np.squeeze(metadat['dep_m'][:nrec]) #loadmat(sonpath+base+'meta.mat')['dep_m'])
     dep_m = humutils.rm_spikes(dep_m,2)
+    dep_m = humutils.runningMeanFast(dep_m, 3)
 
     metadat['dist_m'] = dist_m
 
@@ -621,7 +611,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
           imu = np.asarray(imu, 'float64')
 
-          imu = ppdrc.ppdrc(imu, np.shape(imu)[1]/2).getdata()
+          #imu = ppdrc.ppdrc(imu, np.shape(imu)[1]/2).getdata()
 
           imu = median_filter(imu,(20,20))
 
@@ -639,6 +629,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
           # if standard deviation of auto bed pick is too small, then use acoustic bed pick
           if np.std(x)<5:
+             print "stdev of auto bed pick is low, using acoustic pick"
              x = bed.copy()
 
           if len(dist_m)<len(bed):
@@ -654,8 +645,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
           # 'real' bed is estimated to be the minimum of the two
           #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
-          bed = bed[:nrec] #np.min(np.vstack((bed[:nrec],np.squeeze(x[:nrec]))),axis=0) 
-          #del x
+          bed = np.min(np.vstack((bed[:nrec],np.squeeze(x[:nrec]))),axis=0) 
+          bed = humutils.runningMeanFast(bed, 3)
 
        else: #manual
   
@@ -695,6 +686,59 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     #heading = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])[:nrec]
     metadat['heading'] = metadat['heading'][:nrec]
+
+    # over-ride measured bearing and calc from positions
+    if calc_bearing==1:
+       lat = np.squeeze(metadat['lat'])
+       lon = np.squeeze(metadat['lon']) 
+
+       #point-to-point bearing
+       bearing = np.zeros(len(lat))
+       for k in xrange(len(lat)-1):
+          bearing[k] = bearingBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+       del lat, lon
+
+    else:
+       # reported bearing by instrument (Kalman filtered?)
+       bearing = np.squeeze(metadat['heading'])
+
+    # if stdev in heading is large, there's probably noise that needs to be filtered out
+    if np.std(bearing)>180:
+       print "WARNING: large heading stdev - attempting filtering"
+       from sklearn.cluster import MiniBatchKMeans
+       # can have two modes
+       data = np.column_stack([bearing, bearing])
+       k_means = MiniBatchKMeans(2)
+       # fit the model
+       k_means.fit(data) 
+       values = k_means.cluster_centers_.squeeze()
+       labels = k_means.labels_
+
+       if np.sum(labels==0) > np.sum(labels==1):
+          bearing[labels==1] = np.nan
+       else:
+          bearing[labels==0] = np.nan
+
+       nans, y= humutils.nan_helper(bearing)
+       bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans]) 
+
+    if filt_bearing ==1:
+       bearing = humutils.runningMeanFast(bearing, len(bearing)/100)
+
+    if cog==1:
+       theta = np.asarray(bearing, 'float')/(180/np.pi)
+       #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
+       #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU 
+       # (East-North-Up) coordinate frame. 
+       #Subtract pi/2 from your heading
+       theta = theta - np.pi/2
+       # (re-wrap to Pi to -Pi)
+       theta = np.unwrap(-theta)
+       metadat['heading'] = theta * (180/np.pi)
+    else:
+       metadat['heading'] = bearing
+
+
     metadat['dist_m'] = dist_m[:nrec]
     metadat['dep_m'] = dep_m[:nrec]
     metadat['pix_m'] = 1/ft
@@ -777,7 +821,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     print "Processing took ", elapsed , "seconds to analyse"
 
     print "Done!"
-
 
 # =========================================================
 def custom_save(figdirec,root):
@@ -872,46 +915,41 @@ def plot_bedpick(dat_port, dat_star, Zbed, Zdist, ft, shape_port, sonpath, k):
    plt.close(); del fig
 
 # =========================================================
+def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
+   lat1 = np.deg2rad(pos1_lat)
+   lon1 = np.deg2rad(pos1_lon)
+   lat2 = np.deg2rad(pos2_lat)
+   lon2 = np.deg2rad(pos2_lon)
+
+   bearing = np.arctan2(np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(lon2 - lon1), np.sin(lon2 - lon1) * np.cos(lat2))
+
+   db = np.rad2deg(bearing)
+   return (90.0 - db + 360.0) % 360.0
+   
+# =========================================================
 # =========================================================
 if __name__ == '__main__':
 
-   read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize, model)
+   read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize, model, calc_bearing, filt_bearing, cog)
 
-#    if not t:
-#      t = 0.108
-#      print '[Default] Transducer length is %s m' % (str(t))
-#    if not f:
-#      f = 455
-#      print '[Default] Frequency is %s kHz' % (str(f))
-#    if not c:
-#      c = 1450.0
-#      print '[Default] Celerity of sound = %s m/s' % (str(c))
-#    if not draft:
-#      draft = 0
-#      print '[Default] Draft = %s metres' % (str(draft))
-#    if not cs2cs_args:
-#      # arguments to pass to cs2cs for coordinate transforms
-#      cs2cs_args = "epsg:26949"
-#      print '[Default] cs2cs arguments are %s' % (cs2cs_args)
-#    if not doplot:
-#      if doplot != 0:
-#         doplot = 1
-#         print "[Default] Plots will be made"
-#    if not flip_lr:
-#      if flip_lr != 1:
-#         flip_lr = 0
-#         print "[Default] No port/starboard flipping"
-#    if not bedpick:
-#      bedpick = 1
-#      print '[Default] Bed picking is auto'
-#      
-#    if not chunksize:
-#      chunksize = 0
-#      print '[Default] Chunk size will be determined automatically'
-#      
-#    if not model:
-#       model = 998
-#       print "[Default] Data is from the %s series"  % (str(model))
 
-    # number of bytes in a header packet in SON file
-    #headbytes = 67
+       #dwnlow_fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='r', shape=shape_low)
+       #dwnlow_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), dtype='int16', mode='r', shape=shape_low)
+       #fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
+       #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), dtype='int16', mode='w+', shape=np.shape(Zt))
+             #star_fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='r', shape=shape_star)
+             #star_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), dtype='int16', mode='r', shape=shape_star)
+             #fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='w+', shape=np.shape(tmp2))
+             #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), dtype='int16', mode='w+', shape=np.shape(tmp2))
+             #port_fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='r', shape=shape_port)
+             #port_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), dtype='int16', mode='r', shape=shape_port)
+             #fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='w+', shape=np.shape(tmp2))
+             #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), dtype='int16', mode='w+', shape=np.shape(tmp2))
+       #star_fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='r', shape=shape_star)
+       #star_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), dtype='int16', mode='r', shape=shape_star)
+       #fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
+       #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), dtype='int16', mode='w+', shape=np.shape(Zt))
+       #port_fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='r', shape=shape_port)
+       #port_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), dtype='int16', mode='r', shape=shape_port)
+       #fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
+       #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), dtype='int16', mode='w+', shape=np.shape(Zt)) 

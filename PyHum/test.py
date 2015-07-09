@@ -71,8 +71,6 @@ def dotest():
    shutil.copy(PyHum.__path__[0]+os.sep+'test.DAT', os.path.expanduser("~")+os.sep+'pyhum_test'+os.sep+'test.DAT')
 
    # general settings   
-   #humfile = os.path.expanduser("~")+os.sep+'pyhum_test'+os.sep+'test.DAT'
-   #sonpath = os.path.expanduser("~")+os.sep+'pyhum_test'
    humfile = os.path.normpath(os.path.join(os.path.expanduser("~"),'pyhum_test','test.DAT'))
    sonpath = os.path.normpath(os.path.join(os.path.expanduser("~"),'pyhum_test'))
 
@@ -83,13 +81,16 @@ def dotest():
    bedpick = 1 # auto bed pick
    c = 1450 # speed of sound fresh water
    t = 0.108 # length of transducer
-   f = 455 # frequency kHz
+   f = 455 # frequency kHz of sidescan sonar
    draft = 0.3 # draft in metres
    flip_lr = 1 # flip port and starboard
    model = 998 # humminbird model
    chunk_size = 1000 # chunk size = 1000 pings
    #chunk_size = 0 # auto chunk size
- 
+   cog = 1 # GPS course-over-ground used for heading
+   calc_bearing = 0 #no
+   filt_bearing = 1 #yes
+    
    # correction specific settings
    maxW = 1000 # rms output wattage
 
@@ -106,24 +107,25 @@ def dotest():
 
    # for mapping
    dogrid = 1 # yes
-   calc_bearing = 0 #no
-   filt_bearing = 1 #yes
    res = 0.1 # grid resolution in metres
-   cog = 1 # GPS course-over-ground used for heading
    mode = 3 # gridding mode (gaussian weighted nearest neighbour)
    dowrite = 0 #disable writing of point cloud data to file
+
+   nn = 64 #number of nearest neighbours for gridding (used if mode > 1)
+   influence = 1 #Radius of influence used in gridding. Cut off distance in meters 
+   numstdevs = 4 #Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept 
 
    # for downward-looking echosounder echogram (e1-e2) analysis
    ph = 7.0 # acidity on the pH scale
    temp = 10.0 # water temperature in degrees Celsius
    salinity = 0.0
    beam = 20.0
-   transfreq = 200.0
+   transfreq = 200.0 # frequency (kHz) of downward looking echosounder
    integ = 5
-   numclusters = 3
+   numclusters = 3 # number of acoustic classes to group observations
 
    # read data in SON files into PyHum memory mapped format (.dat)
-   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
+   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model, calc_bearing, filt_bearing, cog)
 
    # correct scans and remove water column
    PyHum.correct(humfile, sonpath, maxW, doplot)
@@ -135,12 +137,13 @@ def dotest():
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
    # grid and map the scans
-   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, mode)
+   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
 
    res = 0.5 # grid resolution in metres
+   numstdevs = 5
    
    # grid and map the texture lengthscale maps
-   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
+   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
 
    # calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)

@@ -72,9 +72,6 @@ import write
 import numpy as np
 import pyproj
 import PyHum.utils as humutils
-#from scipy.interpolate import griddata
-#from scipy.spatial import cKDTree as KDTree
-
 import pyresample
 import replace_nans
 from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
@@ -96,19 +93,18 @@ __all__ = [
     'map',
     'custom_save',
     'custom_save2',    
-    'bearingBetweenPoints',
     'calc_beam_pos',
     ]
 
 #################################################
-def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 0, filt_bearing = 0, res = 0.1, cog = 1, dowrite = 0, mode=3):
+def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowrite = 0, mode=3, nn = 64, influence = 1, numstdevs=4):
          
     '''
     Create plots of the spatially referenced sidescan echograms
 
     Syntax
     ----------
-    [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, mode)
+    [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
 
     Parameters
     ----------
@@ -123,15 +119,8 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
     dogrid : float, *optional* [Default=1]
        if 1, textures will be gridded with resolution 'res'. 
        Otherwise, point cloud will be plotted
-    calc_bearing : float, *optional* [Default=0]
-       if 1, bearing will be calculated from coordinates
-    filt_bearing : float, *optional* [Default=0]
-       if 1, bearing will be filtered
     res : float, *optional* [Default=0.1]
        grid resolution of output gridded texture map
-    cog : int, *optional* [Default=1]
-       if 1, heading calculated assuming GPS course-over-ground rather than
-       using a compass
     dowrite: int, *optional* [Default=0]
        if 1, point cloud data from each chunk is written to ascii file
        if 0, processing times are speeded up considerably but point clouds are not available for further analysis
@@ -139,7 +128,14 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
        gridding mode. 1 = nearest neighbour
                       2 = inverse weighted nearest neighbour
                       3 = Gaussian weighted nearest neighbour
+    nn: int, *optional* [Default=64]
+       number of nearest neighbours for gridding (used if mode > 1)
+    influence: float, *optional* [Default=1]
+       Radius of influence used in gridding. Cut off distance in meters   
+    numstdevs: int, *optional* [Default = 4]
+       Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept            
 
+    
     Returns
     -------
     sonpath+'x_y_ss_raw'+str(p)+'.asc'  : text file
@@ -182,24 +178,9 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
        if dogrid==1:
           print "Data will be gridded"      
 
-    if calc_bearing:
-       calc_bearing = int(calc_bearing)
-       if calc_bearing==1:
-          print "Bearing will be calculated from coordinates"     
- 
-    if filt_bearing:
-       filt_bearing = int(filt_bearing)
-       if filt_bearing==1:
-          print "Bearing will be filtered"      
-
     if res:
        res = np.asarray(res,float)
        print 'Gridding resolution: %s' % (str(res))      
-
-    if cog:
-       cog = int(cog)
-       if cog==1:
-          print "Heading based on course-over-ground" 
 
     if dowrite:
        dowrite = int(dowrite)
@@ -208,7 +189,20 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
 
     if mode:
        mode = int(mode)
-       print 'Mode for gridding: %s' % (str(mode))      
+       print 'Mode for gridding: %s' % (str(mode))   
+       
+    if nn:
+       nn = int(nn)
+       print 'Number of nearest neighbours for gridding: %s' % (str(nn))             
+
+    if influence:
+       influence = int(influence)
+       print 'Radius of influence for gridding: %s (m)' % (str(influence))             
+
+    if numstdevs:
+       numstdevs = int(numstdevs)
+       print 'Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept: %s' % (str(numstdevs))             
+
 
     # start timer
     if os.name=='posix': # true if linux/mac or cygwin on windows
@@ -243,67 +237,12 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
     pix_m = np.squeeze(meta['pix_m'])
     dep_m = np.squeeze(meta['dep_m'])
     c = np.squeeze(meta['c'])
-
-    # over-ride measured bearing and calc from positions
-    if calc_bearing==1:
-       lat = np.squeeze(meta['lat'])
-       lon = np.squeeze(meta['lon']) 
-
-       #point-to-point bearing
-       bearing = np.zeros(len(lat))
-       for k in xrange(len(lat)-1):
-          bearing[k] = bearingBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
-       del lat, lon
-
-    else:
-       # reported bearing by instrument (Kalman filtered?)
-       bearing = np.squeeze(meta['heading'])
-
-    # if stdev in heading is large, there's probably noise that needs to be filtered out
-    if np.std(bearing)>180:
-       print "WARNING: large heading stdev - attempting filtering"
-       from sklearn.cluster import MiniBatchKMeans
-       # can have two modes
-       data = np.column_stack([bearing, bearing])
-       k_means = MiniBatchKMeans(2)
-       # fit the model
-       k_means.fit(data) 
-       values = k_means.cluster_centers_.squeeze()
-       labels = k_means.labels_
-
-       if np.sum(labels==0) > np.sum(labels==1):
-          bearing[labels==1] = np.nan
-       else:
-          bearing[labels==0] = np.nan
-
-       nans, y= humutils.nan_helper(bearing)
-       bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans])
-
-       # save this filtered version to file
-       #meta = loadmat(sonpath+base+'meta.mat')
-       meta['heading_filt'] = bearing
-       #savemat(sonpath+base+'meta.mat', meta ,oned_as='row')
-       savemat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')), meta ,oned_as='row')
-       #del meta   
-
-    if filt_bearing ==1:
-       bearing = humutils.runningMeanFast(bearing, len(bearing)/100)
-
-    theta = np.asarray(bearing, 'float')/(180/np.pi)
-
-    if cog==1:
-       #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
-       #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU 
-       # (East-North-Up) coordinate frame. 
-       #Subtract pi/2 from your heading
-       theta = theta - np.pi/2
-       # (re-wrap to Pi to -Pi)
-       theta = np.unwrap(-theta)
+    
+    theta = np.squeeze(meta['heading'])/(180/np.pi)
 
     # load memory mapped scans
     shape_port = np.squeeze(meta['shape_port'])
     if shape_port!='':
-       #port_fp = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
        if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat'))):
           with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), 'r') as ff:
              port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
@@ -313,7 +252,6 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
 
     shape_star = np.squeeze(meta['shape_star'])
     if shape_star!='':
-       #star_fp = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
        if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat'))):
           with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'r') as ff:
              star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
@@ -332,7 +270,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, calc_bearing = 
        R_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
     for p in xrange(len(star_fp)):
-       make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, mode)
+       make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, mode, nn, influence, numstdevs)
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
@@ -356,19 +294,7 @@ def calc_beam_pos(dist, bearing, x, y):
    return (xfinal, yfinal)
 
 # =========================================================
-def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
-   lat1 = np.deg2rad(pos1_lat)
-   lon1 = np.deg2rad(pos1_lon)
-   lat2 = np.deg2rad(pos2_lat)
-   lon2 = np.deg2rad(pos2_lon)
-
-   bearing = np.arctan2(np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(lon2 - lon1), np.sin(lon2 - lon1) * np.cos(lat2))
-
-   db = np.rad2deg(bearing)
-   return (90.0 - db + 360.0) % 360.0
-
-# =========================================================
-def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, mode):
+def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, mode, nn, influence, numstdevs):
    
    trans =  pyproj.Proj(init=cs2cs_args)   
    
@@ -439,8 +365,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
       #del humlat, humlon
 
-      influence = 1 #m
-      numneighbours = 64
+      #influence = 1 #m
 
       if mode==1:
          try:
@@ -471,7 +396,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
          wf = lambda r: 1/r**2
 
          try:
-            dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=numneighbours, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+            dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
 
          except:
 
@@ -490,14 +415,14 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
             orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten()) 
 
-            dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=numneighbours, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count()) 
+            dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count()) 
 
       elif mode==3:
          sigmas = 1 #m
          eps = 2
 
          try:
-            dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=numneighbours, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+            dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
          except:
 
             print "Memory error: trying a grid resolution twice as big"
@@ -515,7 +440,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
             orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten()) 
 
-            dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=numneighbours, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+            dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
 
       del X, Y
 
@@ -530,8 +455,8 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       dat[mask==1] = 0
 
       if mode>1:
-         dat[(stdev>3) & (mask!=0)] = np.nan
-         dat[(counts<numneighbours) & (counts>0)] = np.nan
+         dat[(stdev>numstdevs) & (mask!=0)] = np.nan
+         dat[(counts<nn) & (counts>0)] = np.nan
 
       dat2 = replace_nans.RN(dat.astype('float64'),1000,0.01,2,'localmean').getdata()
       dat2[dat==0] = np.nan
@@ -610,7 +535,6 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
    del humlat, humlon
 
-
 # =========================================================
 def getxy(e, n, yvec, d, t,extent):
    x = np.concatenate((np.tile(e,extent) , np.tile(e,extent)))
@@ -659,7 +583,65 @@ def getXY(e,n,yvec,d,t,extent):
 # =========================================================
 if __name__ == '__main__':
 
-   map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite, mode)
+   map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
 
 
+       #port_fp = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
+       #star_fp = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
+       
+#    # over-ride measured bearing and calc from positions
+#    if calc_bearing==1:
+#       lat = np.squeeze(meta['lat'])
+#       lon = np.squeeze(meta['lon']) 
+
+#       #point-to-point bearing
+#       bearing = np.zeros(len(lat))
+#       for k in xrange(len(lat)-1):
+#          bearing[k] = bearingBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+#       del lat, lon
+
+#    else:
+#       # reported bearing by instrument (Kalman filtered?)
+#       bearing = np.squeeze(meta['heading'])
+
+#    # if stdev in heading is large, there's probably noise that needs to be filtered out
+#    if np.std(bearing)>180:
+#       print "WARNING: large heading stdev - attempting filtering"
+#       from sklearn.cluster import MiniBatchKMeans
+#       # can have two modes
+#       data = np.column_stack([bearing, bearing])
+#       k_means = MiniBatchKMeans(2)
+#       # fit the model
+#       k_means.fit(data) 
+#       values = k_means.cluster_centers_.squeeze()
+#       labels = k_means.labels_
+
+#       if np.sum(labels==0) > np.sum(labels==1):
+#          bearing[labels==1] = np.nan
+#       else:
+#          bearing[labels==0] = np.nan
+
+#       nans, y= humutils.nan_helper(bearing)
+#       bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans])
+
+#       # save this filtered version to file
+#       #meta = loadmat(sonpath+base+'meta.mat')
+#       meta['heading_filt'] = bearing
+#       #savemat(sonpath+base+'meta.mat', meta ,oned_as='row')
+#       savemat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')), meta ,oned_as='row')
+#       #del meta   
+
+#    if filt_bearing ==1:
+#       bearing = humutils.runningMeanFast(bearing, len(bearing)/100)
+
+#    theta = np.asarray(bearing, 'float')/(180/np.pi)
+
+#    if cog==1:
+#       #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
+#       #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU 
+#       # (East-North-Up) coordinate frame. 
+#       #Subtract pi/2 from your heading
+#       theta = theta - np.pi/2
+#       # (re-wrap to Pi to -Pi)
+#       theta = np.unwrap(-theta)
 

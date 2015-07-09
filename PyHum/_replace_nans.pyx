@@ -26,6 +26,8 @@ from __future__ import division
 import numpy as np
 cimport numpy as np
 
+from cython.parallel cimport prange
+
 # =========================================================
 cdef class RN:
    """
@@ -105,11 +107,12 @@ cdef class RN:
     # make several passes
     # until we reach convergence
     #for it in xrange(max_iter):
-    for it from 0 <= it < max_iter:  
+    for it from 0 <= it < max_iter: 
         #print 'iteration', it
         # for each NaN element
         #for k in xrange(n_nans):
-        for k from 0 <= k < n_nans:  
+        #for k from 0 <= k < n_nans: 
+        for k from 0 <= k < n_nans:                      
             i = inans[k]
             j = jnans[k]
             
@@ -119,7 +122,7 @@ cdef class RN:
             
             # loop over the kernel
             #for I in xrange(2*kernel_size+1):
-            for I from 0 <= I < 2*kernel_size+1:  
+            for I from 0 <= I < 2*kernel_size+1:
                 #for J in xrange(2*kernel_size+1):
                 for J from 0 <= J < 2*kernel_size+1:                     
                     # if we are not out of the boundaries
