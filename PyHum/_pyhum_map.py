@@ -497,8 +497,8 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       fig = plt.figure(frameon=False)
       map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
        resolution = 'i', #h #f
-       llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
-       urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
+       llcrnrlon=np.min(humlon)-0.00001, llcrnrlat=np.min(humlat)-0.00001,
+       urcrnrlon=np.max(humlon)+0.00001, urcrnrlat=np.max(humlat)+0.00001)
 
       if dogrid==1:
          gx,gy = map.projtran(glon, glat)
@@ -524,10 +524,10 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    kml = simplekml.Kml()
    ground = kml.newgroundoverlay(name='GroundOverlay')
    ground.icon.href = 'map'+str(p)+'.png'
-   ground.latlonbox.north = np.min(humlat)-0.0001
-   ground.latlonbox.south = np.max(humlat)+0.0001
-   ground.latlonbox.east =  np.max(humlon)+0.0001
-   ground.latlonbox.west =  np.min(humlon)-0.0001
+   ground.latlonbox.north = np.min(humlat)-0.00001
+   ground.latlonbox.south = np.max(humlat)+0.00001
+   ground.latlonbox.east =  np.max(humlon)+0.00001
+   ground.latlonbox.west =  np.min(humlon)-0.00001
    ground.latlonbox.rotation = 0
 
    #kml.save(sonpath+'GroundOverlay'+str(p)+'.kml')

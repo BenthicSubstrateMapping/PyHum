@@ -447,7 +447,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           fig.add_axes(ax)
 
           if dogrid==1:
-             map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0.5, vmax=2)
+             map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0.25, vmax=2)
              del dat
           else: 
              ## draw point cloud
@@ -463,10 +463,10 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
        kml = simplekml.Kml()
        ground = kml.newgroundoverlay(name='GroundOverlay')
        ground.icon.href = 'class_map'+str(p)+'.png'
-       ground.latlonbox.north = np.min(humlat)-0.0001
-       ground.latlonbox.south = np.max(humlat)+0.0001
-       ground.latlonbox.east =  np.max(humlon)+0.0001
-       ground.latlonbox.west =  np.min(humlon)-0.0001
+       ground.latlonbox.north = np.min(humlat)-0.00001
+       ground.latlonbox.south = np.max(humlat)+0.00001
+       ground.latlonbox.east =  np.max(humlon)+0.00001
+       ground.latlonbox.west =  np.min(humlon)-0.00001
        ground.latlonbox.rotation = 0
 
        #kml.save(sonpath+'class_GroundOverlay'+str(p)+'.kml')
@@ -595,8 +595,8 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           fig = plt.figure()
           map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1],
            resolution = 'i',
-           llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
-           urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
+           llcrnrlon=np.min(humlon)-0.00001, llcrnrlat=np.min(humlat)-0.00001,
+           urcrnrlon=np.max(humlon)+0.00001, urcrnrlat=np.max(humlat)+0.00001)
 
           map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
           if dogrid==1:
@@ -648,7 +648,7 @@ def getXY(e,n,yvec,d,t,extent):
 # =========================================================
 def custom_save(figdirec,root):
     #plt.savefig(figdirec+root,bbox_inches='tight',dpi=600,transparent=True)
-    plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=600, transparent=True)
+    plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=1000, transparent=True)
 
 # =========================================================
 def custom_save2(figdirec,root):
