@@ -218,7 +218,6 @@ which carries out the following operations::
 
    # for shadow removal
    shadowmask = 0 #automatic shadow removal
-   kvals = 8 # number of k-means for automated shadow removal
 
    # for texture calcs
    win = 50 # pixel window
@@ -251,7 +250,7 @@ which carries out the following operations::
    PyHum.correct(humfile, sonpath, maxW, doplot)
 
    # remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
-   PyHum.rmshadows(humfile, sonpath, win, shadowmask, kvals, doplot)
+   PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
    # Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
@@ -345,21 +344,20 @@ The following example script::
 
        # for shadow removal
        shadowmask = 1 #manual shadow removal
-       kvals = 8 # number of k-means for automated shadow removal
        win = 100
 
        # for mapping
        dogrid = 1 # yes
        calc_bearing = 0 #no
        filt_bearing = 0 #no
-       res = 0.05 # grid resolution in metres
+       res = 0.2 # grid resolution in metres
        cog = 1 # GPS course-over-ground used for heading
 
        PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
 
        PyHum.correct(humfile, sonpath, maxW, doplot)
 
-       PyHum.rmshadows(humfile, sonpath, win, shadowmask, kvals, doplot)
+       PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
        PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
 
@@ -374,6 +372,11 @@ or from within ipython (with a GUI prompt to navigate to the files)::
 
    %run proc_mysidescandata.py
    
+If you are in bash (or git bash) you might want to automate through a folder of subfolders like this::
+
+   for k in $(find $PWD -type d -maxdepth 1 -mindepth 1); do python proc_mysidescandata.py -i "$k/${k##*/}.DAT" -s $k; done
+
+which assumes the .DAT file is in the folder with the same root (such as a folder called R00123 which contains SON and IDX files as well as a file called R00123.DAT)
 
 
 .. _support:
@@ -385,5 +388,30 @@ This is a new project written and maintained by Daniel Buscombe. Bugs are expect
 
 Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please address all suggestions, comments and queries to: dbuscombe@usgs.gov. Thanks for stopping by! 
 
-  .. image:: _static/pyhum_logo_colour_sm.png
+
+.. _troubleshooting:
+
+Trouble Shooting
+================
+
+1. Problem: pyhum read hangs for a long time (several minutes) on the test script. 
+Try this: uninstall joblib and install an older version::
+
+   pip uninstall joblib
+   pip install joblib==0.7.1
+
+2. Problem: you get an "invalid mode or file name" error.
+Try this: construct file paths using raw strings e.g.:: 
+
+   r'C:\Users\me\mydata\R0089' 
+
+
+or using os, e.g.::
+
+   import os
+   os.path.abspath(os.path.join('C:\Users','me','mydata','R0089'))
+
+
+
+.. image:: _static/pyhum_logo_colour_sm.png
 

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Getting started &mdash; PyHum 1.3.1 documentation</title>
+    <title>Getting started &mdash; PyHum 1.3.0.crs documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.3.1',
+        VERSION:     '1.3.0.crs',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyHum 1.3.1 documentation" href="index.html" />
+    <link rel="top" title="PyHum 1.3.0.crs documentation" href="index.html" />
     <link rel="next" title="Modules" href="modules.html" />
     <link rel="prev" title="PyHum: Python program for reading and processing low-cost sidescan sonar data" href="index.html" /> 
   </head>
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="index.html" title="PyHum: Python program for reading and processing low-cost sidescan sonar data"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.0.crs documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -219,7 +219,6 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 
 <span class="c"># for shadow removal</span>
 <span class="n">shadowmask</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#automatic shadow removal</span>
-<span class="n">kvals</span> <span class="o">=</span> <span class="mi">8</span> <span class="c"># number of k-means for automated shadow removal</span>
 
 <span class="c"># for texture calcs</span>
 <span class="n">win</span> <span class="o">=</span> <span class="mi">50</span> <span class="c"># pixel window</span>
@@ -252,7 +251,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
 
 <span class="c"># remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)</span>
-<span class="n">PyHum</span><span class="o">.</span><span class="n">rmshadows</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shadowmask</span><span class="p">,</span> <span class="n">kvals</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
+<span class="n">PyHum</span><span class="o">.</span><span class="n">rmshadows</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shadowmask</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
 
 <span class="c"># Calculate texture lengthscale maps using the method of Buscombe et al. (2015)</span>
 <span class="n">PyHum</span><span class="o">.</span><span class="n">texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">numclasses</span><span class="p">,</span> <span class="n">maxscale</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span>
@@ -342,21 +341,20 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 
     <span class="c"># for shadow removal</span>
     <span class="n">shadowmask</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">#manual shadow removal</span>
-    <span class="n">kvals</span> <span class="o">=</span> <span class="mi">8</span> <span class="c"># number of k-means for automated shadow removal</span>
     <span class="n">win</span> <span class="o">=</span> <span class="mi">100</span>
 
     <span class="c"># for mapping</span>
     <span class="n">dogrid</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># yes</span>
     <span class="n">calc_bearing</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#no</span>
     <span class="n">filt_bearing</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#no</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="c"># grid resolution in metres</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="c"># grid resolution in metres</span>
     <span class="n">cog</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># GPS course-over-ground used for heading</span>
 
     <span class="n">PyHum</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">draft</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bedpick</span><span class="p">,</span> <span class="n">flip_lr</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 
     <span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
 
-    <span class="n">PyHum</span><span class="o">.</span><span class="n">rmshadows</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shadowmask</span><span class="p">,</span> <span class="n">kvals</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
+    <span class="n">PyHum</span><span class="o">.</span><span class="n">rmshadows</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shadowmask</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
 
     <span class="n">PyHum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">dowrite</span><span class="p">)</span>
 </pre></div>
@@ -369,14 +367,36 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <div class="highlight-python"><div class="highlight"><pre>%run proc_mysidescandata.py
 </pre></div>
 </div>
+<p>If you are in bash (or git bash) you might want to automate through a folder of subfolders like this:</p>
+<div class="highlight-python"><div class="highlight"><pre>for k in $(find $PWD -type d -maxdepth 1 -mindepth 1); do python proc_mysidescandata.py -i &quot;$k/${k##*/}.DAT&quot; -s $k; done
+</pre></div>
+</div>
+<p>which assumes the .DAT file is in the folder with the same root (such as a folder called R00123 which contains SON and IDX files as well as a file called R00123.DAT)</p>
 </div>
 <div class="section" id="support">
 <span id="id9"></span><h2>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h2>
 <p>This is a new project written and maintained by Daniel Buscombe. Bugs are expected - please report them, I will fix them quickly. Feedback and suggestions for improvements are <em>very</em> welcome</p>
 <p>Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please address all suggestions, comments and queries to: <a class="reference external" href="mailto:dbuscombe&#37;&#52;&#48;usgs&#46;gov">dbuscombe<span>&#64;</span>usgs<span>&#46;</span>gov</a>. Thanks for stopping by!</p>
-<blockquote>
-<div><img alt="_images/pyhum_logo_colour_sm.png" src="_images/pyhum_logo_colour_sm.png" />
-</div></blockquote>
+</div>
+<div class="section" id="trouble-shooting">
+<span id="troubleshooting"></span><h2>Trouble Shooting<a class="headerlink" href="#trouble-shooting" title="Permalink to this headline">¶</a></h2>
+<p>1. Problem: pyhum read hangs for a long time (several minutes) on the test script.
+Try this: uninstall joblib and install an older version:</p>
+<div class="highlight-python"><div class="highlight"><pre>pip uninstall joblib
+pip install joblib==0.7.1
+</pre></div>
+</div>
+<p>2. Problem: you get an &#8220;invalid mode or file name&#8221; error.
+Try this: construct file paths using raw strings e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="s">r&#39;C:\Users\me\mydata\R0089&#39;</span>
+</pre></div>
+</div>
+<p>or using os, e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;C:\Users&#39;</span><span class="p">,</span><span class="s">&#39;me&#39;</span><span class="p">,</span><span class="s">&#39;mydata&#39;</span><span class="p">,</span><span class="s">&#39;R0089&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<img alt="_images/pyhum_logo_colour_sm.png" src="_images/pyhum_logo_colour_sm.png" />
 </div>
 </div>
 
@@ -402,6 +422,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <li><a class="reference internal" href="#test">Test</a></li>
 <li><a class="reference internal" href="#gettingstarted">Getting Started</a></li>
 <li><a class="reference internal" href="#support">Support</a></li>
+<li><a class="reference internal" href="#trouble-shooting">Trouble Shooting</a></li>
 </ul>
 </li>
 </ul>
@@ -456,7 +477,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
         <li class="right" >
           <a href="index.html" title="PyHum: Python program for reading and processing low-cost sidescan sonar data"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.1 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.0.crs documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

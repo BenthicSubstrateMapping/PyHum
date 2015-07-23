@@ -98,7 +98,7 @@ def dotest():
    shadowmask = 0 #automatic shadow removal
 
    # for texture calcs
-   win = 50 # pixel window
+   win = 100 # pixel window
    shift = 10 # pixel shift
    density = win/2 
    numclasses = 4 # number of discrete classes for contouring and k-means
