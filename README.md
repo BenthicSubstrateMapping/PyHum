@@ -454,6 +454,31 @@ or from within ipython (with a GUI prompt to navigate to the files):
 ```
 
 
+### Trouble Shooting
+
+1. Problem: pyhum read hangs for a long time (several minutes) on the test script. 
+Try this: uninstall joblib and install an older version::
+
+```
+   pip uninstall joblib
+   pip install joblib==0.7.1
+```
+
+2. Problem: you get an "invalid mode or file name" error.
+Try this: construct file paths using raw strings e.g.:: 
+
+```
+   r'C:\Users\me\mydata\R0089' 
+```
+
+or using os, e.g.::
+
+```
+   import os
+   os.path.abspath(os.path.join('C:\Users','me','mydata','R0089'))
+```
+
+
 ### Support
 
 This is a new project written and maintained by Daniel Buscombe. Bugs are expected - please report them, I will fix them quickly. Feedback and suggestions for improvements are *very* welcome
