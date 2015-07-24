@@ -404,20 +404,20 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
                  tmp2[k] = tmp[k][:,:np.shape(star_fp[k])[1]]
              del tmp
 
-             port_fp.flush()
-             del port_fp
-             if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat'))):
-                os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')))
+             #port_fp.flush()
+             #del port_fp
+             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat'))):
+             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')))
                 
              # create memory mapped file for Z
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'w+') as ff:
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_port2.dat')), 'w+') as ff:
                 fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
              fp[:] = tmp2[:]
              del fp
              shape_port = np.shape(tmp2)
              del tmp2
              #we are only going to access the portion of memory required
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'r') as ff:
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_port2.dat')), 'r') as ff:
                 port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_port)
              ind_port = list(ind_port)
              ind_port[-1] = np.shape(star_fp[0])[1]
@@ -430,20 +430,20 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
                  tmp2[k] = tmp[k][:,:np.shape(port_fp[k])[1]]
              del tmp
 
-             star_fp.flush()
-             del star_fp
-             if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat'))):
-                os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')))
+             #star_fp.flush()
+             #del star_fp
+             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat'))):
+             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')))
                 
              # create memory mapped file for Z
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'w+') as ff:
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat')), 'w+') as ff:
                 fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
              fp[:] = tmp2[:]
              del fp
              shape_star = np.shape(tmp2)
              del tmp2
              #we are only going to access the portion of memory required
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'r') as ff:
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat')), 'r') as ff:
                 port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_star)
              ind_star = list(ind_star)
              ind_star[-1] = np.shape(port_fp[0])[1]
@@ -511,20 +511,20 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
                  tmp2[k] = tmp[k][:,:np.shape(dwnlow_fp[k])[1]]
              del tmp
 
-             dwnhi_fp.flush()
-             del dwnhi_fp
-             if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat'))):
-                os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')))
+             #dwnhi_fp.flush()
+             #del dwnhi_fp
+             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat'))):
+             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')))
                 
              # create memory mapped file for Z
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'w+') as ff:
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi2.dat')), 'w+') as ff:
                 fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
              fp[:] = tmp2[:]
              del fp
              shape_dwnhi = np.shape(tmp2)
              del tmp2
              #we are only going to access the portion of memory required
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi2.dat')), 'r') as ff:
                 dwnhi_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_dwnhi)
              ind_hi = list(ind_hi)
              ind_hi[-1] = np.shape(dwnlow_fp[0])[1]
@@ -537,20 +537,20 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
                  tmp2[k] = tmp[k][:,:np.shape(dwnhi_fp[k])[1]]
              del tmp
 
-             dwnlow_fp.flush()
-             del dwnlow_fp
-             if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat'))):
-                os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')))
+             #dwnlow_fp.flush()
+             #del dwnlow_fp
+             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat'))):
+             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')))
                 
              # create memory mapped file for Z
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'w+') as ff:
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'w+') as ff:
                 fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
              fp[:] = tmp2[:]
              del fp
              shape_dwnlow = np.shape(tmp2)
              del tmp2
              #we are only going to access the portion of memory required
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'r') as ff:
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'r') as ff:
                 dwnlow_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_dwnlow)
              ind_low = list(ind_low)
              ind_low[-1] = np.shape(dwnhi_fp[0])[1]

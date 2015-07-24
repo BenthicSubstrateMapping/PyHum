@@ -237,13 +237,23 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0):
     # load memory mapped scans
     shape_port = np.squeeze(meta['shape_port'])
     if shape_port!='':
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'r') as ff:
-          port_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_port))
+       
+       if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port2.dat'))):
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'r') as ff:
+             port_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_port))
+
+       else:
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'r') as ff:
+             port_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_port))
 
     shape_star = np.squeeze(meta['shape_star'])
     if shape_star!='':
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'r') as ff:
-          star_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_star))
+       if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat'))):
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat')), 'r') as ff:
+             star_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_star))
+       else:
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'r') as ff:
+             star_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_star))
 
     extent = shape_star[1] #np.shape(data_port)[0]
 
@@ -330,26 +340,49 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0):
     shape_low = np.squeeze(meta['shape_low'])
 
     if shape_low!='':
-       try:
-          with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'r') as ff:
-             low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
+       if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat'))):
+          try:
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'r') as ff:
+                low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
 
-       except:
-          if 'shape_hi' in locals():
+          except:
+             if 'shape_hi' in locals():
+                with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'r') as ff:
+                   low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
+
+       else:
+
+          try:
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'r') as ff:
-                low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
+                low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
+
+          except:
+             if 'shape_hi' in locals():
+                with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'r') as ff:
+                   low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
 
     shape_hi = np.squeeze(meta['shape_hi'])
 
     if shape_hi!='':
-       try:
-          with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
-             hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
-
-       except:
-          if 'shape_low' in locals():
+       if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi2.dat'))):
+          try:
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
-                hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
+                hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
+
+          except:
+             if 'shape_low' in locals():
+                with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
+                   hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
+
+       else:
+          try:
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
+                hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
+
+          except:
+             if 'shape_low' in locals():
+                with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
+                   hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
 
 
     if 'low_fp' in locals():
