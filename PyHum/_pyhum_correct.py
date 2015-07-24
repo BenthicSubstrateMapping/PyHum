@@ -69,6 +69,7 @@ from joblib import Parallel, delayed, cpu_count
 import numpy as np
 import PyHum.utils as humutils
 #from scipy.stats import nanmean, nanmedian
+import ppdrc
 
 #plotting
 import matplotlib.pyplot as plt
@@ -82,6 +83,10 @@ import matplotlib.colors as colors
 np.seterr(divide='ignore')
 np.seterr(invalid='ignore')
 
+import warnings
+warnings.filterwarnings("ignore")
+
+
 # =========================================================
 # =============== begin program ======================
 # ========================================================
@@ -94,7 +99,7 @@ __all__ = [
     ]
 
 #################################################
-def correct(humfile, sonpath, maxW=1000, doplot=1):
+def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0):
 
     '''
     Remove water column and carry out some rudimentary radiometric corrections, 
@@ -114,6 +119,8 @@ def correct(humfile, sonpath, maxW=1000, doplot=1):
        maximum transducer power
     doplot : int, *optional* [Default=1]
        1 = make plots, otherwise do not
+    dofilt : int, *optional* [Default=0]
+       1 = apply a phase preserving filter to the scans
 
     Returns
     -------
@@ -174,6 +181,12 @@ def correct(humfile, sonpath, maxW=1000, doplot=1):
       doplot = int(doplot)
       if doplot==0:
          print "Plots will not be made"
+    if dofilt:
+      dofilt = int(dofilt)
+      if dofilt==0:
+         print "Phase preserving filter will not be applied"
+      else:
+         print "Phase preserving filter will be applied"
 
 
     # start timer
@@ -199,7 +212,6 @@ def correct(humfile, sonpath, maxW=1000, doplot=1):
     if base.find(' ')>-1:
        base = base[:base.find(' ')]
 
-    dofilt = 1
     
     # add wattage to metadata dict 
     #meta = loadmat(sonpath+base+'meta.mat')
@@ -476,7 +488,11 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
  
 # =========================================================
 def correct_scans(fp, r_fp, dofilt):
-    return Parallel(n_jobs = -1, verbose=0)(delayed(c_scans)(fp[p], r_fp[p], dofilt) for p in xrange(len(fp)))
+    return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans)(fp[p], r_fp[p], dofilt) for p in xrange(len(fp)))
+#   Zt = []
+#   for p in xrange(len(fp)):
+#      Zt.append(c_scans(fp[p], r_fp[p], dofilt))
+#   return Zt
 
 # =========================================================
 def c_scans(fp, r_fp, dofilt):
@@ -488,7 +504,7 @@ def c_scans(fp, r_fp, dofilt):
 
 # =========================================================
 def correct_scans2(fp):
-    return Parallel(n_jobs = -1, verbose=0)(delayed(c_scans2)(fp[p]) for p in xrange(len(fp)))
+    return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans2)(fp[p]) for p in xrange(len(fp)))
 
 # =========================================================
 def c_scans2(fp):
@@ -498,7 +514,6 @@ def c_scans2(fp):
 
 # =========================================================
 def do_ppdrc(fp, filtsize):
-   import ppdrc
    dat = fp.astype('float64')
    dat[np.isnan(dat)] = 0
    dat1 = ppdrc.ppdrc(dat, filtsize)

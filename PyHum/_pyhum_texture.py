@@ -88,6 +88,9 @@ except:
 np.seterr(divide='ignore')
 np.seterr(invalid='ignore')
 
+import warnings
+warnings.filterwarnings("ignore")
+
 __all__ = [
     'texture',
     'custom_save',

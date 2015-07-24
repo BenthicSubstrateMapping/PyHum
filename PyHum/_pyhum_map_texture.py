@@ -90,6 +90,9 @@ import simplekml
 np.seterr(divide='ignore')
 np.seterr(invalid='ignore')
 
+import warnings
+warnings.filterwarnings("ignore")
+
 __all__ = [
     'map_texture',
     'custom_save',
@@ -343,48 +346,66 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
        if dogrid==1:
 
-          grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
+          complete=0
+          while complete==0:
+             try:
+                grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
+                #del X, Y
+                longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+                shape = np.shape(grid_x)
+                #del grid_y, grid_x
 
-          del X, Y
-          longrid, latgrid = trans(grid_x, grid_y, inverse=True)
-          shape = np.shape(grid_x)
-          #del grid_y, grid_x
+                targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+                del longrid, latgrid
 
-          targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
-          del longrid, latgrid
-
-          orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
-          #del humlat, humlon
-
-          #influence = 1 #m
-          #numneighbours = 64
+                orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
+                #del humlat, humlon
+                if 'orig_def' in locals(): 
+                   complete=1 
+             except:
+                print "memory error: trying grid resolution of %s" % (str(res*2))
+                res = res*2
 
           if mode==1:
-             try:
-                # nearest neighbour
-                dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
-             except:
-                # nearest neighbour
-                dat, stdev, counts = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, with_uncert = True, nprocs = 1)
+
+             complete=0
+             while complete==0:
+                try:
+                   dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count()) 
+                   if 'dat' in locals(): 
+                      complete=1 
+                except:
+                   del grid_x, grid_y, targ_def, orig_def
+                   dat, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode)
 
           elif mode==2:
              # custom inverse distance 
              wf = lambda r: 1/r**2
 
-             try:
-                dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
-             except:
-                dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = 1)   
+             complete=0
+             while complete==0:
+                try:
+                   dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+                   if 'dat' in locals(): 
+                      complete=1 
+                except:
+                   del grid_x, grid_y, targ_def, orig_def
+                   dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode)
+
 
           elif mode==3:
              sigmas = 1 #m
              eps = 2
 
-             try:
-                dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
-             except:
-                dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = 1, epsilon = eps)
-
+             complete=0
+             while complete==0:
+                try:
+                   dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+                   if 'dat' in locals(): 
+                      complete=1 
+                except:
+                   del grid_x, grid_y, targ_def, orig_def
+                   dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode)
 
           dat = dat.reshape(shape)
 
@@ -447,7 +468,13 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           fig.add_axes(ax)
 
           if dogrid==1:
-             map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0.25, vmax=2)
+             if datm.size > 25000000:
+                print "matrix size > 25,000,000 - decimating by factor of 5 for display"
+                map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='YlOrRd', vmin=0.25, vmax=2)
+             else:
+                map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0.25, vmax=2)
+
+             #map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0.25, vmax=2)
              del dat
           else: 
              ## draw point cloud
@@ -499,48 +526,66 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
        if dogrid==1:
 
-          grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
+          complete=0
+          while complete==0:
+             try:
+                grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
+                #del X, Y
+                longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+                shape = np.shape(grid_x)
+                #del grid_y, grid_x
 
-          del X, Y
-          longrid, latgrid = trans(grid_x, grid_y, inverse=True)
-          shape = np.shape(grid_x)
-          #del grid_y, grid_x
+                targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+                del longrid, latgrid
 
-          targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
-          del longrid, latgrid
-
-          orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
-          #del humlat, humlon
-
-          #influence = 1 #m
-          #numneighbours = 64
+                orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
+                #del humlat, humlon
+                if 'orig_def' in locals(): 
+                   complete=1 
+             except:
+                print "memory error: trying grid resolution of %s" % (str(res*2))
+                res = res*2
 
           if mode==1:
-             try:
-                # nearest neighbour
-                dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
-             except:
-                # nearest neighbour
-                dat, stdev, counts = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, with_uncert = True, nprocs = 1)
+
+             complete=0
+             while complete==0:
+                try:
+                   dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count()) 
+                   if 'dat' in locals(): 
+                      complete=1 
+                except:
+                   del grid_x, grid_y, targ_def, orig_def
+                   dat, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode)
 
           elif mode==2:
              # custom inverse distance 
              wf = lambda r: 1/r**2
 
-             try:
-                dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
-             except:
-                dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = 1)   
+             complete=0
+             while complete==0:
+                try:
+                   dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+                   if 'dat' in locals(): 
+                      complete=1 
+                except:
+                   del grid_x, grid_y, targ_def, orig_def
+                   dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode)
+
 
           elif mode==3:
              sigmas = 1 #m
              eps = 2
 
-             try:
-                dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
-             except:
-                dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = 1, epsilon = eps)
-
+             complete=0
+             while complete==0:
+                try:
+                   dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+                   if 'dat' in locals(): 
+                      complete=1 
+                except:
+                   del grid_x, grid_y, targ_def, orig_def
+                   dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode)
 
           dat = dat.reshape(shape)
 
@@ -603,7 +648,14 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
              gx,gy = map.projtran(glon, glat)
 
           if dogrid==1:
-             map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
+
+             if datm.size > 25000000:
+                print "matrix size > 25,000,000 - decimating by factor of 5 for display"
+                map.contourf(gx[::5,::5], gy[::5,::5], datm[::5,::5], levels, cmap='YlOrRd')
+             else:
+                map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
+
+             #map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
           else: 
              ## draw point cloud
              x,y = map.projtran(humlon, humlat)
@@ -614,6 +666,51 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
        except:
           print "error: map could not be created..."
 
+# =========================================================
+def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mode):
+
+   complete=0
+   while complete==0:
+      try:
+         grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
+         longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+         shape = np.shape(grid_x)
+         targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+         del longrid, latgrid
+
+         orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
+
+         if mode==1:
+            dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
+            stdev = None
+            counts = None
+         elif mode==2:
+            dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+         else:
+            dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+ 
+         if 'dat' in locals(): 
+            complete=1 
+      except:
+         print "memory error: trying grid resolution of %s" % (str(res*2))
+         res = res*2
+
+   return dat, stdev, counts, res, complete
+
+# =========================================================
+def getmesh(minX, maxX, minY, maxY, res):
+
+   complete=0
+   while complete==0:
+      try:
+         grid_x, grid_y = np.meshgrid( np.arange(minX, maxX, res), np.arange(minY, maxY, res) )
+         if 'grid_x' in locals(): 
+            complete=1 
+      except:
+         print "memory error: trying grid resolution of %s" % (str(res*2))
+         res = res*2
+         
+   return grid_x, grid_y, res
 
 # =========================================================
 def getxy(e, n, yvec, d, t,extent):
@@ -669,6 +766,149 @@ if __name__ == '__main__':
    map_texture(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
 
 
+
+
+#          complete=0
+#          while complete==0:
+#             try:
+#                grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
+#                #del X, Y
+#                longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+#                shape = np.shape(grid_x)
+#                #del grid_y, grid_x
+
+#                targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+#                del longrid, latgrid
+
+#                orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
+#                #del humlat, humlon
+#                if 'dat' in locals(): 
+#                   complete=1 
+#             except:
+#                print "memory error: trying grid resolution of %s" % (str(res*2))
+#                res = res*2
+
+#          if mode==1:
+
+#             complete=0
+#             while complete==0:
+#                try:
+#                   dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
+#                   if 'dat' in locals(): 
+#                      complete=1 
+#                except:
+#                   del grid_x, grid_y, longrid, latgrid, targ_def, orig_def
+#                   grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
+#                   longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+#                   shape = np.shape(grid_x)
+
+#                   targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+#                   del longrid, latgrid
+
+#                   orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
+
+#                   dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count()) 
+
+#                   if 'dat' in locals(): 
+#                      complete=1     
+
+
+#          elif mode==2:
+#             # custom inverse distance 
+#             wf = lambda r: 1/r**2
+
+#             complete=0
+#             while complete==0:
+#                try:
+#                   dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+#                   if 'dat' in locals(): 
+#                      complete=1 
+#                except:
+#                   del grid_x, grid_y, longrid, latgrid, targ_def, orig_def
+#                   grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
+#                   longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+#                   shape = np.shape(grid_x)
+
+#                   targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+#                   del longrid, latgrid
+
+#                   orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
+
+#                   dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+
+#                   if 'dat' in locals(): 
+#                      complete=1     
+
+#          elif mode==3:
+#             sigmas = 1 #m
+#             eps = 2
+
+#             complete=0
+#             while complete==0:
+#                try:
+#                   dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+#                   if 'dat' in locals(): 
+#                      complete=1 
+#                except:
+#                   del grid_x, grid_y, longrid, latgrid, targ_def, orig_def
+#                   grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
+#                   longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+#                   shape = np.shape(grid_x)
+
+#                   targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+#                   del longrid, latgrid
+
+#                   orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
+
+#                   dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+
+#                   if 'dat' in locals(): 
+#                      complete=1 
+
+
+
+#             try:
+#                # nearest neighbour
+#                dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
+#             except:
+#                # nearest neighbour
+#                dat, stdev, counts = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, with_uncert = True, nprocs = 1)
+
+
+#          grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
+
+#          #grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
+
+#          #del X, Y
+#          longrid, latgrid = trans(grid_x, grid_y, inverse=True)
+#          shape = np.shape(grid_x)
+#          #del grid_y, grid_x
+
+#          targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
+#          del longrid, latgrid
+
+#          orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
+#          #del humlat, humlon
+
+#          #influence = 1 #m
+#          #numneighbours = 64
+
+#             try:
+#                dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+#             except:
+#                dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = 1, epsilon = eps)
+
+#             try:
+#                dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+#             except:
+#                dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = 1)   
+
+#             try:
+#                # nearest neighbour
+#                dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
+#             except:
+#                # nearest neighbour
+#                dat, stdev, counts = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, with_uncert = True, nprocs = 1)
 
 
 #          grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  

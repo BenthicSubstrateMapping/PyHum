@@ -93,6 +93,7 @@ def dotest():
     
    # correction specific settings
    maxW = 1000 # rms output wattage
+   dofilt = 1 # apply a phase preserving filter (WARNING!! takes a very long time for large scans)
 
    # for shadow removal
    shadowmask = 0 #automatic shadow removal
@@ -108,7 +109,9 @@ def dotest():
    # for mapping
    dogrid = 1 # yes
    res = 0.1 # grid resolution in metres
-   mode = 3 # gridding mode (gaussian weighted nearest neighbour)
+   mode = 1 # gridding mode (simple nearest neighbour)
+   #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
+   #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
    dowrite = 0 #disable writing of point cloud data to file
 
    nn = 64 #number of nearest neighbours for gridding (used if mode > 1)
@@ -128,7 +131,7 @@ def dotest():
    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model, calc_bearing, filt_bearing, cog)
 
    # correct scans and remove water column
-   PyHum.correct(humfile, sonpath, maxW, doplot)
+   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt)
 
    # remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)

@@ -85,6 +85,9 @@ import matplotlib.colors as colors
 #np.seterr(invalid='ignore')
 np.seterr(all='ignore')
 
+import warnings
+warnings.filterwarnings("ignore")
+
 # =========================================================
 # =============== begin program ======================
 # ========================================================

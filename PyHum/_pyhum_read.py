@@ -65,7 +65,7 @@ except:
    pass
 import csv
 from fractions import gcd
-from joblib import Parallel, delayed, cpu_count
+#from joblib import Parallel, delayed, cpu_count
 
 #numerical
 import pyread
@@ -85,6 +85,10 @@ import matplotlib.colors as colors
 #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 #rc('text', usetex=True)
 import simplekml
+
+import warnings
+warnings.filterwarnings("ignore")
+
 
 __all__ = [
     'read',
@@ -291,6 +295,19 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     #cs2cs_args = "epsg:26949"; doplot = 1; draft = 0
     #chunksize=0; c=1450; bedpick=1; fliplr=1
 
+
+    try:
+       from mpl_toolkits.basemap import Basemap
+       m = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
+          resolution = 'i', llcrnrlon=10, llcrnrlat=10, urcrnrlon=30, urcrnrlat=30)
+       del m
+    except:
+       print "Error: the epsg code you have chosen is not compatible with Basemap"
+       print "please choose a different epsg code (http://spatialreference.org/)"
+       print "program will now close"
+       sys.exit()
+
+
     # start timer
     if os.name=='posix': # true if linux/mac or cygwin on windows
        start = time.time()
@@ -386,6 +403,12 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              for k in xrange(len(tmp)):
                  tmp2[k] = tmp[k][:,:np.shape(star_fp[k])[1]]
              del tmp
+
+             port_fp.flush()
+             del port_fp
+             if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat'))):
+                os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')))
+                
              # create memory mapped file for Z
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'w+') as ff:
                 fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
@@ -406,6 +429,12 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              for k in xrange(len(tmp)):
                  tmp2[k] = tmp[k][:,:np.shape(port_fp[k])[1]]
              del tmp
+
+             star_fp.flush()
+             del star_fp
+             if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat'))):
+                os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')))
+                
              # create memory mapped file for Z
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'w+') as ff:
                 fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
@@ -481,6 +510,12 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              for k in xrange(len(tmp)):
                  tmp2[k] = tmp[k][:,:np.shape(dwnlow_fp[k])[1]]
              del tmp
+
+             dwnhi_fp.flush()
+             del dwnhi_fp
+             if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat'))):
+                os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')))
+                
              # create memory mapped file for Z
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'w+') as ff:
                 fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
@@ -501,6 +536,12 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              for k in xrange(len(tmp)):
                  tmp2[k] = tmp[k][:,:np.shape(dwnhi_fp[k])[1]]
              del tmp
+
+             dwnlow_fp.flush()
+             del dwnlow_fp
+             if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat'))):
+                os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')))
+                
              # create memory mapped file for Z
              with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'w+') as ff:
                 fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
@@ -618,7 +659,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           ## narrow image to within range of estimated bed
           #imu = data_port[int(np.min(bed)):int(np.max(bed)),:]
           # use dynamic boundary tracing to get 2nd estimate of bed  
-          x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T))
+          x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T)) - buff
           #x = np.squeeze(humutils.dpboundary(-imu.T))
           del imu 
 
@@ -637,11 +678,11 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
           if doplot==1:
              # treats each chunk in parallel for speed
-             try:
-                d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
-             except:
-                for k in xrange(len(star_fp)):
-                   plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+             #try:
+             #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
+             #except:
+             for k in xrange(len(star_fp)):
+                plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
 
           # 'real' bed is estimated to be the minimum of the two
           #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
@@ -672,11 +713,11 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
        if doplot==1:
           # treats each chunk in parallel for speed
-          try:
-             d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_bedpick)(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
-          except:
-             for k in xrange(len(star_fp)):
-                plot_bedpick(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+          #try:
+          #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_bedpick)(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
+          #except:
+          for k in xrange(len(star_fp)):
+             plot_bedpick(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
 
 
        metadat['bed'] = bed[:nrec]
