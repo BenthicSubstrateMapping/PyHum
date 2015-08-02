@@ -56,7 +56,7 @@
 
 #operational
 import glob, sys, getopt
-from scipy.io import savemat, loadmat
+from scipy.io import savemat #, loadmat
 import os, time
 try:
    from Tkinter import Tk
@@ -64,13 +64,12 @@ try:
 except:
    pass
 import csv
-from fractions import gcd
+#from fractions import gcd
 #from joblib import Parallel, delayed, cpu_count
 
 #numerical
 import pyread
 import PyHum.utils as humutils
-#from skimage.measure import LineModel, ransac
 import numpy as np
 import pyproj
 
@@ -89,18 +88,8 @@ import simplekml
 import warnings
 warnings.filterwarnings("ignore")
 
-
-__all__ = [
-    'read',
-    'custom_save',
-    'distBetweenPoints',
-    'makechunks',
-    'plot_2bedpicks',
-    'plot_bedpick',
-    ]
-
 #################################################
-def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=1, t=0.108, f=455, bedpick=1, flip_lr=0, chunksize=0, model=998, calc_bearing = 0, filt_bearing = 0, cog = 1):
+def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=1, t=0.108, f=455, bedpick=1, flip_lr=0, model=998, calc_bearing = 0, filt_bearing = 0, cog = 1, chunk='d100'):
 
     '''
     Read a .DAT and associated set of .SON files recorded by a Humminbird(R)
@@ -115,7 +104,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     Syntax
     ----------
-    [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize, model, calc_bearing, filt_bearing, cog)
+    [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize, model, calc_bearing, filt_bearing, cog, chunk)
 
     Parameters
     ------------
@@ -144,11 +133,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     flip_lr : int, *optional* [Default=0]
        if 1, port and starboard scans will be flipped
        (for situations where the transducer is flipped 180 degrees)
-    chunksize : int, *optional* [Default=0]
-       if not 0, the data will be parsed into 'chunks' of data which
-       are 'chunksize' scans long. A scan is a ping, or the simultaneous
-       acquisition of a port and starboard scan. A typical value to keep 
-       data chunks a manageable (small) size is 10,000 - 50,000
     model: int, *optional* [Default=998]
        A 3 or 4 number code indicating the model number 
        Examples: 998, 997, 1198, 1199
@@ -159,7 +143,13 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        if 1, bearing will be calculated from coordinates
     filt_bearing : float, *optional* [Default=0]
        if 1, bearing will be filtered
-            
+    chunk : str, *optional* [Default='d100' (distance, 100 m)]
+       letter, followed by a number.
+       There are the following letter options:
+       'd' - parse chunks based on distance, then number which is distance in m
+       'p' - parse chunks based on number of pings, then number which is number of pings 
+       'h' - parse chunks based on change in heading, then number which is the change in heading in degrees
+                   
     Returns
     ---------
     sonpath+base+'_data_port.dat': memory-mapped file
@@ -264,13 +254,26 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
       else:
          print 'Bed picking is manual'
 
-    if chunksize:
-      chunksize = int(chunksize)
-      if chunksize==0:
-         print "Chunk size will be determined automatically"
-      else:
-         print 'Chunk size: %s' % (str(chunksize))
-
+    if chunk:
+       chunk = str(chunk)
+       if chunk[0]=='d':
+          chunkmode=1
+          chunkval = int(chunk[1:])
+          print 'Chunks based on distance of %s m' % (str(chunkval))
+       elif chunk[0]=='p':          
+          chunkmode=2
+          chunkval = int(chunk[1:])
+          print 'Chunks based on %s pings' % (str(chunkval))
+       elif chunk[0]=='h':          
+          chunkmode=3
+          chunkval = int(chunk[1:])
+          print 'Chunks based on heading devation of %s degrees' % (str(chunkval))
+       else:
+          print "Chunk mode not understood - should be 'd', 'p', or 'h' - using defaults"
+          chunkmode=1
+          chunkval = 100
+          print 'Chunks based on distance of %s m' % (str(chunkval))                      
+          
     if model:
        model = int(model)
        print "Data is from the %s series"  % (str(model))
@@ -293,8 +296,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     ## for debugging
     #humfile = r"test.DAT"; sonpath = "test_data"
     #cs2cs_args = "epsg:26949"; doplot = 1; draft = 0
-    #chunksize=0; c=1450; bedpick=1; fliplr=1
-
+    #c=1450; bedpick=1; fliplr=1; chunk = 'd100'
+    #model=998; cog=1; calc_bearing=0; filt_bearing=0
 
     try:
        from mpl_toolkits.basemap import Basemap
@@ -344,224 +347,48 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     dat = data.gethumdat() 
     metadat = data.getmetadata()
 
-    try:
-       if flip_lr==0:
-          data_port = data.getportscans().astype('int16')
-       else:
-          data_port = data.getstarscans().astype('int16')
+    nrec = len(metadat['n'])   
 
-       Zt, ind_port = makechunks(data_port, chunksize)
-       del data_port
+    #heading = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])[:nrec]
+    metadat['heading'] = metadat['heading'][:nrec]
 
-       # create memory mapped file for Z
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'w+') as ff:
-          fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_port = np.shape(Zt)
-       del Zt
-       #we are only going to access the portion of memory required
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'r') as ff:
-          port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_port)
+    # over-ride measured bearing and calc from positions
+    if calc_bearing==1:
+       lat = np.squeeze(metadat['lat'])
+       lon = np.squeeze(metadat['lon']) 
 
-    except:
-       data_port = ''
-       print "portside scan not available"
+       #point-to-point bearing
+       bearing = np.zeros(len(lat))
+       for k in xrange(len(lat)-1):
+          bearing[k] = humutils.bearingBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+       del lat, lon
 
-    try:
-       if flip_lr==0:
-          data_star = data.getstarscans().astype('int16')
-       else:
-          data_star = data.getportscans().astype('int16')
-
-       Zt, ind_star = makechunks(data_star, chunksize)
-       del data_star
-
-       # create memory mapped file for Z
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'w+') as ff:
-          fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_star = np.shape(Zt)
-       del Zt
-       #we are only going to access the portion of memory required
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'r') as ff:
-          star_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_star)
-
-    except:
-       data_star = ''
-       print "starboardside scan not available"
-
-
-    if 'star_fp' in locals() and 'port_fp' in locals():
-       # check that port and starboard are same size
-       # and trim if not
-       if np.shape(star_fp)!=np.shape(port_fp):
-          if np.shape(port_fp[0])[1] > np.shape(star_fp[0])[1]:
-             tmp = port_fp.copy()
-             tmp2 = np.empty_like(star_fp)
-             for k in xrange(len(tmp)):
-                 tmp2[k] = tmp[k][:,:np.shape(star_fp[k])[1]]
-             del tmp
-
-             #port_fp.flush()
-             #del port_fp
-             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat'))):
-             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')))
-                
-             # create memory mapped file for Z
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_port2.dat')), 'w+') as ff:
-                fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
-             fp[:] = tmp2[:]
-             del fp
-             shape_port = np.shape(tmp2)
-             del tmp2
-             #we are only going to access the portion of memory required
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_port2.dat')), 'r') as ff:
-                port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_port)
-             ind_port = list(ind_port)
-             ind_port[-1] = np.shape(star_fp[0])[1]
-             ind_port = tuple(ind_port)
-
-          elif np.shape(port_fp[0])[1] < np.shape(star_fp[0])[1]:
-             tmp = star_fp.copy()
-             tmp2 = np.empty_like(port_fp)
-             for k in xrange(len(tmp)):
-                 tmp2[k] = tmp[k][:,:np.shape(port_fp[k])[1]]
-             del tmp
-
-             #star_fp.flush()
-             #del star_fp
-             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat'))):
-             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')))
-                
-             # create memory mapped file for Z
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat')), 'w+') as ff:
-                fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
-             fp[:] = tmp2[:]
-             del fp
-             shape_star = np.shape(tmp2)
-             del tmp2
-             #we are only going to access the portion of memory required
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat')), 'r') as ff:
-                port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_star)
-             ind_star = list(ind_star)
-             ind_star[-1] = np.shape(port_fp[0])[1]
-             ind_star = tuple(ind_star)
-
-    try:
-       data_dwnlow = data.getlowscans().astype('int16')
-
-
-       if chunksize != 0:
-          Zt, ind_low = makechunks(data_dwnlow, chunksize/2)
-       else:
-          Zt, ind_low = makechunks(data_dwnlow, chunksize)
-       del data_dwnlow
-
-       # create memory mapped file for Z
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'w+') as ff:
-          fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_low = np.shape(Zt)
-       del Zt
-       #we are only going to access the portion of memory required      
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'r') as ff:
-          dwnlow_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_low)
-
-    except:
-       data_dwnlow = ''
-       print "low-freq. scan not available"
-
-    try:
-       data_dwnhi = data.gethiscans().astype('int16')
-
-       if chunksize != 0:
-          Zt, ind_hi = makechunks(data_dwnhi, chunksize/2)
-       else:
-          Zt, ind_hi = makechunks(data_dwnhi, chunksize)
-       del data_dwnhi
-
-       # create memory mapped file for Z
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'w+') as ff:
-          fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
-
-       fp[:] = Zt[:]
-       del fp
-       shape_hi = np.shape(Zt)
-       del Zt
-       #we are only going to access the portion of memory required
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
-          dwnhi_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_hi)
-
-    except:
-       data_dwnhi = ''
-       print "high-freq. scan not available"
-
-
-    if 'dwnhi_fp' in locals() and 'dwnlow_fp' in locals():
-       # check that low and high are same size
-       # and trim if not
-       if np.shape(dwnhi_fp)!=np.shape(dwnlow_fp):
-          if np.shape(dwnhi_fp[0])[1] > np.shape(dwnlow_fp[0])[1]:
-             tmp = dwnhi_fp.copy()
-             tmp2 = np.empty_like(dwnlow_fp)
-             for k in xrange(len(tmp)):
-                 tmp2[k] = tmp[k][:,:np.shape(dwnlow_fp[k])[1]]
-             del tmp
-
-             #dwnhi_fp.flush()
-             #del dwnhi_fp
-             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat'))):
-             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')))
-                
-             # create memory mapped file for Z
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi2.dat')), 'w+') as ff:
-                fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
-             fp[:] = tmp2[:]
-             del fp
-             shape_dwnhi = np.shape(tmp2)
-             del tmp2
-             #we are only going to access the portion of memory required
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi2.dat')), 'r') as ff:
-                dwnhi_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_dwnhi)
-             ind_hi = list(ind_hi)
-             ind_hi[-1] = np.shape(dwnlow_fp[0])[1]
-             ind_hi = tuple(ind_hi)
-
-          elif np.shape(dwnhi_fp[0])[1] < np.shape(dwnlow_fp[0])[1]:
-             tmp = dwnlow_fp.copy()
-             tmp2 = np.empty_like(dwnhi_fp)
-             for k in xrange(len(tmp)):
-                 tmp2[k] = tmp[k][:,:np.shape(dwnhi_fp[k])[1]]
-             del tmp
-
-             #dwnlow_fp.flush()
-             #del dwnlow_fp
-             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat'))):
-             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')))
-                
-             # create memory mapped file for Z
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'w+') as ff:
-                fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
-             fp[:] = tmp2[:]
-             del fp
-             shape_dwnlow = np.shape(tmp2)
-             del tmp2
-             #we are only going to access the portion of memory required
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'r') as ff:
-                dwnlow_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_dwnlow)
-             ind_low = list(ind_low)
-             ind_low[-1] = np.shape(dwnhi_fp[0])[1]
-             ind_low = tuple(ind_low)
-
-    del data
-
-    if chunksize!=0:
-       nrec = len(dwnhi_fp)*chunksize
     else:
-       nrec = len(metadat['n'])
+       # reported bearing by instrument (Kalman filtered?)
+       bearing = np.squeeze(metadat['heading'])
+
+    # if stdev in heading is large, there's probably noise that needs to be filtered out
+    if np.std(bearing)>180:
+       print "WARNING: large heading stdev - attempting filtering"
+       from sklearn.cluster import MiniBatchKMeans
+       # can have two modes
+       data = np.column_stack([bearing, bearing])
+       k_means = MiniBatchKMeans(2)
+       # fit the model
+       k_means.fit(data) 
+       values = k_means.cluster_centers_.squeeze()
+       labels = k_means.labels_
+
+       if np.sum(labels==0) > np.sum(labels==1):
+          bearing[labels==1] = np.nan
+       else:
+          bearing[labels==0] = np.nan
+
+       nans, y= humutils.nan_helper(bearing)
+       bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans]) 
+
+    if filt_bearing ==1:
+       bearing = humutils.runningMeanFast(bearing, len(bearing)/100)
 
     try:
        es = humutils.runningMeanFast(metadat['e'][:nrec],len(metadat['e'][:nrec])/100)
@@ -582,23 +409,384 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     metadat['lon'] = lon
     metadat['lat'] = lat
 
+    if cog==1:
+       theta = np.asarray(bearing, 'float')/(180/np.pi)
+       #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
+       #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU 
+       # (East-North-Up) coordinate frame. 
+       #Subtract pi/2 from your heading
+       theta = theta - np.pi/2
+       # (re-wrap to Pi to -Pi)
+       theta = np.unwrap(-theta)
+       metadat['heading'] = theta * (180/np.pi)
+    else:
+       metadat['heading'] = bearing
+
+
+    dist = np.zeros(len(lat))
+    for k in xrange(len(lat)-1):
+       dist[k] = humutils.distBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+
+    dist_m = np.cumsum(dist)
+    metadat['dist_m'] = dist_m    
+    
+    # theta at 3dB in the horizontal
+    theta3dB = np.arcsin(c/(t*(f*1000)))
+    #resolution of 1 sidescan pixel to nadir
+    ft = (np.pi/2)*(1/theta3dB)
+
+    dep_m = np.squeeze(metadat['dep_m'][:nrec]) #loadmat(sonpath+base+'meta.mat')['dep_m'])
+    dep_m = humutils.rm_spikes(dep_m,2)
+    dep_m = humutils.runningMeanFast(dep_m, 3)         
+
+    # port scan
+    try:
+       if flip_lr==0:
+          data_port = data.getportscans().astype('int16')
+       else:
+          data_port = data.getstarscans().astype('int16')
+    except:
+       data_port = ''
+       print "portside scan not available"
+
+    if data_port!='':
+       #Zt, ind_port = makechunks(data_port, chunksize)
+       if chunkmode==1:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = metadat['dist_m']/chunkval #length_chunk
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "port sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_port = makechunks_simple(data_port, nchunks) 
+
+       elif chunkmode==2:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.max(np.shape(data_port))/chunkval #length_chunk
+             nchunks = np.floor(tmp)
+             del tmp
+          print "port sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_port = makechunks_simple(data_port, nchunks)           
+
+       elif chunkmode==3:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "port sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_port = makechunks_simple(data_port, nchunks) 
+          
+       del data_port 
+          
+       # create memory mapped file for Z
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+       del fp
+       shape_port = np.shape(Zt)
+       del Zt
+       #we are only going to access the portion of memory required
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'r') as ff:
+          port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_port)
+          
+    # starboard scan          
+    try:
+       if flip_lr==0:
+          data_star = data.getstarscans().astype('int16')
+       else:
+          data_star = data.getportscans().astype('int16')
+    except:
+       data_star = ''
+       print "starboardside scan not available"
+
+    if data_star!='':
+       #Zt, ind_star = makechunks(data_star, chunksize)
+       if chunkmode==1: # distance
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1       
+             tmp = metadat['dist_m']/chunkval #length_chunk
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_star = makechunks_simple(data_star, nchunks) 
+          
+       elif chunkmode==2: #pings
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.max(np.shape(data_star))/chunkval #length_chunk
+             nchunks = np.floor(tmp)
+             del tmp
+          print "starboard sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_star = makechunks_simple(data_star, nchunks) 
+
+       elif chunkmode==3:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "starboard sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_star = makechunks_simple(data_star, nchunks) 
+                    
+       del data_star
+
+       # create memory mapped file for Z
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+       del fp
+       shape_star = np.shape(Zt)
+       del Zt
+       #we are only going to access the portion of memory required
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'r') as ff:
+          star_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_star)
+
+
+    if 'star_fp' in locals() and 'port_fp' in locals():
+       # check that port and starboard are same size
+       # and trim if not
+       if np.shape(star_fp)!=np.shape(port_fp):
+          print "port and starboard scans are different sizes ... rectifying"
+          if np.shape(port_fp[0])[1] > np.shape(star_fp[0])[1]:
+             tmp = port_fp.copy()
+             tmp2 = np.empty_like(star_fp)
+             for k in xrange(len(tmp)):
+                 tmp2[k] = tmp[k][:,:np.shape(star_fp[k])[1]]
+             del tmp
+     
+             # create memory mapped file for Z
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_port2.dat')), 'w+') as ff:
+                fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
+             fp[:] = tmp2[:]
+             del fp
+             shape_port = np.shape(tmp2)
+             shape_star = np.shape(tmp2)
+             del tmp2
+             #we are only going to access the portion of memory required
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_port2.dat')), 'r') as ff:
+                port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_port)
+             ind_port = list(ind_port)
+             ind_port[-1] = np.shape(star_fp[0])[1]
+             ind_port = tuple(ind_port)
+
+          elif np.shape(port_fp[0])[1] < np.shape(star_fp[0])[1]:
+             tmp = star_fp.copy()
+             tmp2 = np.empty_like(port_fp)
+             for k in xrange(len(tmp)):
+                 tmp2[k] = tmp[k][:,:np.shape(port_fp[k])[1]]
+             del tmp
+    
+             # create memory mapped file for Z
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat')), 'w+') as ff:
+                fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
+             fp[:] = tmp2[:]
+             del fp
+             shape_star = np.shape(tmp2)
+             shape_port = np.shape(tmp2)
+             del tmp2
+             #we are only going to access the portion of memory required
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat')), 'r') as ff:
+                port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_star)
+             ind_star = list(ind_star)
+             ind_star[-1] = np.shape(port_fp[0])[1]
+             ind_star = tuple(ind_star)
+
+    # low-freq. sonar
+    try:
+       data_dwnlow = data.getlowscans().astype('int16')
+    except:
+       data_dwnlow = ''
+       print "low-freq. scan not available"
+   
+    if data_dwnlow!='':
+       if chunkmode==1: #distance
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = metadat['dist_m']/chunkval #length_chunk
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_low = makechunks_simple(data_dwnlow, nchunks) 
+          
+       elif chunkmode==2: #pings
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.max(np.shape(data_dwnlow))/chunkval #length_chunk
+             nchunks = np.floor(tmp)
+             del tmp
+          print "low-freq. sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_low = makechunks_simple(data_dwnlow, nchunks)
+
+       elif chunkmode==3:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "low-freq. sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_low = makechunks_simple(data_dwnlow, nchunks) 
+                     
+       del data_dwnlow
+
+       # create memory mapped file for Z
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+       del fp
+       shape_low = np.shape(Zt)
+       del Zt
+       #we are only going to access the portion of memory required      
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'r') as ff:
+          dwnlow_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_low)
+
+    # hi-freq. sonar
+    try:
+       data_dwnhi = data.gethiscans().astype('int16')
+    except:
+       data_dwnhi = ''
+       print "high-freq. scan not available"
+
+    if data_dwnhi!='':
+       if chunkmode==1: # distance
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = metadat['dist_m']/chunkval #length_chunk
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_hi = makechunks_simple(data_dwnhi, nchunks)  
+          
+       elif chunkmode==2: #pings
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.max(np.shape(data_dwnhi))/chunkval #length_chunk
+             nchunks = np.floor(tmp)
+             del tmp
+          print "high-freq. sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_hi = makechunks_simple(data_dwnhi, nchunks)
+
+       elif chunkmode==3:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "high-freq. sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_hi = makechunks_simple(data_dwnhi, nchunks) 
+                   
+       del data_dwnhi
+
+       # create memory mapped file for Z
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
+
+       fp[:] = Zt[:]
+       del fp
+       shape_hi = np.shape(Zt)
+       del Zt
+       #we are only going to access the portion of memory required
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
+          dwnhi_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_hi)
+
+
+    if 'dwnhi_fp' in locals() and 'dwnlow_fp' in locals():
+       # check that low and high are same size
+       # and trim if not
+       if np.shape(dwnhi_fp)!=np.shape(dwnlow_fp):
+          print "dwnhi and dwnlow are different sizes ... rectifying"
+          if np.shape(dwnhi_fp[0])[1] > np.shape(dwnlow_fp[0])[1]:
+             tmp = dwnhi_fp.copy()
+             tmp2 = np.empty_like(dwnlow_fp)
+             for k in xrange(len(tmp)):
+                 tmp2[k] = tmp[k][:,:np.shape(dwnlow_fp[k])[1]]
+             del tmp
+  
+             # create memory mapped file for Z
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi2.dat')), 'w+') as ff:
+                fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
+             fp[:] = tmp2[:]
+             del fp
+             shape_hi = np.shape(tmp2)
+             shape_low = np.shape(tmp2)
+             del tmp2
+             #we are only going to access the portion of memory required
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi2.dat')), 'r') as ff:
+                dwnhi_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_hi)
+             ind_hi = list(ind_hi)
+             ind_hi[-1] = np.shape(dwnlow_fp[0])[1]
+             ind_hi = tuple(ind_hi)
+
+          elif np.shape(dwnhi_fp[0])[1] < np.shape(dwnlow_fp[0])[1]:
+             tmp = dwnlow_fp.copy()
+             tmp2 = np.empty_like(dwnhi_fp)
+             for k in xrange(len(tmp)):
+                 tmp2[k] = tmp[k][:,:np.shape(dwnhi_fp[k])[1]]
+             del tmp
+ 
+             # create memory mapped file for Z
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'w+') as ff:
+                fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
+             fp[:] = tmp2[:]
+             del fp
+             shape_low = np.shape(tmp2)
+             shape_hi = np.shape(tmp2)
+             del tmp2
+             #we are only going to access the portion of memory required
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'r') as ff:
+                dwnlow_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_low)
+             ind_low = list(ind_low)
+             ind_low[-1] = np.shape(dwnhi_fp[0])[1]
+             ind_low = tuple(ind_low)
+
+    del data
+
     if 'shape_port' in locals():
        metadat['shape_port'] = shape_port
+       nrec = metadat['shape_port'][0] * metadat['shape_port'][2]
     else:
        metadat['shape_port'] = ''   
 
     if 'shape_star' in locals():
        metadat['shape_star'] = shape_star
+       nrec = metadat['shape_star'][0] * metadat['shape_star'][2]
     else:
        metadat['shape_star'] = ''   
 
     if 'shape_hi' in locals():
        metadat['shape_hi'] = shape_hi
+       #nrec = metadat['shape_hi'][0] * metadat['shape_hi'][2] * 2
     else:
        metadat['shape_hi'] = ''   
 
     if 'shape_low' in locals():
        metadat['shape_low'] = shape_low
+       #nrec = metadat['shape_low'][0] * metadat['shape_low'][2] * 2
     else:
        metadat['shape_low'] = ''   
 
@@ -617,22 +805,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     except:
        print "install simplekml for kml plots"
 
-    dist = np.zeros(len(lat))
-    for k in xrange(len(lat)-1):
-       dist[k] = distBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
-
-    dist_m = np.cumsum(dist)
-
-    # theta at 3dB in the horizontal
-    theta3dB = np.arcsin(c/(t*(f*1000)))
-    #resolution of 1 sidescan pixel to nadir
-    ft = (np.pi/2)*(1/theta3dB)
-
-    dep_m = np.squeeze(metadat['dep_m'][:nrec]) #loadmat(sonpath+base+'meta.mat')['dep_m'])
-    dep_m = humutils.rm_spikes(dep_m,2)
-    dep_m = humutils.runningMeanFast(dep_m, 3)
-
-    metadat['dist_m'] = dist_m
 
     if 'port_fp' in locals() and 'star_fp' in locals():
 
@@ -659,7 +831,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           ## narrow image to within range of estimated bed
           #imu = data_port[int(np.min(bed)):int(np.max(bed)),:]
           # use dynamic boundary tracing to get 2nd estimate of bed  
-          x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T)) - buff
+          x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T)) 
           #x = np.squeeze(humutils.dpboundary(-imu.T))
           del imu 
 
@@ -725,61 +897,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     else:
        metadat['bed'] = dep_m[:nrec]*ft
 
-    #heading = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])[:nrec]
     metadat['heading'] = metadat['heading'][:nrec]
-
-    # over-ride measured bearing and calc from positions
-    if calc_bearing==1:
-       lat = np.squeeze(metadat['lat'])
-       lon = np.squeeze(metadat['lon']) 
-
-       #point-to-point bearing
-       bearing = np.zeros(len(lat))
-       for k in xrange(len(lat)-1):
-          bearing[k] = bearingBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
-       del lat, lon
-
-    else:
-       # reported bearing by instrument (Kalman filtered?)
-       bearing = np.squeeze(metadat['heading'])
-
-    # if stdev in heading is large, there's probably noise that needs to be filtered out
-    if np.std(bearing)>180:
-       print "WARNING: large heading stdev - attempting filtering"
-       from sklearn.cluster import MiniBatchKMeans
-       # can have two modes
-       data = np.column_stack([bearing, bearing])
-       k_means = MiniBatchKMeans(2)
-       # fit the model
-       k_means.fit(data) 
-       values = k_means.cluster_centers_.squeeze()
-       labels = k_means.labels_
-
-       if np.sum(labels==0) > np.sum(labels==1):
-          bearing[labels==1] = np.nan
-       else:
-          bearing[labels==0] = np.nan
-
-       nans, y= humutils.nan_helper(bearing)
-       bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans]) 
-
-    if filt_bearing ==1:
-       bearing = humutils.runningMeanFast(bearing, len(bearing)/100)
-
-    if cog==1:
-       theta = np.asarray(bearing, 'float')/(180/np.pi)
-       #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
-       #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU 
-       # (East-North-Up) coordinate frame. 
-       #Subtract pi/2 from your heading
-       theta = theta - np.pi/2
-       # (re-wrap to Pi to -Pi)
-       theta = np.unwrap(-theta)
-       metadat['heading'] = theta * (180/np.pi)
-    else:
-       metadat['heading'] = bearing
-
-
+    metadat['lon'] = lon[:nrec]
+    metadat['lat'] = lat[:nrec]
     metadat['dist_m'] = dist_m[:nrec]
     metadat['dep_m'] = dep_m[:nrec]
     metadat['pix_m'] = 1/ft
@@ -792,8 +912,10 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     metadat['time_s'] = metadat['time_s'][:nrec]
     metadat['e'] = metadat['e'][:nrec]
     metadat['n'] = metadat['n'][:nrec]
+    metadat['es'] = metadat['es'][:nrec]
+    metadat['ns'] = metadat['ns'][:nrec]
     metadat['caltime'] = metadat['caltime'][:nrec]
-
+    
     #savemat(sonpath+base+'meta.mat', metadat ,oned_as='row')
     savemat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')), metadat ,oned_as='row')
 
@@ -801,7 +923,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     f = open(os.path.normpath(os.path.join(sonpath,base+'rawdat.csv')), 'wt')
     writer = csv.writer(f)
     writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth (m)', 'distance (m)', 'heading (deg.)' ) )
-    for i in range(0, len(lon)):
+    for i in range(0, nrec):
        writer.writerow(( float(lon[i]),float(lat[i]),float(es[i]),float(ns[i]),float(dep_m[i]),float(dist_m[i]), float(metadat['heading'][i]) ))
     f.close()
 
@@ -869,39 +991,10 @@ def custom_save(figdirec,root):
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=400)
 
 # =========================================================
-def distBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
-   return 6378137.0 * 2.0 * np.arcsin(np.sqrt(np.power(np.sin((np.deg2rad(pos1_lat) - np.deg2rad(pos2_lat)) / 2.0), 2.0) + np.cos(np.deg2rad(pos1_lat)) * np.cos(np.deg2rad(pos2_lat)) * np.power(np.sin((np.deg2rad(pos1_lon) - np.deg2rad(pos2_lon)) / 2.0), 2.0)))
-
-# =========================================================
-def makechunks(dat, chunksize=0):
+def makechunks_simple(dat, numchunks):
    Ny, Nx = np.shape(dat)
-   
-   if chunksize==0:
-      # get optimal number of slices
-      if Nx%2==0:
-         H = []
-         for k in xrange(2,50):
-            H.append(gcd(Nx,Nx/k))
-         hslice = np.max(H)
-      else:
-         dat = np.hstack( (dat,np.ones((Ny,1))) )
-         Ny, Nx = np.shape(dat)
-         H = []
-         for k in xrange(2,50):
-            H.append(gcd(Nx,Nx/k))
-         hslice = np.max(H)
-   
-      # get windowed data
-      Zt,ind = humutils.sliding_window(dat,(Ny,hslice))
-
-   else:
-      if chunksize<np.shape(dat)[1]:
-         Zt,ind = humutils.sliding_window(dat,(Ny,chunksize))
-      else:
-         print "Error: chunk size is larger than number of scan lines. Please choose smaller chunk size ... exiting"
-
-   return Zt, ind
-
+   # get windowed data
+   return humutils.sliding_window(dat,(Ny,Nx/int(numchunks)))                  
 
 # =========================================================
 def plot_2bedpicks(dat_port, dat_star, Zbed, Zdist, Zx, ft, shape_port, sonpath, k):
@@ -954,43 +1047,124 @@ def plot_bedpick(dat_port, dat_star, Zbed, Zdist, ft, shape_port, sonpath, k):
 
    custom_save(sonpath,'bed_pick'+str(k))
    plt.close(); del fig
-
-# =========================================================
-def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
-   lat1 = np.deg2rad(pos1_lat)
-   lon1 = np.deg2rad(pos1_lon)
-   lat2 = np.deg2rad(pos2_lat)
-   lon2 = np.deg2rad(pos2_lon)
-
-   bearing = np.arctan2(np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(lon2 - lon1), np.sin(lon2 - lon1) * np.cos(lat2))
-
-   db = np.rad2deg(bearing)
-   return (90.0 - db + 360.0) % 360.0
    
 # =========================================================
 # =========================================================
 if __name__ == '__main__':
 
-   read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize, model, calc_bearing, filt_bearing, cog)
+   read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
 
 
-       #dwnlow_fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='r', shape=shape_low)
-       #dwnlow_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), dtype='int16', mode='r', shape=shape_low)
-       #fp = np.memmap(sonpath+base+'_data_dwnlow.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
-       #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), dtype='int16', mode='w+', shape=np.shape(Zt))
-             #star_fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='r', shape=shape_star)
-             #star_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), dtype='int16', mode='r', shape=shape_star)
-             #fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='w+', shape=np.shape(tmp2))
-             #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), dtype='int16', mode='w+', shape=np.shape(tmp2))
-             #port_fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='r', shape=shape_port)
-             #port_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), dtype='int16', mode='r', shape=shape_port)
-             #fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='w+', shape=np.shape(tmp2))
-             #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), dtype='int16', mode='w+', shape=np.shape(tmp2))
-       #star_fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='r', shape=shape_star)
-       #star_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), dtype='int16', mode='r', shape=shape_star)
-       #fp = np.memmap(sonpath+base+'_data_star.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
-       #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), dtype='int16', mode='w+', shape=np.shape(Zt))
-       #port_fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='r', shape=shape_port)
-       #port_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), dtype='int16', mode='r', shape=shape_port)
-       #fp = np.memmap(sonpath+base+'_data_port.dat', dtype='int16', mode='w+', shape=np.shape(Zt))
-       #fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), dtype='int16', mode='w+', shape=np.shape(Zt)) 
+
+#    if man_chunk==0:
+#    
+#    elif man_chunk == 1:
+#       # heading
+#       plt.scatter(metadat['e'], metadat['n'], 50, metadat['heading'], linewidth=0)
+#       cbar = plt.colorbar()
+#       plt.xlabel('Easting'); plt.ylabel('Northing')
+#       cbar.set_label('Heading (deg.)')
+#       plt.axis('tight')
+#       plt.ginput(mouse_stop=3)
+#       #plt.show()
+
+#    elif man_chunk == 2:
+#       # heading deviation
+#       plt.scatter(metadat['e'], metadat['n'], 50, np.abs(metadat['heading']-metadat['heading'][0]), linewidth=0)
+#       cbar = plt.colorbar()
+#       plt.xlabel('Easting'); plt.ylabel('Northing')
+#       cbar.set_label('Heading deviation (deg.)')
+#       plt.axis('tight')
+#       plt.show()
+#       
+#    elif man_chunk == 3:
+#       # distance along track
+#       plt.scatter(metadat['e'], metadat['n'], 50, np.sqrt((metadat['e']-metadat['e'].min())**2 + (metadat['n']-metadat['n'].min())**2), linewidth=0)
+#       cbar = plt.colorbar()
+#       plt.xlabel('Easting'); plt.ylabel('Northing')
+#       cbar.set_label('Distance (m)')
+#       plt.axis('tight')
+#       plt.show()
+
+#__all__ = [
+#    'read',
+#    'custom_save',
+#    'distBetweenPoints',
+#    'makechunks',
+#    'plot_2bedpicks',
+#    'plot_bedpick',
+#    ]
+
+## =========================================================
+#def makechunks(dat, chunksize=0):
+#   Ny, Nx = np.shape(dat)
+#   
+#   if chunksize==0:
+#      # get optimal number of slices
+#      if Nx%2==0:
+#         H = []
+#         for k in xrange(2,50):
+#            H.append(gcd(Nx,Nx/k))
+#         hslice = np.max(H)
+#      else:
+#         dat = np.hstack( (dat,np.ones((Ny,1))) )
+#         Ny, Nx = np.shape(dat)
+#         H = []
+#         for k in xrange(2,50):
+#            H.append(gcd(Nx,Nx/k))
+#         hslice = np.max(H)
+#   
+#      # get windowed data
+#      Zt,ind = humutils.sliding_window(dat,(Ny,hslice))
+
+#   else:
+#      if chunksize<np.shape(dat)[1]:
+#         Zt,ind = humutils.sliding_window(dat,(Ny,chunksize))
+#      else:
+#         print "Error: chunk size is larger than number of scan lines. Please choose smaller chunk size ... exiting"
+
+#   return Zt, ind
+
+    #if chunksize:
+    #  chunksize = int(chunksize)
+    #  if chunksize>0:
+    #     print 'Chunk size: %s' % (str(chunksize))
+    #  else:
+    #     print "Chunk size will be determined automatically"
+    #if chunksize!=0:
+    #   nrec = len(data.getportscans())*chunksize
+    #else:    
+       #if chunksize != 0:
+       #   Zt, ind_low = makechunks(data_dwnlow, chunksize/2)
+       #else:
+       #Zt, ind_low = makechunks(data_dwnlow, chunksize)
+              
+       #if chunksize != 0:
+       #   Zt, ind_hi = makechunks(data_dwnhi, chunksize/2)
+       #else:
+       #Zt, ind_hi = makechunks(data_dwnhi, chunksize)
+    #if chunksize!=0:
+    #   nrec = len(dwnlow_fp)*chunksize
+    #else:
+    #nrec = len(metadat['n']) 
+    
+             #port_fp.flush()
+             #del port_fp
+             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat'))):
+             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')))
+           
+             #star_fp.flush()
+             #del star_fp
+             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat'))):
+             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')))
+            
+             #dwnhi_fp.flush()
+             #del dwnhi_fp
+             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat'))):
+             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')))
+              
+             #dwnlow_fp.flush()
+             #del dwnlow_fp
+             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat'))):
+             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')))
+               

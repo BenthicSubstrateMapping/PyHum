@@ -21,7 +21,7 @@ http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 '''
 
 from numpy.lib.stride_tricks import as_strided as ast
-from numpy import array, product, isnan, min, max, convolve, isnan, ones, mean, std, argmax, where, interp, shape, zeros, hstack, vstack, argmin, squeeze, choose, linspace, r_, cumsum, histogram, any, seterr
+from numpy import array, product, isnan, min, max, convolve, isnan, ones, mean, std, argmax, where, interp, shape, zeros, hstack, vstack, argmin, squeeze, choose, linspace, r_, cumsum, histogram, any, seterr, cos, sin, rad2deg, arctan2, deg2rad, arcsin, power, sqrt
 
 from numpy import nan as npnan
 from numpy.matlib import repmat
@@ -36,6 +36,8 @@ import string, random
 seterr(all='ignore')
 
 __all__ = [
+    'distBetweenPoints',
+    'bearingBetweenPoints',
     'id_generator',
     'rm_spikes',
     'ascol',
@@ -51,6 +53,24 @@ __all__ = [
     ]
 
 #################################################
+# =========================================================
+def distBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
+   return 6378137.0 * 2.0 * arcsin(sqrt(power(sin((deg2rad(pos1_lat) - deg2rad(pos2_lat)) / 2.0), 2.0) + cos(deg2rad(pos1_lat)) * cos(deg2rad(pos2_lat)) * power(sin((deg2rad(pos1_lon) - deg2rad(pos2_lon)) / 2.0), 2.0)))
+
+
+# =========================================================
+def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
+   lat1 = deg2rad(pos1_lat)
+   lon1 = deg2rad(pos1_lon)
+   lat2 = deg2rad(pos2_lat)
+   lon2 = deg2rad(pos2_lon)
+
+   bearing = arctan2(np.cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(lon2 - lon1), sin(lon2 - lon1) * cos(lat2))
+
+   db = rad2deg(bearing)
+   return (90.0 - db + 360.0) % 360.0
+
+
 # =========================================================
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
    return ''.join(random.choice(chars) for _ in range(size))
