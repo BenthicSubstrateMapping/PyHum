@@ -11,7 +11,7 @@ Syntax
 
 You call the function like this::
 
-  [] = PyHum.correct(humfile, sonpath, maxW, doplot)
+  [] = PyHum.correct(humfile, sonpath, maxW, doplot, correct_withwater)
 
 Parameters
 -------------
@@ -23,6 +23,8 @@ Parameters
        maximum transducer power
     doplot : int, *optional* [Default=1]
        1 = make plots, otherwise do not
+    correct_withwater : int, *optional* [Default=0]
+       1 = apply radiometric correction but don't remove water column from scans
 
 Returns
 ---------
@@ -58,6 +60,15 @@ Returns
         contains the high freq. downward  scan with water column removed and
         radiometrically corrected
 
+    if correct_withwater == 1:
+    
+       sonpath+base+'_data_star_lw.dat': memory-mapped file
+           contains the starboard scan with water column retained and 
+           radiometrically corrected
+
+       sonpath+base+'_data_port_lw.dat': memory-mapped file
+           contains the portside scan with water column retained and
+           radiometrically corrected
 
   .. image:: _static/pyhum_logo_colour_sm.png
 

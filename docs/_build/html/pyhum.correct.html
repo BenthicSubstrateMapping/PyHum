@@ -59,7 +59,7 @@ accounting for directivity and attenuation with range</div></blockquote>
 <div class="section" id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
 <p>You call the function like this:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">correct_withwater</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -75,6 +75,8 @@ accounting for directivity and attenuation with range</div></blockquote>
 <dd>maximum transducer power</dd>
 <dt>doplot <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=1]</span></dt>
 <dd>1 = make plots, otherwise do not</dd>
+<dt>correct_withwater <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=0]</span></dt>
+<dd>1 = apply radiometric correction but don&#8217;t remove water column from scans</dd>
 </dl>
 </div></blockquote>
 </div>
@@ -107,6 +109,17 @@ radiometrically corrected</dd>
 <dd>contains the high freq. downward  scan with water column removed and
 radiometrically corrected</dd>
 </dl>
+<p>if correct_withwater == 1:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>sonpath+base+&#8217;_data_star_lw.dat&#8217;: memory-mapped file</dt>
+<dd>contains the starboard scan with water column retained and
+radiometrically corrected</dd>
+<dt>sonpath+base+&#8217;_data_port_lw.dat&#8217;: memory-mapped file</dt>
+<dd>contains the portside scan with water column retained and
+radiometrically corrected</dd>
+</dl>
+</div></blockquote>
 </div></blockquote>
 <img alt="_images/pyhum_logo_colour_sm.png" src="_images/pyhum_logo_colour_sm.png" />
 </div></blockquote>

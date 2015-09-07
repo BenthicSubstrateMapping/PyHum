@@ -274,8 +274,8 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
 
     lat = np.squeeze(meta['lat'])
     lon = np.squeeze(meta['lon'])
-    es = np.squeeze(meta['es'])
-    ns = np.squeeze(meta['ns'])
+    es = np.squeeze(meta['e'])
+    ns = np.squeeze(meta['n'])
     dep = np.squeeze(meta['dep_m'])
     #del meta
 

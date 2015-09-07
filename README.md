@@ -19,6 +19,8 @@ The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) an
 Some aspects of the program are detailed in:
 Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, in press.
 
+Full documentation of the program is forthcoming
+
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/class_R01560.png)
 *Sand dunes on the bed of the Colorado River in Grand Canyon*
@@ -249,15 +251,19 @@ which carries out the following operations:
    draft = 0.3 # draft in metres
    flip_lr = 1 # flip port and starboard
    model = 998 # humminbird model
-   chunk_size = 1000 # chunk size = 1000 pings
-   #chunk_size = 0 # auto chunk size
    cog = 1 # GPS course-over-ground used for heading
    calc_bearing = 0 #no
-   filt_bearing = 1 #yes
-    
+   filt_bearing = 0 #no
+   #chunk_size = 1000 # chunk size = 1000 pings
+   #chunk_size = 0 # auto chunk size
+   chunk = 'd100' # distance, 100m
+   #chunk = 'p1000' # pings, 1000
+   #chunk = 'h10' # heading deviation, 10 deg
+          
    # correction specific settings
    maxW = 1000 # rms output wattage
    dofilt = 1 # apply a phase preserving filter (WARNING!! takes a very long time for large scans)
+   correct_withwater = 0 # don't retain water column in radiometric correction (1 = retains water column for radiomatric corrections)
 
    # for shadow removal
    shadowmask = 0 #automatic shadow removal
@@ -292,10 +298,10 @@ which carries out the following operations:
    numclusters = 3 # number of acoustic classes to group observations
 
    # read data in SON files into PyHum memory mapped format (.dat)
-   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model, calc_bearing, filt_bearing, cog)
+   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
 
    # correct scans and remove water column
-   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt)
+   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater)
 
    # remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)

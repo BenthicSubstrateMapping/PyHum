@@ -60,6 +60,7 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
 <p>The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) and works on both sidescan and downward-looking echosounder data, where available.</p>
 <p>Some aspects of the program are detailed in:
 Buscombe, D., Grams, P.E., and Smith, S. (2015) &#8220;Automated riverbed sediment classification using low-cost sidescan sonar&#8221;, Journal of Hydraulic Engineering, in press.</p>
+<p>Full documentation of the program is forthcoming</p>
 <p>For the source code visit <a class="reference external" href="https://github.com/dbuscombe-usgs/PyHum/">the project github site</a></p>
 <blockquote>
 <div><p>Primary Developer |    Daniel Buscombe
@@ -232,15 +233,19 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <span class="n">draft</span> <span class="o">=</span> <span class="mf">0.3</span> <span class="c"># draft in metres</span>
 <span class="n">flip_lr</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># flip port and starboard</span>
 <span class="n">model</span> <span class="o">=</span> <span class="mi">998</span> <span class="c"># humminbird model</span>
-<span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c"># chunk size = 1000 pings</span>
-<span class="c">#chunk_size = 0 # auto chunk size</span>
 <span class="n">cog</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># GPS course-over-ground used for heading</span>
 <span class="n">calc_bearing</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#no</span>
-<span class="n">filt_bearing</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">#yes</span>
+<span class="n">filt_bearing</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#no</span>
+<span class="c">#chunk_size = 1000 # chunk size = 1000 pings</span>
+<span class="c">#chunk_size = 0 # auto chunk size</span>
+<span class="n">chunk</span> <span class="o">=</span> <span class="s">&#39;d100&#39;</span> <span class="c"># distance, 100m</span>
+<span class="c">#chunk = &#39;p1000&#39; # pings, 1000</span>
+<span class="c">#chunk = &#39;h10&#39; # heading deviation, 10 deg</span>
 
 <span class="c"># correction specific settings</span>
 <span class="n">maxW</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c"># rms output wattage</span>
 <span class="n">dofilt</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># apply a phase preserving filter (WARNING!! takes a very long time for large scans)</span>
+<span class="n">correct_withwater</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># don&#39;t retain water column in radiometric correction (1 = retains water column for radiomatric corrections)</span>
 
 <span class="c"># for shadow removal</span>
 <span class="n">shadowmask</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#automatic shadow removal</span>
@@ -275,10 +280,10 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <span class="n">numclusters</span> <span class="o">=</span> <span class="mi">3</span> <span class="c"># number of acoustic classes to group observations</span>
 
 <span class="c"># read data in SON files into PyHum memory mapped format (.dat)</span>
-<span class="n">PyHum</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">draft</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bedpick</span><span class="p">,</span> <span class="n">flip_lr</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">cog</span><span class="p">)</span>
+<span class="n">PyHum</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">draft</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bedpick</span><span class="p">,</span> <span class="n">flip_lr</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">chunk</span><span class="p">)</span>
 
 <span class="c"># correct scans and remove water column</span>
-<span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">dofilt</span><span class="p">)</span>
+<span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">dofilt</span><span class="p">,</span> <span class="n">correct_withwater</span><span class="p">)</span>
 
 <span class="c"># remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)</span>
 <span class="n">PyHum</span><span class="o">.</span><span class="n">rmshadows</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shadowmask</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
@@ -371,6 +376,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
     <span class="c"># correction specific settings</span>
     <span class="n">maxW</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c"># rms output wattage</span>
     <span class="n">dofilt</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># apply a phase preserving filter (WARNING!! takes a very long time for large scans)</span>
+    <span class="n">correct_withwater</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># don&#39;t retain water column in radiometric correction (1 = retains water column for radiomatric corrections)</span>
 
     <span class="c"># for shadow removal</span>
     <span class="n">shadowmask</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">#manual shadow removal</span>
@@ -385,7 +391,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 
     <span class="n">PyHum</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">draft</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bedpick</span><span class="p">,</span> <span class="n">flip_lr</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 
-    <span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">dofilt</span><span class="p">)</span>
+    <span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">dofilt</span><span class="p">,</span> <span class="n">correct_withwater</span><span class="p">)</span>
 
     <span class="n">PyHum</span><span class="o">.</span><span class="n">rmshadows</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shadowmask</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
 

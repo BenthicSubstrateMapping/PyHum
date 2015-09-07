@@ -99,7 +99,7 @@ __all__ = [
     ]
 
 #################################################
-def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0):
+def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0):
 
     '''
     Remove water column and carry out some rudimentary radiometric corrections, 
@@ -107,7 +107,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0):
 
     Syntax
     ----------
-    [] = PyHum.correct(humfile, sonpath, maxW, doplot)
+    [] = PyHum.correct(humfile, sonpath, maxW, doplot, correct_withwater)
 
     Parameters
     ----------
@@ -121,6 +121,8 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0):
        1 = make plots, otherwise do not
     dofilt : int, *optional* [Default=0]
        1 = apply a phase preserving filter to the scans
+    correct_withwater : int, *optional* [Default=0]
+       1 = apply radiometric correction but don't remove water column from scans
 
     Returns
     -------
@@ -155,6 +157,17 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0):
     sonpath+base+'_data_dwnhi_la.dat': memory-mapped file
         contains the high freq. downward  scan with water column removed and
         radiometrically corrected
+    
+    if correct_withwater == 1:
+    
+       sonpath+base+'_data_star_lw.dat': memory-mapped file
+           contains the starboard scan with water column retained and 
+           radiometrically corrected
+
+       sonpath+base+'_data_port_lw.dat': memory-mapped file
+           contains the portside scan with water column retained and
+           radiometrically corrected
+
     '''
 
     # prompt user to supply file if no input file given
@@ -278,12 +291,23 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0):
     del fp
     del R
 
+    with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'r') as ff:
+       R_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
+
+    if correct_withwater == 1:
+       Zt = correct_scans(star_fp, R_fp, dofilt)
+
+       # create memory mapped file for Z)
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lw.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+       del fp
+       shape_star = np.shape(Zt)
+       del Zt
+
     #we are only going to access the portion of memory required
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'r') as ff:
        star_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
-
-    with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'r') as ff:
-       R_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
 
     Zt = correct_scans(star_fp, R_fp, dofilt)
 
@@ -300,6 +324,17 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0):
 
 
     ######### port
+    if correct_withwater == 1:
+       Zt = correct_scans(port_fp, R_fp, dofilt)
+
+       # create memory mapped file for Z)
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lw.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+       del fp
+       shape_port = np.shape(Zt)
+       del Zt
+
     Zt = remove_water(port_fp, bed, shape_port, dep_m, pix_m, 0,  maxW)
 
     # create memory mapped file for Z
@@ -332,8 +367,23 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0):
        #try:
        #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_merged_scans)(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p) for p in xrange(len(star_fp)))
        #except:
-       for p in xrange(len(star_fp)):
-          plot_merged_scans(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p)
+       if correct_withwater == 1:
+
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lw.dat')), 'r') as ff:
+             port_fpw = np.memmap(ff, dtype='float32', mode='r', shape=shape_port)
+
+
+          with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lw.dat')), 'r') as ff:
+              star_fpw = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
+
+          for p in xrange(len(star_fp)):
+             plot_merged_scans(port_fpw[p], star_fpw[p], dist_m, shape_port, ft, sonpath, p)
+
+
+       else:
+
+          for p in xrange(len(star_fp)):
+             plot_merged_scans(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p)
 
 
     # load memory mapped scans
