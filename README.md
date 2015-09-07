@@ -262,7 +262,7 @@ which carries out the following operations:
           
    # correction specific settings
    maxW = 1000 # rms output wattage
-   dofilt = 1 # apply a phase preserving filter (WARNING!! takes a very long time for large scans)
+   dofilt = 0 # 1=apply a phase preserving filter (WARNING!! takes a very long time for large scans)
    correct_withwater = 0 # don't retain water column in radiometric correction (1 = retains water column for radiomatric corrections)
 
    # for shadow removal

@@ -201,6 +201,10 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
       else:
          print "Phase preserving filter will be applied"
 
+    if correct_withwater:
+      correct_withwater = int(correct_withwater)
+      if correct_withwater==1:
+         print "Correction will be applied without removing water column"
 
     # start timer
     if os.name=='posix': # true if linux/mac or cygwin on windows
