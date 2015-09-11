@@ -61,6 +61,7 @@ import os, time
 try:
    from Tkinter import Tk
    from tkFileDialog import askopenfilename, askdirectory
+   import tkMessageBox
 except:
    pass
 import csv
@@ -251,8 +252,10 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
       bedpick = np.asarray(bedpick,int)
       if bedpick==1:
          print 'Bed picking is auto'
-      else:
+      elif bedpick==0:
          print 'Bed picking is manual'
+      else:
+         print 'User will be prompted per chunk about bed picking method'
 
     if chunk:
        chunk = str(chunk)
@@ -300,10 +303,12 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     #model=998; cog=1; calc_bearing=0; filt_bearing=0
 
     try:
+       print "Checking the epsg code you have chosen for compatibility with Basemap ... "
        from mpl_toolkits.basemap import Basemap
        m = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
           resolution = 'i', llcrnrlon=10, llcrnrlat=10, urcrnrlon=30, urcrnrlat=30)
        del m
+       print "... epsg code compatible"
     except:
        print "Error: the epsg code you have chosen is not compatible with Basemap"
        print "please choose a different epsg code (http://spatialreference.org/)"
@@ -861,6 +866,78 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           bed = np.min(np.vstack((bed[:nrec],np.squeeze(x[:nrec]))),axis=0) 
           bed = humutils.runningMeanFast(bed, 3)
 
+
+       elif bedpick>1: # user prompt
+
+          buff = 10
+
+          # get bed from depth trace
+          bed = ft*dep_m
+
+          imu = []
+
+          for k in xrange(len(port_fp)):
+             imu.append(port_fp[k][np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+          imu = np.hstack(imu)
+
+          imu = np.asarray(imu, 'float64')
+          imu = median_filter(imu,(20,20))
+
+          ## narrow image to within range of estimated bed
+          # use dynamic boundary tracing to get 2nd estimate of bed  
+          x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T)) 
+          del imu 
+
+          if len(x)<len(bed):
+             x = np.append(x,x[-1]*np.ones(len(bed)-len(x)))
+          elif len(x)>len(bed):
+             bed = np.append(bed,bed[-1]*np.ones(len(x)-len(bed)))
+
+          # if standard deviation of auto bed pick is too small, then use acoustic bed pick
+          if np.std(x)<5:
+             print "stdev of auto bed pick is low, using acoustic pick"
+             x = bed.copy()
+
+          if len(dist_m)<len(bed):
+             dist_m = np.append(dist_m,dist_m[-1]*np.ones(len(bed)-len(dist_m)))
+
+          # 'real' bed is estimated to be the minimum of the two
+          #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
+          bed = np.min(np.vstack((bed[:nrec],np.squeeze(x[:nrec]))),axis=0) 
+          bed = humutils.runningMeanFast(bed, 3)
+
+          # manually intervene
+          fig = plt.figure()
+          ax = plt.gca()
+          im = ax.imshow(np.hstack(port_fp), cmap = 'gray', origin = 'upper')
+          plt.plot(bed,'r')
+          plt.axis('normal'); plt.axis('tight')
+
+          pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 60 seconds
+          x1=map(lambda x: x[0],pts1) # map applies the function passed as 
+          y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
+          plt.close()
+          del fig
+
+          if x1 != []: # if x1 is not empty
+             from scipy.spatial import cKDTree as KDTree
+             tree = KDTree(zip(np.arange(1,len(bed)), bed))
+             dist, inds = tree.query(zip(x1, y1), k = 100, eps=5)
+             b = np.interp(inds,x1,y1)
+             bed2 = bed.copy()
+             bed2[inds] = b
+
+             #plt.plot(bed,'r');
+             #plt.plot(x1,y1,'ko');
+             #plt.plot(bed2,'g');
+             #plt.show()
+             bed = bed2
+
+          if doplot==1:
+             for k in xrange(len(star_fp)):
+                plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+
+
        else: #manual
   
           beds=[]
@@ -882,6 +959,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
        # now revise the depth in metres
        dep_m = (1/ft)*bed
+
 
        if doplot==1:
           # treats each chunk in parallel for speed
@@ -1047,7 +1125,8 @@ def plot_bedpick(dat_port, dat_star, Zbed, Zdist, ft, shape_port, sonpath, k):
 
    custom_save(sonpath,'bed_pick'+str(k))
    plt.close(); del fig
-   
+
+
 # =========================================================
 # =========================================================
 if __name__ == '__main__':
