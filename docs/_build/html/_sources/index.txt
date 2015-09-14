@@ -18,6 +18,11 @@ Contents:
    :maxdepth: 2
 
    modules.rst
+   
+.. toctree::
+   :maxdepth: 2
+
+   data_formats.rst
 
 .. toctree::
    :maxdepth: 2

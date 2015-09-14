@@ -1,4 +1,3 @@
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -7,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Index &mdash; PyHum 1.3.2 documentation</title>
+    <title>Data Formats &mdash; PyHum 1.3.2 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -24,15 +23,23 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyHum 1.3.2 documentation" href="index.html" /> 
+    <link rel="top" title="PyHum 1.3.2 documentation" href="index.html" />
+    <link rel="next" title="PyHum package" href="pyhum.html" />
+    <link rel="prev" title="Modules" href="modules.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="#" title="General Index"
+          <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="pyhum.html" title="PyHum package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="Modules"
+             accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.2 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -42,11 +49,18 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-
-<h1 id="index">Index</h1>
-
-<div class="genindex-jumpbox">
- 
+  <div class="section" id="data-formats">
+<span id="id1"></span><h1>Data Formats<a class="headerlink" href="#data-formats" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<span id="id2"></span><h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>PyHum reads data from binary files created by a Humminbird unit (using the &#8216;Record&#8217; function). Humminbird units write out the following file formats:</p>
+<ol class="arabic simple">
+<li><a href="#id3"><span class="problematic" id="id4">*</span></a>.DAT files which contain basic information about the sonar, time, position and sonar settings</li>
+<li><a href="#id5"><span class="problematic" id="id6">*</span></a>.SON files which contain the sonar data (echograms)</li>
+<li><a href="#id7"><span class="problematic" id="id8">*</span></a>.IDX files (1 per SON file)</li>
+</ol>
+<p>One set of data in PyHum consists of up to 4 <a href="#id9"><span class="problematic" id="id10">*</span></a>.SON files and 1 <a href="#id11"><span class="problematic" id="id12">*</span></a>.DAT file. If present, the software will use the <a href="#id13"><span class="problematic" id="id14">*</span></a>.IDX files to more efficiently read in the echogram data from the <a href="#id15"><span class="problematic" id="id16">*</span></a>.SON files.</p>
+</div>
 </div>
 
 
@@ -58,9 +72,20 @@
             <p class="logo"><a href="index.html">
               <img class="logo" src="_static/pyhum_logo_white.png" alt="Logo"/>
             </a></p>
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Data Formats</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+</ul>
+</li>
+</ul>
 
-   
-
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="modules.html"
+                        title="previous chapter">Modules</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pyhum.html"
+                        title="next chapter">PyHum package</a></p>
 
     <hr/>
 
@@ -84,6 +109,10 @@
     <p class="searchtip" style="font-size: 80%">
     Send an email to subscribe</p>
     </div>
+<hr/>
+<small><a href="_sources/data_formats.txt"
+           rel="nofollow">Show this page source</a>
+</small>
 
         </div>
       </div>
@@ -93,8 +122,14 @@
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
-          <a href="#" title="General Index"
+          <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="pyhum.html" title="PyHum package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="Modules"
+             >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.2 documentation</a> &raquo;</li> 
       </ul>
     </div>
