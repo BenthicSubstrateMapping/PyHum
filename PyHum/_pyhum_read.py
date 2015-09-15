@@ -838,11 +838,14 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
           imu = []
 
-          for k in xrange(len(port_fp)):
-             #imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
-             imu.append(port_fp[k][np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
-          imu = np.hstack(imu)
-
+          if chunkmode!=4:
+             for k in xrange(len(port_fp)):
+                #imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
+                imu.append(port_fp[k][np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+             imu = np.hstack(imu)
+          else:
+             imu.append(port_fp[np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+        
           imu = np.asarray(imu, 'float64')
 
           #imu = ppdrc.ppdrc(imu, np.shape(imu)[1]/2).getdata()
@@ -874,8 +877,11 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              #try:
              #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
              #except:
-             for k in xrange(len(star_fp)):
-                plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+             if chunkmode!=4:
+                for k in xrange(len(star_fp)):
+                   plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+             else:
+                plot_2bedpicks(port_fp, star_fp, bed, dist_m, x, ft, shape_port, sonpath, 0)             
 
           # 'real' bed is estimated to be the minimum of the two
           #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
@@ -892,9 +898,14 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
           imu = []
 
-          for k in xrange(len(port_fp)):
-             imu.append(port_fp[k][np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
-          imu = np.hstack(imu)
+          if chunkmode!=4:
+             for k in xrange(len(port_fp)):
+                #imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
+                imu.append(port_fp[k][np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+             imu = np.hstack(imu)
+          else:
+             imu.append(port_fp[np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+        
 
           imu = np.asarray(imu, 'float64')
           imu = median_filter(imu,(20,20))
@@ -950,9 +961,11 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              bed = bed2
 
           if doplot==1:
-             for k in xrange(len(star_fp)):
-                plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
-
+             if chunkmode!=4:
+                for k in xrange(len(star_fp)):
+                   plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+             else:
+                plot_2bedpicks(port_fp, star_fp, bed, dist_m, x, ft, shape_port, sonpath, 0)
 
        else: #manual
   
@@ -982,9 +995,11 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           #try:
           #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_bedpick)(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
           #except:
-          for k in xrange(len(star_fp)):
-             plot_bedpick(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
-
+          if chunkmode!=4:
+             for k in xrange(len(star_fp)):
+                plot_bedpick(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+          else:
+             plot_bedpick(port_fp, star_fp, (1/ft)*bed, dist_m, ft, shape_port, sonpath, 0)
 
        metadat['bed'] = bed[:nrec]
 
