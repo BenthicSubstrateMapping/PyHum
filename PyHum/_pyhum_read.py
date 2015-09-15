@@ -739,7 +739,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     if 'dwnhi_fp' in locals() and 'dwnlow_fp' in locals():
        # check that low and high are same size
        # and trim if not
-       if np.shape(dwnhi_fp)!=np.shape(dwnlow_fp):
+       if (np.shape(dwnhi_fp)!=np.shape(dwnlow_fp)) and (chunkmode!=4):
           print "dwnhi and dwnlow are different sizes ... rectifying"
           if np.shape(dwnhi_fp[0])[1] > np.shape(dwnlow_fp[0])[1]:
              tmp = dwnhi_fp.copy()
