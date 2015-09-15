@@ -790,24 +790,34 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     if ('shape_port' in locals()) and (chunkmode!=4):
        metadat['shape_port'] = shape_port
        nrec = metadat['shape_port'][0] * metadat['shape_port'][2]
+    elif chunkmode==4:
+       metadat['shape_port'] = shape_port
+       nrec = metadat['shape_port'][1]
     else:
        metadat['shape_port'] = ''   
 
     if ('shape_star' in locals()) and (chunkmode!=4):
        metadat['shape_star'] = shape_star
        nrec = metadat['shape_star'][0] * metadat['shape_star'][2]
+    elif chunkmode==4:
+       metadat['shape_star'] = shape_star
+       nrec = metadat['shape_star'][1]
     else:
        metadat['shape_star'] = ''   
 
     if ('shape_hi' in locals()) and (chunkmode!=4):
        metadat['shape_hi'] = shape_hi
        #nrec = metadat['shape_hi'][0] * metadat['shape_hi'][2] * 2
+    elif chunkmode==4:
+       metadat['shape_hi'] = shape_hi
     else:
        metadat['shape_hi'] = ''   
 
     if ('shape_low' in locals()) and (chunkmode!=4):
        metadat['shape_low'] = shape_low
        #nrec = metadat['shape_low'][0] * metadat['shape_low'][2] * 2
+    elif chunkmode==4:
+       metadat['shape_low'] = shape_low
     else:
        metadat['shape_low'] = ''   
 
@@ -846,7 +856,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           else:
              imu.append(port_fp[np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
         
-          imu = np.asarray(imu, 'float64')
+          imu = np.squeeze(np.asarray(imu, 'float64'))
 
           #imu = ppdrc.ppdrc(imu, np.shape(imu)[1]/2).getdata()
 
@@ -879,9 +889,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              #except:
              if chunkmode!=4:
                 for k in xrange(len(star_fp)):
-                   plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+                   plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k, chunkmode)
              else:
-                plot_2bedpicks(port_fp, star_fp, bed, dist_m, x, ft, shape_port, sonpath, 0)             
+                plot_2bedpicks(port_fp, star_fp, bed, dist_m, x, ft, shape_port, sonpath, 0, chunkmode)             
 
           # 'real' bed is estimated to be the minimum of the two
           #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
@@ -906,8 +916,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           else:
              imu.append(port_fp[np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
         
-
-          imu = np.asarray(imu, 'float64')
+          imu = np.squeeze(np.asarray(imu, 'float64'))
           imu = median_filter(imu,(20,20))
 
           ## narrow image to within range of estimated bed
@@ -936,7 +945,10 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           # manually intervene
           fig = plt.figure()
           ax = plt.gca()
-          im = ax.imshow(np.hstack(port_fp), cmap = 'gray', origin = 'upper')
+          if chunkmode !=4:
+             im = ax.imshow(np.hstack(port_fp), cmap = 'gray', origin = 'upper')
+          else:
+             im = ax.imshow(port_fp, cmap = 'gray', origin = 'upper')
           plt.plot(bed,'r')
           plt.axis('normal'); plt.axis('tight')
 
@@ -963,19 +975,36 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           if doplot==1:
              if chunkmode!=4:
                 for k in xrange(len(star_fp)):
-                   plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+                   plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k, chunkmode)
              else:
-                plot_2bedpicks(port_fp, star_fp, bed, dist_m, x, ft, shape_port, sonpath, 0)
+                plot_2bedpicks(port_fp, star_fp, bed, dist_m, x, ft, shape_port, sonpath, 0, chunkmode)
 
        else: #manual
   
           beds=[]
-          for k in xrange(len(port_fp)):
-             raw_input("Bed picking "+str(k+1)+" of "+str(len(port_fp))+", are you ready? 30 seconds. Press Enter to continue...")
+
+          if chunkmode!=4:          
+             for k in xrange(len(port_fp)):
+                raw_input("Bed picking "+str(k+1)+" of "+str(len(port_fp))+", are you ready? 30 seconds. Press Enter to continue...")
+                bed={}
+                fig = plt.figure()
+                ax = plt.gca()
+                im = ax.imshow(port_fp[k], cmap = 'gray', origin = 'upper')
+                pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 60 seconds
+                x1=map(lambda x: x[0],pts1) # map applies the function passed as 
+                y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
+                bed = np.interp(np.r_[:ind_port[-1]],x1,y1)
+                plt.close()
+                del fig
+                beds.append(bed)
+                extent = np.shape(port_fp[k])[0]
+             bed = np.asarray(np.hstack(beds),'float')
+          else:
+             raw_input("Bed picking - are you ready? 30 seconds. Press Enter to continue...")
              bed={}
              fig = plt.figure()
              ax = plt.gca()
-             im = ax.imshow(port_fp[k], cmap = 'gray', origin = 'upper')
+             im = ax.imshow(port_fp, cmap = 'gray', origin = 'upper')
              pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 60 seconds
              x1=map(lambda x: x[0],pts1) # map applies the function passed as 
              y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
@@ -983,8 +1012,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              plt.close()
              del fig
              beds.append(bed)
-             extent = np.shape(port_fp[k])[0]
-          bed = np.asarray(np.hstack(beds),'float')
+             extent = np.shape(port_fp)[1]
+             bed = np.asarray(np.hstack(beds),'float')
 
        # now revise the depth in metres
        dep_m = (1/ft)*bed
@@ -997,9 +1026,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           #except:
           if chunkmode!=4:
              for k in xrange(len(star_fp)):
-                plot_bedpick(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+                plot_bedpick(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k, chunkmode)
           else:
-             plot_bedpick(port_fp, star_fp, (1/ft)*bed, dist_m, ft, shape_port, sonpath, 0)
+             plot_bedpick(port_fp, star_fp, (1/ft)*bed, dist_m, ft, shape_port, sonpath, 0, chunkmode)
 
        metadat['bed'] = bed[:nrec]
 
@@ -1064,26 +1093,47 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
        if 'dwnlow_fp' in locals():
 
-          for k in xrange(len(dwnlow_fp)):
+          if chunkmode!=4:
+             for k in xrange(len(dwnlow_fp)):
+                fig = plt.figure()
+                plt.imshow(dwnlow_fp[k],cmap='gray')
+                plt.axis('normal'); plt.axis('tight')
+                plt.xlabel('Ping Number (Time)')
+                plt.ylabel('Range (Distance)')
+
+                custom_save(sonpath,'raw_dwnlow'+str(k))
+                plt.close(); del fig
+          else:
              fig = plt.figure()
-             plt.imshow(dwnlow_fp[k],cmap='gray')
+             plt.imshow(dwnlow_fp,cmap='gray')
              plt.axis('normal'); plt.axis('tight')
              plt.xlabel('Ping Number (Time)')
              plt.ylabel('Range (Distance)')
 
-             custom_save(sonpath,'raw_dwnlow'+str(k))
+             custom_save(sonpath,'raw_dwnlow'+str(0))
              plt.close(); del fig
 
        if 'dwnhi_fp' in locals():
 
-          for k in xrange(len(dwnhi_fp)):
+          if chunkmode!=4:
+             for k in xrange(len(dwnhi_fp)):
+                fig = plt.figure()
+                plt.imshow(dwnhi_fp[k],cmap='gray')
+                plt.axis('normal'); plt.axis('tight')
+                plt.xlabel('Ping Number (Time)')
+                plt.ylabel('Range (Distance)')
+
+                custom_save(sonpath,'raw_dwnhi'+str(k))
+                plt.close(); del fig
+
+          else:
              fig = plt.figure()
-             plt.imshow(dwnhi_fp[k],cmap='gray')
+             plt.imshow(dwnhi_fp,cmap='gray')
              plt.axis('normal'); plt.axis('tight')
              plt.xlabel('Ping Number (Time)')
              plt.ylabel('Range (Distance)')
 
-             custom_save(sonpath,'raw_dwnhi'+str(k))
+             custom_save(sonpath,'raw_dwnhi'+str(0))
              plt.close(); del fig
 
     if os.name=='posix': # true if linux/mac
@@ -1106,9 +1156,12 @@ def makechunks_simple(dat, numchunks):
    return humutils.sliding_window(dat,(Ny,Nx/int(numchunks)))                  
 
 # =========================================================
-def plot_2bedpicks(dat_port, dat_star, Zbed, Zdist, Zx, ft, shape_port, sonpath, k):
+def plot_2bedpicks(dat_port, dat_star, Zbed, Zdist, Zx, ft, shape_port, sonpath, k, chunkmode):
 
-   extent = shape_port[1] #np.shape(merge)[0]
+   if chunkmode != 4:
+      extent = shape_port[1] #np.shape(merge)[0]
+   else:
+      extent = shape_port[0]
 
    fig = plt.figure()
    fig.subplots_adjust(wspace = 0.1, hspace=0.1)
@@ -1131,15 +1184,18 @@ def plot_2bedpicks(dat_port, dat_star, Zbed, Zdist, Zx, ft, shape_port, sonpath,
    plt.plot(Zdist,Zbed/ft,'k')
    plt.plot(Zdist,Zx[:len(Zdist)]/ft,'r')
    plt.axis('normal'); plt.axis('tight')
-   plt.ylim(10,0)
+   plt.ylim(np.max(Zbed/ft)+5,0)
    plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
    custom_save(sonpath,'bed_2picks'+str(k))
    plt.close(); del fig
 
 # =========================================================
-def plot_bedpick(dat_port, dat_star, Zbed, Zdist, ft, shape_port, sonpath, k):
+def plot_bedpick(dat_port, dat_star, Zbed, Zdist, ft, shape_port, sonpath, k, chunkmode):
 
-   extent = shape_port[1] #np.shape(merge)[0]
+   if chunkmode != 4:
+      extent = shape_port[1] #np.shape(merge)[0]
+   else:
+      extent = shape_port[0]
 
    fig = plt.figure()
    plt.subplot(2,2,1)

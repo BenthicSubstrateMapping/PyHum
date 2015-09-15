@@ -272,13 +272,19 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
           with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'r') as ff:
              star_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_star))
 
-    extent = shape_star[1] #np.shape(data_port)[0]
+    if len(shape_star)==2:
+       extent = shape_star[0] 
+    else:
+       extent = shape_star[1] #np.shape(data_port)[0]
 
     bed = np.asarray(bed,'int')+int(0.25*ft)
 
     # calculate in dB
     ######### star
     Zt, R = remove_water(star_fp, bed, shape_star, dep_m, pix_m, 1,  maxW)
+
+    Zt = np.squeeze(Zt)
+    R = np.squeeze(R)
 
     # create memory mapped file for Z)
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'w+') as ff:
@@ -341,6 +347,8 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     Zt = remove_water(port_fp, bed, shape_port, dep_m, pix_m, 0,  maxW)
 
+    Zt = np.squeeze(Zt)
+
     # create memory mapped file for Z
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_l.dat')), 'w+') as ff:
        fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
@@ -380,14 +388,19 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
           with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lw.dat')), 'r') as ff:
               star_fpw = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
 
-          for p in xrange(len(star_fp)):
-             plot_merged_scans(port_fpw[p], star_fpw[p], dist_m, shape_port, ft, sonpath, p)
-
+          if len(np.shape(star_fpw))>2:
+             for p in xrange(len(star_fpw)):
+                plot_merged_scans(port_fpw[p], star_fpw[p], dist_m, shape_port, ft, sonpath, p)
+          else:
+             plot_merged_scans(port_fpw, star_fpw, dist_m, shape_port, ft, sonpath, 0)
 
        else:
 
-          for p in xrange(len(star_fp)):
-             plot_merged_scans(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p)
+          if len(np.shape(star_fp))>2:
+             for p in xrange(len(star_fp)):
+                plot_merged_scans(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p)
+          else:
+             plot_merged_scans(port_fp, star_fp, dist_m, shape_port, ft, sonpath, 0)
 
 
     # load memory mapped scans
@@ -442,6 +455,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     if 'low_fp' in locals():
        ######### low
        Zt = remove_water(low_fp, bed, shape_low, dep_m, pix_m, 0,  maxW)
+       Zt = np.squeeze(Zt)
 
        # create memory mapped file for Z
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow_l.dat')), 'w+') as ff:
@@ -473,8 +487,11 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
           #try:
           #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_dwnlow_scans)(low_fp[p], dist_m, shape_low, ft, sonpath, p) for p in xrange(len(low_fp)))
           #except:
-          for p in xrange(len(hi_fp)):
-             plot_dwnlow_scans(low_fp[p], dist_m, shape_low, ft, sonpath, p)
+          if len(np.shape(low_fp))>2:
+             for p in xrange(len(low_fp)):
+                plot_dwnlow_scans(low_fp[p], dist_m, shape_low, ft, sonpath, p)
+          else:
+             plot_dwnlow_scans(low_fp, dist_m, shape_low, ft, sonpath, 0)
 
           #for p in xrange(len(low_fp)):
           #   plot_dwnlow_scans(low_fp[p], dist_m, shape_low, ft, sonpath, p)
@@ -482,6 +499,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     if 'hi_fp' in locals():
        ######### hi
        Zt = remove_water(hi_fp, bed, shape_hi, dep_m, pix_m, 0,  maxW)
+       Zt = np.squeeze(Zt)
 
        # create memory mapped file for Z
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi_l.dat')), 'w+') as ff:
@@ -512,9 +530,11 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
           #try:
           #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_dwnhi_scans)(hi_fp[p], dist_m, shape_hi, ft, sonpath, p) for p in xrange(len(hi_fp)))
           #except:
-          for p in xrange(len(hi_fp)):
-             plot_dwnhi_scans(hi_fp[p], dist_m, shape_hi, ft, sonpath, p)
-
+          if len(np.shape(hi_fp))>2:
+             for p in xrange(len(hi_fp)):
+                plot_dwnhi_scans(hi_fp[p], dist_m, shape_hi, ft, sonpath, p)
+          else:
+             plot_dwnhi_scans(hi_fp, dist_m, shape_hi, ft, sonpath, 0)
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
@@ -536,26 +556,60 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
     if calcR==1:
        R = []
 
-    for p in xrange(len(fp)):
-       data_dB = fp[p]*(10*np.log10(maxW)/255)
+    if  len(np.shape(fp))>2:
+       for p in xrange(len(fp)):
+          data_dB = fp[p]*(10*np.log10(maxW)/255)
 
-       Zbed = np.squeeze(bed[shape[-1]*p:shape[-1]*(p+1)])
+          Zbed = np.squeeze(bed[shape[-1]*p:shape[-1]*(p+1)])
+
+          # shift proportionally depending on where the bed is
+          for k in xrange(np.shape(data_dB)[1]):
+             try:
+                data_dB[:,k] = np.r_[data_dB[Zbed[k]:,k], np.zeros( (np.shape(data_dB)[0] -  np.shape(data_dB[Zbed[k]:,k])[0] ,) )]
+             except:
+                data_dB[:,k] = np.ones(np.shape(data_dB)[0])
+
+          Zt.append(data_dB)    
+
+          if calcR ==1:
+             extent = shape[1]
+             yvec = np.linspace(pix_m,extent*pix_m,extent)
+             d = dep_m[shape[-1]*p:shape[-1]*(p+1)]
+
+             r = np.ones(np.shape(fp[p]))
+             for k in range(len(d)): 
+                r[:,k] = d[k]/yvec
+
+             # shift proportionally depending on where the bed is
+             for k in xrange(np.shape(r)[1]):
+                try:
+                   r[:,k] = np.r_[r[Zbed[k]:,k], np.zeros( (np.shape(r)[0] -  np.shape(r[Zbed[k]:,k])[0] ,) )]
+                except:
+                   r[:,k] = np.ones(np.shape(r)[0])
+
+             R.append(r)
+
+    else:
+
+       data_dB = fp*(10*np.log10(maxW)/255)
+
+       Zbed = np.squeeze(bed)
 
        # shift proportionally depending on where the bed is
        for k in xrange(np.shape(data_dB)[1]):
           try:
-             data_dB[:,k] = np.r_[data_dB[Zbed[k]:,k], np.zeros( (np.shape(data_dB)[0] -  np.shape(data_dB[Zbed[k]:,k])[0] ,) )]
+            data_dB[:,k] = np.r_[data_dB[Zbed[k]:,k], np.zeros( (np.shape(data_dB)[0] -  np.shape(data_dB[Zbed[k]:,k])[0] ,) )]
           except:
              data_dB[:,k] = np.ones(np.shape(data_dB)[0])
 
        Zt.append(data_dB)    
 
        if calcR ==1:
-          extent = shape[1]
+          extent = shape[0]
           yvec = np.linspace(pix_m,extent*pix_m,extent)
-          d = dep_m[shape[-1]*p:shape[-1]*(p+1)]
+          d = dep_m
 
-          r = np.ones(np.shape(fp[p]))
+          r = np.ones(np.shape(fp))
           for k in range(len(d)): 
              r[:,k] = d[k]/yvec
 
@@ -611,8 +665,12 @@ def do_ppdrc(fp, filtsize):
 # =========================================================
 def plot_merged_scans(dat_port, dat_star, dist_m, shape_port, ft, sonpath, p):
 
-   Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
-   extent = shape_port[1] #np.shape(merge)[0]
+   if len(shape_port)>2:
+      Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
+      extent = shape_port[1] #np.shape(merge)[0]
+   else:
+      Zdist = dist_m
+      extent = shape_port[0] #np.shape(merge)[0]
 
    fig = plt.figure()
    plt.imshow(np.vstack((np.flipud(dat_port), dat_star)), cmap='gray', extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)])
@@ -625,9 +683,13 @@ def plot_merged_scans(dat_port, dat_star, dist_m, shape_port, ft, sonpath, p):
 # =========================================================
 def plot_dwnlow_scans(dat_dwnlow, dist_m, shape_low, ft, sonpath, p):
 
-    Zdist = dist_m[shape_low[-1]*p:shape_low[-1]*(p+1)]
-    extent = shape_low[1] #np.shape(merge)[0]
-   
+    if len(shape_low)>2:
+       Zdist = dist_m[shape_low[-1]*p:shape_low[-1]*(p+1)]
+       extent = shape_low[1] #np.shape(merge)[0]
+    else:
+      Zdist = dist_m
+      extent = shape_low[0] #np.shape(merge)[0]  
+ 
     fig = plt.figure()
     plt.imshow(dat_dwnlow, cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
     plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
@@ -639,9 +701,13 @@ def plot_dwnlow_scans(dat_dwnlow, dist_m, shape_low, ft, sonpath, p):
 # =========================================================
 def plot_dwnhi_scans(dat_dwnhi, dist_m, shape_hi, ft, sonpath, p):
 
-    Zdist = dist_m[shape_hi[-1]*p:shape_hi[-1]*(p+1)]
-    extent = shape_hi[1] #np.shape(merge)[0]
-   
+    if len(shape_hi)>2:
+       Zdist = dist_m[shape_hi[-1]*p:shape_hi[-1]*(p+1)]
+       extent = shape_hi[1] #np.shape(merge)[0]
+    else:
+      Zdist = dist_m
+      extent = shape_hi[0] #np.shape(merge)[0]  
+    
     fig = plt.figure()
     plt.imshow(dat_dwnhi, cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
     plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
