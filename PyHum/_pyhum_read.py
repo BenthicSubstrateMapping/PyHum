@@ -150,6 +150,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        'd' - parse chunks based on distance, then number which is distance in m
        'p' - parse chunks based on number of pings, then number which is number of pings 
        'h' - parse chunks based on change in heading, then number which is the change in heading in degrees
+       '1' - process just 1 chunk
                    
     Returns
     ---------
@@ -271,6 +272,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           chunkmode=3
           chunkval = int(chunk[1:])
           print 'Chunks based on heading devation of %s degrees' % (str(chunkval))
+       elif chunk[0]=='1':          
+          chunkmode=4
+          print 'Only 1 chunk will be produced'
        else:
           print "Chunk mode not understood - should be 'd', 'p', or 'h' - using defaults"
           chunkmode=1
@@ -489,6 +493,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           chunkval = chunkval+1
           Zt, ind_port = makechunks_simple(data_port, nchunks) 
           
+       elif chunkmode==4:
+          Zt, ind_port = makechunks_simple(data_port, 1) 
+
        del data_port 
           
        # create memory mapped file for Z
@@ -547,6 +554,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           chunkval = chunkval+1
           Zt, ind_star = makechunks_simple(data_star, nchunks) 
                     
+       elif chunkmode==4:
+          Zt, ind_port = makechunks_simple(data_star, 1) 
+
        del data_star
 
        # create memory mapped file for Z
@@ -651,6 +661,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           chunkval = chunkval+1
           Zt, ind_low = makechunks_simple(data_dwnlow, nchunks) 
                      
+       elif chunkmode==4:
+          Zt, ind_port = makechunks_simple(data_dwnlow, 1) 
+
        del data_dwnlow
 
        # create memory mapped file for Z
@@ -705,6 +718,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           chunkval = chunkval+1
           Zt, ind_hi = makechunks_simple(data_dwnhi, nchunks) 
                    
+       elif chunkmode==4:
+          Zt, ind_port = makechunks_simple(data_dwnhi, 1) 
+
        del data_dwnhi
 
        # create memory mapped file for Z
