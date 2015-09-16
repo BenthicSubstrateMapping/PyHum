@@ -268,8 +268,13 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
          shape = shape_port.copy()
          shape[1] = shape_port[1] + shape_star[1]
       else:
-         shape = shape_port.copy()
-         shape[0] = shape_port[0] + shape_star[0]
+         #shape = shape_port.copy()
+         #shape[1] = shape_port[0] + shape_star[0]
+         shape = []
+         shape.append(1)
+         shape.append(shape_port[0])
+         shape.append(shape_port[1])
+         shape[1] = shape_port[0] + shape_star[0]
 
       # create memory mapped file for Sp
       #fp = np.memmap(sonpath+base+'_data_class.dat', dtype='float32', mode='w+', shape=tuple(shape))
@@ -347,6 +352,11 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             fp[p] = Sp.astype('float32')
             del Sp
 
+         del fp # flush data to file
+
+         #class_fp = np.memmap(sonpath+base+'_data_class.dat', dtype='float32', mode='r', shape=tuple(shape))
+         with open(os.path.normpath(os.path.join(sonpath,base+'_data_class_tmp.dat')), 'r') as ff:
+            class_fp = np.memmap(ff, dtype='float64', mode='r', shape=tuple(np.shape(Sp))) #shape=tuple(shape))
 
       else:
 
@@ -416,14 +426,13 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
             Sp = (Sp**2) * np.cos(R) / shift**2
 
-            fp = Sp.astype('float32')
+            with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'w+') as ff:
+               np.save(ff, np.squeeze(Sp).astype('float32'))
+
+            with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'r') as ff:
+               class_fp = np.load(ff)
+
             del Sp
-
-      del fp # flush data to file
-
-      #class_fp = np.memmap(sonpath+base+'_data_class.dat', dtype='float32', mode='r', shape=tuple(shape))
-      with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'r') as ff:
-         class_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
 
       dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
 
@@ -437,36 +446,60 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
          else:
             plot_class(dist_m, shape_port, port_fp, star_fp, class_fp, ft, humfile, sonpath, base, 0)
 
-         for p in xrange(len(star_fp)):
-            plot_contours(dist_m, shape_port, class_fp[p], ft, humfile, sonpath, base, numclasses, p)
-         
+         if len(shape_star)>2:
+            for p in xrange(len(star_fp)):
+               plot_contours(dist_m, shape_port, class_fp[p], ft, humfile, sonpath, base, numclasses, p)
+         else:
+            plot_contours(dist_m, shape_port, class_fp, ft, humfile, sonpath, base, numclasses, 0)
+        
 
       #######################################################
       # k-means 
       #fp = np.memmap(sonpath+base+'_data_kclass.dat', dtype='float32', mode='w+', shape=tuple(shape))
-      with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'w+') as ff:
-         fp = np.memmap(ff, dtype='float32', mode='w+', shape=tuple(shape))
+      
+      if len(shape_star)>2:
+         with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'w+') as ff:
+            fp = np.memmap(ff, dtype='float32', mode='w+', shape=tuple(shape))
 
-      for p in xrange(len(port_fp)):
-         Sk = class_fp[p].copy()
+         for p in xrange(len(port_fp)):
+            Sk = class_fp[p].copy()
+            Sk[np.isnan(Sk)] = 0
+            wc, values = humutils.cut_kmeans(Sk,numclasses+1)
+            wc[Sk==0] = np.nan
+            del Sk
+            fp[p] = wc.astype('float32')
+            del wc
+
+         del fp
+
+         #kclass_fp = np.memmap(sonpath+base+'_data_kclass.dat', dtype='float32', mode='r', shape=tuple(shape))
+         with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'r') as ff:
+            kclass_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
+            
+      else:
+      
+         Sk = class_fp.copy()
          Sk[np.isnan(Sk)] = 0
          wc, values = humutils.cut_kmeans(Sk,numclasses+1)
          wc[Sk==0] = np.nan
          del Sk
-         fp[p] = wc.astype('float32')
+         
+         with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'w+') as ff:
+            np.save(ff, np.squeeze(wc).astype('float32'))
+
          del wc
-
-      del fp
-
-      #kclass_fp = np.memmap(sonpath+base+'_data_kclass.dat', dtype='float32', mode='r', shape=tuple(shape))
-      with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'r') as ff:
-         kclass_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
-
+         
+         with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'r') as ff:
+            kclass_fp = np.load(ff)
+            
       ########################################################
       if doplot==1:
 
-         for p in xrange(len(star_fp)):
-            plot_kmeans(dist_m, shape_port, port_fp[p], star_fp[p], kclass_fp[p], ft, humfile, sonpath, base, p)
+         if len(shape_star)>2:
+            for p in xrange(len(star_fp)):
+               plot_kmeans(dist_m, shape_port, port_fp[p], star_fp[p], kclass_fp[p], ft, humfile, sonpath, base, p)
+         else:
+            plot_kmeans(dist_m, shape_port, port_fp, star_fp, kclass_fp, ft, humfile, sonpath, base, 0)         
 
       if os.name=='posix': # true if linux/mac
          elapsed = (time.time() - start)
@@ -546,8 +579,12 @@ def plot_class(dist_m, shape_port, dat_port, dat_star, dat_class, ft, humfile, s
 # =========================================================
 def plot_contours(dist_m, shape_port, dat_class, ft, humfile, sonpath, base, numclasses, p):
 
-   Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
-   extent = shape_port[1] 
+   if len(shape_port)>2:
+      Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
+      extent = shape_port[1]
+   else:
+      Zdist = dist_m
+      extent = shape_port[0]
 
    levels = np.linspace(np.nanmin(dat_class),np.nanmax(dat_class),numclasses+1)
 
@@ -572,8 +609,12 @@ def plot_contours(dist_m, shape_port, dat_class, ft, humfile, sonpath, base, num
 # =========================================================
 def plot_kmeans(dist_m, shape_port, dat_port, dat_star, dat_kclass, ft, humfile, sonpath, base, p):
 
-   Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
-   extent = shape_port[1] 
+   if len(shape_port)>2:
+      Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
+      extent = shape_port[1]
+   else:
+      Zdist = dist_m
+      extent = shape_port[0]
 
    levels = [0.5,0.75,1.25,1.5,1.75,2,3]
 
