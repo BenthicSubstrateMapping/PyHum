@@ -369,25 +369,25 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                 nans, y= humutils.nan_helper(rough)
                 rough[nans]= np.interp(y(nans), y(~nans), rough[~nans])
              except:
-                continue
+                pass
 
              try:
                 nans, y= humutils.nan_helper(hard)
                 hard[nans]= np.interp(y(nans), y(~nans), hard[~nans])
              except:
-                continue
+                pass
 
              try:
                 nans, y= humutils.nan_helper(sv_e1)
                 sv_e1[nans]= np.interp(y(nans), y(~nans), sv_e1[~nans])
              except:
-                continue
+                pass
 
              try:
                 nans, y= humutils.nan_helper(sv_e2)
                 sv_e2[nans]= np.interp(y(nans), y(~nans), sv_e2[~nans])
              except:
-                continue
+                pass
 
              data = np.column_stack([sv_e1, sv_e2])
              k_means = MiniBatchKMeans(numclusters)
@@ -621,25 +621,25 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                 nans, y= humutils.nan_helper(rough)
                 rough[nans]= np.interp(y(nans), y(~nans), rough[~nans])
              except:
-                continue
+                pass
 
              try:
                 nans, y= humutils.nan_helper(hard)
                 hard[nans]= np.interp(y(nans), y(~nans), hard[~nans])
              except:
-                continue
+                pass
 
              try:
                 nans, y= humutils.nan_helper(sv_e1)
                 sv_e1[nans]= np.interp(y(nans), y(~nans), sv_e1[~nans])
              except:
-                continue
+                pass
 
              try:
                 nans, y= humutils.nan_helper(sv_e2)
                 sv_e2[nans]= np.interp(y(nans), y(~nans), sv_e2[~nans])
              except:
-                continue
+                pass
 
              data = np.column_stack([sv_e1, sv_e2])
              k_means = MiniBatchKMeans(numclusters)
