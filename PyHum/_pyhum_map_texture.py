@@ -737,6 +737,8 @@ def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mo
 # =========================================================
 def getmesh(minX, maxX, minY, maxY, res):
 
+   orig_res = res
+   
    complete=0
    while complete==0:
       try:
@@ -744,6 +746,8 @@ def getmesh(minX, maxX, minY, maxY, res):
          if 'grid_x' in locals(): 
             complete=1 
       except:
+         if np.isinf(res):
+            res = orig_res
          print "memory error: trying grid resolution of %s" % (str(res*2))
          res = res*2
          
