@@ -220,6 +220,8 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
        print 'Threshold number of standard deviations in texture lengthscale per grid cell up to which to accept: %s' % (str(numstdevs))             
 
 
+    print res
+
     trans =  pyproj.Proj(init=cs2cs_args)
 
     # if son path name supplied has no separator at end, put one on
@@ -342,10 +344,14 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
              orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat)
              
+             print res
+                          
              sigmas = 1 #m
              eps = 2
-             dat = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs)
+             dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs)
 
+             print res
+             
           if dogrid==1:
              dat[dat==0] = np.nan
              dat[np.isinf(dat)] = np.nan
@@ -388,7 +394,11 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
              orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat)
 
-             dat = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs)
+             print res
+             
+             dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs)
+             
+             print res
 
           if dogrid==1:
              dat[dat==0] = np.nan
@@ -455,7 +465,9 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
              
           sigmas = 1 #m
           eps = 2
-          dat = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs)
+          dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs)
+          
+          print res
 
        if dogrid==1:
           dat[dat==0] = np.nan
@@ -636,7 +648,7 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
     dat = dat2
     del dat2
 
-    return dat
+    return dat, res
 
 # =========================================================
 def get_griddefs(minX, maxX, minY, maxY, res, humlon, humlat):  
