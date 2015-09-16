@@ -651,12 +651,10 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
 
 # =========================================================
 def get_griddefs(minX, maxX, minY, maxY, res, humlon, humlat):  
-
-    orig_res = res
    
-    complete=0
-    while complete==0:
-       try:
+#    complete=0
+#    while complete==0:
+#       try:
           grid_x, grid_y, res = getmesh(minX, maxX, minY, maxY, res)
           #del X, Y
           longrid, latgrid = trans(grid_x, grid_y, inverse=True)
@@ -670,11 +668,9 @@ def get_griddefs(minX, maxX, minY, maxY, res, humlon, humlat):
           #del humlat, humlon
           if 'orig_def' in locals(): 
              complete=1 
-       except:
-          if np.isinf(res):
-            res = orig_res
-          print "memory error: trying grid resolution of %s" % (str(res*2))
-          res = res*2
+#       except:
+#          print "memory error: trying grid resolution of %s" % (str(res*2))
+#          res = res*2
                    
     return orig_def, targ_def, grid_x, grid_y, res, shape
 
@@ -701,12 +697,10 @@ def trim_xys(X, Y, merge, index):
           
 # =========================================================
 def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mode):
-
-   orig_res = res
    
-   complete=0
-   while complete==0:
-      try: 
+#   complete=0
+#   while complete==0:
+#      try: 
          grid_x, grid_y, res = getmesh(minX, maxX, minY, maxY, res)
          longrid, latgrid = trans(grid_x, grid_y, inverse=True)
          shape = np.shape(grid_x)
@@ -724,32 +718,26 @@ def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mo
          else:
             dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
  
-         if 'dat' in locals(): 
-            complete=1 
-      except:
-         if np.isinf(res):
-            res = orig_res
-         print "memory error: trying grid resolution of %s" % (str(res*2))
-         res = res*2
+#         if 'dat' in locals(): 
+#            complete=1 
+#      except:
+#         print "memory error: trying grid resolution of %s" % (str(res*2))
+#         res = res*2
 
    return dat, stdev, counts, res, complete
 
 # =========================================================
 def getmesh(minX, maxX, minY, maxY, res):
-
-   orig_res = res
    
-   complete=0
-   while complete==0:
-      try:
+#   complete=0
+#   while complete==0:
+#      try:
          grid_x, grid_y = np.meshgrid( np.arange(minX, maxX, res), np.arange(minY, maxY, res) )
          if 'grid_x' in locals(): 
             complete=1 
-      except:
-         if np.isinf(res):
-            res = orig_res
-         print "memory error: trying grid resolution of %s" % (str(res*2))
-         res = res*2
+#      except:
+#         print "memory error: trying grid resolution of %s" % (str(res*2))
+#         res = res*2
          
    return grid_x, grid_y, res
 
