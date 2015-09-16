@@ -652,6 +652,8 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
 # =========================================================
 def get_griddefs(minX, maxX, minY, maxY, res, humlon, humlat):  
 
+    orig_res = res
+   
     complete=0
     while complete==0:
        try:
@@ -669,6 +671,8 @@ def get_griddefs(minX, maxX, minY, maxY, res, humlon, humlat):
           if 'orig_def' in locals(): 
              complete=1 
        except:
+          if np.isinf(res):
+            res = orig_res
           print "memory error: trying grid resolution of %s" % (str(res*2))
           res = res*2
                    
