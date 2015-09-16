@@ -220,8 +220,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
        print 'Threshold number of standard deviations in texture lengthscale per grid cell up to which to accept: %s' % (str(numstdevs))             
 
 
-    print res
-
     trans =  pyproj.Proj(init=cs2cs_args)
 
     # if son path name supplied has no separator at end, put one on
@@ -343,13 +341,10 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           if dogrid==1:
 
              orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
-             print res
                           
              sigmas = 1 #m
              eps = 2
              dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans)
-
-             print res
              
           if dogrid==1:
              dat[dat==0] = np.nan
@@ -392,12 +387,9 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           if dogrid==1:
 
              orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
-
-             print res
              
              dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans)
-             
-             print res
+            
 
           if dogrid==1:
              dat[dat==0] = np.nan
@@ -466,7 +458,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           eps = 2
           dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans)
           
-          print res
 
        if dogrid==1:
           dat[dat==0] = np.nan
@@ -652,9 +643,9 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
 # =========================================================
 def get_griddefs(minX, maxX, minY, maxY, res, humlon, humlat, trans):  
    
-#    complete=0
-#    while complete==0:
-#       try:
+    complete=0
+    while complete==0:
+       try:
           grid_x, grid_y, res = getmesh(minX, maxX, minY, maxY, res)
           #del X, Y
           longrid, latgrid = trans(grid_x, grid_y, inverse=True)
@@ -668,11 +659,11 @@ def get_griddefs(minX, maxX, minY, maxY, res, humlon, humlat, trans):
           #del humlat, humlon
           if 'orig_def' in locals(): 
              complete=1 
-#       except:
-#          print "memory error: trying grid resolution of %s" % (str(res*2))
-#          res = res*2
+       except:
+          print "memory error: trying grid resolution of %s" % (str(res*2))
+          res = res*2
                    
-          return orig_def, targ_def, grid_x, grid_y, res, shape
+    return orig_def, targ_def, grid_x, grid_y, res, shape
 
 # =========================================================
 def trim_xys(X, Y, merge, index):
@@ -698,9 +689,9 @@ def trim_xys(X, Y, merge, index):
 # =========================================================
 def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mode, trans):
    
-#   complete=0
-#   while complete==0:
-#      try: 
+   complete=0
+   while complete==0:
+      try: 
          grid_x, grid_y, res = getmesh(minX, maxX, minY, maxY, res)
          longrid, latgrid = trans(grid_x, grid_y, inverse=True)
          shape = np.shape(grid_x)
@@ -718,28 +709,28 @@ def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mo
          else:
             dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
  
-#         if 'dat' in locals(): 
-#            complete=1 
-#      except:
-#         print "memory error: trying grid resolution of %s" % (str(res*2))
-#         res = res*2
+         if 'dat' in locals(): 
+            complete=1 
+      except:
+         print "memory error: trying grid resolution of %s" % (str(res*2))
+         res = res*2
 
-         return dat, stdev, counts, res, complete
+   return dat, stdev, counts, res, complete
 
 # =========================================================
 def getmesh(minX, maxX, minY, maxY, res):
    
-#   complete=0
-#   while complete==0:
-#      try:
+   complete=0
+   while complete==0:
+      try:
          grid_x, grid_y = np.meshgrid( np.arange(minX, maxX, res), np.arange(minY, maxY, res) )
          if 'grid_x' in locals(): 
             complete=1 
-#      except:
-#         print "memory error: trying grid resolution of %s" % (str(res*2))
-#         res = res*2
+      except:
+         print "memory error: trying grid resolution of %s" % (str(res*2))
+         res = res*2
          
-         return grid_x, grid_y, res
+   return grid_x, grid_y, res
 
 # =========================================================
 def getxy(e, n, yvec, d, t,extent):

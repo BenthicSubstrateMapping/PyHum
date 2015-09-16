@@ -303,15 +303,27 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
        ft = (np.pi/2)*(1/theta3dB)
        bed = ft*dep
 
-       i = np.linspace(1,shape_hi[0]*shape_hi[2], len(bed)) 
-       #np.shape(beam_data)[1],len(bed))
-       #bedi = np.interp(np.linspace(1,np.shape(beam_data)[1],np.shape(beam_data)[1]), i, bed)
-       bedi = np.interp(np.linspace(1,shape_hi[0]*shape_hi[2],shape_hi[0]*shape_hi[2]), i, bed)  
-       ei = np.interp(np.linspace(1,shape_hi[0]*shape_hi[2],shape_hi[0]*shape_hi[2]), i, es)    
-       ni = np.interp(np.linspace(1,shape_hi[0]*shape_hi[2],shape_hi[0]*shape_hi[2]), i, ns)    
-       lati = np.interp(np.linspace(1,shape_hi[0]*shape_hi[2],shape_hi[0]*shape_hi[2]), i, lat)   
-       loni = np.interp(np.linspace(1,shape_hi[0]*shape_hi[2],shape_hi[0]*shape_hi[2]), i, lon)    
-       del i
+       if len(shape_hi)>2:    
+          i = np.linspace(1,shape_hi[0]*shape_hi[2], len(bed)) 
+          #np.shape(beam_data)[1],len(bed))
+          #bedi = np.interp(np.linspace(1,np.shape(beam_data)[1],np.shape(beam_data)[1]), i, bed)
+          bedi = np.interp(np.linspace(1,shape_hi[0]*shape_hi[2],shape_hi[0]*shape_hi[2]), i, bed)  
+          ei = np.interp(np.linspace(1,shape_hi[0]*shape_hi[2],shape_hi[0]*shape_hi[2]), i, es)    
+          ni = np.interp(np.linspace(1,shape_hi[0]*shape_hi[2],shape_hi[0]*shape_hi[2]), i, ns)    
+          lati = np.interp(np.linspace(1,shape_hi[0]*shape_hi[2],shape_hi[0]*shape_hi[2]), i, lat)   
+          loni = np.interp(np.linspace(1,shape_hi[0]*shape_hi[2],shape_hi[0]*shape_hi[2]), i, lon)    
+          del i
+       else:
+          i = np.linspace(1,shape_hi[1], len(bed)) 
+          #np.shape(beam_data)[1],len(bed))
+          #bedi = np.interp(np.linspace(1,np.shape(beam_data)[1],np.shape(beam_data)[1]), i, bed)
+          bedi = np.interp(np.linspace(1,shape_hi[1],shape_hi[1]), i, bed)  
+          ei = np.interp(np.linspace(1,shape_hi[1],shape_hi[1]), i, es)    
+          ni = np.interp(np.linspace(1,shape_hi[1],shape_hi[1]), i, ns)    
+          lati = np.interp(np.linspace(1,shape_hi[1],shape_hi[1]), i, lat)   
+          loni = np.interp(np.linspace(1,shape_hi[1],shape_hi[1]), i, lon)    
+          del i 
+          
        bedi = np.asarray(bedi,'int')
 
        depi = ((1/ft)*bedi) 
@@ -322,256 +334,509 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
        #absorption = calcAb(c, ph, salinity, temp, np.asarray(depi), transfreq)
        absorption = water_atten(np.asarray(depi), transfreq, c, ph, temp, salinity)
 
-       for p in xrange(len(dwnhi_fp)):
-          #make an index of every other record
-          ind = range(0,np.shape(dwnhi_fp[p])[1])
+       if len(shape_hi)>2:    
+          for p in xrange(len(dwnhi_fp)):
+             #make an index of every other record
+             ind = range(0,np.shape(dwnhi_fp[p])[1])
 
-          Zdepi = depi[shape_hi[2]*p:shape_hi[2]*(p+1)]
-          Zabsorp = absorption[shape_hi[2]*p:shape_hi[2]*(p+1)]
-          Zlat = lati[shape_hi[2]*p:shape_hi[2]*(p+1)]
-          Zlon = loni[shape_hi[2]*p:shape_hi[2]*(p+1)]       
-          Zes = ei[shape_hi[2]*p:shape_hi[2]*(p+1)]
-          Zns = ni[shape_hi[2]*p:shape_hi[2]*(p+1)]       
+             Zdepi = depi[shape_hi[2]*p:shape_hi[2]*(p+1)]
+             Zabsorp = absorption[shape_hi[2]*p:shape_hi[2]*(p+1)]
+             Zlat = lati[shape_hi[2]*p:shape_hi[2]*(p+1)]
+             Zlon = loni[shape_hi[2]*p:shape_hi[2]*(p+1)]       
+             Zes = ei[shape_hi[2]*p:shape_hi[2]*(p+1)]
+             Zns = ni[shape_hi[2]*p:shape_hi[2]*(p+1)]       
                 
-          try: #parallel processing with all available cores
-            w = Parallel(n_jobs=-1, verbose=0)(delayed(get_rgh_hrd)(dwnhi_fp[p][:,i],Zdepi[i],Zabsorp[i],c,nf,transfreq,equivbeam,maxW,pi,ft) for i in ind)
-          except: #fall back to serial
-            w = Parallel(n_jobs=1, verbose=0)(delayed(get_rgh_hrd)(dwnhi_fp[p][:,i],Zdepi[i],Zabsorp[i],c,nf,transfreq,equivbeam,maxW,pi,ft) for i in ind)
+             try: #parallel processing with all available cores
+               w = Parallel(n_jobs=-1, verbose=0)(delayed(get_rgh_hrd)(dwnhi_fp[p][:,i],Zdepi[i],Zabsorp[i],c,nf,transfreq,equivbeam,maxW,pi,ft) for i in ind)
+             except: #fall back to serial
+               w = Parallel(n_jobs=1, verbose=0)(delayed(get_rgh_hrd)(dwnhi_fp[p][:,i],Zdepi[i],Zabsorp[i],c,nf,transfreq,equivbeam,maxW,pi,ft) for i in ind)
 
-          rough, hard, sv_e1, sv_e2, e1a, e1b, e2a, e2b = zip(*w) 
+             rough, hard, sv_e1, sv_e2, e1a, e1b, e2a, e2b = zip(*w) 
 
-          rough = np.array(rough,'float')
-          rough[rough==0.0] = np.nan
+             rough = np.array(rough,'float')
+             rough[rough==0.0] = np.nan
 
-          hard = np.array(hard,'float')
-          hard[hard==0.0] = np.nan
+             hard = np.array(hard,'float')
+             hard[hard==0.0] = np.nan
 
-          sv_e1 = np.array(sv_e1,'float')
-          sv_e1[sv_e1==0.0] = np.nan
+             sv_e1 = np.array(sv_e1,'float')
+             sv_e1[sv_e1==0.0] = np.nan
 
-          sv_e2 = np.array(sv_e2,'float')
-          sv_e2[sv_e2==0.0] = np.nan
+             sv_e2 = np.array(sv_e2,'float')
+             sv_e2[sv_e2==0.0] = np.nan
 
-          try:
-             nans, y= humutils.nan_helper(rough)
-             rough[nans]= np.interp(y(nans), y(~nans), rough[~nans])
-          except:
-             continue
+             try:
+                nans, y= humutils.nan_helper(rough)
+                rough[nans]= np.interp(y(nans), y(~nans), rough[~nans])
+             except:
+                continue
 
-          try:
-             nans, y= humutils.nan_helper(hard)
-             hard[nans]= np.interp(y(nans), y(~nans), hard[~nans])
-          except:
-             continue
+             try:
+                nans, y= humutils.nan_helper(hard)
+                hard[nans]= np.interp(y(nans), y(~nans), hard[~nans])
+             except:
+                continue
 
-          try:
-             nans, y= humutils.nan_helper(sv_e1)
-             sv_e1[nans]= np.interp(y(nans), y(~nans), sv_e1[~nans])
-          except:
-             continue
+             try:
+                nans, y= humutils.nan_helper(sv_e1)
+                sv_e1[nans]= np.interp(y(nans), y(~nans), sv_e1[~nans])
+             except:
+                continue
 
-          try:
-             nans, y= humutils.nan_helper(sv_e2)
-             sv_e2[nans]= np.interp(y(nans), y(~nans), sv_e2[~nans])
-          except:
-             continue
+             try:
+                nans, y= humutils.nan_helper(sv_e2)
+                sv_e2[nans]= np.interp(y(nans), y(~nans), sv_e2[~nans])
+             except:
+                continue
 
-          data = np.column_stack([sv_e1, sv_e2])
-          k_means = MiniBatchKMeans(numclusters)
-          # fit the model
-          k_means.fit(data) 
-          values = k_means.cluster_centers_.squeeze()
-          labels = k_means.labels_
+             data = np.column_stack([sv_e1, sv_e2])
+             k_means = MiniBatchKMeans(numclusters)
+             # fit the model
+             k_means.fit(data) 
+             values = k_means.cluster_centers_.squeeze()
+             labels = k_means.labels_
     
-          hardav = humutils.runningMeanFast(hard,integ)
-          roughav = humutils.runningMeanFast(rough,integ)
+             hardav = humutils.runningMeanFast(hard,integ)
+             roughav = humutils.runningMeanFast(rough,integ)
 
-          #f = open(sonpath+base+'rough_and_hard'+str(p)+'.csv', 'wt')
-          f = open(os.path.normpath(os.path.join(sonpath,base+'rough_and_hard'+str(p)+'.csv')), 'wt')
-          writer = csv.writer(f)
-          writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth', 'roughness', 'hardness', 'average roughness', 'average hardness','k-mean label') )
-          for i in range(0, len(rough)):
-             writer.writerow(( float(Zlon[i]),float(Zlat[i]),float(Zes[i]),float(Zns[i]),float(Zdepi[i]),float(rough[i]),float(hard[i]),float(roughav[i]),float(hardav[i]), labels[i].astype(int) ))
-          f.close()
+             #f = open(sonpath+base+'rough_and_hard'+str(p)+'.csv', 'wt')
+             f = open(os.path.normpath(os.path.join(sonpath,base+'rough_and_hard'+str(p)+'.csv')), 'wt')
+             writer = csv.writer(f)
+             writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth', 'roughness', 'hardness', 'average roughness', 'average hardness','k-mean label') )
+             for i in range(0, len(rough)):
+                writer.writerow(( float(Zlon[i]),float(Zlat[i]),float(Zes[i]),float(Zns[i]),float(Zdepi[i]),float(rough[i]),float(hard[i]),float(roughav[i]),float(hardav[i]), labels[i].astype(int) ))
+             f.close()
 
-          if doplot==1:
-             try:
+             if doplot==1:
+                try:
 
-                fig = plt.figure()
-                plt.imshow(dwnhi_fp[p], cmap='gray')
-                plt.plot(e1a,'r');
-                plt.plot(e1b,'y');
-                plt.plot(e2a,'c');
-                plt.plot(e2b,'m');
-                plt.axis('tight')
-                #plt.show()
-                custom_save(sonpath,'e1e2_scan'+str(p))
-                del fig
+                   fig = plt.figure()
+                   plt.imshow(dwnhi_fp[p], cmap='gray')
+                   plt.plot(e1a,'r');
+                   plt.plot(e1b,'y');
+                   plt.plot(e2a,'c');
+                   plt.plot(e2b,'m');
+                   plt.axis('tight')
+                   #plt.show()
+                   custom_save(sonpath,'e1e2_scan'+str(p))
+                   del fig
 
-             except:
-                print "plot could not be produced"
+                except:
+                   print "plot could not be produced"
 
-          if doplot==1:
-             try:
+             if doplot==1:
+                try:
 
-                fig = plt.figure()
-                fig.subplots_adjust(wspace = 0.4, hspace=0.4)
-                plt.subplot(221)   
-                plt.plot(sv_e1[labels==0],sv_e2[labels==0],'ko');
-                plt.plot(sv_e1[labels==1],sv_e2[labels==1],'ro');
-                plt.plot(sv_e1[labels==2],sv_e2[labels==2],'bo');
-                plt.xlabel('SV1'); plt.ylabel('SV2')
-                plt.xlim(0,1); plt.ylim(0,1)
+                   fig = plt.figure()
+                   fig.subplots_adjust(wspace = 0.4, hspace=0.4)
+                   plt.subplot(221)   
+                   plt.plot(sv_e1[labels==0],sv_e2[labels==0],'ko');
+                   plt.plot(sv_e1[labels==1],sv_e2[labels==1],'ro');
+                   plt.plot(sv_e1[labels==2],sv_e2[labels==2],'bo');
+                   plt.xlabel('SV1'); plt.ylabel('SV2')
+                   plt.xlim(0,1); plt.ylim(0,1)
 
-                plt.subplot(222)   
-                plt.plot(rough[labels==0],hard[labels==0],'ko');
-                plt.plot(rough[labels==1],hard[labels==1],'ro');
-                plt.plot(rough[labels==2],hard[labels==2],'bo');
-                plt.xlabel('E1'); plt.ylabel('E2')
-                plt.xlim(1,8); plt.ylim(1,8)
-                #plt.show()
-                custom_save(sonpath,'e1e2_kmeans'+str(p))
-                del fig
+                   plt.subplot(222)   
+                   plt.plot(rough[labels==0],hard[labels==0],'ko');
+                   plt.plot(rough[labels==1],hard[labels==1],'ro');
+                   plt.plot(rough[labels==2],hard[labels==2],'bo');
+                   plt.xlabel('E1'); plt.ylabel('E2')
+                   plt.xlim(1,8); plt.ylim(1,8)
+                   #plt.show()
+                   custom_save(sonpath,'e1e2_kmeans'+str(p))
+                   del fig
 
-             except:
-                print "plot could not be produced"
+                except:
+                   print "plot could not be produced"
 
-          if doplot==1:
-             try:
+             if doplot==1:
+                try:
 
-                fig = plt.figure()
-                s=plt.scatter(Zes[labels==0],Zns[labels==0],marker='o',c='k', s=10, linewidth=0, vmin=0, vmax=8);
-                s=plt.scatter(Zes[labels==1],Zns[labels==1],marker='o',c='r', s=10, linewidth=0, vmin=0, vmax=8);
-                s=plt.scatter(Zes[labels==2],Zns[labels==2],marker='o',c='b', s=10, linewidth=0, vmin=0, vmax=8);
-                custom_save(sonpath,'rgh_hard_kmeans'+str(p))
-                del fig
+                   fig = plt.figure()
+                   s=plt.scatter(Zes[labels==0],Zns[labels==0],marker='o',c='k', s=10, linewidth=0, vmin=0, vmax=8);
+                   s=plt.scatter(Zes[labels==1],Zns[labels==1],marker='o',c='r', s=10, linewidth=0, vmin=0, vmax=8);
+                   s=plt.scatter(Zes[labels==2],Zns[labels==2],marker='o',c='b', s=10, linewidth=0, vmin=0, vmax=8);
+                   custom_save(sonpath,'rgh_hard_kmeans'+str(p))
+                   del fig
 
-             except:
-                print "plot could not be produced"
+                except:
+                   print "plot could not be produced"
 
-          if doplot==1:
-             try:
+             if doplot==1:
+                try:
 
-                print "drawing and printing map ..."
-                fig = plt.figure(frameon=False)
-                #fig.subplots_adjust(wspace = 0.4, hspace=0.4)
-                map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #epsg=26949,
-                   resolution = 'i', #h #f
-                   llcrnrlon=np.min(Zlon)-0.0001, llcrnrlat=np.min(Zlat)-0.0001,
-                   urcrnrlon=np.max(Zlon)+0.0001, urcrnrlat=np.max(Zlat)+0.0001)
+                   print "drawing and printing map ..."
+                   fig = plt.figure(frameon=False)
+                   #fig.subplots_adjust(wspace = 0.4, hspace=0.4)
+                   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #epsg=26949,
+                      resolution = 'i', #h #f
+                      llcrnrlon=np.min(Zlon)-0.0001, llcrnrlat=np.min(Zlat)-0.0001,
+                      urcrnrlon=np.max(Zlon)+0.0001, urcrnrlat=np.max(Zlat)+0.0001)
 
-                # draw point cloud
-                x,y = map.projtran(Zlon, Zlat)
+                   # draw point cloud
+                   x,y = map.projtran(Zlon, Zlat)
 
-                cs = map.scatter(x.flatten(), y.flatten(), 1, rough.flatten(), linewidth=0, vmin=0, vmax=8)
+                   cs = map.scatter(x.flatten(), y.flatten(), 1, rough.flatten(), linewidth=0, vmin=0, vmax=8)
 
-                map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+                   map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
   
-                cbar = map.colorbar(cs,location='bottom',pad="5%")
-                cbar.set_label('E1')
-                cbar.set_ticks([0,2,4,6,8])
+                   cbar = map.colorbar(cs,location='bottom',pad="5%")
+                   cbar.set_label('E1')
+                   cbar.set_ticks([0,2,4,6,8])
 
-                custom_save(sonpath,'map_rgh'+str(p))
-                del fig 
+                   custom_save(sonpath,'map_rgh'+str(p))
+                   del fig 
 
-             except:
-                print "plot could not be produced"
+                except:
+                   print "plot could not be produced"
 
-          if doplot==1:
+             if doplot==1:
+                try:
+                   fig = plt.figure()
+                   #fig.subplots_adjust(wspace = 0.4, hspace=0.4)
+                   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1],
+                      resolution = 'i', #h #f
+                      llcrnrlon=np.min(Zlon)-0.0001, llcrnrlat=np.min(Zlat)-0.0001,
+                      urcrnrlon=np.max(Zlon)+0.0001, urcrnrlat=np.max(Zlat)+0.0001)
+
+                   # draw point cloud
+                   x,y = map.projtran(Zlon, Zlat)
+
+                   cs = map.scatter(x.flatten(), y.flatten(), 1, hard.flatten(), linewidth=0, vmin=0, vmax=8)
+
+                   map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+
+                   cbar = map.colorbar(cs,location='bottom',pad="5%")
+                   cbar.set_label('E2')
+                   cbar.set_ticks([0,2,4,6,8])
+
+                   custom_save(sonpath,'map_hard'+str(p))
+                   del fig 
+
+                except:
+                   print "plot could not be produced"
+
+             if doplot==1:
+                try:
+                   print "drawing and printing map ..."
+                   fig = plt.figure(frameon=False)
+                   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
+                    resolution = 'i', #h #f
+                    llcrnrlon=np.min(Zlon)-0.001, llcrnrlat=np.min(Zlat)-0.001,
+                    urcrnrlon=np.max(Zlon)+0.001, urcrnrlat=np.max(Zlat)+0.001)
+
+                   ax = plt.Axes(fig, [0., 0., 1., 1.], )
+                   ax.set_axis_off()
+                   fig.add_axes(ax)
+
+                   ## draw point cloud
+                   x,y = map.projtran(Zlon, Zlat)
+                   map.scatter(x.flatten(), y.flatten(), 1, rough.flatten(), linewidth = '0', vmin=0, vmax=8)
+
+                   custom_save(sonpath,'Rough'+str(p))
+                   del fig 
+
+                   kml = simplekml.Kml()
+                   ground = kml.newgroundoverlay(name='GroundOverlay')
+                   ground.icon.href = 'Rough'+str(p)+'.png'
+                   ground.latlonbox.north = np.min(Zlat)-0.001
+                   ground.latlonbox.south = np.max(Zlat)+0.001
+                   ground.latlonbox.east =  np.max(Zlon)+0.001
+                   ground.latlonbox.west =  np.min(Zlon)-0.001
+                   ground.latlonbox.rotation = 0
+
+                   #kml.save(sonpath+'Rough'+str(p)+'.kml')
+                   kml.save(os.path.normpath(os.path.join(sonpath,'Rough'+str(p)+'.kml')))
+
+                except:
+                   print "plot could not be produced"
+
+             if doplot==1:
+                try:
+                   print "drawing and printing map ..."
+                   fig = plt.figure(frameon=False)
+                   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
+                    resolution = 'i', #h #f
+                    llcrnrlon=np.min(Zlon)-0.001, llcrnrlat=np.min(Zlat)-0.001,
+                    urcrnrlon=np.max(Zlon)+0.001, urcrnrlat=np.max(Zlat)+0.001)
+
+                   ax = plt.Axes(fig, [0., 0., 1., 1.], )
+                   ax.set_axis_off()
+                   fig.add_axes(ax)
+
+                   ## draw point cloud
+                   x,y = map.projtran(Zlon, Zlat)
+                   map.scatter(x.flatten(), y.flatten(), 1, hard.flatten(), linewidth = '0', vmin=0, vmax=8)
+
+                   custom_save(sonpath,'Hard'+str(p))
+                   del fig 
+
+                   kml = simplekml.Kml()
+                   ground = kml.newgroundoverlay(name='GroundOverlay')
+                   ground.icon.href = 'Hard'+str(p)+'.png'
+                   ground.latlonbox.north = np.min(Zlat)-0.001
+                   ground.latlonbox.south = np.max(Zlat)+0.001
+                   ground.latlonbox.east =  np.max(Zlon)+0.001
+                   ground.latlonbox.west =  np.min(Zlon)-0.001
+                   ground.latlonbox.rotation = 0
+
+                   #kml.save(sonpath+'Hard'+str(p)+'.kml')
+                   kml.save(os.path.normpath(os.path.join(sonpath,'Hard'+str(p)+'.kml')))
+
+                except:
+                   print "plot could not be produced"
+
+       else:
+          if 2 > 1: # need to tiday all this up later!!
+             #make an index of every other record
+             ind = range(0,np.shape(dwnhi_fp)[1])
+
+             Zdepi = depi
+             Zabsorp = absorption
+             Zlat = lati
+             Zlon = loni       
+             Zes = ei
+             Zns = ni      
+                
+             try: #parallel processing with all available cores
+               w = Parallel(n_jobs=-1, verbose=0)(delayed(get_rgh_hrd)(dwnhi_fp[:,i],Zdepi[i],Zabsorp[i],c,nf,transfreq,equivbeam,maxW,pi,ft) for i in ind)
+             except: #fall back to serial
+               w = Parallel(n_jobs=1, verbose=0)(delayed(get_rgh_hrd)(dwnhi_fp[:,i],Zdepi[i],Zabsorp[i],c,nf,transfreq,equivbeam,maxW,pi,ft) for i in ind)
+
+             rough, hard, sv_e1, sv_e2, e1a, e1b, e2a, e2b = zip(*w) 
+
+             rough = np.array(rough,'float')
+             rough[rough==0.0] = np.nan
+
+             hard = np.array(hard,'float')
+             hard[hard==0.0] = np.nan
+
+             sv_e1 = np.array(sv_e1,'float')
+             sv_e1[sv_e1==0.0] = np.nan
+
+             sv_e2 = np.array(sv_e2,'float')
+             sv_e2[sv_e2==0.0] = np.nan
+
              try:
-                fig = plt.figure()
-                #fig.subplots_adjust(wspace = 0.4, hspace=0.4)
-                map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1],
-                   resolution = 'i', #h #f
-                   llcrnrlon=np.min(Zlon)-0.0001, llcrnrlat=np.min(Zlat)-0.0001,
-                   urcrnrlon=np.max(Zlon)+0.0001, urcrnrlat=np.max(Zlat)+0.0001)
-
-                # draw point cloud
-                x,y = map.projtran(Zlon, Zlat)
-
-                cs = map.scatter(x.flatten(), y.flatten(), 1, hard.flatten(), linewidth=0, vmin=0, vmax=8)
-
-                map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
-
-                cbar = map.colorbar(cs,location='bottom',pad="5%")
-                cbar.set_label('E2')
-                cbar.set_ticks([0,2,4,6,8])
-
-                custom_save(sonpath,'map_hard'+str(p))
-                del fig 
-
+                nans, y= humutils.nan_helper(rough)
+                rough[nans]= np.interp(y(nans), y(~nans), rough[~nans])
              except:
-                print "plot could not be produced"
+                continue
 
-          if doplot==1:
              try:
-                print "drawing and printing map ..."
-                fig = plt.figure(frameon=False)
-                map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
-                 resolution = 'i', #h #f
-                 llcrnrlon=np.min(Zlon)-0.001, llcrnrlat=np.min(Zlat)-0.001,
-                 urcrnrlon=np.max(Zlon)+0.001, urcrnrlat=np.max(Zlat)+0.001)
-
-                ax = plt.Axes(fig, [0., 0., 1., 1.], )
-                ax.set_axis_off()
-                fig.add_axes(ax)
-
-                ## draw point cloud
-                x,y = map.projtran(Zlon, Zlat)
-                map.scatter(x.flatten(), y.flatten(), 1, rough.flatten(), linewidth = '0', vmin=0, vmax=8)
-
-                custom_save(sonpath,'Rough'+str(p))
-                del fig 
-
-                kml = simplekml.Kml()
-                ground = kml.newgroundoverlay(name='GroundOverlay')
-                ground.icon.href = 'Rough'+str(p)+'.png'
-                ground.latlonbox.north = np.min(Zlat)-0.001
-                ground.latlonbox.south = np.max(Zlat)+0.001
-                ground.latlonbox.east =  np.max(Zlon)+0.001
-                ground.latlonbox.west =  np.min(Zlon)-0.001
-                ground.latlonbox.rotation = 0
-
-                #kml.save(sonpath+'Rough'+str(p)+'.kml')
-                kml.save(os.path.normpath(os.path.join(sonpath,'Rough'+str(p)+'.kml')))
-
+                nans, y= humutils.nan_helper(hard)
+                hard[nans]= np.interp(y(nans), y(~nans), hard[~nans])
              except:
-                print "plot could not be produced"
+                continue
 
-          if doplot==1:
              try:
-                print "drawing and printing map ..."
-                fig = plt.figure(frameon=False)
-                map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
-                 resolution = 'i', #h #f
-                 llcrnrlon=np.min(Zlon)-0.001, llcrnrlat=np.min(Zlat)-0.001,
-                 urcrnrlon=np.max(Zlon)+0.001, urcrnrlat=np.max(Zlat)+0.001)
-
-                ax = plt.Axes(fig, [0., 0., 1., 1.], )
-                ax.set_axis_off()
-                fig.add_axes(ax)
-
-                ## draw point cloud
-                x,y = map.projtran(Zlon, Zlat)
-                map.scatter(x.flatten(), y.flatten(), 1, hard.flatten(), linewidth = '0', vmin=0, vmax=8)
-
-                custom_save(sonpath,'Hard'+str(p))
-                del fig 
-
-                kml = simplekml.Kml()
-                ground = kml.newgroundoverlay(name='GroundOverlay')
-                ground.icon.href = 'Hard'+str(p)+'.png'
-                ground.latlonbox.north = np.min(Zlat)-0.001
-                ground.latlonbox.south = np.max(Zlat)+0.001
-                ground.latlonbox.east =  np.max(Zlon)+0.001
-                ground.latlonbox.west =  np.min(Zlon)-0.001
-                ground.latlonbox.rotation = 0
-
-                #kml.save(sonpath+'Hard'+str(p)+'.kml')
-                kml.save(os.path.normpath(os.path.join(sonpath,'Hard'+str(p)+'.kml')))
-
+                nans, y= humutils.nan_helper(sv_e1)
+                sv_e1[nans]= np.interp(y(nans), y(~nans), sv_e1[~nans])
              except:
-                print "plot could not be produced"
+                continue
+
+             try:
+                nans, y= humutils.nan_helper(sv_e2)
+                sv_e2[nans]= np.interp(y(nans), y(~nans), sv_e2[~nans])
+             except:
+                continue
+
+             data = np.column_stack([sv_e1, sv_e2])
+             k_means = MiniBatchKMeans(numclusters)
+             # fit the model
+             k_means.fit(data) 
+             values = k_means.cluster_centers_.squeeze()
+             labels = k_means.labels_
+    
+             hardav = humutils.runningMeanFast(hard,integ)
+             roughav = humutils.runningMeanFast(rough,integ)
+
+             #f = open(sonpath+base+'rough_and_hard'+str(p)+'.csv', 'wt')
+             f = open(os.path.normpath(os.path.join(sonpath,base+'rough_and_hard'+str(0)+'.csv')), 'wt')
+             writer = csv.writer(f)
+             writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth', 'roughness', 'hardness', 'average roughness', 'average hardness','k-mean label') )
+             for i in range(0, len(rough)):
+                writer.writerow(( float(Zlon[i]),float(Zlat[i]),float(Zes[i]),float(Zns[i]),float(Zdepi[i]),float(rough[i]),float(hard[i]),float(roughav[i]),float(hardav[i]), labels[i].astype(int) ))
+             f.close()
+
+             if doplot==1:
+                try:
+
+                   fig = plt.figure()
+                   plt.imshow(dwnhi_fp, cmap='gray')
+                   plt.plot(e1a,'r');
+                   plt.plot(e1b,'y');
+                   plt.plot(e2a,'c');
+                   plt.plot(e2b,'m');
+                   plt.axis('tight')
+                   #plt.show()
+                   custom_save(sonpath,'e1e2_scan'+str(0))
+                   del fig
+
+                except:
+                   print "plot could not be produced"
+
+             if doplot==1:
+                try:
+
+                   fig = plt.figure()
+                   fig.subplots_adjust(wspace = 0.4, hspace=0.4)
+                   plt.subplot(221)   
+                   plt.plot(sv_e1[labels==0],sv_e2[labels==0],'ko');
+                   plt.plot(sv_e1[labels==1],sv_e2[labels==1],'ro');
+                   plt.plot(sv_e1[labels==2],sv_e2[labels==2],'bo');
+                   plt.xlabel('SV1'); plt.ylabel('SV2')
+                   plt.xlim(0,1); plt.ylim(0,1)
+
+                   plt.subplot(222)   
+                   plt.plot(rough[labels==0],hard[labels==0],'ko');
+                   plt.plot(rough[labels==1],hard[labels==1],'ro');
+                   plt.plot(rough[labels==2],hard[labels==2],'bo');
+                   plt.xlabel('E1'); plt.ylabel('E2')
+                   plt.xlim(1,8); plt.ylim(1,8)
+                   #plt.show()
+                   custom_save(sonpath,'e1e2_kmeans'+str(0))
+                   del fig
+
+                except:
+                   print "plot could not be produced"
+
+             if doplot==1:
+                try:
+
+                   fig = plt.figure()
+                   s=plt.scatter(Zes[labels==0],Zns[labels==0],marker='o',c='k', s=10, linewidth=0, vmin=0, vmax=8);
+                   s=plt.scatter(Zes[labels==1],Zns[labels==1],marker='o',c='r', s=10, linewidth=0, vmin=0, vmax=8);
+                   s=plt.scatter(Zes[labels==2],Zns[labels==2],marker='o',c='b', s=10, linewidth=0, vmin=0, vmax=8);
+                   custom_save(sonpath,'rgh_hard_kmeans'+str(0))
+                   del fig
+
+                except:
+                   print "plot could not be produced"
+
+             if doplot==1:
+                try:
+
+                   print "drawing and printing map ..."
+                   fig = plt.figure(frameon=False)
+                   #fig.subplots_adjust(wspace = 0.4, hspace=0.4)
+                   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #epsg=26949,
+                      resolution = 'i', #h #f
+                      llcrnrlon=np.min(Zlon)-0.0001, llcrnrlat=np.min(Zlat)-0.0001,
+                      urcrnrlon=np.max(Zlon)+0.0001, urcrnrlat=np.max(Zlat)+0.0001)
+
+                   # draw point cloud
+                   x,y = map.projtran(Zlon, Zlat)
+
+                   cs = map.scatter(x.flatten(), y.flatten(), 1, rough.flatten(), linewidth=0, vmin=0, vmax=8)
+
+                   map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+  
+                   cbar = map.colorbar(cs,location='bottom',pad="5%")
+                   cbar.set_label('E1')
+                   cbar.set_ticks([0,2,4,6,8])
+
+                   custom_save(sonpath,'map_rgh'+str(0))
+                   del fig 
+
+                except:
+                   print "plot could not be produced"
+
+             if doplot==1:
+                try:
+                   fig = plt.figure()
+                   #fig.subplots_adjust(wspace = 0.4, hspace=0.4)
+                   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1],
+                      resolution = 'i', #h #f
+                      llcrnrlon=np.min(Zlon)-0.0001, llcrnrlat=np.min(Zlat)-0.0001,
+                      urcrnrlon=np.max(Zlon)+0.0001, urcrnrlat=np.max(Zlat)+0.0001)
+
+                   # draw point cloud
+                   x,y = map.projtran(Zlon, Zlat)
+
+                   cs = map.scatter(x.flatten(), y.flatten(), 1, hard.flatten(), linewidth=0, vmin=0, vmax=8)
+
+                   map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+
+                   cbar = map.colorbar(cs,location='bottom',pad="5%")
+                   cbar.set_label('E2')
+                   cbar.set_ticks([0,2,4,6,8])
+
+                   custom_save(sonpath,'map_hard'+str(0))
+                   del fig 
+
+                except:
+                   print "plot could not be produced"
+
+             if doplot==1:
+                try:
+                   print "drawing and printing map ..."
+                   fig = plt.figure(frameon=False)
+                   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
+                    resolution = 'i', #h #f
+                    llcrnrlon=np.min(Zlon)-0.001, llcrnrlat=np.min(Zlat)-0.001,
+                    urcrnrlon=np.max(Zlon)+0.001, urcrnrlat=np.max(Zlat)+0.001)
+
+                   ax = plt.Axes(fig, [0., 0., 1., 1.], )
+                   ax.set_axis_off()
+                   fig.add_axes(ax)
+
+                   ## draw point cloud
+                   x,y = map.projtran(Zlon, Zlat)
+                   map.scatter(x.flatten(), y.flatten(), 1, rough.flatten(), linewidth = '0', vmin=0, vmax=8)
+
+                   custom_save(sonpath,'Rough'+str(0))
+                   del fig 
+
+                   kml = simplekml.Kml()
+                   ground = kml.newgroundoverlay(name='GroundOverlay')
+                   ground.icon.href = 'Rough'+str(0)+'.png'
+                   ground.latlonbox.north = np.min(Zlat)-0.001
+                   ground.latlonbox.south = np.max(Zlat)+0.001
+                   ground.latlonbox.east =  np.max(Zlon)+0.001
+                   ground.latlonbox.west =  np.min(Zlon)-0.001
+                   ground.latlonbox.rotation = 0
+
+                   #kml.save(sonpath+'Rough'+str(p)+'.kml')
+                   kml.save(os.path.normpath(os.path.join(sonpath,'Rough'+str(0)+'.kml')))
+
+                except:
+                   print "plot could not be produced"
+
+             if doplot==1:
+                try:
+                   print "drawing and printing map ..."
+                   fig = plt.figure(frameon=False)
+                   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
+                    resolution = 'i', #h #f
+                    llcrnrlon=np.min(Zlon)-0.001, llcrnrlat=np.min(Zlat)-0.001,
+                    urcrnrlon=np.max(Zlon)+0.001, urcrnrlat=np.max(Zlat)+0.001)
+
+                   ax = plt.Axes(fig, [0., 0., 1., 1.], )
+                   ax.set_axis_off()
+                   fig.add_axes(ax)
+
+                   ## draw point cloud
+                   x,y = map.projtran(Zlon, Zlat)
+                   map.scatter(x.flatten(), y.flatten(), 1, hard.flatten(), linewidth = '0', vmin=0, vmax=8)
+
+                   custom_save(sonpath,'Hard'+str(0))
+                   del fig 
+
+                   kml = simplekml.Kml()
+                   ground = kml.newgroundoverlay(name='GroundOverlay')
+                   ground.icon.href = 'Hard'+str(0)+'.png'
+                   ground.latlonbox.north = np.min(Zlat)-0.001
+                   ground.latlonbox.south = np.max(Zlat)+0.001
+                   ground.latlonbox.east =  np.max(Zlon)+0.001
+                   ground.latlonbox.west =  np.min(Zlon)-0.001
+                   ground.latlonbox.rotation = 0
+
+                   #kml.save(sonpath+'Hard'+str(p)+'.kml')
+                   kml.save(os.path.normpath(os.path.join(sonpath,'Hard'+str(0)+'.kml')))
+
+                except:
+                   print "plot could not be produced"         
 
     else:
        print "high-frequency downward echosounder data not available"
