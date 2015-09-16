@@ -343,8 +343,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     if base.find(' ')>-1:
        base = base[:base.find(' ')]
 
-      if base.find('.')>-1:
-         base = base[:base.find('.')]
+    if base.find('.')>-1:
+       base = base[:base.find('.')]
 
     # get the SON files from this directory
     sonfiles = glob.glob(sonpath+'*.SON')
