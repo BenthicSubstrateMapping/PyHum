@@ -231,6 +231,9 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowr
     if base.find(' ')>-1:
        base = base[:base.find(' ')]
 
+    if base.find('.')>-1:
+       base = base[:base.find('.')]
+
     meta = loadmat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')))
 
     esi = np.squeeze(meta['e'])

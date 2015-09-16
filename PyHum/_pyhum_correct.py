@@ -229,7 +229,10 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     if base.find(' ')>-1:
        base = base[:base.find(' ')]
 
+    if base.find('.')>-1:
+       base = base[:base.find('.')]
     
+
     # add wattage to metadata dict 
     #meta = loadmat(sonpath+base+'meta.mat')
     meta = loadmat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')))

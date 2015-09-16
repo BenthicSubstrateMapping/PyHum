@@ -260,6 +260,9 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
     if base.find(' ')>-1:
        base = base[:base.find(' ')]
 
+    if base.find('.')>-1:
+       base = base[:base.find('.')]
+
     meta = loadmat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')))
 
     beamwidth = beam*(np.sqrt(0.5))

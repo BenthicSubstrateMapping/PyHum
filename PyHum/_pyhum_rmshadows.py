@@ -191,6 +191,9 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
     if base.find(' ')>-1:
        base = base[:base.find(' ')]
 
+    if base.find('.')>-1:
+       base = base[:base.find('.')]
+
     meta = loadmat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')))
 
     # load memory mapped scans
@@ -213,21 +216,39 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
     if shadowmask==1:
 
        Zt = []
-       for p in xrange(len(star_fp)):
-          raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue...")
-          shoreline_star={}
-          fig = plt.figure()
-          ax = plt.gca()
-          im = ax.imshow(star_fp[p], cmap = 'gray') #, origin = 'upper')
-          plt.axis('normal'); plt.axis('tight')
-          pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
-          x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-          y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-          shoreline_star = np.interp(np.r_[:np.shape(star_fp[p])[1]],x1,y1)
-          plt.close()
-          del fig
+       if len(np.shape(star_fp))>2:
+          for p in xrange(len(star_fp)):
+             raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue...")
+             shoreline_star={}
+             fig = plt.figure()
+             ax = plt.gca()
+             im = ax.imshow(star_fp[p], cmap = 'gray') #, origin = 'upper')
+             plt.axis('normal'); plt.axis('tight')
+             pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
+             x1=map(lambda x: x[0],pts1) # map applies the function passed as 
+             y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
+             shoreline_star = np.interp(np.r_[:np.shape(star_fp[p])[1]],x1,y1)
+             plt.close()
+             del fig
 
-          star_mg = star_fp[p].copy()
+             star_mg = star_fp[p].copy()
+
+          else:
+
+             raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue...")
+             shoreline_star={}
+             fig = plt.figure()
+             ax = plt.gca()
+             im = ax.imshow(star_fp, cmap = 'gray') #, origin = 'upper')
+             plt.axis('normal'); plt.axis('tight')
+             pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
+             x1=map(lambda x: x[0],pts1) # map applies the function passed as 
+             y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
+             shoreline_star = np.interp(np.r_[:np.shape(star_fp)[1]],x1,y1)
+             plt.close()
+             del fig
+
+             star_mg = star_fp.copy()
 
           shoreline_star = np.asarray(shoreline_star,'int')
           # shift proportionally depending on where the bed is
@@ -237,6 +258,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
           del shoreline_star
 
           Zt.append(star_mg)
+          Zt = np.squeeze(Zt)
 
        ## create memory mapped file for Z
        #p = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
@@ -255,22 +277,41 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
 
 
        Zt = []
-       for p in xrange(len(port_fp)):
+       if len(np.shape(star_fp))>2:
+          for p in xrange(len(port_fp)):
 
-          raw_input("Shore picking (port), are you ready? 30 seconds. Press Enter to continue...")
-          shoreline_port={}
-          fig = plt.figure()
-          ax = plt.gca()
-          im = ax.imshow(port_fp[p], cmap = 'gray') #, origin = 'upper')
-          plt.axis('normal'); plt.axis('tight')
-          pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
-          x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-          y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-          shoreline_port = np.interp(np.r_[:np.shape(port_fp[p])[1]],x1,y1)
-          plt.close()
-          del fig
+             raw_input("Shore picking (port), are you ready? 30 seconds. Press Enter to continue...")
+             shoreline_port={}
+             fig = plt.figure()
+             ax = plt.gca()
+             im = ax.imshow(port_fp[p], cmap = 'gray') #, origin = 'upper')
+             plt.axis('normal'); plt.axis('tight')
+             pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
+             x1=map(lambda x: x[0],pts1) # map applies the function passed as 
+             y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
+             shoreline_port = np.interp(np.r_[:np.shape(port_fp[p])[1]],x1,y1)
+             plt.close()
+             del fig
 
-          port_mg = port_fp[p].copy()
+             port_mg = port_fp[p].copy()
+
+          else:
+
+             raw_input("Shore picking (port), are you ready? 30 seconds. Press Enter to continue...")
+             shoreline_port={}
+             fig = plt.figure()
+             ax = plt.gca()
+             im = ax.imshow(port_fp, cmap = 'gray') #, origin = 'upper')
+             plt.axis('normal'); plt.axis('tight')
+             pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
+             x1=map(lambda x: x[0],pts1) # map applies the function passed as 
+             y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
+             shoreline_port = np.interp(np.r_[:np.shape(port_fp)[1]],x1,y1)
+             plt.close()
+             del fig
+
+             port_mg = port_fp.copy()
+
 
           shoreline_port = np.asarray(shoreline_port,'int')
           # shift proportionally depending on where the bed is
@@ -281,6 +322,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
 
           Zt.append(port_mg)
 
+          Zt = np.squeeze(Zt)
        ## create memory mapped file for Z
        #fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
        #fp[:] = Zt[:]
@@ -301,11 +343,75 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
        win = 31
 
        Zs = []; Zp = []
-       for p in xrange(len(star_fp)):
-          merge = np.vstack((np.flipud(port_fp[p]),star_fp[p]))
+       if len(np.shape(star_fp))>2:
+          for p in xrange(len(star_fp)):
+             merge = np.vstack((np.flipud(port_fp[p]),star_fp[p]))
+             merge = np.asarray(merge, 'float64')
+
+             merge_mask = np.vstack((np.flipud(port_fp[p]),star_fp[p]))
+
+             merge[merge_mask==0] = 0
+             del merge_mask
+
+             mask = np.asarray(merge!=0,'int8') # only 8bit precision needed
+
+             merge[np.isnan(merge)] = 0
+
+             #Z,ind = humutils.sliding_window(merge,(win,win),(win/2,win/2))
+             Z,ind = humutils.sliding_window(merge,(win,win/2),(win,win/2))
+
+             #zmean = np.reshape(zmean, ( ind[0], ind[1] ) )
+             Ny, Nx = np.shape(merge)
+             #zmean[np.isnan(zmean)] = 0
+          
+             try: #parallel processing with all available cores     
+                w = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k]) for k in xrange(len(Z)))
+             except: #fall back to serial
+                w = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k]) for k in xrange(len(Z)))          
+          
+             zmean = np.reshape(w , ( ind[0], ind[1] ) )
+             del w
+        
+             M = humutils.im_resize(zmean,Nx,Ny)
+             M[mask==0] = 0
+             del zmean
+
+             bw = M>0.5  
+
+             # erode and dilate to remove splotches of no data
+             #bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))
+             bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((win,win)))
+             
+             # fill holes
+             bw2 = binary_fill_holes(bw2, structure=np.ones((3,3))).astype(int)
+             del bw
+             bw2 = np.asarray(bw2!=0,'int8') # we only need 8 bit precision
+
+             merge[bw2==1] = 0 #blank out bad data
+         
+             ## do plots of merged scans
+             if doplot==1:
+
+                Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
+
+                fig = plt.figure()
+                plt.imshow(merge, cmap='gray', extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)])
+                plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
+
+                plt.axis('normal'); plt.axis('tight')
+                custom_save(sonpath,'merge_corrected_rmshadow_scan'+str(p))
+                del fig
+
+             Zp.append(np.flipud(merge[:shape_port[1],:]))
+             Zs.append(merge[shape_port[1]:,:])
+             del merge, bw2
+
+       else:
+
+          merge = np.vstack((np.flipud(port_fp),star_fp))
           merge = np.asarray(merge, 'float64')
 
-          merge_mask = np.vstack((np.flipud(port_fp[p]),star_fp[p]))
+          merge_mask = np.vstack((np.flipud(port_fp),star_fp))
 
           merge[merge_mask==0] = 0
           del merge_mask
@@ -316,14 +422,6 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
 
           #Z,ind = humutils.sliding_window(merge,(win,win),(win/2,win/2))
           Z,ind = humutils.sliding_window(merge,(win,win/2),(win,win/2))
-
-          #try: #parallel processing with all available cores
-          #   w = Parallel(n_jobs=-1, verbose=0)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z))) #backend="threading"
-          #except: #fall back to serial
-          #   w = Parallel(n_jobs=1, verbose=0)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z)))
-
-          #zmean,stdv= zip(*w)
-          #del w, stdv
 
           #zmean = np.reshape(zmean, ( ind[0], ind[1] ) )
           Ny, Nx = np.shape(merge)
@@ -341,14 +439,6 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
           M[mask==0] = 0
           del zmean
 
-          ## get a k-value segmentation   
-          #wc, values = humutils.cut_kmeans(merge, kvals) #merge,kvals)
-          #del M, Ny, Nx
-   
-          ## the lowest value is zero, get the next lowest
-          #bw = wc==np.sort(values)[-(kvals-1)]
-          #del wc, values
-
           bw = M>0.5  
 
           # erode and dilate to remove splotches of no data
@@ -365,20 +455,21 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
           ## do plots of merged scans
           if doplot==1:
 
-             Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
-
+             Zdist = dist_m
              fig = plt.figure()
              plt.imshow(merge, cmap='gray', extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)])
              plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
 
              plt.axis('normal'); plt.axis('tight')
-             custom_save(sonpath,'merge_corrected_rmshadow_scan'+str(p))
+             custom_save(sonpath,'merge_corrected_rmshadow_scan'+str(0))
              del fig
 
-          Zp.append(np.flipud(merge[:shape_port[1],:]))
-          Zs.append(merge[shape_port[1]:,:])
+          Zp.append(np.flipud(merge[:shape_port[0],:]))
+          Zs.append(merge[shape_port[0]:,:])
           del merge, bw2
 
+       Zp = np.squeeze(Zp)
+       Zs = np.squeeze(Zs)
        # create memory mapped file for Zp
        #fp = np.memmap(sonpath+base+'_data_port_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zp))
        #with open(sonpath+base+'_data_port_lar.dat', 'w+') as f:
@@ -436,6 +527,22 @@ if __name__ == '__main__':
 
    rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
+
+          #try: #parallel processing with all available cores
+          #   w = Parallel(n_jobs=-1, verbose=0)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z))) #backend="threading"
+          #except: #fall back to serial
+          #   w = Parallel(n_jobs=1, verbose=0)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z)))
+
+          #zmean,stdv= zip(*w)
+          #del w, stdv
+
+          ## get a k-value segmentation   
+          #wc, values = humutils.cut_kmeans(merge, kvals) #merge,kvals)
+          #del M, Ny, Nx
+   
+          ## the lowest value is zero, get the next lowest
+          #bw = wc==np.sort(values)[-(kvals-1)]
+          #del wc, values
 
 #    if not kvals:
 #       kvals = 8
