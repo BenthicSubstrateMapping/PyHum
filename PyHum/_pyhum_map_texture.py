@@ -342,12 +342,12 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
           if dogrid==1:
 
-             orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat)
+             orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
              print res
                           
              sigmas = 1 #m
              eps = 2
-             dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs)
+             dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans)
 
              print res
              
@@ -391,11 +391,11 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
           if dogrid==1:
 
-             orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat)
+             orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
 
              print res
              
-             dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs)
+             dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans)
              
              print res
 
@@ -460,11 +460,11 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
        if dogrid==1:
 
-          orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat)
+          orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
              
           sigmas = 1 #m
           eps = 2
-          dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs)
+          dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans)
           
           print res
 
@@ -578,7 +578,7 @@ def print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpa
        print "error: map could not be created..."
 
 # =========================================================
-def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY, res, nn, sigmas, eps, shape, numstdevs):
+def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY, res, nn, sigmas, eps, shape, numstdevs, trans):
 
     if mode==1:
 
@@ -590,7 +590,7 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
                 complete=1 
           except:
              del grid_x, grid_y, targ_def, orig_def
-             dat, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode)
+             dat, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans)
 
     elif mode==2:
        # custom inverse distance 
@@ -604,7 +604,7 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
                 complete=1 
           except:
              del grid_x, grid_y, targ_def, orig_def
-             dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode)
+             dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans)
 
     elif mode==3:
 
@@ -616,7 +616,7 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
                 complete=1 
           except:
              del grid_x, grid_y, targ_def, orig_def
-             dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode)
+             dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans)
 
     dat = dat.reshape(shape)
     if mode>1:
@@ -650,7 +650,7 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
     return dat, res
 
 # =========================================================
-def get_griddefs(minX, maxX, minY, maxY, res, humlon, humlat):  
+def get_griddefs(minX, maxX, minY, maxY, res, humlon, humlat, trans):  
    
 #    complete=0
 #    while complete==0:
@@ -696,7 +696,7 @@ def trim_xys(X, Y, merge, index):
     
           
 # =========================================================
-def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mode):
+def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mode, trans):
    
 #   complete=0
 #   while complete==0:
