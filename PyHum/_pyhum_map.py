@@ -274,9 +274,12 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowr
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'r') as ff:
        R_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
-    for p in xrange(len(star_fp)):
-       res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, mode, nn, influence, numstdevs)
-       print "grid resolution is %s" % (str(res))
+    if len(shape_star)>2:    
+       for p in xrange(len(star_fp)):
+          res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, mode, nn, influence, numstdevs)
+          print "grid resolution is %s" % (str(res))
+    else:
+       res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, pix_m, res, cs2cs_args, sonpath, 0, dogrid, dowrite, mode, nn, influence, numstdevs)
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
