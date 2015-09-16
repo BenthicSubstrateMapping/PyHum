@@ -672,7 +672,7 @@ def get_griddefs(minX, maxX, minY, maxY, res, humlon, humlat):
 #          print "memory error: trying grid resolution of %s" % (str(res*2))
 #          res = res*2
                    
-    return orig_def, targ_def, grid_x, grid_y, res, shape
+          return orig_def, targ_def, grid_x, grid_y, res, shape
 
 # =========================================================
 def trim_xys(X, Y, merge, index):
@@ -724,7 +724,7 @@ def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mo
 #         print "memory error: trying grid resolution of %s" % (str(res*2))
 #         res = res*2
 
-   return dat, stdev, counts, res, complete
+         return dat, stdev, counts, res, complete
 
 # =========================================================
 def getmesh(minX, maxX, minY, maxY, res):
@@ -739,7 +739,7 @@ def getmesh(minX, maxX, minY, maxY, res):
 #         print "memory error: trying grid resolution of %s" % (str(res*2))
 #         res = res*2
          
-   return grid_x, grid_y, res
+         return grid_x, grid_y, res
 
 # =========================================================
 def getxy(e, n, yvec, d, t,extent):
