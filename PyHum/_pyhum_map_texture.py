@@ -707,7 +707,7 @@ def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mo
    complete=0
    while complete==0:
       try: 
-         grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
+         grid_x, grid_y, res = getmesh(minX, maxX, minY, maxY, res)
          longrid, latgrid = trans(grid_x, grid_y, inverse=True)
          shape = np.shape(grid_x)
          targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
