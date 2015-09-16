@@ -343,7 +343,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           if dogrid==1:
 
              orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat)
-             
              print res
                           
              sigmas = 1 #m
@@ -699,9 +698,11 @@ def trim_xys(X, Y, merge, index):
 # =========================================================
 def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mode):
 
+   orig_res = res
+   
    complete=0
    while complete==0:
-      try:
+      try: 
          grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
          longrid, latgrid = trans(grid_x, grid_y, inverse=True)
          shape = np.shape(grid_x)
@@ -722,6 +723,8 @@ def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mo
          if 'dat' in locals(): 
             complete=1 
       except:
+         if np.isinf(res):
+            res = orig_res
          print "memory error: trying grid resolution of %s" % (str(res*2))
          res = res*2
 
