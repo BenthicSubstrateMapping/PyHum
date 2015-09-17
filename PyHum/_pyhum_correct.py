@@ -284,10 +284,11 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     # calculate in dB
     ######### star
-    Zt, R = remove_water(star_fp, bed, shape_star, dep_m, pix_m, 1,  maxW)
+    Zt, R, A = remove_water(star_fp, bed, shape_star, dep_m, pix_m, 1,  maxW)
 
     Zt = np.squeeze(Zt)
     R = np.squeeze(R)
+    A = np.squeeze(A)
 
     # create memory mapped file for Z)
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'w+') as ff:
@@ -304,11 +305,19 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     del fp
     del R
 
-    with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'r') as ff:
-       R_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
+
+    # create memory mapped file for A
+    with open(os.path.normpath(os.path.join(sonpath,base+'_data_incidentangle.dat')), 'w+') as ff:
+       fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(A))
+    fp[:] = A[:]
+    del fp
+    del A
+
+    with open(os.path.normpath(os.path.join(sonpath,base+'_data_incidentangle.dat')), 'r') as ff:
+       A_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
 
     if correct_withwater == 1:
-       Zt = correct_scans(star_fp, R_fp, dofilt)
+       Zt = correct_scans(star_fp, A_fp, dofilt)
 
        # create memory mapped file for Z)
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lw.dat')), 'w+') as ff:
@@ -322,7 +331,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'r') as ff:
        star_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
 
-    Zt = correct_scans(star_fp, R_fp, dofilt)
+    Zt = correct_scans(star_fp, A_fp, dofilt)
 
     # create memory mapped file for Z
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'w+') as ff:
@@ -338,7 +347,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     ######### port
     if correct_withwater == 1:
-       Zt = correct_scans(port_fp, R_fp, dofilt)
+       Zt = correct_scans(port_fp, A_fp, dofilt)
 
        # create memory mapped file for Z)
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lw.dat')), 'w+') as ff:
@@ -363,7 +372,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_l.dat')), 'r') as ff:
        port_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_port)
 
-    Zt = correct_scans(port_fp, R_fp, dofilt)
+    Zt = correct_scans(port_fp, A_fp, dofilt)
 
     # create memory mapped file for Z
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'w+') as ff:
@@ -558,6 +567,7 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
     Zt = []
     if calcR==1:
        R = []
+       A = []
 
     if  len(np.shape(fp))>2:
        for p in xrange(len(fp)):
@@ -579,18 +589,25 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
              yvec = np.linspace(pix_m,extent*pix_m,extent)
              d = dep_m[shape[-1]*p:shape[-1]*(p+1)]
 
+             a = np.ones(np.shape(fp[p]))
+             for k in range(len(d)): 
+                a[:,k] = d[k]/yvec
+
              r = np.ones(np.shape(fp[p]))
              for k in range(len(d)): 
-                r[:,k] = d[k]/yvec
+                r[:,k] = np.sqrt(yvec**2 - d[k]**2)
 
              # shift proportionally depending on where the bed is
              for k in xrange(np.shape(r)[1]):
                 try:
                    r[:,k] = np.r_[r[Zbed[k]:,k], np.zeros( (np.shape(r)[0] -  np.shape(r[Zbed[k]:,k])[0] ,) )]
+                   a[:,k] = np.r_[a[Zbed[k]:,k], np.zeros( (np.shape(a)[0] -  np.shape(a[Zbed[k]:,k])[0] ,) )]
                 except:
                    r[:,k] = np.ones(np.shape(r)[0])
+                   a[:,k] = np.ones(np.shape(a)[0])
 
              R.append(r)
+             A.append(a)
 
     else:
 
@@ -612,37 +629,44 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
           yvec = np.linspace(pix_m,extent*pix_m,extent)
           d = dep_m
 
+          a = np.ones(np.shape(fp))
+          for k in range(len(d)): 
+             a[:,k] = d[k]/yvec
+
           r = np.ones(np.shape(fp))
           for k in range(len(d)): 
-             r[:,k] = d[k]/yvec
+             r[:,k] = np.sqrt(yvec**2 - d[k]**2)
 
           # shift proportionally depending on where the bed is
           for k in xrange(np.shape(r)[1]):
              try:
                 r[:,k] = np.r_[r[Zbed[k]:,k], np.zeros( (np.shape(r)[0] -  np.shape(r[Zbed[k]:,k])[0] ,) )]
+                a[:,k] = np.r_[a[Zbed[k]:,k], np.zeros( (np.shape(a)[0] -  np.shape(a[Zbed[k]:,k])[0] ,) )]
              except:
                 r[:,k] = np.ones(np.shape(r)[0])
+                a[:,k] = np.ones(np.shape(a)[0])
 
           R.append(r)
+          A.append(a)
 
     if calcR ==1:
-       return Zt, R
+       return Zt, R, np.pi/2 - np.arctan(A)
     else:
        return Zt
  
 # =========================================================
-def correct_scans(fp, r_fp, dofilt):
-    return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans)(fp[p], r_fp[p], dofilt) for p in xrange(len(fp)))
+def correct_scans(fp, a_fp, dofilt):
+    return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans)(fp[p], a_fp[p], dofilt) for p in xrange(len(fp)))
 #   Zt = []
 #   for p in xrange(len(fp)):
 #      Zt.append(c_scans(fp[p], r_fp[p], dofilt))
 #   return Zt
 
 # =========================================================
-def c_scans(fp, r_fp, dofilt):
+def c_scans(fp, a_fp, dofilt):
    if dofilt==1:
       fp = do_ppdrc(fp, np.shape(fp)[-1]/2)
-   mg = 10**np.log10(np.asarray(fp*np.cos(r_fp),'float32')+0.001)
+   mg = 10**np.log10(np.asarray(fp*np.cos(a_fp),'float32')+0.001)
    mg[fp==0] = np.nan
    return mg
 
