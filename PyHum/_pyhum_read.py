@@ -793,7 +793,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     if ('shape_port' in locals()) and (chunkmode!=4):
        metadat['shape_port'] = shape_port
        nrec = metadat['shape_port'][0] * metadat['shape_port'][2]
-    elif chunkmode==4:
+    elif ('shape_port' in locals()) and (chunkmode==4):
        metadat['shape_port'] = shape_port
        nrec = metadat['shape_port'][1]
     else:
@@ -802,7 +802,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     if ('shape_star' in locals()) and (chunkmode!=4):
        metadat['shape_star'] = shape_star
        nrec = metadat['shape_star'][0] * metadat['shape_star'][2]
-    elif chunkmode==4:
+    elif ('shape_star' in locals()) and (chunkmode==4):
        metadat['shape_star'] = shape_star
        nrec = metadat['shape_star'][1]
     else:
@@ -811,7 +811,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     if ('shape_hi' in locals()) and (chunkmode!=4):
        metadat['shape_hi'] = shape_hi
        #nrec = metadat['shape_hi'][0] * metadat['shape_hi'][2] * 2
-    elif chunkmode==4:
+    elif ('shape_hi' in locals()) and (chunkmode==4):
        metadat['shape_hi'] = shape_hi
     else:
        metadat['shape_hi'] = ''   
@@ -819,7 +819,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     if ('shape_low' in locals()) and (chunkmode!=4):
        metadat['shape_low'] = shape_low
        #nrec = metadat['shape_low'][0] * metadat['shape_low'][2] * 2
-    elif chunkmode==4:
+    elif ('shape_low' in locals()) and (chunkmode==4):
        metadat['shape_low'] = shape_low
     else:
        metadat['shape_low'] = ''   
