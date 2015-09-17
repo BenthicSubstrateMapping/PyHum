@@ -199,4 +199,5 @@ SON file sonar data packet
 
 The sonar data is all bytes in the packet after the header bytes have been read in. The data is big endian, unsigned char (8-bit integers).
 
+  .. image:: _static/pyhum_logo_colour_sm.png
 

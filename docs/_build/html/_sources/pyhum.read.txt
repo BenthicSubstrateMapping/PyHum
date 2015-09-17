@@ -60,9 +60,13 @@ Parameters
        if 1, bearing will be filtered
     chunk : str, *optional* [Default='d100' (distance, 100 m)]
        letter, followed by a number.
+
        There are the following letter options:
+
        'd' - parse chunks based on distance, then number which is distance in m
+
        'p' - parse chunks based on number of pings, then number which is number of pings 
+
        'h' - parse chunks based on change in heading, then number which is the change in heading in degrees
        '1' - process just 1 chunk
 

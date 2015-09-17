@@ -28,7 +28,7 @@ Full documentation of the program is forthcoming
 ![alt tag](http://dbuscombe-usgs.github.io/figs/Texas_reef_merged_cropped.png)
 *Submerged reef and a school of fish, in the Gulf of Mexico off the coast of Texas. Credit: Richard Kline and Michael Bollinger from the University of Texas Rio Grande Valley.  Funded by the Texas Parks and Wildlife Department, Artificial Reef Program.*
 
-![alt tag](http://dbuscombe-usgs.github.io/figs/R00426_map.jpg)
+![alt tag](http://dbuscombe-usgs.github.io/figs/DogRiver_AllenAven.png)
 *Boat marina in Dog River, Alabama. Credit: Allen Aven, Dauphin Island Sea Lab*
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/PyHum_glencanyon.png)
