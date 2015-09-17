@@ -23,14 +23,16 @@ Full documentation of the program is forthcoming
 
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/class_R01560.png)
-*Sand dunes on the bed of the Colorado River in Grand Canyon*
+*Sand dunes on the bed of the Colorado River in Grand Canyon, Arizona*
 
+![alt tag](http://dbuscombe-usgs.github.io/figs/Texas_reef_merged_cropped.png)
+*Submerged reef and a school of fish, in the Gulf of Mexico off the coast of Texas. Credit: Richard Kline and Michael Bollinger from the University of Texas Rio Grande Valley.  Funded by the Texas Parks and Wildlife Department, Artificial Reef Program.*
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/R00426_map.jpg)
-*Dog River, Alabama. Credit: Allen Aven, Dauphin Island Sea Lab*
+*Boat marina in Dog River, Alabama. Credit: Allen Aven, Dauphin Island Sea Lab*
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/PyHum_glencanyon.png)
-*Fine/coarse transition on the bed of the Colorado River in Glen Canyon*
+*Fine/coarse transition on the bed of the Colorado River in Glen Canyon, Arizona*
 
 ### Contributing & Credits
 
