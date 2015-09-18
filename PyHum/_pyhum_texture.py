@@ -352,6 +352,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             fp[p] = Sp.astype('float32')
             del Sp
 
+         shape = np.shape(fp)
          del fp # flush data to file
 
          #class_fp = np.memmap(sonpath+base+'_data_class.dat', dtype='float32', mode='r', shape=tuple(shape))
