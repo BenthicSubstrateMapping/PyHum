@@ -70,6 +70,7 @@ import numpy as np
 import PyHum.utils as humutils
 #from scipy.stats import nanmean, nanmedian
 import ppdrc
+#from scipy.ndimage.filters import median_filter
 
 #plotting
 import matplotlib.pyplot as plt
@@ -99,7 +100,7 @@ __all__ = [
     ]
 
 #################################################
-def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0):
+def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0, ph = 7, temp = 10, salinity = 0, dconcfile = None):
 
     '''
     Remove water column and carry out some rudimentary radiometric corrections, 
@@ -107,22 +108,44 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     Syntax
     ----------
-    [] = PyHum.correct(humfile, sonpath, maxW, doplot, correct_withwater)
+    [] = PyHum.correct(humfile, sonpath, maxW, doplot, correct_withwater, ph, temp, salinity, dconcfile)
 
     Parameters
     ----------
     humfile : str
        path to the .DAT file
+
     sonpath : str
        path where the *.SON files are
+
     maxW : int, *optional* [Default=1000]
        maximum transducer power
+
     doplot : int, *optional* [Default=1]
        1 = make plots, otherwise do not
+
     dofilt : int, *optional* [Default=0]
        1 = apply a phase preserving filter to the scans
+
     correct_withwater : int, *optional* [Default=0]
        1 = apply radiometric correction but don't remove water column from scans
+
+    ph : float, *optional* [Default=7.0]
+       water acidity in pH
+
+    temp : float, *optional* [Default=10.0]
+       water temperature in degrees Celsius
+
+    salinity : float, *optional* [Default=0.0]
+       salinity of water in parts per thousand
+
+    dconcfile : str, *optional* [Default=None]
+       file path of a text file containing sediment concentration data
+       this file must contain the following fields separated by spaces:
+       size (microns) conc (mg/L) dens (kg/m3)
+       with one row per grain size, for example:
+       30 1700 2200
+       100 15 2650
 
     Returns
     -------
@@ -185,15 +208,19 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     # print given arguments to screen and convert data type where necessary
     if humfile:
       print 'Input file is %s' % (humfile)
+
     if sonpath:
       print 'Sonar file path is %s' % (sonpath)
+
     if maxW:
       maxW = np.asarray(maxW,float)
       print 'Max. transducer power is %s W' % (str(maxW))
+
     if doplot:
       doplot = int(doplot)
       if doplot==0:
          print "Plots will not be made"
+
     if dofilt:
       dofilt = int(dofilt)
       if dofilt==0:
@@ -206,6 +233,26 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
       if correct_withwater==1:
          print "Correction will be applied without removing water column"
 
+    if salinity:
+       salinity = np.asarray(salinity,float)
+       print 'Salinity is %s ppt' % (str(salinity))
+
+    if ph:
+       ph = np.asarray(ph,float)
+       print 'pH is %s' % (str(ph))
+
+    if temp:
+       temp = np.asarray(temp,float)
+       print 'Temperature is %s' % (str(temp))
+
+    if dconcfile is not None:
+       print 'Suspended sediment size/conc. file is %s' % (dconcfile)
+       dconc = np.genfromtxt(dconcfile).T
+       conc = dconc[1]
+       dens = dconc[2]
+       d = dconc[0]
+
+    #================================
     # start timer
     if os.name=='posix': # true if linux/mac or cygwin on windows
        start = time.time()
@@ -254,6 +301,12 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     #dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
     dist_m = np.squeeze(meta['dist_m'])
 
+    if dconcfile is not None:
+       # sediment attenuation
+       alpha = sed_atten(meta['f'],conc,dens,d,meta['c'])
+    else:
+       alpha = 0
+
     # load memory mapped scans
     shape_port = np.squeeze(meta['shape_port'])
     if shape_port!='':
@@ -290,6 +343,16 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     R = np.squeeze(R)
     A = np.squeeze(A)
 
+    R[np.isnan(R)] = 0
+
+    alpha_w = water_atten(R,meta['f'],meta['c'], ph, temp, salinity)
+
+    # compute transmission losses
+    TL = (40 * np.log10(R) + alpha_w + (2*alpha)*R/1000)/255
+
+    TL[np.isnan(TL)] = 0
+    TL[TL<0] = 0
+
     # create memory mapped file for Z)
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'w+') as ff:
        fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
@@ -317,7 +380,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
        A_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
 
     if correct_withwater == 1:
-       Zt = correct_scans(star_fp, A_fp, dofilt)
+       Zt = correct_scans(star_fp, A_fp, TL, dofilt)
 
        # create memory mapped file for Z)
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lw.dat')), 'w+') as ff:
@@ -331,7 +394,9 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'r') as ff:
        star_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
 
-    Zt = correct_scans(star_fp, A_fp, dofilt)
+    Zt = correct_scans(star_fp, A_fp, TL, dofilt)
+
+    Zt = np.squeeze(Zt)
 
     # create memory mapped file for Z
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'w+') as ff:
@@ -347,7 +412,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     ######### port
     if correct_withwater == 1:
-       Zt = correct_scans(port_fp, A_fp, dofilt)
+       Zt = correct_scans(port_fp, A_fp, TL, dofilt)
 
        # create memory mapped file for Z)
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lw.dat')), 'w+') as ff:
@@ -372,7 +437,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_l.dat')), 'r') as ff:
        port_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_port)
 
-    Zt = correct_scans(port_fp, A_fp, dofilt)
+    Zt = correct_scans(port_fp, A_fp, TL, dofilt)
 
     # create memory mapped file for Z
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'w+') as ff:
@@ -480,7 +545,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow_l.dat')), 'r') as ff:
           low_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_low)
 
-       Zt = correct_scans2(low_fp)
+       Zt = correct_scans2(low_fp, TL)
 
        # create memory mapped file for Z
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow_la.dat')), 'w+') as ff:
@@ -524,7 +589,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi_l.dat')), 'r') as ff:
           hi_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_hi)
 
-       Zt = correct_scans2(hi_fp)
+       Zt = correct_scans2(hi_fp, TL)
 
        # create memory mapped file for Z
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi_la.dat')), 'w+') as ff:
@@ -558,6 +623,59 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
 
 # =========================================================
+def water_atten(H,f,c,pH,T,S):
+   '''
+   calculate absorption of sound in water.
+   '''
+   H = np.abs(H)
+   P1 = 1 # cosntant
+   A1 = (8.86/c)*(10**(0.78*pH - 5))
+   f1 = 2.8*(S/35)**0.5 * 10**(4 - 1245/(T + 273))
+   A2 = 21.44*(S/c)*(1 + 0.025*T)
+   A3 = (4.937 *10**-4) - (2.59 * 10**-5)*T + (9.11* 10**-7)*T**2- (1.5 * 10**-8)*T**3
+   f2 = (8.17 * 10**(8 - 1990/(T + 273))) / (1 + 0.0018*(S - 35))
+   P2= 1 - (1.37*10**-4) * H + (6.2 * 10**-9)* H**2
+   P3 = 1 - (3.83 * 10**-5)*H + (4.9 *10**(-10) )* H**2
+   # absorption sound water dB/km
+   alphaw = ( (A1*P1*f1*f**2)/(f**2 + f1**2) ) + ( (A2*P2*f2*f**2)/(f**2 + f2**2) ) + (A3*P3*f**2)
+   return 2*(alphaw/1000)*H # depth(m) * dB/m = dB
+
+
+# =========================================================
+def sed_atten(f,conc,dens,d,c):
+   '''
+   calculates the attenuation due to sediment, in dB/m
+   given sediment concentration, density, grain size, frequency and speed of sound
+   according to Urick (1948), JASA
+   http://www.rdinstruments.com/pdfs/Use-ADCP-suspended-sediment%20discharge-NY.pdf
+   http://rspa.royalsocietypublishing.org/content/459/2037/2153.full.pdf
+   example values
+   f = 400  freq, kHz
+   c = 1490 speed sound in water, m/s
+   d = [40, 100] microns
+   dens = [2000, 2650] sediment density, kg/m^3
+   conc = [1000, 100] mg/L
+   '''
+
+   if np.any(conc)>0:
+      f = f * 1000 # frequency, Hz
+      sigma = dens/1000 # ratio sediment to fluid density
+      d = d/1e6 # particle diameter, m
+      nu = 1.004e-6 # viscosity fresh water, m^2/s
+      lam = c/f # acoustic wavelength, m
+      k = (2*np.pi)/lam # acoustic wavenumber 
+      w = (2*np.pi)*f # radian frequency
+      delta_v = np.sqrt(2*nu/w)
+      phi = (conc/1e6)/dens #sediment volume fraction
+      a = d/2 # particle radius, m
+      tau = (1/2) + (9/4)*(delta_v/a)
+      s = (9/4)*(delta_v/a)*(1+(delta_v/a))
+      alpha = phi*( (1/6) *k**4 *a**3 + k*(sigma-1)**2 *( s/( s**2+(sigma+tau)**2 ) ) )*1e4
+      return np.sum(alpha) # times 2 because 2 way travel
+   else:
+      return np.nan
+
+# =========================================================
 def custom_save(figdirec,root):
     #plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=400)
@@ -588,6 +706,7 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
              extent = shape[1]
              yvec = np.linspace(pix_m,extent*pix_m,extent)
              d = dep_m[shape[-1]*p:shape[-1]*(p+1)]
+             #d = median_filter(dep_m[shape[-1]*p:shape[-1]*(p+1)],100) 
 
              a = np.ones(np.shape(fp[p]))
              for k in range(len(d)): 
@@ -628,6 +747,7 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
           extent = shape[0]
           yvec = np.linspace(pix_m,extent*pix_m,extent)
           d = dep_m
+          #d = median_filter(dep_m,100) #dep_m
 
           a = np.ones(np.shape(fp))
           for k in range(len(d)): 
@@ -655,29 +775,36 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
        return Zt
  
 # =========================================================
-def correct_scans(fp, a_fp, dofilt):
-    return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans)(fp[p], a_fp[p], dofilt) for p in xrange(len(fp)))
+def correct_scans(fp, a_fp, TL, dofilt):
+    return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans)(fp[p], a_fp[p], TL[p], dofilt) for p in xrange(len(fp)))
 #   Zt = []
 #   for p in xrange(len(fp)):
 #      Zt.append(c_scans(fp[p], r_fp[p], dofilt))
 #   return Zt
 
 # =========================================================
-def c_scans(fp, a_fp, dofilt):
+def c_scans(fp, a_fp, TL, dofilt):
    if dofilt==1:
       fp = do_ppdrc(fp, np.shape(fp)[-1]/2)
-   mg = 10**np.log10(np.asarray(fp*np.cos(a_fp),'float32')+0.001)
+   #mg = 10**np.log10(np.asarray(fp*np.cos(a_fp),'float32')+0.001)
+   mg = 10**np.log10(np.asarray(fp * 1-np.cos(a_fp),'float32')+0.001 + TL)
    mg[fp==0] = np.nan
+   mg[mg<0] = np.nan
    return mg
 
 # =========================================================
-def correct_scans2(fp):
-    return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans2)(fp[p]) for p in xrange(len(fp)))
+def correct_scans2(fp, TL):
+    return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans2)(fp[p], TL) for p in xrange(len(fp)))
 
 # =========================================================
-def c_scans2(fp):
-   mg = 10**np.log10(np.asarray(fp,'float32')+0.001)
+def c_scans2(fp, TL):
+   try:
+      mg = 10**np.log10(np.asarray(fp,'float32')+0.001 + TL[:,::2] )
+   except:
+      mg = 10**np.log10(np.asarray(fp,'float32')+0.001 )
+
    mg[fp==0] = np.nan
+   mg[mg<0] = np.nan
    return mg
 
 # =========================================================

@@ -34,6 +34,9 @@ Full documentation of the program is forthcoming
 ![alt tag](http://dbuscombe-usgs.github.io/figs/PyHum_glencanyon.png)
 *Fine/coarse transition on the bed of the Colorado River in Glen Canyon, Arizona*
 
+![alt tag](http://dbuscombe-usgs.github.io/figs/SuwaneeRiver_Florida.png)
+*Lower Suwannee River, Florida. Credit: Florida Fish and Wildlife Commission: Information Science and Management. Funded by U.S. Fish and Wildlife Service State Wildlife Grant (SWG)*
+
 ### Contributing & Credits
 
  Primary Developer |    Daniel Buscombe 
@@ -256,16 +259,17 @@ which carries out the following operations:
    cog = 1 # GPS course-over-ground used for heading
    calc_bearing = 0 #no
    filt_bearing = 0 #no
-   #chunk_size = 1000 # chunk size = 1000 pings
-   #chunk_size = 0 # auto chunk size
    chunk = 'd100' # distance, 100m
    #chunk = 'p1000' # pings, 1000
    #chunk = 'h10' # heading deviation, 10 deg
           
    # correction specific settings
    maxW = 1000 # rms output wattage
-   dofilt = 0 # 1=apply a phase preserving filter (WARNING!! takes a very long time for large scans)
+   dofilt = 0 # 1 = apply a phase preserving filter (WARNING!! takes a very long time for large scans)
    correct_withwater = 0 # don't retain water column in radiometric correction (1 = retains water column for radiomatric corrections)
+   ph = 7.0 # acidity on the pH scale
+   temp = 10.0 # water temperature in degrees Celsius
+   salinity = 0.0
 
    # for shadow removal
    shadowmask = 0 #automatic shadow removal
@@ -291,9 +295,6 @@ which carries out the following operations:
    numstdevs = 4 #Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept 
 
    # for downward-looking echosounder echogram (e1-e2) analysis
-   ph = 7.0 # acidity on the pH scale
-   temp = 10.0 # water temperature in degrees Celsius
-   salinity = 0.0
    beam = 20.0
    transfreq = 200.0 # frequency (kHz) of downward looking echosounder
    integ = 5
@@ -303,7 +304,7 @@ which carries out the following operations:
    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
 
    # correct scans and remove water column
-   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater)
+   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
 
    # remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
@@ -415,29 +416,32 @@ if __name__ == '__main__':
     if sonpath:
        print 'Son files are in %s' % (sonpath)
                  
-    # general settings   
     doplot = 1 #yes
 
     # reading specific settings
-    cs2cs_args = "epsg:32100" #NAD83 / Montana
-    bedpick = 2 # manual bed pick
+    cs2cs_args = "epsg:26949" #arizona central state plane
+    bedpick = 1 # auto bed pick
     c = 1450 # speed of sound fresh water
     t = 0.108 # length of transducer
-    f = 455 # frequency kHz
+    f = 455 # frequency kHz of sidescan sonar
     draft = 0.3 # draft in metres
     flip_lr = 1 # flip port and starboard
-    model = 1199 # humminbird model
-    #chunk_size = 1000 # chunk size = 1000 pings
-    chunk_size = 0 # auto chunk size
-    dowrite = 0 #disable writing of point cloud data to file
- 
+    model = 998 # humminbird model
+    cog = 1 # GPS course-over-ground used for heading
+    calc_bearing = 0 #no
+    filt_bearing = 0 #no
+    chunk = 'd100' # distance, 100m
+     
     # correction specific settings
     maxW = 1000 # rms output wattage
+    dofilt = 0 # 1 = apply a phase preserving filter (WARNING!! takes a very long time for large scans)
+    correct_withwater = 0 # don't retain water column in radiometric correction (1 = retains water column for radiomatric corrections)
+    ph = 7.0 # acidity on the pH scale
+    temp = 10.0 # water temperature in degrees Celsius
+    #salinity = 0.0
 
     # for shadow removal
     shadowmask = 1 #manual shadow removal
-    kvals = 8 # number of k-means for automated shadow removal
-    win = 100
 
     # for mapping
     dogrid = 1 # yes

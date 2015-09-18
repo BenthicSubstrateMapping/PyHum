@@ -59,7 +59,7 @@ accounting for directivity and attenuation with range</div></blockquote>
 <div class="section" id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
 <p>You call the function like this:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">correct_withwater</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">correct_withwater</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">salinity</span><span class="p">,</span> <span class="n">dconcfile</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -75,8 +75,23 @@ accounting for directivity and attenuation with range</div></blockquote>
 <dd>maximum transducer power</dd>
 <dt>doplot <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=1]</span></dt>
 <dd>1 = make plots, otherwise do not</dd>
+<dt>dofilt <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=0]</span></dt>
+<dd>1 = apply a phase preserving filter to the scans</dd>
 <dt>correct_withwater <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=0]</span></dt>
 <dd>1 = apply radiometric correction but don&#8217;t remove water column from scans</dd>
+<dt>ph <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=7.0]</span></dt>
+<dd>water acidity in pH</dd>
+<dt>temp <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=10.0]</span></dt>
+<dd>water temperature in degrees Celsius</dd>
+<dt>salinity <span class="classifier-delimiter">:</span> <span class="classifier">float, <em>optional</em> [Default=0.0]</span></dt>
+<dd>salinity of water in parts per thousand</dd>
+<dt>dconcfile <span class="classifier-delimiter">:</span> <span class="classifier">str, <em>optional</em> [Default=None]</span></dt>
+<dd>file path of a text file containing sediment concentration data
+this file must contain the following fields separated by spaces:
+size (microns) conc (mg/L) dens (kg/m3)
+with one row per grain size, for example:
+30 1700 2200
+100 15 2650</dd>
 </dl>
 </div></blockquote>
 </div>

@@ -88,8 +88,6 @@ def dotest():
    cog = 1 # GPS course-over-ground used for heading
    calc_bearing = 0 #no
    filt_bearing = 0 #no
-   #chunk_size = 1000 # chunk size = 1000 pings
-   #chunk_size = 0 # auto chunk size
    chunk = 'd100' # distance, 100m
    #chunk = 'p1000' # pings, 1000
    #chunk = 'h10' # heading deviation, 10 deg
@@ -98,6 +96,9 @@ def dotest():
    maxW = 1000 # rms output wattage
    dofilt = 0 # 1 = apply a phase preserving filter (WARNING!! takes a very long time for large scans)
    correct_withwater = 0 # don't retain water column in radiometric correction (1 = retains water column for radiomatric corrections)
+   ph = 7.0 # acidity on the pH scale
+   temp = 10.0 # water temperature in degrees Celsius
+   salinity = 0.0
 
    # for shadow removal
    shadowmask = 0 #automatic shadow removal
@@ -123,9 +124,6 @@ def dotest():
    numstdevs = 4 #Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept 
 
    # for downward-looking echosounder echogram (e1-e2) analysis
-   ph = 7.0 # acidity on the pH scale
-   temp = 10.0 # water temperature in degrees Celsius
-   salinity = 0.0
    beam = 20.0
    transfreq = 200.0 # frequency (kHz) of downward looking echosounder
    integ = 5
@@ -135,7 +133,7 @@ def dotest():
    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
 
    # correct scans and remove water column
-   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater)
+   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
 
    # remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
