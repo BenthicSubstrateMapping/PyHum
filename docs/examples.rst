@@ -24,4 +24,10 @@ Gallery
   .. image:: _static/DogRiver_AllenAven.png
 *Boat marina in Dog River, Alabama. Credit: Allen Aven, Dauphin Island Sea Lab*
 
+.. _suwanee:
+
+  .. image:: _static/SuwaneeRiver_Florida.png
+*Lower Suwannee River, Florida. Credit: Florida Fish and Wildlife Commission: Information Science and Management. Funded by U.S. Fish and Wildlife Service State Wildlife Grant (SWG)*
+
+
   .. image:: _static/pyhum_logo_colour_sm.png
