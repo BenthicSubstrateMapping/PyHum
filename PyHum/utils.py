@@ -138,7 +138,7 @@ def strip_base(base):
 
     if base.find('.')>-1:
        base = base[:base.find('.')]
-   return base
+    return base
 
 # =========================================================
 def distBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
