@@ -180,11 +180,11 @@ def rm_spikes(dat,numstds):
    ht = np.mean(dat) + numstds*np.std(dat)
    lt = np.argmax(np.mean(dat) - numstds*np.std(dat),0)
 
-   index = where(dat>ht); 
+   index = np.where(dat>ht); 
    if index:
       dat[index] = np.nan
 
-   index = where(dat<lt); 
+   index = np.where(dat<lt); 
    if index: 
       dat[index] = np.nan
 
