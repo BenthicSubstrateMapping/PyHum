@@ -495,42 +495,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        print "low-freq. scan not available"
    
     if data_dwnlow!='':
-       if chunkmode==1: #distance
-          nchunks = 0
-          while nchunks<2:
-             chunkval = chunkval-1
-             tmp = metadat['dist_m']/chunkval #length_chunk
-             nchunks = np.floor(tmp.max())
-             del tmp
-          print "low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
-          chunkval = chunkval+1
-          Zt, ind_low = makechunks_simple(data_dwnlow, nchunks) 
-          
-       elif chunkmode==2: #pings
-          nchunks = 0
-          while nchunks<2:
-             chunkval = chunkval-1
-             tmp = np.max(np.shape(data_dwnlow))/chunkval #length_chunk
-             nchunks = np.floor(tmp)
-             del tmp
-          print "low-freq. sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
-          chunkval = chunkval+1
-          Zt, ind_low = makechunks_simple(data_dwnlow, nchunks)
-
-       elif chunkmode==3:
-          nchunks = 0
-          while nchunks<2:
-             chunkval = chunkval-1
-             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
-             nchunks = np.floor(tmp.max())
-             del tmp
-          print "low-freq. sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
-          chunkval = chunkval+1
-          Zt, ind_low = makechunks_simple(data_dwnlow, nchunks) 
-                     
-       elif chunkmode==4:
-          Zt, ind_port = makechunks_simple(data_dwnlow, 1) 
-
+    
+       Zt, ind_low = makechunks_scan(chunkmode, metadat, data_dwnlow, 2)
+           
        del data_dwnlow
 
        # create memory mapped file for Z
@@ -552,41 +519,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        print "high-freq. scan not available"
 
     if data_dwnhi!='':
-       if chunkmode==1: # distance
-          nchunks = 0
-          while nchunks<2:
-             chunkval = chunkval-1
-             tmp = metadat['dist_m']/chunkval #length_chunk
-             nchunks = np.floor(tmp.max())
-             del tmp
-          print "high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
-          chunkval = chunkval+1
-          Zt, ind_hi = makechunks_simple(data_dwnhi, nchunks)  
-          
-       elif chunkmode==2: #pings
-          nchunks = 0
-          while nchunks<2:
-             chunkval = chunkval-1
-             tmp = np.max(np.shape(data_dwnhi))/chunkval #length_chunk
-             nchunks = np.floor(tmp)
-             del tmp
-          print "high-freq. sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
-          chunkval = chunkval+1
-          Zt, ind_hi = makechunks_simple(data_dwnhi, nchunks)
-
-       elif chunkmode==3:
-          nchunks = 0
-          while nchunks<2:
-             chunkval = chunkval-1
-             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
-             nchunks = np.floor(tmp.max())
-             del tmp
-          print "high-freq. sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
-          chunkval = chunkval+1
-          Zt, ind_hi = makechunks_simple(data_dwnhi, nchunks) 
-                   
-       elif chunkmode==4:
-          Zt, ind_port = makechunks_simple(data_dwnhi, 1) 
+    
+       Zt, ind_hi = makechunks_scan(chunkmode, metadat, data_dwnhi, 3)
 
        del data_dwnhi
 
@@ -1025,6 +959,10 @@ def makechunks_scan(chunkmode, metadat, data_port, flag):
              print "port sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
           elif flag==1:
              print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))          
+          elif flag==2:
+             print "low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))  
+          elif flag==3:
+             print "high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))  
           chunkval = chunkval+1
           Zt, ind = makechunks_simple(data, nchunks) 
 
@@ -1039,6 +977,10 @@ def makechunks_scan(chunkmode, metadat, data_port, flag):
              print "port sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
           elif flag==1:
              print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)) 
+          elif flag==2:
+             print "low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))  
+          elif flag==3:
+             print "high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))  
           chunkval = chunkval+1
           Zt, ind = makechunks_simple(data, nchunks)           
 
@@ -1053,6 +995,10 @@ def makechunks_scan(chunkmode, metadat, data_port, flag):
              print "port sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
           elif flag==1:
              print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)) 
+          elif flag==2:
+             print "low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))  
+          elif flag==3:
+             print "high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))  
           chunkval = chunkval+1
           Zt, ind = makechunks_simple(data, nchunks) 
           
@@ -1139,6 +1085,78 @@ if __name__ == '__main__':
    read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
 
 
+
+#       if chunkmode==1: # distance
+#          nchunks = 0
+#          while nchunks<2:
+#             chunkval = chunkval-1
+#             tmp = metadat['dist_m']/chunkval #length_chunk
+#             nchunks = np.floor(tmp.max())
+#             del tmp
+#          print "high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+#          chunkval = chunkval+1
+#          Zt, ind_hi = makechunks_simple(data_dwnhi, nchunks)  
+#          
+#       elif chunkmode==2: #pings
+#          nchunks = 0
+#          while nchunks<2:
+#             chunkval = chunkval-1
+#             tmp = np.max(np.shape(data_dwnhi))/chunkval #length_chunk
+#             nchunks = np.floor(tmp)
+#             del tmp
+#          print "high-freq. sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
+#          chunkval = chunkval+1
+#          Zt, ind_hi = makechunks_simple(data_dwnhi, nchunks)
+
+#       elif chunkmode==3:
+#          nchunks = 0
+#          while nchunks<2:
+#             chunkval = chunkval-1
+#             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
+#             nchunks = np.floor(tmp.max())
+#             del tmp
+#          print "high-freq. sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
+#          chunkval = chunkval+1
+#          Zt, ind_hi = makechunks_simple(data_dwnhi, nchunks) 
+#                   
+#       elif chunkmode==4:
+#          Zt, ind_port = makechunks_simple(data_dwnhi, 1) 
+
+#       if chunkmode==1: #distance
+#          nchunks = 0
+#          while nchunks<2:
+#             chunkval = chunkval-1
+#             tmp = metadat['dist_m']/chunkval #length_chunk
+#             nchunks = np.floor(tmp.max())
+#             del tmp
+#          print "low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+#          chunkval = chunkval+1
+#          Zt, ind_low = makechunks_simple(data_dwnlow, nchunks) 
+#          
+#       elif chunkmode==2: #pings
+#          nchunks = 0
+#          while nchunks<2:
+#             chunkval = chunkval-1
+#             tmp = np.max(np.shape(data_dwnlow))/chunkval #length_chunk
+#             nchunks = np.floor(tmp)
+#             del tmp
+#          print "low-freq. sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
+#          chunkval = chunkval+1
+#          Zt, ind_low = makechunks_simple(data_dwnlow, nchunks)
+
+#       elif chunkmode==3:
+#          nchunks = 0
+#          while nchunks<2:
+#             chunkval = chunkval-1
+#             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
+#             nchunks = np.floor(tmp.max())
+#             del tmp
+#          print "low-freq. sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
+#          chunkval = chunkval+1
+#          Zt, ind_low = makechunks_simple(data_dwnlow, nchunks) 
+#                     
+#       elif chunkmode==4:
+#          Zt, ind_port = makechunks_simple(data_dwnlow, 1) 
 
 #       if chunkmode==1: # distance
 #          nchunks = 0
