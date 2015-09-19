@@ -97,7 +97,7 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp):
 # =========================================================
 def make_trackline(lon,lat, sonpath, base):
 
-    try:
+    #try:
        import simplekml
        # create kml for loading path into google earth
        kml = simplekml.Kml()
@@ -109,8 +109,8 @@ def make_trackline(lon,lat, sonpath, base):
        ls.style.linestyle.color = simplekml.Color.red
        #kml.save(sonpath+base+"trackline.kml")
        kml.save(os.path.normpath(os.path.join(sonpath,base+'trackline.kml')))
-    except:
-       print "install simplekml for kml plots"
+    #except:
+    #   print "install simplekml for kml plots"
        
 # =========================================================
 def get_depth(dep_m):
