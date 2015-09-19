@@ -25,7 +25,7 @@ from numpy.lib.stride_tricks import as_strided as ast
 
 import numpy as np
 
-from numpy import nan as npnan
+#from numpy import nan as npnan
 from numpy.matlib import repmat
 
 from sklearn.cluster import MiniBatchKMeans
@@ -303,7 +303,7 @@ def dpboundary(imu):
       c0 = c[i-1,:]
       tmp1 = np.squeeze(ascol(np.hstack((c0[1:],c0[-1]))))  
       tmp2 = np.squeeze(ascol(np.hstack((c0[0], c0[0:len(c0)-1]))))
-      d = np.repmat( imu[i,:], 3, 1 ) + np.vstack( (c0,tmp1,tmp2) )
+      d = repmat( imu[i,:], 3, 1 ) + np.vstack( (c0,tmp1,tmp2) )
       del tmp1, tmp2
       p[i,:] =  np.argmin(d,axis=0)
       c[i,:] =  np.min(d,axis=0)
