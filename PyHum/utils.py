@@ -21,7 +21,9 @@ http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 '''
 
 from numpy.lib.stride_tricks import as_strided as ast
-from numpy import array, product, isnan, min, max, convolve, isnan, ones, mean, std, argmax, where, interp, shape, zeros, hstack, vstack, argmin, squeeze, choose, linspace, r_, cumsum, histogram, any, seterr, cos, sin, rad2deg, arctan2, deg2rad, arcsin, power, sqrt
+#from numpy import array, product, isnan, min, max, convolve, isnan, ones, mean, std, argmax, where, interp, shape, zeros, hstack, vstack, argmin, squeeze, choose, linspace, r_, cumsum, histogram, any, seterr, cos, sin, rad2deg, arctan2, deg2rad, arcsin, power, sqrt
+
+import numpy as np
 
 from numpy import nan as npnan
 from numpy.matlib import repmat
@@ -33,7 +35,7 @@ import string, random
 # suppress divide and invalid warnings
 #seterr(divide='ignore')
 #seterr(invalid='ignore')
-seterr(all='ignore')
+np.seterr(all='ignore')
 
 __all__ = [
     'distBetweenPoints',
@@ -142,19 +144,19 @@ def strip_base(base):
 
 # =========================================================
 def distBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
-   return 6378137.0 * 2.0 * arcsin(sqrt(power(sin((deg2rad(pos1_lat) - deg2rad(pos2_lat)) / 2.0), 2.0) + cos(deg2rad(pos1_lat)) * cos(deg2rad(pos2_lat)) * power(sin((deg2rad(pos1_lon) - deg2rad(pos2_lon)) / 2.0), 2.0)))
+   return 6378137.0 * 2.0 * np.arcsin(np.sqrt(np.power(np.sin((np.deg2rad(pos1_lat) - np.deg2rad(pos2_lat)) / 2.0), 2.0) + np.cos(np.deg2rad(pos1_lat)) * np.cos(np.deg2rad(pos2_lat)) * np.power(np.sin((deg2rad(pos1_lon) - np.deg2rad(pos2_lon)) / 2.0), 2.0)))
 
 
 # =========================================================
 def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
-   lat1 = deg2rad(pos1_lat)
-   lon1 = deg2rad(pos1_lon)
-   lat2 = deg2rad(pos2_lat)
-   lon2 = deg2rad(pos2_lon)
+   lat1 = np.deg2rad(pos1_lat)
+   lon1 = np.deg2rad(pos1_lon)
+   lat2 = np.deg2rad(pos2_lat)
+   lon2 = np.deg2rad(pos2_lon)
 
-   bearing = arctan2(np.cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(lon2 - lon1), sin(lon2 - lon1) * cos(lat2))
+   bearing = np.arctan2(np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(lon2 - lon1), np.sin(lon2 - lon1) * np.cos(lat2))
 
-   db = rad2deg(bearing)
+   db = np.rad2deg(bearing)
    return (90.0 - db + 360.0) % 360.0
 
 
@@ -175,16 +177,16 @@ def rm_spikes(dat,numstds):
    """
    remove spikes in dat
    """
-   ht = mean(dat) + numstds*std(dat)
-   lt = argmax(mean(dat) - numstds*std(dat),0)
+   ht = np.mean(dat) + numstds*np.std(dat)
+   lt = np.argmax(np.mean(dat) - numstds*np.std(dat),0)
 
    index = where(dat>ht); 
    if index:
-      dat[index] = npnan
+      dat[index] = np.nan
 
    index = where(dat<lt); 
    if index: 
-      dat[index] = npnan
+      dat[index] = np.nan
 
    # fill nans using linear interpolation
    nans, y= nan_helper(dat)
@@ -196,8 +198,8 @@ def rescale(dat,mn,mx):
    """
    rescales an input dat between mn and mx
    """
-   m = min(dat.flatten())
-   M = max(dat.flatten())
+   m = np.min(dat.flatten())
+   M = np.max(dat.flatten())
    return (mx-mn)*(dat-m)/(M-m)+mn
 
 # =========================================================
@@ -205,7 +207,7 @@ def runningMeanFast(x, N):
    '''
    flawed but fast running mean
    '''
-   x = convolve(x, ones((N,))/N)[(N-1):]
+   x = np.convolve(x, np.ones((N,))/N)[(N-1):]
    # the last N values will be crap, so they're set to the global mean
    x[-N:] = x[-N]
    return x
@@ -215,7 +217,7 @@ def nan_helper(y):
    '''
    function to help manage indices of nans
    '''
-   return isnan(y), lambda z: z.nonzero()[0]
+   return np.isnan(y), lambda z: z.nonzero()[0]
 
 # =========================================================
 def norm_shape(shap):
@@ -251,9 +253,9 @@ def sliding_window(a,ws,ss = None,flatten = True):
    ws = norm_shape(ws)
    ss = norm_shape(ss)
    # convert ws, ss, and a.shape to numpy arrays
-   ws = array(ws)
-   ss = array(ss)
-   shap = array(a.shape)
+   ws = np.array(ws)
+   ss = np.array(ss)
+   shap = np.array(a.shape)
    # ensure that ws, ss, and a.shape all have the same number of dimensions
    ls = [len(shap),len(ws),len(ss)]
    if 1 != len(set(ls)):
@@ -261,7 +263,7 @@ def sliding_window(a,ws,ss = None,flatten = True):
       'a.shape, ws and ss must all have the same length. They were %s' % str(ls))
      
    # ensure that ws is smaller than a in every dimension
-   if any(ws > shap):
+   if np.any(ws > shap):
       raise ValueError(\
       'ws cannot be larger than a in any dimension.\
  a.shape was %s and ws was %s' % (str(a.shape),str(ws)))
@@ -272,14 +274,14 @@ def sliding_window(a,ws,ss = None,flatten = True):
    newshape += norm_shape(ws)
    # the strides tuple will be the array's strides multiplied by step size, plus
    # the array's strides (tuple addition)
-   newstrides = norm_shape(array(a.strides) * ss) + a.strides
+   newstrides = norm_shape(np.array(a.strides) * ss) + a.strides
    a = ast(a,shape = newshape,strides = newstrides)
    if not flatten:
       return a
    # Collapse strided so that it has one more dimension than the window.  I.e.,
    # the new array is a flat list of slices.
    meat = len(ws) if ws.shape else 0
-   firstdim = (int(product(newshape[:-meat])),) if ws.shape else ()
+   firstdim = (int(np.product(newshape[:-meat])),) if ws.shape else ()
    dim = firstdim + (newshape[-meat:])
    # remove any dimensions with size 1
    dim = filter(lambda i : i != 1,dim) 
@@ -292,26 +294,26 @@ def dpboundary(imu):
    dynamic boundary tracing in an image 
    (translated from matlab: CMP Vision Algorithms http://visionbook.felk.cvut.cz)
    '''
-   m,n = shape(imu)  
-   c = zeros((m,n))
-   p = zeros((m,n))
+   m,n = np.shape(imu)  
+   c = np.zeros((m,n))
+   p = np.zeros((m,n))
    c[0,:] = imu[0,:]  
    
    for i in xrange(1,m):
       c0 = c[i-1,:]
-      tmp1 = squeeze(ascol(hstack((c0[1:],c0[-1]))))  
-      tmp2 = squeeze(ascol(hstack((c0[0], c0[0:len(c0)-1]))))
-      d = repmat( imu[i,:], 3, 1 ) + vstack( (c0,tmp1,tmp2) )
+      tmp1 = np.squeeze(ascol(np.hstack((c0[1:],c0[-1]))))  
+      tmp2 = np.squeeze(ascol(np.hstack((c0[0], c0[0:len(c0)-1]))))
+      d = np.repmat( imu[i,:], 3, 1 ) + np.vstack( (c0,tmp1,tmp2) )
       del tmp1, tmp2
-      p[i,:] =  argmin(d,axis=0)
-      c[i,:] =  min(d,axis=0)
+      p[i,:] =  np.argmin(d,axis=0)
+      c[i,:] =  np.min(d,axis=0)
 
    p[p==0] = -1
    p = p+1
 
-   x = zeros((m,1))
-   cost = min(c[-1,:])
-   xpos = argmin( c[-1,:] )
+   x = np.zeros((m,1))
+   cost = np.min(c[-1,:])
+   xpos = np.argmin( c[-1,:] )
    for i in reversed(range(1,m)):
       x[i] = xpos
       if p[i,xpos]==2 and xpos<n:
@@ -333,7 +335,7 @@ def cut_kmeans(w,numclusters):
    values = k_means.cluster_centers_.squeeze()
    labels = k_means.labels_
    # make the cut and reshape
-   wc = choose(labels, values)
+   wc = np.choose(labels, values)
    wc.shape = w.shape
    return wc, values
 
@@ -342,23 +344,23 @@ def im_resize(im,Nx,Ny):
    '''
    resize array by bivariate spline interpolation
    '''
-   ny, nx = shape(im)
-   xx = linspace(0,nx,Nx)
-   yy = linspace(0,ny,Ny)
-   newKernel = RectBivariateSpline(r_[:ny],r_[:nx],im) 
+   ny, nx = np.shape(im)
+   xx = np.linspace(0,nx,Nx)
+   yy = np.linspace(0,ny,Ny)
+   newKernel = RectBivariateSpline(np.r_[:ny],np.r_[:nx],im) 
    return newKernel(yy,xx)
 
 # =========================================================
 def histeq(im,nbr_bins=256):
 
-   im[isnan(im)] = 0
+   im[np.isnan(im)] = 0
    #get image histogram
-   imhist,bins = histogram(im.flatten(),nbr_bins,normed=True)
+   imhist,bins = np.histogram(im.flatten(),nbr_bins,normed=True)
    cdf = imhist.cumsum() #cumulative distribution function
    cdf = 255 * cdf / cdf[-1] #normalize
 
    #use linear interpolation of cdf to find new pixel values
-   im2 = interp(im.flatten(),bins[:-1],cdf)
+   im2 = np.interp(im.flatten(),bins[:-1],cdf)
 
    return im2.reshape(im.shape), cdf
     
