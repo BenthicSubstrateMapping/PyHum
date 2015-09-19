@@ -946,7 +946,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     print "Done!"
 
 # =========================================================
-def makechunks_scan(chunkmode, chunkval, metadat, data_port, flag):
+def makechunks_scan(chunkmode, chunkval, metadat, data, flag):
 
        if chunkmode==1:
           nchunks = 0
