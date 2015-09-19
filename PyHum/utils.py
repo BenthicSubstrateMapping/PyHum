@@ -56,7 +56,7 @@ __all__ = [
 
 #################################################
 # =========================================================
-def get_depth(lat, lon):
+def get_depth(dep_m):
 
     dep_m = np.squeeze(dep_m) 
     dep_m = rm_spikes(dep_m,2)
