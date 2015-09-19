@@ -31,6 +31,7 @@ from numpy.matlib import repmat
 from sklearn.cluster import MiniBatchKMeans
 from scipy.interpolate import RectBivariateSpline
 import string, random
+from scipy.ndimage.filters import median_filter
 
 # suppress divide and invalid warnings
 #seterr(divide='ignore')
@@ -55,6 +56,62 @@ __all__ = [
     ]
 
 #################################################
+
+# =========================================================
+def auto_bedpick(ft, dep_m, chunkmode, port_fp):
+    buff = 10
+
+    # get bed from depth trace
+    bed = ft*dep_m
+
+    imu = []
+
+    if chunkmode!=4:
+      for k in xrange(len(port_fp)):
+         #imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
+         imu.append(port_fp[k][np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+      imu = np.hstack(imu)
+    else:
+      imu.append(port_fp[np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+        
+    imu = np.squeeze(np.asarray(imu, 'float64'))
+    imu = median_filter(imu,(20,20))
+
+    ## narrow image to within range of estimated bed
+    # use dynamic boundary tracing to get 2nd estimate of bed  
+    x = np.squeeze(int(np.min(bed))+dpboundary(-imu.T)) 
+    del imu
+
+    if len(x)<len(bed):
+       x = np.append(x,x[-1]*np.ones(len(bed)-len(x)))
+    elif len(x)>len(bed):
+       bed = np.append(bed,bed[-1]*np.ones(len(x)-len(bed)))
+
+    # if standard deviation of auto bed pick is too small, then use acoustic bed pick
+    if np.std(x)<5:
+       print "stdev of auto bed pick is low, using acoustic pick"
+       x = bed.copy()          
+          
+    return x, bed
+          
+# =========================================================
+def make_trackline(lon,lat, sonpath, base):
+
+    try:
+       import simplekml
+       # create kml for loading path into google earth
+       kml = simplekml.Kml()
+       ls = kml.newlinestring(name='trackline')
+       ls.coords = zip(lon,lat)
+       ls.extrude = 1
+       ls.altitudemode = simplekml.AltitudeMode.relativetoground
+       ls.style.linestyle.width = 5
+       ls.style.linestyle.color = simplekml.Color.red
+       #kml.save(sonpath+base+"trackline.kml")
+       kml.save(os.path.normpath(os.path.join(sonpath,base+'trackline.kml')))
+    except:
+       print "install simplekml for kml plots"
+       
 # =========================================================
 def get_depth(dep_m):
 

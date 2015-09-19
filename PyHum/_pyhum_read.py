@@ -75,7 +75,7 @@ import numpy as np
 import pyproj
 
 #import ppdrc
-from scipy.ndimage.filters import median_filter
+#from scipy.ndimage.filters import median_filter
 
 #plotting
 import matplotlib.pyplot as plt
@@ -623,72 +623,19 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     else:
        metadat['shape_low'] = ''   
 
-    try:
-       import simplekml
-       # create kml for loading path into google earth
-       kml = simplekml.Kml()
-       ls = kml.newlinestring(name='trackline')
-       ls.coords = zip(lon,lat)
-       ls.extrude = 1
-       ls.altitudemode = simplekml.AltitudeMode.relativetoground
-       ls.style.linestyle.width = 5
-       ls.style.linestyle.color = simplekml.Color.red
-       #kml.save(sonpath+base+"trackline.kml")
-       kml.save(os.path.normpath(os.path.join(sonpath,base+'trackline.kml')))
-    except:
-       print "install simplekml for kml plots"
-
+    #make kml boat trackline
+    humutils.make_trackline(lon,lat, sonpath, base)
 
     if 'port_fp' in locals() and 'star_fp' in locals():
 
        if bedpick == 1: # auto
 
-          buff = 10
-
-          # get bed from depth trace
-          bed = ft*dep_m
-
-          imu = []
-
-          if chunkmode!=4:
-             for k in xrange(len(port_fp)):
-                #imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
-                imu.append(port_fp[k][np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
-             imu = np.hstack(imu)
-          else:
-             imu.append(port_fp[np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
-        
-          imu = np.squeeze(np.asarray(imu, 'float64'))
-
-          #imu = ppdrc.ppdrc(imu, np.shape(imu)[1]/2).getdata()
-
-          imu = median_filter(imu,(20,20))
-
-          ## narrow image to within range of estimated bed
-          #imu = data_port[int(np.min(bed)):int(np.max(bed)),:]
-          # use dynamic boundary tracing to get 2nd estimate of bed  
-          x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T)) 
-          #x = np.squeeze(humutils.dpboundary(-imu.T))
-          del imu 
-
-          if len(x)<len(bed):
-             x = np.append(x,x[-1]*np.ones(len(bed)-len(x)))
-          elif len(x)>len(bed):
-             bed = np.append(bed,bed[-1]*np.ones(len(x)-len(bed)))
-
-          # if standard deviation of auto bed pick is too small, then use acoustic bed pick
-          if np.std(x)<5:
-             print "stdev of auto bed pick is low, using acoustic pick"
-             x = bed.copy()
+          x, bed = auto_bedpick(ft, dep_m, chunkmode, port_fp)
 
           if len(dist_m)<len(bed):
              dist_m = np.append(dist_m,dist_m[-1]*np.ones(len(bed)-len(dist_m)))
 
           if doplot==1:
-             # treats each chunk in parallel for speed
-             #try:
-             #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
-             #except:
              if chunkmode!=4:
                 for k in xrange(len(star_fp)):
                    plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k, chunkmode)
@@ -703,38 +650,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
        elif bedpick>1: # user prompt
 
-          buff = 10
-
-          # get bed from depth trace
-          bed = ft*dep_m
-
-          imu = []
-
-          if chunkmode!=4:
-             for k in xrange(len(port_fp)):
-                #imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
-                imu.append(port_fp[k][np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
-             imu = np.hstack(imu)
-          else:
-             imu.append(port_fp[np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
-        
-          imu = np.squeeze(np.asarray(imu, 'float64'))
-          imu = median_filter(imu,(20,20))
-
-          ## narrow image to within range of estimated bed
-          # use dynamic boundary tracing to get 2nd estimate of bed  
-          x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T)) 
-          del imu 
-
-          if len(x)<len(bed):
-             x = np.append(x,x[-1]*np.ones(len(bed)-len(x)))
-          elif len(x)>len(bed):
-             bed = np.append(bed,bed[-1]*np.ones(len(x)-len(bed)))
-
-          # if standard deviation of auto bed pick is too small, then use acoustic bed pick
-          if np.std(x)<5:
-             print "stdev of auto bed pick is low, using acoustic pick"
-             x = bed.copy()
+          x, bed = auto_bedpick(ft, dep_m, chunkmode, port_fp)
 
           if len(dist_m)<len(bed):
              dist_m = np.append(dist_m,dist_m[-1]*np.ones(len(bed)-len(dist_m)))
@@ -1087,6 +1003,83 @@ if __name__ == '__main__':
 
 
 
+
+#          buff = 10
+
+#          # get bed from depth trace
+#          bed = ft*dep_m
+
+#          imu = []
+
+#          if chunkmode!=4:
+#             for k in xrange(len(port_fp)):
+#                #imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
+#                imu.append(port_fp[k][np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+#             imu = np.hstack(imu)
+#          else:
+#             imu.append(port_fp[np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+#        
+#          imu = np.squeeze(np.asarray(imu, 'float64'))
+#          imu = median_filter(imu,(20,20))
+
+#          ## narrow image to within range of estimated bed
+#          # use dynamic boundary tracing to get 2nd estimate of bed  
+#          x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T)) 
+#          del imu 
+
+#          if len(x)<len(bed):
+#             x = np.append(x,x[-1]*np.ones(len(bed)-len(x)))
+#          elif len(x)>len(bed):
+#             bed = np.append(bed,bed[-1]*np.ones(len(x)-len(bed)))
+
+#          # if standard deviation of auto bed pick is too small, then use acoustic bed pick
+#          if np.std(x)<5:
+#             print "stdev of auto bed pick is low, using acoustic pick"
+#             x = bed.copy()
+
+
+#          buff = 10
+
+#          # get bed from depth trace
+#          bed = ft*dep_m
+
+#          imu = []
+
+#          if chunkmode!=4:
+#             for k in xrange(len(port_fp)):
+#                #imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
+#                imu.append(port_fp[k][np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+#             imu = np.hstack(imu)
+#          else:
+#             imu.append(port_fp[np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+#        
+#          imu = np.squeeze(np.asarray(imu, 'float64'))
+
+#          imu = median_filter(imu,(20,20))
+
+#          ## narrow image to within range of estimated bed
+#          #imu = data_port[int(np.min(bed)):int(np.max(bed)),:]
+#          # use dynamic boundary tracing to get 2nd estimate of bed  
+#          x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T)) 
+#          #x = np.squeeze(humutils.dpboundary(-imu.T))
+#          del imu 
+
+#          if len(x)<len(bed):
+#             x = np.append(x,x[-1]*np.ones(len(bed)-len(x)))
+#          elif len(x)>len(bed):
+#             bed = np.append(bed,bed[-1]*np.ones(len(x)-len(bed)))
+
+#          # if standard deviation of auto bed pick is too small, then use acoustic bed pick
+#          if np.std(x)<5:
+#             print "stdev of auto bed pick is low, using acoustic pick"
+#             x = bed.copy()
+
+
+            # treats each chunk in parallel for speed
+             #try:
+             #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
+             #except:
+             
 #       if chunkmode==1: # distance
 #          nchunks = 0
 #          while nchunks<2:
