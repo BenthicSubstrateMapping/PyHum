@@ -374,7 +374,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     metadat['lon'] = lon
     metadat['lat'] = lat
 
-    dist_m = humutils.get_dist(lat, lon)    
+    dist_m = humutils.get_dist(lat, lon)  
+    metadat['dist_m'] = dist_m  
     
     # theta at 3dB in the horizontal
     theta3dB = np.arcsin(c/(t*(f*1000)))
