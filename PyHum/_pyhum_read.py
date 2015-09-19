@@ -395,7 +395,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     if data_port!='':
     
-       Zt, ind_port = makechunks_scan(chunkmode, metadat, data_port, 0)
+       Zt, ind_port = makechunks_scan(chunkmode, chunkval, metadat, data_port, 0)
 
        del data_port 
           
@@ -422,7 +422,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     if data_star!='':
 
-       Zt, ind_star = makechunks_scan(chunkmode, metadat, data_star, 1)
+       Zt, ind_star = makechunks_scan(chunkmode, chunkval, metadat, data_star, 1)
        
        del data_star
 
@@ -496,7 +496,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
    
     if data_dwnlow!='':
     
-       Zt, ind_low = makechunks_scan(chunkmode, metadat, data_dwnlow, 2)
+       Zt, ind_low = makechunks_scan(chunkmode, chunkval, metadat, data_dwnlow, 2)
            
        del data_dwnlow
 
@@ -520,7 +520,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     if data_dwnhi!='':
     
-       Zt, ind_hi = makechunks_scan(chunkmode, metadat, data_dwnhi, 3)
+       Zt, ind_hi = makechunks_scan(chunkmode, chunkval, metadat, data_dwnhi, 3)
 
        del data_dwnhi
 
@@ -946,7 +946,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     print "Done!"
 
 # =========================================================
-def makechunks_scan(chunkmode, metadat, data_port, flag):
+def makechunks_scan(chunkmode, chunkval, metadat, data_port, flag):
 
        if chunkmode==1:
           nchunks = 0
