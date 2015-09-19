@@ -190,7 +190,7 @@ def rm_spikes(dat,numstds):
 
    # fill nans using linear interpolation
    nans, y= nan_helper(dat)
-   dat[nans]= interp(y(nans), y(~nans), dat[~nans])
+   dat[nans]= np.interp(y(nans), y(~nans), dat[~nans])
    return dat
 
 # =========================================================
