@@ -274,6 +274,9 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowr
     with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'r') as ff:
        R_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
+    ## actual along-track resolution is this: grid using this????
+    ##tmp = R_fp[0] * np.arcsin(c/(1000*meta['t']*meta['f']))
+
     if len(shape_star)>2:    
        for p in xrange(len(star_fp)):
           res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, mode, nn, influence, numstdevs)
