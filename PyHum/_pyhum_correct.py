@@ -267,18 +267,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     base = base[0].split(os.sep)[-1]
 
     # remove underscores, negatives and spaces from basename
-    if base.find('_')>-1:
-       base = base[:base.find('_')]
-
-    if base.find('-')>-1:
-       base = base[:base.find('-')]
-
-    if base.find(' ')>-1:
-       base = base[:base.find(' ')]
-
-    if base.find('.')>-1:
-       base = base[:base.find('.')]
-    
+    base = humutils.strip_base(base)   
 
     # add wattage to metadata dict 
     #meta = loadmat(sonpath+base+'meta.mat')

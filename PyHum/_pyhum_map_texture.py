@@ -230,17 +230,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
     base = base[0].split(os.sep)[-1]
 
     # remove underscores, negatives and spaces from basename
-    if base.find('_')>-1:
-       base = base[:base.find('_')]
-
-    if base.find('-')>-1:
-       base = base[:base.find('-')]
-
-    if base.find(' ')>-1:
-       base = base[:base.find(' ')]
-
-    if base.find('.')>-1:
-       base = base[:base.find('.')]
+    base = humutils.strip_base(base)
 
     meta = loadmat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')))
 

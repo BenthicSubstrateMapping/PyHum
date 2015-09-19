@@ -54,6 +54,93 @@ __all__ = [
 
 #################################################
 # =========================================================
+def get_depth(lat, lon):
+
+    dep_m = np.squeeze(dep_m) 
+    dep_m = rm_spikes(dep_m,2)
+    return runningMeanFast(dep_m, 3) 
+    
+# =========================================================
+def get_dist(lat, lon):
+
+    dist = np.zeros(len(lat))
+    for k in xrange(len(lat)-1):
+       dist[k] = distBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+
+    return np.cumsum(dist)
+    
+# =========================================================
+def get_bearing(calc_bearing, cog, filt_bearing, lat, lon, heading):
+
+    # over-ride measured bearing and calc from positions
+    if calc_bearing==1:
+       lat = np.squeeze(lat)
+       lon = np.squeeze(lon) 
+
+       #point-to-point bearing
+       bearing = np.zeros(len(lat))
+       for k in xrange(len(lat)-1):
+          bearing[k] = bearingBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+       #del lat, lon
+
+    else:
+       # reported bearing by instrument (Kalman filtered?)
+       bearing = np.squeeze(heading)
+
+    # if stdev in heading is large, there's probably noise that needs to be filtered out
+    if np.std(bearing)>180:
+       print "WARNING: large heading stdev - attempting filtering"
+       from sklearn.cluster import MiniBatchKMeans
+       # can have two modes
+       data = np.column_stack([bearing, bearing])
+       k_means = MiniBatchKMeans(2)
+       # fit the model
+       k_means.fit(data) 
+       values = k_means.cluster_centers_.squeeze()
+       labels = k_means.labels_
+
+       if np.sum(labels==0) > np.sum(labels==1):
+          bearing[labels==1] = np.nan
+       else:
+          bearing[labels==0] = np.nan
+
+       nans, y= nan_helper(bearing)
+       bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans]) 
+
+    if filt_bearing ==1:
+       bearing = runningMeanFast(bearing, len(bearing)/100)
+       
+    if cog==1:
+       theta = np.asarray(bearing, 'float')/(180/np.pi)
+       #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
+       #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU 
+       # (East-North-Up) coordinate frame. 
+       #Subtract pi/2 from your heading
+       theta = theta - np.pi/2
+       # (re-wrap to Pi to -Pi)
+       theta = np.unwrap(-theta)
+       bearing = theta * (180/np.pi)     
+       
+    return bearing
+    
+
+# =========================================================
+def strip_base(base):
+    # remove underscores, negatives and spaces from basename
+    if base.find('_')>-1:
+       base = base[:base.find('_')]
+
+    if base.find('-')>-1:
+       base = base[:base.find('-')]
+
+    if base.find(' ')>-1:
+       base = base[:base.find(' ')]
+
+    if base.find('.')>-1:
+       base = base[:base.find('.')]
+   return base
+
+# =========================================================
 def distBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
    return 6378137.0 * 2.0 * arcsin(sqrt(power(sin((deg2rad(pos1_lat) - deg2rad(pos2_lat)) / 2.0), 2.0) + cos(deg2rad(pos1_lat)) * cos(deg2rad(pos2_lat)) * power(sin((deg2rad(pos1_lon) - deg2rad(pos2_lon)) / 2.0), 2.0)))
 

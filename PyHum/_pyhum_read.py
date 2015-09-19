@@ -319,7 +319,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        print "program will now close"
        sys.exit()
 
-
     # start timer
     if os.name=='posix': # true if linux/mac or cygwin on windows
        start = time.time()
@@ -330,26 +329,16 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     if sonpath[-1]!=os.sep:
        sonpath = sonpath + os.sep
 
-    base = humfile.split('.DAT') # get base of file name for output
-    base = base[0].split(os.sep)[-1]
-
-    # remove underscores, negatives and spaces from basename
-    if base.find('_')>-1:
-       base = base[:base.find('_')]
-
-    if base.find('-')>-1:
-       base = base[:base.find('-')]
-
-    if base.find(' ')>-1:
-       base = base[:base.find(' ')]
-
-    if base.find('.')>-1:
-       base = base[:base.find('.')]
-
     # get the SON files from this directory
     sonfiles = glob.glob(sonpath+'*.SON')
     if not sonfiles:
         sonfiles = glob.glob(os.getcwd()+os.sep+sonpath+'*.SON')
+        
+    base = humfile.split('.DAT') # get base of file name for output
+    base = base[0].split(os.sep)[-1]
+
+    # remove underscores, negatives and spaces from basename
+    base = humutils.strip_base(base)
 
     print "WARNING: Because files have to be read in byte by byte,"
     print "this could take a very long time ..."
@@ -363,44 +352,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     #heading = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])[:nrec]
     metadat['heading'] = metadat['heading'][:nrec]
-
-    # over-ride measured bearing and calc from positions
-    if calc_bearing==1:
-       lat = np.squeeze(metadat['lat'])
-       lon = np.squeeze(metadat['lon']) 
-
-       #point-to-point bearing
-       bearing = np.zeros(len(lat))
-       for k in xrange(len(lat)-1):
-          bearing[k] = humutils.bearingBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
-       del lat, lon
-
-    else:
-       # reported bearing by instrument (Kalman filtered?)
-       bearing = np.squeeze(metadat['heading'])
-
-    # if stdev in heading is large, there's probably noise that needs to be filtered out
-    if np.std(bearing)>180:
-       print "WARNING: large heading stdev - attempting filtering"
-       from sklearn.cluster import MiniBatchKMeans
-       # can have two modes
-       data = np.column_stack([bearing, bearing])
-       k_means = MiniBatchKMeans(2)
-       # fit the model
-       k_means.fit(data) 
-       values = k_means.cluster_centers_.squeeze()
-       labels = k_means.labels_
-
-       if np.sum(labels==0) > np.sum(labels==1):
-          bearing[labels==1] = np.nan
-       else:
-          bearing[labels==0] = np.nan
-
-       nans, y= humutils.nan_helper(bearing)
-       bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans]) 
-
-    if filt_bearing ==1:
-       bearing = humutils.runningMeanFast(bearing, len(bearing)/100)
+    
+    metadat['heading'] = humutils.get_bearing(calc_bearing, filt_bearing, cog, metadat['lat'], metadat['lon'], metadat['heading'])
 
     try:
        es = humutils.runningMeanFast(metadat['e'][:nrec],len(metadat['e'][:nrec])/100)
@@ -421,35 +374,14 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     metadat['lon'] = lon
     metadat['lat'] = lat
 
-    if cog==1:
-       theta = np.asarray(bearing, 'float')/(180/np.pi)
-       #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
-       #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU 
-       # (East-North-Up) coordinate frame. 
-       #Subtract pi/2 from your heading
-       theta = theta - np.pi/2
-       # (re-wrap to Pi to -Pi)
-       theta = np.unwrap(-theta)
-       metadat['heading'] = theta * (180/np.pi)
-    else:
-       metadat['heading'] = bearing
-
-
-    dist = np.zeros(len(lat))
-    for k in xrange(len(lat)-1):
-       dist[k] = humutils.distBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
-
-    dist_m = np.cumsum(dist)
-    metadat['dist_m'] = dist_m    
+    metadat['dist_m'] = humutils.get_dist(lat, lon)    
     
     # theta at 3dB in the horizontal
     theta3dB = np.arcsin(c/(t*(f*1000)))
     #resolution of 1 sidescan pixel to nadir
     ft = (np.pi/2)*(1/theta3dB)
 
-    dep_m = np.squeeze(metadat['dep_m'][:nrec]) #loadmat(sonpath+base+'meta.mat')['dep_m'])
-    dep_m = humutils.rm_spikes(dep_m,2)
-    dep_m = humutils.runningMeanFast(dep_m, 3)         
+    dep_m = humutils.get_depth(metadat['dep_m'][:nrec])
 
     # port scan
     try:
@@ -462,42 +394,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        print "portside scan not available"
 
     if data_port!='':
-       #Zt, ind_port = makechunks(data_port, chunksize)
-       if chunkmode==1:
-          nchunks = 0
-          while nchunks<2:
-             chunkval = chunkval-1
-             tmp = metadat['dist_m']/chunkval #length_chunk
-             nchunks = np.floor(tmp.max())
-             del tmp
-          print "port sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
-          chunkval = chunkval+1
-          Zt, ind_port = makechunks_simple(data_port, nchunks) 
-
-       elif chunkmode==2:
-          nchunks = 0
-          while nchunks<2:
-             chunkval = chunkval-1
-             tmp = np.max(np.shape(data_port))/chunkval #length_chunk
-             nchunks = np.floor(tmp)
-             del tmp
-          print "port sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
-          chunkval = chunkval+1
-          Zt, ind_port = makechunks_simple(data_port, nchunks)           
-
-       elif chunkmode==3:
-          nchunks = 0
-          while nchunks<2:
-             chunkval = chunkval-1
-             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
-             nchunks = np.floor(tmp.max())
-             del tmp
-          print "port sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
-          chunkval = chunkval+1
-          Zt, ind_port = makechunks_simple(data_port, nchunks) 
-          
-       elif chunkmode==4:
-          Zt, ind_port = makechunks_simple(data_port, 1) 
+    
+       Zt, ind_port = makechunks_scan(chunkmode, metadat, data_port, 0)
 
        del data_port 
           
@@ -523,43 +421,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        print "starboardside scan not available"
 
     if data_star!='':
-       #Zt, ind_star = makechunks(data_star, chunksize)
-       if chunkmode==1: # distance
-          nchunks = 0
-          while nchunks<2:
-             chunkval = chunkval-1       
-             tmp = metadat['dist_m']/chunkval #length_chunk
-             nchunks = np.floor(tmp.max())
-             del tmp
-          print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
-          chunkval = chunkval+1
-          Zt, ind_star = makechunks_simple(data_star, nchunks) 
-          
-       elif chunkmode==2: #pings
-          nchunks = 0
-          while nchunks<2:
-             chunkval = chunkval-1
-             tmp = np.max(np.shape(data_star))/chunkval #length_chunk
-             nchunks = np.floor(tmp)
-             del tmp
-          print "starboard sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
-          chunkval = chunkval+1
-          Zt, ind_star = makechunks_simple(data_star, nchunks) 
 
-       elif chunkmode==3:
-          nchunks = 0
-          while nchunks<2:
-             chunkval = chunkval-1
-             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
-             nchunks = np.floor(tmp.max())
-             del tmp
-          print "starboard sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
-          chunkval = chunkval+1
-          Zt, ind_star = makechunks_simple(data_star, nchunks) 
-                    
-       elif chunkmode==4:
-          Zt, ind_port = makechunks_simple(data_star, 1) 
-
+       Zt, ind_star = makechunks_scan(chunkmode, metadat, data_star, 1)
+       
        del data_star
 
        # create memory mapped file for Z
@@ -1148,6 +1012,57 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     print "Done!"
 
 # =========================================================
+def makechunks_scan(chunkmode, metadat, data_port, flag):
+
+       if chunkmode==1:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = metadat['dist_m']/chunkval #length_chunk
+             nchunks = np.floor(tmp.max())
+             del tmp
+          if flag==0:
+             print "port sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          elif flag==1:
+             print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))          
+          chunkval = chunkval+1
+          Zt, ind = makechunks_simple(data, nchunks) 
+
+       elif chunkmode==2:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.max(np.shape(data))/chunkval #length_chunk
+             nchunks = np.floor(tmp)
+             del tmp
+          if flag==0:
+             print "port sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
+          elif flag==1:
+             print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)) 
+          chunkval = chunkval+1
+          Zt, ind = makechunks_simple(data, nchunks)           
+
+       elif chunkmode==3:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
+             nchunks = np.floor(tmp.max())
+             del tmp
+          if flag==0:
+             print "port sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
+          elif flag==1:
+             print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)) 
+          chunkval = chunkval+1
+          Zt, ind = makechunks_simple(data, nchunks) 
+          
+       elif chunkmode==4:
+          Zt, ind = makechunks_simple(data, 1)
+          
+       return Zt, ind
+
+
+# =========================================================
 def custom_save(figdirec,root):
     #plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=400)
@@ -1224,6 +1139,103 @@ if __name__ == '__main__':
    read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
 
 
+
+#       if chunkmode==1: # distance
+#          nchunks = 0
+#          while nchunks<2:
+#             chunkval = chunkval-1       
+#             tmp = metadat['dist_m']/chunkval #length_chunk
+#             nchunks = np.floor(tmp.max())
+#             del tmp
+#          print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+#          chunkval = chunkval+1
+#          Zt, ind_star = makechunks_simple(data_star, nchunks) 
+#          
+#       elif chunkmode==2: #pings
+#          nchunks = 0
+#          while nchunks<2:
+#             chunkval = chunkval-1
+#             tmp = np.max(np.shape(data_star))/chunkval #length_chunk
+#             nchunks = np.floor(tmp)
+#             del tmp
+#          print "starboard sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
+#          chunkval = chunkval+1
+#          Zt, ind_star = makechunks_simple(data_star, nchunks) 
+
+#       elif chunkmode==3:
+#          nchunks = 0
+#          while nchunks<2:
+#             chunkval = chunkval-1
+#             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
+#             nchunks = np.floor(tmp.max())
+#             del tmp
+#          print "starboard sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
+#          chunkval = chunkval+1
+#          Zt, ind_star = makechunks_simple(data_star, nchunks) 
+#                    
+#       elif chunkmode==4:
+#          Zt, ind_port = makechunks_simple(data_star, 1) 
+
+#    dep_m = np.squeeze(metadat['dep_m'][:nrec]) #loadmat(sonpath+base+'meta.mat')['dep_m'])
+#    dep_m = humutils.rm_spikes(dep_m,2)
+#    dep_m = humutils.runningMeanFast(dep_m, 3)         
+
+
+#    dist = np.zeros(len(lat))
+#    for k in xrange(len(lat)-1):
+#       dist[k] = humutils.distBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+#    dist_m = np.cumsum(dist)
+
+#    if cog==1:
+#       theta = np.asarray(bearing, 'float')/(180/np.pi)
+#       #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
+#       #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU 
+#       # (East-North-Up) coordinate frame. 
+#       #Subtract pi/2 from your heading
+#       theta = theta - np.pi/2
+#       # (re-wrap to Pi to -Pi)
+#       theta = np.unwrap(-theta)
+#       metadat['heading'] = theta * (180/np.pi)
+#    else:
+#       metadat['heading'] = bearing
+
+#    # over-ride measured bearing and calc from positions
+#    if calc_bearing==1:
+#       lat = np.squeeze(metadat['lat'])
+#       lon = np.squeeze(metadat['lon']) 
+
+#       #point-to-point bearing
+#       bearing = np.zeros(len(lat))
+#       for k in xrange(len(lat)-1):
+#          bearing[k] = humutils.bearingBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+#       del lat, lon
+
+#    else:
+#       # reported bearing by instrument (Kalman filtered?)
+#       bearing = np.squeeze(metadat['heading'])
+
+#    # if stdev in heading is large, there's probably noise that needs to be filtered out
+#    if np.std(bearing)>180:
+#       print "WARNING: large heading stdev - attempting filtering"
+#       from sklearn.cluster import MiniBatchKMeans
+#       # can have two modes
+#       data = np.column_stack([bearing, bearing])
+#       k_means = MiniBatchKMeans(2)
+#       # fit the model
+#       k_means.fit(data) 
+#       values = k_means.cluster_centers_.squeeze()
+#       labels = k_means.labels_
+
+#       if np.sum(labels==0) > np.sum(labels==1):
+#          bearing[labels==1] = np.nan
+#       else:
+#          bearing[labels==0] = np.nan
+
+#       nans, y= humutils.nan_helper(bearing)
+#       bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans]) 
+
+#    if filt_bearing ==1:
+#       bearing = humutils.runningMeanFast(bearing, len(bearing)/100)
 
 #    if man_chunk==0:
 #    
