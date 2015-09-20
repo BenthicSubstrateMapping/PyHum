@@ -21,11 +21,8 @@ http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 '''
 
 from numpy.lib.stride_tricks import as_strided as ast
-#from numpy import array, product, isnan, min, max, convolve, isnan, ones, mean, std, argmax, where, interp, shape, zeros, hstack, vstack, argmin, squeeze, choose, linspace, r_, cumsum, histogram, any, seterr, cos, sin, rad2deg, arctan2, deg2rad, arcsin, power, sqrt
-
+import os
 import numpy as np
-
-#from numpy import nan as npnan
 from numpy.matlib import repmat
 
 from sklearn.cluster import MiniBatchKMeans
@@ -34,8 +31,6 @@ import string, random
 from scipy.ndimage.filters import median_filter
 
 # suppress divide and invalid warnings
-#seterr(divide='ignore')
-#seterr(invalid='ignore')
 np.seterr(all='ignore')
 
 __all__ = [
@@ -97,21 +92,17 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp):
 # =========================================================
 def make_trackline(lon,lat, sonpath, base):
 
-    #try:
-       import simplekml
-       # create kml for loading path into google earth
-       kml = simplekml.Kml()
-       ls = kml.newlinestring(name='trackline')
-       ls.coords = zip(lon,lat)
-       ls.extrude = 1
-       ls.altitudemode = simplekml.AltitudeMode.relativetoground
-       ls.style.linestyle.width = 5
-       ls.style.linestyle.color = simplekml.Color.red
-       #kml.save(sonpath+base+"trackline.kml")
-       kml.save(os.path.normpath(os.path.join(sonpath,base+'trackline.kml')))
-    #except:
-    #   print "install simplekml for kml plots"
-       
+    import simplekml
+    # create kml for loading path into google earth
+    kml = simplekml.Kml()
+    ls = kml.newlinestring(name='trackline')
+    ls.coords = zip(lon,lat)
+    ls.extrude = 1
+    ls.altitudemode = simplekml.AltitudeMode.relativetoground
+    ls.style.linestyle.width = 5
+    ls.style.linestyle.color = simplekml.Color.red
+    kml.save(os.path.normpath(os.path.join(sonpath,base+'trackline.kml')))
+   
 # =========================================================
 def get_depth(dep_m):
 

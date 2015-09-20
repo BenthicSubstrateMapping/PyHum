@@ -75,10 +75,6 @@ import ppdrc
 #plotting
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
-#from mpl_toolkits.axes_grid1 import make_axes_locatable
-#from matplotlib import rc
-#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-#rc('text', usetex=True)
 
 # suppress divide and invalid warnings
 np.seterr(divide='ignore')
@@ -270,24 +266,16 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     base = humutils.strip_base(base)   
 
     # add wattage to metadata dict 
-    #meta = loadmat(sonpath+base+'meta.mat')
     meta = loadmat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')))
 
     dep_m = meta['dep_m'][0]
     pix_m = meta['pix_m'][0]
 
     meta['maxW'] = maxW
-    #savemat(sonpath+base+'meta.mat', meta ,oned_as='row')
     savemat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')), meta ,oned_as='row')
-    #del meta
 
-    #bed = np.squeeze(loadmat(sonpath+base+'meta.mat')['bed'])
     bed = np.squeeze(meta['bed'])
-
-    #ft = 1/loadmat(sonpath+base+'meta.mat')['pix_m'] 
     ft = 1/(meta['pix_m'])
-
-    #dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
     dist_m = np.squeeze(meta['dist_m'])
 
     if dconcfile is not None:
@@ -441,10 +429,6 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     ## do plots of merged scans
     if doplot==1:
-       ## treats each chunk in parallel for speed
-       #try:
-       #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_merged_scans)(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p) for p in xrange(len(star_fp)))
-       #except:
        if correct_withwater == 1:
 
           with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lw.dat')), 'r') as ff:
@@ -549,10 +533,6 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
 
        if doplot==1:
-          # treats each chunk in parallel for speed
-          #try:
-          #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_dwnlow_scans)(low_fp[p], dist_m, shape_low, ft, sonpath, p) for p in xrange(len(low_fp)))
-          #except:
           if len(np.shape(low_fp))>2:
              for p in xrange(len(low_fp)):
                 plot_dwnlow_scans(low_fp[p], dist_m, shape_low, ft, sonpath, p)
@@ -592,10 +572,6 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
           hi_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_hi)
 
        if doplot==1:
-          ## treats each chunk in parallel for speed
-          #try:
-          #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_dwnhi_scans)(hi_fp[p], dist_m, shape_hi, ft, sonpath, p) for p in xrange(len(hi_fp)))
-          #except:
           if len(np.shape(hi_fp))>2:
              for p in xrange(len(hi_fp)):
                 plot_dwnhi_scans(hi_fp[p], dist_m, shape_hi, ft, sonpath, p)
@@ -666,7 +642,6 @@ def sed_atten(f,conc,dens,d,c):
 
 # =========================================================
 def custom_save(figdirec,root):
-    #plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=400)
 
 # =========================================================
@@ -695,7 +670,6 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
              extent = shape[1]
              yvec = np.linspace(pix_m,extent*pix_m,extent)
              d = dep_m[shape[-1]*p:shape[-1]*(p+1)]
-             #d = median_filter(dep_m[shape[-1]*p:shape[-1]*(p+1)],100) 
 
              a = np.ones(np.shape(fp[p]))
              for k in range(len(d)): 
@@ -736,7 +710,6 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
           extent = shape[0]
           yvec = np.linspace(pix_m,extent*pix_m,extent)
           d = dep_m
-          #d = median_filter(dep_m,100) #dep_m
 
           a = np.ones(np.shape(fp))
           for k in range(len(d)): 
@@ -766,10 +739,6 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
 # =========================================================
 def correct_scans(fp, a_fp, TL, dofilt):
     return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans)(fp[p], a_fp[p], TL[p], dofilt) for p in xrange(len(fp)))
-#   Zt = []
-#   for p in xrange(len(fp)):
-#      Zt.append(c_scans(fp[p], r_fp[p], dofilt))
-#   return Zt
 
 # =========================================================
 def c_scans(fp, a_fp, TL, dofilt):
@@ -866,74 +835,3 @@ if __name__ == '__main__':
 
    correct(humfile, sonpath, maxW, doplot)
 
-
-       #port_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), dtype='int16', mode='r', shape=tuple(shape_port))
-       #star_fp = np.memmap(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), dtype='int16', mode='r', shape=tuple(shape_star))
-       
-       
-#    if not maxW:
-#      maxW = 1000
-#      print '[Default] Max. transducr power is %s W' % (str(maxW))
-
-#    if not doplot:
-#      if doplot != 0:
-#         doplot = 1
-#         print "[Default] Plots will be made"
-
-    #for p in xrange(len(Zt)):
-
-    #   dat1 = Zt[p].astype('float64')
-    #   dat1[np.isnan(dat1)] = 0
-    #   dat1 = ppdrc.ppdrc(dat1, shape_star[-1]/10)
-    #   dat1 = rescale(dat1.getdata(),0,255)
-    #   dat1[np.isnan(Zt[p])] = np.nan
-    #   Zt[p] = dat1.astype('float32')
-    #   del dat1
-
-    #for p in xrange(len(Zt)):
-
-    #   dat1 = Zt[p].astype('float64')
-    #   dat1[np.isnan(dat1)] = 0
-    #   dat1 = ppdrc.ppdrc(dat1, shape_port[-1]/4)
-    #   dat1 = rescale(dat1.getdata(),0,255)
-    #   dat1[np.isnan(Zt[p])] = np.nan
-    #   Zt[p] = dat1.astype('float32')
-    #   del dat1
-
-       #for p in xrange(len(Zt)):
-       #   dat1 = Zt[p].astype('float64')
-       #   dat1[np.isnan(dat1)] = 0
-       #   dat1 = ppdrc.ppdrc(dat1, shape_low[-1]/4)
-       #   dat1 = rescale(dat1.getdata(),0,255)
-       #   dat1[np.isnan(Zt[p])] = np.nan
-       #   Zt[p] = dat1.astype('float32')
-       #   del dat1
-
-       #for p in xrange(len(Zt)):
-       #   dat1 = Zt[p].astype('float64')
-       #   dat1[np.isnan(dat1)] = 0
-       #   dat1 = ppdrc.ppdrc(dat1, shape_hi[-1]/4)
-       #   dat1 = rescale(dat1.getdata(),0,255)
-       #   dat1[np.isnan(Zt[p])] = np.nan
-       #   Zt[p] = dat1.astype('float32')
-       #   del dat1
-
-## =========================================================
-#def correct_scans(fp, r_fp):
-#    Zt = []
-
-#    for p in xrange(len(fp)):
-#       mg = 10**np.log10(np.asarray(fp[p]*np.cos(r_fp[p]),'float32')+0.001)
-#       mg[fp[p]==0] = np.nan
-#       Zt.append(mg)
-#    return Zt
-
-## =========================================================
-#def correct_scans2(fp):
-#    Zt = []
-
-#    for p in xrange(len(fp)):
-#       mg = 10**np.log10(np.asarray(fp[p],'float32')+0.001)
-#       mg[fp[p]==0] = np.nan
-#       Zt.append(mg)
-#    return Zt

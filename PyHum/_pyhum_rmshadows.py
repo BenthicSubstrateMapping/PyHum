@@ -150,18 +150,21 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
     # print given arguments to screen and convert data type where necessary
     if humfile:
       print 'Input file is %s' % (humfile)
+      
     if sonpath:
       print 'Sonar file path is %s' % (sonpath)
 
     if win:
        win = np.asarray(win,int)
        print 'Window is %s square pixels' % (str(win))
+       
     if shadowmask:
        shadowmask = np.asarray(shadowmask,int)
        if shadowmask==1:
           print 'Shadow masking is manual'
        else: 
           print 'Shadow masking is auto'
+          
     if doplot:
        doplot = int(doplot)
        if doplot==0:

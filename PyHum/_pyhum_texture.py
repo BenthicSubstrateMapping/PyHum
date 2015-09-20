@@ -161,26 +161,34 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       # print given arguments to screen and convert data type where necessary
       if humfile:
          print 'Input file is %s' % (humfile)
+         
       if sonpath:
          print 'Sonar file path is %s' % (sonpath)
+         
       if win:
          win = np.asarray(win,int)
          print 'Window is %s square pixels' % (str(win))
+         
       if shift:
          shift = np.asarray(shift,int)
          print 'Min shift is %s pixels' % (str(shift))
+         
       if density:
          density = np.asarray(density,int)
          print 'Image will be sampled every %s pixels' % (str(density))
+         
       if numclasses:
          numclasses = np.asarray(numclasses,int)
          print 'Number of sediment classes: %s' % (str(numclasses))
+         
       if maxscale:
          maxscale = np.asarray(maxscale,int)
          print 'Max scale as inverse fraction of data length: %s' % (str(maxscale))
+         
       if notes:
          notes = np.asarray(notes,int)
          print 'Notes per octave: %s' % (str(notes))
+         
       if doplot:
          doplot = int(doplot)
          if doplot==0:
@@ -206,17 +214,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       base = base[0].split(os.sep)[-1]
 
       # remove underscores, negatives and spaces from basename
-      if base.find('_')>-1:
-         base = base[:base.find('_')]
-
-      if base.find('-')>-1:
-         base = base[:base.find('-')]
-
-      if base.find(' ')>-1:
-         base = base[:base.find(' ')]
-
-      if base.find('.')>-1:
-         base = base[:base.find('.')]
+      base = humutils.strip_base(base)   
 
       meta = loadmat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')))
 
@@ -230,10 +228,6 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       # load memory mapped scan ... port
       shape_port = np.squeeze(meta['shape_port'])
       if shape_port!='':
-         #port_fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='r', shape=tuple(shape_port))
-         #port_fp2 = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
-         #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
-         #   port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
 
          if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat'))):
             with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), 'r') as ff:
@@ -250,10 +244,6 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       # load memory mapped scan ... port
       shape_star = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_star'])
       if shape_star!='':
-         #star_fp = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='r', shape=tuple(shape_star))
-         #star_fp2 = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
-         #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
-         #   star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
          if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat'))):
             with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'r') as ff:
                star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
@@ -268,8 +258,6 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
          shape = shape_port.copy()
          shape[1] = shape_port[1] + shape_star[1]
       else:
-         #shape = shape_port.copy()
-         #shape[1] = shape_port[0] + shape_star[0]
          shape = []
          shape.append(1)
          shape.append(shape_port[0])
@@ -277,7 +265,6 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
          shape[1] = shape_port[0] + shape_star[0]
 
       # create memory mapped file for Sp
-      #fp = np.memmap(sonpath+base+'_data_class.dat', dtype='float32', mode='w+', shape=tuple(shape))
       with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'w+') as ff:
          fp = np.memmap(ff, dtype='float32', mode='w+', shape=tuple(shape))
 
@@ -352,10 +339,8 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             fp[p] = Sp.astype('float32')
             del Sp
 
-         #shape = np.shape(fp)
          del fp # flush data to file
 
-         #class_fp = np.memmap(sonpath+base+'_data_class.dat', dtype='float32', mode='r', shape=tuple(shape))
          with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'r') as ff:
             class_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
 
@@ -413,7 +398,6 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             yvec = np.linspace(pix_m,extent*pix_m,extent)
             d = dep_m
 
-            #R_fp = np.memmap(sonpath+base+'_data_range.dat', dtype='float32', mode='r', shape=tuple(shape_star))
             with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'r') as ff:
                R_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
@@ -438,7 +422,6 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
 
       ########################################################
-      ########################################################
       if doplot==1:
 
          if len(shape_star)>2:
@@ -456,7 +439,6 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
       #######################################################
       # k-means 
-      #fp = np.memmap(sonpath+base+'_data_kclass.dat', dtype='float32', mode='w+', shape=tuple(shape))
       
       if len(shape_star)>2:
          with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'w+') as ff:
@@ -473,7 +455,6 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
          del fp
 
-         #kclass_fp = np.memmap(sonpath+base+'_data_kclass.dat', dtype='float32', mode='r', shape=tuple(shape))
          with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'r') as ff:
             kclass_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
             
@@ -515,7 +496,6 @@ def custom_save(figdirec,root):
     '''
     save with no bounding box
     '''
-    #plt.savefig(figdirec+root,bbox_inches='tight',dpi=400)
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=400)
 
 # =========================================================
@@ -644,58 +624,6 @@ def plot_kmeans(dist_m, shape_port, dat_port, dat_star, dat_kclass, ft, humfile,
 if __name__ == '__main__':
 
    texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
-
-
-#      if not win:
-#         win = 100
-#         print '[Default] Window is %s square pixels' % (str(win))
-
-#      if not shift:
-#         shift = 10
-#         print '[Default] Min shift is %s pixels' % (str(shift))
-
-#      if not density:
-#         density = win/2
-#         print '[Default] Echogram will be sampled every %s pixels' % (str(density))
-
-#      if not numclasses:
-#         numclasses = 4
-#         print '[Default] Number of sediment classes: %s' % (str(numclasses))
-
-#      if not maxscale:
-#         maxscale = 20
-#         print '[Default] Max scale as inverse fraction of data length: %s ' % (str(maxscale))
-
-#      if not notes:
-#         notes = 4
-#         print '[Default] Notes per octave: %s ' % (str(notes))
-
-#      if not doplot:
-#         if doplot != 0:
-#            doplot = 1
-#            print "[Default] Plots will be made"
-
-
-         #R = np.ones(np.shape(Sp))
-         #for k in range(len(d)): 
-         #   R[:,k] = np.hstack((np.flipud(d[k]/yvec), d[k]/yvec))
-
-         #if len(d)<np.shape(port_fp[p])[1]:
-         #   d = np.append(d,d[-1])
-         #Zbed = np.squeeze(d*ft)
-
-         #R1 = R[extent:,:]
-         #R2 = np.flipud(R[:extent,:])
-
-         ## shift proportionally depending on where the bed is
-         #for k in xrange(np.shape(R1)[1]):
-         #   R1[:,k] = np.r_[R1[Zbed[k]:,k], np.zeros( (np.shape(R1)[0] -  np.shape(R1[Zbed[k]:,k])[0] ,) )]
-
-         #for k in xrange(np.shape(R2)[1]):
-         #   R2[:,k] = np.r_[R2[Zbed[k]:,k], np.zeros( (np.shape(R2)[0] -  np.shape(R2[Zbed[k]:,k])[0] ,) )]
-
-         #R = np.vstack((np.flipud(R2),R1))
-         #del R1, R2
 
 
 
