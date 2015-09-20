@@ -1,6 +1,6 @@
 
 import os
-
+import numpy as np
 #dtype = 'int16'
 #string = '_data_port.dat'
 
