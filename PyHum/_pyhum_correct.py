@@ -64,13 +64,12 @@ try:
 except:
    pass
 from joblib import Parallel, delayed, cpu_count
+import PyHum.io as io
 
 #numerical
 import numpy as np
 import PyHum.utils as humutils
-#from scipy.stats import nanmean, nanmedian
 import ppdrc
-#from scipy.ndimage.filters import median_filter
 
 #plotting
 import matplotlib.pyplot as plt
@@ -289,21 +288,25 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     if shape_port!='':
        
        if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port2.dat'))):
-          with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'r') as ff:
-             port_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_port))
+          port_fp = io.get_mmap_data(sonpath, base, '_data_port2.dat', 'int16', tuple(shape_port))
+          #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'r') as ff:
+          #   port_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_port))
 
        else:
-          with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'r') as ff:
-             port_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_port))
+          port_fp = io.get_mmap_data(sonpath, base, '_data_port.dat', 'int16', tuple(shape_port))       
+          #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'r') as ff:
+          #   port_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_port))
 
     shape_star = np.squeeze(meta['shape_star'])
     if shape_star!='':
        if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat'))):
-          with open(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat')), 'r') as ff:
-             star_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_star))
+          star_fp = io.get_mmap_data(sonpath, base, '_data_star2.dat', 'int16', tuple(shape_star))       
+          #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat')), 'r') as ff:
+          #   star_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_star))
        else:
-          with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'r') as ff:
-             star_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_star))
+          star_fp = io.get_mmap_data(sonpath, base, '_data_star.dat', 'int16', tuple(shape_star))        
+          #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'r') as ff:
+          #   star_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_star))
 
     if len(shape_star)==2:
        extent = shape_star[0] 
@@ -331,60 +334,69 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     TL[TL<0] = 0
 
     # create memory mapped file for Z)
-    with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'w+') as ff:
-       fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
-    fp[:] = Zt[:]
-    del fp
-    shape_star = np.shape(Zt)
-    del Zt
+    shape_star = io.set_mmap_data(sonpath, base, '_data_star_l.dat', 'float32', Zt)    
+    #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'w+') as ff:
+    #   fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
+    #fp[:] = Zt[:]
+    #del fp
+    #shape_star = np.shape(Zt)
+    #del Zt
 
     # create memory mapped file for R
-    with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'w+') as ff:
-       fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(R))
-    fp[:] = R[:]
-    del fp
-    del R
+    shape_R = io.set_mmap_data(sonpath, base, '_data_range.dat', 'float32', R)     
+    #with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'w+') as ff:
+    #   fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(R))
+    #fp[:] = R[:]
+    #del fp
+    #del R
 
 
     # create memory mapped file for A
-    with open(os.path.normpath(os.path.join(sonpath,base+'_data_incidentangle.dat')), 'w+') as ff:
-       fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(A))
-    fp[:] = A[:]
-    del fp
-    del A
+    shape_A = io.set_mmap_data(sonpath, base, '_data_incidentangle.dat', 'float32', A)         
+    #with open(os.path.normpath(os.path.join(sonpath,base+'_data_incidentangle.dat')), 'w+') as ff:
+    #   fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(A))
+    #fp[:] = A[:]
+    #del fp
+    #del A
 
-    with open(os.path.normpath(os.path.join(sonpath,base+'_data_incidentangle.dat')), 'r') as ff:
-       A_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
+    A_fp = io.get_mmap_data(sonpath, base, '_data_incidentangle.dat', 'float32', shape_star)
+    #with open(os.path.normpath(os.path.join(sonpath,base+'_data_incidentangle.dat')), 'r') as ff:
+    #   A_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
 
     if correct_withwater == 1:
        Zt = correct_scans(star_fp, A_fp, TL, dofilt)
 
        # create memory mapped file for Z)
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lw.dat')), 'w+') as ff:
-          fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_star = np.shape(Zt)
-       del Zt
+       shape_star = io.set_mmap_data(sonpath, base, '_data_star_lw.dat', 'float32', Zt)       
+       #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lw.dat')), 'w+') as ff:
+       #   fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
+       #fp[:] = Zt[:]
+       #del fp
+       #shape_star = np.shape(Zt)
+       #del Zt
 
     #we are only going to access the portion of memory required
-    with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'r') as ff:
-       star_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
+    star_fp = io.get_mmap_data(sonpath, base, '_data_star_l.dat', 'float32', shape_star)     
+    #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'r') as ff:
+    #   star_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
 
     Zt = correct_scans(star_fp, A_fp, TL, dofilt)
 
     Zt = np.squeeze(Zt)
 
     # create memory mapped file for Z
-    with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'w+') as ff:
-       fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
-    fp[:] = Zt[:]
-    del fp
-    shape_star = np.shape(Zt)
-    del Zt
+    shape_star = io.set_mmap_data(sonpath, base, '_data_star_la.dat', 'float32', Zt)    
+    #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'w+') as ff:
+    #   fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
+    #fp[:] = Zt[:]
+    #del fp
+    #shape_star = np.shape(Zt)
+    #del Zt
+    
     #we are only going to access the portion of memory required
-    with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
-       star_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
+    star_fp = io.get_mmap_data(sonpath, base, '_data_star_la.dat', 'float32', shape_star) 
+    #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
+    #   star_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
 
 
     ######### port
@@ -392,51 +404,59 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
        Zt = correct_scans(port_fp, A_fp, TL, dofilt)
 
        # create memory mapped file for Z)
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lw.dat')), 'w+') as ff:
-          fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_port = np.shape(Zt)
-       del Zt
+       shape_port = io.set_mmap_data(sonpath, base, '_data_port_lw.dat', 'float32', Zt)        
+       #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lw.dat')), 'w+') as ff:
+       #   fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
+       #fp[:] = Zt[:]
+       #del fp
+       #shape_port = np.shape(Zt)
+       #del Zt
 
     Zt = remove_water(port_fp, bed, shape_port, dep_m, pix_m, 0,  maxW)
 
     Zt = np.squeeze(Zt)
 
     # create memory mapped file for Z
-    with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_l.dat')), 'w+') as ff:
-       fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
-    fp[:] = Zt[:]
-    del fp
-    shape_port = np.shape(Zt)
-    del Zt
+    shape_port = io.set_mmap_data(sonpath, base, '_data_port_l.dat', 'float32', Zt)       
+    #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_l.dat')), 'w+') as ff:
+    #   fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
+    #fp[:] = Zt[:]
+    #del fp
+    #shape_port = np.shape(Zt)
+    #del Zt
+
     #we are only going to access the portion of memory required
-    with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_l.dat')), 'r') as ff:
-       port_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_port)
+    port_fp = io.get_mmap_data(sonpath, base, '_data_port_l.dat', 'float32', shape_port)     
+    #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_l.dat')), 'r') as ff:
+    #   port_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_port)
 
     Zt = correct_scans(port_fp, A_fp, TL, dofilt)
 
     # create memory mapped file for Z
-    with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'w+') as ff:
-       fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
-    fp[:] = Zt[:]
-    del fp
-    shape_port = np.shape(Zt)
-    del Zt
+    shape_port = io.set_mmap_data(sonpath, base, '_data_port_la.dat', 'float32', Zt)       
+    #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'w+') as ff:
+    #   fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
+    #fp[:] = Zt[:]
+    #del fp
+    #shape_port = np.shape(Zt)
+    #del Zt
+
     #we are only going to access the portion of memory required
-    with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
-       port_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_port)
+    port_fp = io.get_mmap_data(sonpath, base, '_data_port_la.dat', 'float32', shape_port) 
+    #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
+    #   port_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_port)
 
     ## do plots of merged scans
     if doplot==1:
        if correct_withwater == 1:
 
-          with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lw.dat')), 'r') as ff:
-             port_fpw = np.memmap(ff, dtype='float32', mode='r', shape=shape_port)
+          port_fpw = io.get_mmap_data(sonpath, base, '_data_port_lw.dat', 'float32', shape_port) 
+          #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lw.dat')), 'r') as ff:
+          #   port_fpw = np.memmap(ff, dtype='float32', mode='r', shape=shape_port)
 
-
-          with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lw.dat')), 'r') as ff:
-              star_fpw = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
+          star_fpw = io.get_mmap_data(sonpath, base, '_data_star_lw.dat', 'float32', shape_star) 
+          #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lw.dat')), 'r') as ff:
+          #    star_fpw = np.memmap(ff, dtype='float32', mode='r', shape=shape_star)
 
           if len(np.shape(star_fpw))>2:
              for p in xrange(len(star_fpw)):
@@ -459,47 +479,55 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     if shape_low!='':
        if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat'))):
           try:
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'r') as ff:
-                low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
+             low_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow2.dat', 'int16', tuple(shape_low))           
+             #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'r') as ff:
+             #   low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
 
           except:
              if 'shape_hi' in locals():
-                with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'r') as ff:
-                   low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
+                low_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow2.dat', 'int16', tuple(shape_hi))              
+                #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'r') as ff:
+                #   low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
 
        else:
 
           try:
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'r') as ff:
-                low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
+             low_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow.dat', 'int16', tuple(shape_low))           
+             #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'r') as ff:
+             #   low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
 
           except:
              if 'shape_hi' in locals():
-                with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'r') as ff:
-                   low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
+                low_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow.dat', 'int16', tuple(shape_hi))              
+                #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'r') as ff:
+                #   low_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
 
     shape_hi = np.squeeze(meta['shape_hi'])
 
     if shape_hi!='':
        if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi2.dat'))):
           try:
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
-                hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
+             hi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi2.dat', 'int16', tuple(shape_hi))           
+             #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
+             #   hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
 
           except:
              if 'shape_low' in locals():
-                with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
-                   hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
+                hi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi2.dat', 'int16', tuple(shape_low))               
+                #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
+                #   hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
 
        else:
           try:
-             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
-                hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
+             hi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi.dat', 'int16', tuple(shape_hi))            
+             #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
+             #   hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_hi))
 
           except:
              if 'shape_low' in locals():
-                with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
-                   hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
+                hi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi.dat', 'int16', tuple(shape_low))               
+                #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
+                #   hi_fp = np.memmap(ff, dtype='int16', mode='r', shape=tuple(shape_low))
 
 
     if 'low_fp' in locals():
@@ -508,29 +536,34 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
        Zt = np.squeeze(Zt)
 
        # create memory mapped file for Z
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow_l.dat')), 'w+') as ff:
-          fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_low = np.shape(Zt)
-       del Zt
+       shape_low = io.set_mmap_data(sonpath, base, '_data_dwnlow_l.dat', 'float32', Zt)          
+       #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow_l.dat')), 'w+') as ff:
+       #   fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
+       #fp[:] = Zt[:]
+       #del fp
+       #shape_low = np.shape(Zt)
+       #del Zt
+
        #we are only going to access the portion of memory required
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow_l.dat')), 'r') as ff:
-          low_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_low)
+       low_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow_l.dat', 'float32', shape_low)         
+       #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow_l.dat')), 'r') as ff:
+       #   low_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_low)
 
        Zt = correct_scans2(low_fp, TL)
 
        # create memory mapped file for Z
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow_la.dat')), 'w+') as ff:
-          fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_low = np.shape(Zt)
-       del Zt
-       #we are only going to access the lowion of memory required
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow_la.dat')), 'r') as ff:
-          low_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_low)
+       shape_low = io.set_mmap_data(sonpath, base, '_data_dwnlow_la.dat', 'float32', Zt)        
+       #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow_la.dat')), 'w+') as ff:
+       #   fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
+       #fp[:] = Zt[:]
+       #del fp
+       #shape_low = np.shape(Zt)
+       #del Zt
 
+       #we are only going to access the lowion of memory required
+       low_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow_la.dat', 'float32', shape_low)        
+       #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow_la.dat')), 'r') as ff:
+       #   low_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_low)
 
        if doplot==1:
           if len(np.shape(low_fp))>2:
@@ -548,28 +581,34 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
        Zt = np.squeeze(Zt)
 
        # create memory mapped file for Z
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi_l.dat')), 'w+') as ff:
-          fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_hi = np.shape(Zt)
-       del Zt
+       shape_hi = io.set_mmap_data(sonpath, base, '_data_dwnhi_l.dat', 'float32', Zt)        
+       #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi_l.dat')), 'w+') as ff:
+       #   fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
+       #fp[:] = Zt[:]
+       #del fp
+       #shape_hi = np.shape(Zt)
+       #del Zt
+
        #we are only going to access the portion of memory required
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi_l.dat')), 'r') as ff:
-          hi_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_hi)
+       hi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi_l.dat', 'float32', shape_hi)        
+       #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi_l.dat')), 'r') as ff:
+       #   hi_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_hi)
 
        Zt = correct_scans2(hi_fp, TL)
 
        # create memory mapped file for Z
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi_la.dat')), 'w+') as ff:
-          fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
-       fp[:] = Zt[:]
-       del fp
-       shape_hi = np.shape(Zt)
-       del Zt
+       shape_hi = io.set_mmap_data(sonpath, base, '_data_dwnhi_la.dat', 'float32', Zt)       
+       #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi_la.dat')), 'w+') as ff:
+       #   fp = np.memmap(ff, dtype='float32', mode='w+', shape=np.shape(Zt))
+       #fp[:] = Zt[:]
+       #del fp
+       #shape_hi = np.shape(Zt)
+       #del Zt
+
        #we are only going to access the hiion of memory required
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi_la.dat')), 'r') as ff:
-          hi_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_hi)
+       hi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi_la.dat', 'float32', shape_hi)        
+       #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi_la.dat')), 'r') as ff:
+       #   hi_fp = np.memmap(ff, dtype='float32', mode='r', shape=shape_hi)
 
        if doplot==1:
           if len(np.shape(hi_fp))>2:
