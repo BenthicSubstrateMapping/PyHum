@@ -405,7 +405,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
        del data_port 
           
-       shape_port = set_mmap_data(sonpath, base, '_data_port.dat', 'int16', Zt)
+       shape_port = io.set_mmap_data(sonpath, base, '_data_port.dat', 'int16', Zt)
        ## create memory mapped file for Z
        #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'w+') as ff:
        #   fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
@@ -437,7 +437,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        del data_star
 
        # create memory mapped file for Z
-       shape_star = set_mmap_data(sonpath, base, '_data_star.dat', 'int16', Zt)
+       shape_star = io.set_mmap_data(sonpath, base, '_data_star.dat', 'int16', Zt)
        #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'w+') as ff:
        #   fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
        #fp[:] = Zt[:]
@@ -465,7 +465,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              del tmp
      
              # create memory mapped file for Z
-             shape_port = set_mmap_data(sonpath, base, '_data_port2.dat', 'int16', tmp2)
+             shape_port = io.set_mmap_data(sonpath, base, '_data_port2.dat', 'int16', tmp2)
              shape_star = shape_port.copy()
              #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port2.dat')), 'w+') as ff:
              #   fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
@@ -492,7 +492,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              del tmp
     
              # create memory mapped file for Z
-             shape_port = set_mmap_data(sonpath, base, '_data_star2.dat', 'int16', tmp2)
+             shape_port = io.set_mmap_data(sonpath, base, '_data_star2.dat', 'int16', tmp2)
              shape_star = shape_port.copy()             
              
              #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat')), 'w+') as ff:
@@ -526,7 +526,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        del data_dwnlow
 
        # create memory mapped file for Z
-       shape_low = set_mmap_data(sonpath, base, '_data_dwnlow.dat', 'int16', Zt)
+       shape_low = io.set_mmap_data(sonpath, base, '_data_dwnlow.dat', 'int16', Zt)
        
        #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'w+') as ff:
        #   fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
@@ -555,7 +555,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        del data_dwnhi
 
        # create memory mapped file for Z
-       shape_hi = set_mmap_data(sonpath, base, '_data_dwnhi.dat', 'int16', Zt)        
+       shape_hi = io.set_mmap_data(sonpath, base, '_data_dwnhi.dat', 'int16', Zt)        
        #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'w+') as ff:
        #   fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
 
@@ -583,7 +583,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              del tmp
   
              # create memory mapped file for Z
-             shape_low = set_mmap_data(sonpath, base, '_data_dwnhi2.dat', 'int16', tmp2)             
+             shape_low = io.set_mmap_data(sonpath, base, '_data_dwnhi2.dat', 'int16', tmp2)             
              shape_hi = shape_low.copy() 
              #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi2.dat')), 'w+') as ff:
              #   fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
@@ -609,7 +609,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              del tmp
  
              # create memory mapped file for Z
-             shape_low = set_mmap_data(sonpath, base, '_data_dwnlow2.dat', 'int16', tmp2)             
+             shape_low = io.set_mmap_data(sonpath, base, '_data_dwnlow2.dat', 'int16', tmp2)             
              shape_hi = shape_low.copy()         
              #with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'w+') as ff:
              #   fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
