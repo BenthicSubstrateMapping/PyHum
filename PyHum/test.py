@@ -130,29 +130,29 @@ def dotest():
    integ = 5
    numclusters = 3 # number of acoustic classes to group observations
 
-#   # read data in SON files into PyHum memory mapped format (.dat)
-#   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
+   # read data in SON files into PyHum memory mapped format (.dat)
+   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
 
-#   # correct scans and remove water column
-#   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
+   # correct scans and remove water column
+   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
 
-#   # remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
-#   PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
+   # remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
+   PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
-   # Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
-#   PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+   ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
+   PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
    ## grid and map the scans
    PyHum.map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
 
-#   res = 0.5 # grid resolution in metres
-#   numstdevs = 5
-#   
-#   # grid and map the texture lengthscale maps
-#   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, res, mode, nn, influence, numstdevs)
+   res = 0.5 # grid resolution in metres
+   numstdevs = 5
+   
+   # grid and map the texture lengthscale maps
+   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, res, mode, nn, influence, numstdevs)
 
-#   # calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
-#   PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
+   # calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
+   PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
 
 if __name__ == '__main__':
    dotest()
