@@ -319,12 +319,11 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
           X, Y, merge = trim_xys(X, Y, merge, index)
 
-          if dowrite==1:
-             # write raw bs to file
-             #outfile = sonpath+'x_y_class'+str(p)+'.asc' 
-             outfile = os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc'))
-             with open(outfile, 'w') as f:
-                np.savetxt(f, np.hstack((humutils.ascol(X),humutils.ascol(Y), humutils.ascol(merge))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+          # write raw bs to file
+          #outfile = sonpath+'x_y_class'+str(p)+'.asc' 
+          outfile = os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc'))
+          with open(outfile, 'w') as f:
+             np.savetxt(f, np.hstack((humutils.ascol(X),humutils.ascol(Y), humutils.ascol(merge))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
           humlon, humlat = trans(X, Y, inverse=True)
 
@@ -348,8 +347,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p)
 
           make_kml(p, sonpath, humlat, humlon)
-
-       if dowrite==1:
 
           X = []; Y = []; S = [];
           for p in xrange(len(class_fp)):
@@ -380,7 +377,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
              
              dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans)
             
-
           if dogrid==1:
              dat[dat==0] = np.nan
              dat[np.isinf(dat)] = np.nan
@@ -431,12 +427,11 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
        X, Y, merge = trim_xys(X, Y, merge, index)
 
-       if dowrite==1:
-          # write raw bs to file
-          #outfile = sonpath+'x_y_class'+str(p)+'.asc' 
-          outfile = os.path.normpath(os.path.join(sonpath,'x_y_class'+str(0)+'.asc'))
-          with open(outfile, 'w') as f:
-             np.savetxt(f, np.hstack((humutils.ascol(X),humutils.ascol(Y), humutils.ascol(merge))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
+       # write raw bs to file
+       #outfile = sonpath+'x_y_class'+str(p)+'.asc' 
+       outfile = os.path.normpath(os.path.join(sonpath,'x_y_class'+str(0)+'.asc'))
+       with open(outfile, 'w') as f:
+          np.savetxt(f, np.hstack((humutils.ascol(X),humutils.ascol(Y), humutils.ascol(merge))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
 
        humlon, humlat = trans(X, Y, inverse=True)
 
@@ -570,7 +565,7 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
              if 'dat' in locals(): 
                 complete=1 
           except:
-             del grid_x, grid_y, targ_def, orig_def
+             #del grid_x, grid_y, targ_def, orig_def
              dat, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans)
 
     elif mode==2:
@@ -584,7 +579,7 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
              if 'dat' in locals(): 
                 complete=1 
           except:
-             del grid_x, grid_y, targ_def, orig_def
+             #del grid_x, grid_y, targ_def, orig_def
              dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans)
 
     elif mode==3:
@@ -596,7 +591,7 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
              if 'dat' in locals(): 
                 complete=1 
           except:
-             del grid_x, grid_y, targ_def, orig_def
+             #del grid_x, grid_y, targ_def, orig_def
              dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans)
 
     dat = dat.reshape(shape)
