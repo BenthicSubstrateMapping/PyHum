@@ -281,7 +281,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
             Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))
 
-            Snn = get_srt(Z,ind)
+            Snn = get_srt(Z,ind,maxscale, notes, win, density)
 #            try:
 #               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
 #            # do the wavelet clacs and get the stats
@@ -358,7 +358,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
             Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp), star_fp)),(win,win),(shift,shift))
             
-            Snn = get_srt(Z,ind)
+            Snn = get_srt(Z,ind,maxscale, notes, win, density)
             
 #            try:
 #               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
@@ -507,7 +507,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
     
     
 # =========================================================
-def get_srt(Z,ind):    
+def get_srt(Z,ind,maxscale, notes, win, density):    
             try:
                print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
             # do the wavelet clacs and get the stats
