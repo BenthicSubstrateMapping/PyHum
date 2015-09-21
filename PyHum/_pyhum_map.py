@@ -444,26 +444,27 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
       mask = dat.mask.copy()
 
-      dat[mask==1] = 0
+      dat[mask==1] = np.nan
+      #dat[mask==1] = 0
 
       if mode>1:
          dat[(stdev>numstdevs) & (mask!=0)] = np.nan
          dat[(counts<nn) & (counts>0)] = np.nan
 
-      dat2 = replace_nans.RN(dat.astype('float64'),1000,0.01,2,'localmean').getdata()
-      dat2[dat==0] = np.nan
+      #dat2 = replace_nans.RN(dat.astype('float64'),1000,0.01,2,'localmean').getdata()
+      #dat2[dat==0] = np.nan
 
       # get a new mask
-      mask = np.isnan(dat2)
+      #mask = np.isnan(dat2)
 
-      mask = ~binary_dilation(binary_erosion(~mask,structure=np.ones((15,15))), structure=np.ones((15,15)))
+      #mask = ~binary_dilation(binary_erosion(~mask,structure=np.ones((15,15))), structure=np.ones((15,15)))
       
-      dat2[mask==1] = np.nan
-      dat2[dat2<1] = np.nan
+      #dat2[mask==1] = np.nan
+      #dat2[dat2<1] = np.nan
 
-      del dat
-      dat = dat2
-      del dat2
+      #del dat
+      #dat = dat2
+      #del dat2
 
 
    if dogrid==1:
@@ -493,9 +494,9 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       if dogrid==1:
          if datm.size > 25000000:
             print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-            map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='gray', vmin=np.nanmin(datm), vmax=np.nanmax(datm))
+            map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='gray')#, vmin=np.nanmin(datm), vmax=np.nanmax(datm))
          else:
-            map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(datm), vmax=np.nanmax(datm))
+            map.pcolormesh(gx, gy, datm, cmap='gray')#@, vmin=np.nanmin(datm), vmax=np.nanmax(datm))
          #del datm, dat
       else: 
          ## draw point cloud
@@ -508,14 +509,24 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    except:
       print "error: map could not be created..."
 
+   kml = simplekml.Kml()
+   ground = kml.newgroundoverlay(name='GroundOverlay')
+   ground.icon.href = 'map'+str(p)+'.png'
+   ground.latlonbox.north = np.min(humlat)-0.00001
+   ground.latlonbox.south = np.max(humlat)+0.00001
+   ground.latlonbox.east =  np.max(humlon)+0.00001
+   ground.latlonbox.west =  np.min(humlon)-0.00001
+   ground.latlonbox.rotation = 0
+
+   kml.save(os.path.normpath(os.path.join(sonpath,'GroundOverlay'+str(p)+'.kml')))
 
    try:
       print "drawing and printing map ..."
       fig = plt.figure(frameon=False)
       map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
        resolution = 'i', #h #f
-       llcrnrlon=np.min(humlon)-0.00001, llcrnrlat=np.min(humlat)-0.00001,
-       urcrnrlon=np.max(humlon)+0.00001, urcrnrlat=np.max(humlat)+0.00001)
+       llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
+       urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
 
       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
       
@@ -538,26 +549,20 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
          x,y = map.projtran(humlon, humlat)
          map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='gray', linewidth = '0')
 
-      custom_save(sonpath,'map_imagery'+str(p))
+      custom_save2(sonpath,'map_imagery'+str(p))
       del fig 
 
    except:
       print "error: map could not be created..."
 
-   kml = simplekml.Kml()
-   ground = kml.newgroundoverlay(name='GroundOverlay')
-   ground.icon.href = 'map'+str(p)+'.png'
-   ground.latlonbox.north = np.min(humlat)-0.00001
-   ground.latlonbox.south = np.max(humlat)+0.00001
-   ground.latlonbox.east =  np.max(humlon)+0.00001
-   ground.latlonbox.west =  np.min(humlon)-0.00001
-   ground.latlonbox.rotation = 0
-
-   kml.save(os.path.normpath(os.path.join(sonpath,'GroundOverlay'+str(p)+'.kml')))
 
    del humlat, humlon
    return res #return the new resolution
 
+
+# =========================================================
+def custom_save2(figdirec,root):
+    plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=1000, transparent=False)
 
 # =========================================================
 def custom_save(figdirec,root):
