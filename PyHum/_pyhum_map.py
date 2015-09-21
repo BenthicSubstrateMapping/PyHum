@@ -100,7 +100,7 @@ warnings.filterwarnings("ignore")
 #    ]
 
 #################################################
-def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowrite = 0, mode=3, nn = 64, influence = 1, numstdevs=4):
+def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 99, dowrite = 0, mode=3, nn = 128, influence = 1, numstdevs=5):
          
     '''
     Create plots of the spatially referenced sidescan echograms
@@ -122,8 +122,9 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowr
     dogrid : float, *optional* [Default=1]
        if 1, textures will be gridded with resolution 'res'. 
        Otherwise, point cloud will be plotted
-    res : float, *optional* [Default=0.1]
+    res : float, *optional* [Default=99]
        grid resolution of output gridded texture map
+       if res=99, res will be determined automatically from the spatial resolution of 1 pixel
     dowrite: int, *optional* [Default=0]
        if 1, point cloud data from each chunk is written to ascii file
        if 0, processing times are speeded up considerably but point clouds are not available for further analysis
@@ -358,12 +359,15 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
    if dogrid==1:
 
-      res = np.min(res_grid[res_grid>0])
+      if res==99:
+         resg = np.min(res_grid[res_grid>0])
+      else:
+         resg = res
 
       complete=0
       while complete==0:
          try:
-            grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
+            grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), resg)
             longrid, latgrid = trans(grid_x, grid_y, inverse=True)
             shape = np.shape(grid_x)
 
@@ -374,8 +378,8 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
             if 'orig_def' in locals(): 
                complete=1 
          except:
-            print "memory error: trying grid resolution of %s" % (str(res*2))
-            res = res*2
+            print "memory error: trying grid resolution of %s" % (str(resg*2))
+            resg = resg*2
 
       if mode==1:
 
@@ -392,8 +396,8 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
                   complete=1 
             except:
                del grid_x, grid_y, targ_def, orig_def
-               dat, stdev, counts, res, complete, shape = getgrid_lm(humlon, humlat, merge, influence, min(X), max(X), min(Y), max(Y), res*2, mode)         
-               r_dat, stdev, counts, res, complete, shape = getgrid_lm(humlon, humlat, res_grid, influence, min(X), max(X), min(Y), max(Y), res*2, mode)   
+               dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, influence, min(X), max(X), min(Y), max(Y), resg*2, mode)         
+               r_dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, influence, min(X), max(X), min(Y), max(Y), resg*2, mode)   
 
       elif mode==2:
 
@@ -411,8 +415,8 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
                   complete=1 
             except:
                del grid_x, grid_y, targ_def, orig_def
-               dat, stdev, counts, res, complete, shape = getgrid_lm(humlon, humlat, merge, influence, min(X), max(X), min(Y), max(Y), res*2, mode)
-               r_dat, stdev, counts, res, complete, shape = getgrid_lm(humlon, humlat, res_grid, influence, min(X), max(X), min(Y), max(Y), res*2, mode)
+               dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, influence, min(X), max(X), min(Y), max(Y), resg*2, mode)
+               r_dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, influence, min(X), max(X), min(Y), max(Y), resg*2, mode)
                del stdev_null, counts_null
 
       elif mode==3:
@@ -430,8 +434,8 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
                   complete=1 
             except:
                del grid_x, grid_y, targ_def, orig_def
-               dat, stdev, counts, res, complete, shape = getgrid_lm(humlon, humlat, merge, influence, min(X), max(X), min(Y), max(Y), res*2, mode)
-               r_dat, stdev_null, counts_null, res, complete, shape = getgrid_lm(humlon, humlat, res_grid, influence, min(X), max(X), min(Y), max(Y), res*2, mode)
+               dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, influence, min(X), max(X), min(Y), max(Y), resg*2, mode)
+               r_dat, stdev_null, counts_null, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, influence, min(X), max(X), min(Y), max(Y), resg*2, mode)
                del stdev_null, counts_null
 
       del X, Y

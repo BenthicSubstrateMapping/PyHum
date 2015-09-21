@@ -113,15 +113,16 @@ def dotest():
 
    # for mapping
    dogrid = 1 # yes
-   res = 0.1 # grid resolution in metres
+   res = 99 # grid resolution in metres
+   # if res==99, the program will automatically calc res from the spatial res of the scans
    mode = 1 # gridding mode (simple nearest neighbour)
    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
    #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
    dowrite = 0 #disable writing of point cloud data to file
 
-   nn = 64 #number of nearest neighbours for gridding (used if mode > 1)
+   nn = 128 #number of nearest neighbours for gridding (used if mode > 1)
    influence = 1 #Radius of influence used in gridding. Cut off distance in meters 
-   numstdevs = 4 #Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept 
+   numstdevs = 5 #Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept 
 
    # for downward-looking echosounder echogram (e1-e2) analysis
    beam = 20.0
