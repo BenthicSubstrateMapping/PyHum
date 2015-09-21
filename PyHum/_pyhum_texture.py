@@ -230,14 +230,17 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       if shape_port!='':
 
          if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat'))):
-            with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), 'r') as ff:
-               port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
+            port_fp = io.get_mmap_data(sonpath, base, '_data_port_lar.dat', 'float32', tuple(shape_port))         
+            #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), 'r') as ff:
+            #   port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
          else:
-            with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
-               port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
+            port_fp = io.get_mmap_data(sonpath, base, '_data_port_la.dat', 'float32', tuple(shape_port))
+            #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
+            #   port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
 
-         with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_l.dat')), 'r') as ff:
-            port_fp2 = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
+         port_fp2 = io.get_mmap_data(sonpath, base, '_data_port_l.dat', 'float32', tuple(shape_port))
+         #with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_l.dat')), 'r') as ff:
+         #   port_fp2 = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
 
       ### star
       print "processing starboard side ..."
@@ -245,14 +248,17 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       shape_star = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_star'])
       if shape_star!='':
          if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat'))):
-            with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'r') as ff:
-               star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+            star_fp = io.get_mmap_data(sonpath, base, '_data_star_lar.dat', 'float32', tuple(shape_star))
+            #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'r') as ff:
+            #   star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
          else:
-            with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
-               star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+            star_fp = io.get_mmap_data(sonpath, base, '_data_star_la.dat', 'float32', tuple(shape_star))
+            #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
+            #   star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
-         with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'r') as ff:
-            star_fp2 = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+         star_fp2 = io.get_mmap_data(sonpath, base, '_data_star_l.dat', 'float32', tuple(shape_star))
+         #with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_l.dat')), 'r') as ff:
+         #   star_fp2 = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
       if len(shape_star)>2:
          shape = shape_port.copy()
@@ -274,34 +280,35 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
             Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))
 
-            try:
-               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
-            # do the wavelet clacs and get the stats
-               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
-            except:
-               print "memory error: trying serial"
-               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+            Snn = get_srt(Z,ind)
+#            try:
+#               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+#            # do the wavelet clacs and get the stats
+#               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+#            except:
+#               print "memory error: trying serial"
+#               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
 
-            srt = np.reshape(d , ( ind[0], ind[1] ) )
-            del d
+#            srt = np.reshape(d , ( ind[0], ind[1] ) )
+#            del d
 
-            try:
-               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
-            # do the wavelet clacs and get the stats
-               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
-            except:
-               print "memory error: trying serial"
-               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+#            try:
+#               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+#            # do the wavelet clacs and get the stats
+#               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+#            except:
+#               print "memory error: trying serial"
+#               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
 
-            srt2 = np.reshape(d , ( ind[0], ind[1] ) )
-            del d
-            Z = None
+#            srt2 = np.reshape(d , ( ind[0], ind[1] ) )
+#            del d
+#            Z = None
 
-            SRT = srt+srt2
-            del srt, srt2
+#            SRT = srt+srt2
+#            del srt, srt2
 
-            Snn = SRT.copy() 
-            del SRT
+#            Snn = SRT.copy() 
+#            del SRT
 
             # replace nans using infilling algorithm
             rn = replace_nans.RN(Snn.astype('float64'),1000,0.01,2,'localmean')
@@ -323,8 +330,9 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             yvec = np.linspace(pix_m,extent*pix_m,extent)
             d = dep_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
 
-            with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'r') as ff:
-               R_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+            R_fp = io.get_mmap_data(sonpath, base, '_data_range.dat', 'float32', tuple(shape_star))
+            #with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'r') as ff:
+            #   R_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
             R = np.vstack((np.flipud(R_fp[0]),R_fp[0]))
 
@@ -341,42 +349,44 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
          del fp # flush data to file
 
-         with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'r') as ff:
-            class_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
+         class_fp = io.get_mmap_data(sonpath, base, '_data_class.dat', 'float32', tuple(shape))
+         #with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'r') as ff:
+         #   class_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
 
       else:
 
             Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp), star_fp)),(win,win),(shift,shift))
+            
+            Snn = get_srt(Z,ind)
+            
+#            try:
+#               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+#            # do the wavelet clacs and get the stats
+#               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+#            except:
+#               print "memory error: trying serial"
+#               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
 
-            try:
-               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
-            # do the wavelet clacs and get the stats
-               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
-            except:
-               print "memory error: trying serial"
-               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+#            srt = np.reshape(d , ( ind[0], ind[1] ) )
+#            del d
 
-            srt = np.reshape(d , ( ind[0], ind[1] ) )
-            del d
+#            try:
+#               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+#            # do the wavelet clacs and get the stats
+#               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+#            except:
+#               print "memory error: trying serial"
+#               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
 
-            try:
-               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
-            # do the wavelet clacs and get the stats
-               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
-            except:
-               print "memory error: trying serial"
-               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+#            srt2 = np.reshape(d , ( ind[0], ind[1] ) )
+#            del d
+#            Z = None
 
+#            SRT = srt+srt2
+#            del srt, srt2
 
-            srt2 = np.reshape(d , ( ind[0], ind[1] ) )
-            del d
-            Z = None
-
-            SRT = srt+srt2
-            del srt, srt2
-
-            Snn = SRT.copy() 
-            del SRT
+#            Snn = SRT.copy() 
+#            del SRT
 
             # replace nans using infilling algorithm
             rn = replace_nans.RN(Snn.astype('float64'),1000,0.01,2,'localmean')
@@ -398,8 +408,9 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             yvec = np.linspace(pix_m,extent*pix_m,extent)
             d = dep_m
 
-            with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'r') as ff:
-               R_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+            R_fp = io.get_mmap_data(sonpath, base, '_data_range.dat', 'float32', tuple(shape_star))
+            #with open(os.path.normpath(os.path.join(sonpath,base+'_data_range.dat')), 'r') as ff:
+            #   R_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
 
             R = np.vstack((np.flipud(R_fp),R_fp))
 
@@ -445,27 +456,29 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             fp = np.memmap(ff, dtype='float32', mode='w+', shape=tuple(shape))
 
          for p in xrange(len(port_fp)):
-            Sk = class_fp[p].copy()
-            Sk[np.isnan(Sk)] = 0
-            wc, values = humutils.cut_kmeans(Sk,numclasses+1)
-            wc[Sk==0] = np.nan
-            del Sk
+            wc = get_kclass(class_fp[p].copy())
+            #Sk = class_fp[p].copy()
+            #Sk[np.isnan(Sk)] = 0
+            #wc, values = humutils.cut_kmeans(Sk,numclasses+1)
+            #wc[Sk==0] = np.nan
+            #del Sk
             fp[p] = wc.astype('float32')
             del wc
 
          del fp
 
-         with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'r') as ff:
-            kclass_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
+         kclass_fp = io.get_mmap_data(sonpath, base, '_data_kclass.dat', 'float32', tuple(shape))
+         #with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'r') as ff:
+         #   kclass_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
             
       else:
-      
-         Sk = class_fp.copy()
-         Sk[np.isnan(Sk)] = 0
-         wc, values = humutils.cut_kmeans(Sk,numclasses+1)
-         wc[Sk==0] = np.nan
-         del Sk
-         
+         wc = get_kclass(class_fp.copy())
+         #Sk = class_fp.copy()
+         #Sk[np.isnan(Sk)] = 0
+         #wc, values = humutils.cut_kmeans(Sk,numclasses+1)
+         #wc[Sk==0] = np.nan
+         #del Sk
+
          with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'w+') as ff:
             np.save(ff, np.squeeze(wc).astype('float32'))
 
@@ -490,7 +503,42 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       print "Processing took ", elapsed , "seconds to analyse"
 
       print "Done!"
-      
+    
+    
+# =========================================================
+def get_srt(Z,ind):    
+            try:
+               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+            # do the wavelet clacs and get the stats
+               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+            except:
+               print "memory error: trying serial"
+               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+
+            srt = np.reshape(d , ( ind[0], ind[1] ) )
+            del d
+
+            try:
+               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+            # do the wavelet clacs and get the stats
+               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+            except:
+               print "memory error: trying serial"
+               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+
+            srt2 = np.reshape(d , ( ind[0], ind[1] ) )
+            del d
+            Z = None
+
+            return srt+srt2
+            
+# =========================================================
+def get_kclass(Sk):   
+    Sk[np.isnan(Sk)] = 0
+    wc, values = humutils.cut_kmeans(Sk,numclasses+1)
+    wc[Sk==0] = np.nan
+    return wc  
+   
 # =========================================================
 def custom_save(figdirec,root):
     '''
