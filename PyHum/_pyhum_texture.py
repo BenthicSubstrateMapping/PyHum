@@ -81,22 +81,13 @@ try:
    from mpl_toolkits.axes_grid1 import make_axes_locatable
 except:
    pass
-#from matplotlib import rc
-#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
-#rc('text', usetex=True)
-
+   
 # suppress divide and invalid warnings
 np.seterr(divide='ignore')
 np.seterr(invalid='ignore')
 
 import warnings
 warnings.filterwarnings("ignore")
-
-__all__ = [
-    'texture',
-    'custom_save',
-    'parallel_me',
-    ]
 
 #################################################
 def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasses=4, maxscale=20, notes=4):

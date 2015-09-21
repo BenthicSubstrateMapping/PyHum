@@ -87,13 +87,6 @@ warnings.filterwarnings("ignore")
 # =============== begin program ======================
 # ========================================================
 
-__all__ = [
-    'correct',
-    'custom_save',
-    'remove_water',
-    'correct_scans',
-    ]
-
 #################################################
 def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0, ph = 7, temp = 10, salinity = 0, dconcfile = None):
 

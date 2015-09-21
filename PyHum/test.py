@@ -142,8 +142,8 @@ def dotest():
    # Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
 #   PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
-   # grid and map the scans
-#   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
+   ## grid and map the scans
+   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
 
    res = 0.5 # grid resolution in metres
    numstdevs = 5

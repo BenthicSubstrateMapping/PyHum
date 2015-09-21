@@ -91,13 +91,6 @@ np.seterr(invalid='ignore')
 import warnings
 warnings.filterwarnings("ignore")
 
-#__all__ = [
-#    'map_texture',
-#    'custom_save',
-#    'custom_save2',    
-#    'calc_beam_pos',
-#    ]
-
 #################################################
 def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.5, mode=3, nn = 64, influence = 10, numstdevs=5):
          
@@ -238,26 +231,23 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
     shape_port = np.squeeze(meta['shape_port'])
     if shape_port!='':
        if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat'))):
-          with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), 'r') as ff:
-             port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
+          port_fp = io.get_mmap_data(sonpath, base, '_data_port_lar.dat', 'float32', tuple(shape_port))
        else:
-          with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')), 'r') as ff:
-             port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
+          port_fp = io.get_mmap_data(sonpath, base, '_data_port_la.dat', 'float32', tuple(shape_port))
 
     shape_star = np.squeeze(meta['shape_star'])
     if shape_star!='':
        if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat'))):
-          with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'r') as ff:
-             star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+             star_fp = io.get_mmap_data(sonpath, base, '_data_star_lar.dat', 'float32', tuple(shape_star))
        else:
-          with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_la.dat')), 'r') as ff:
-             star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
+          star_fp = io.get_mmap_data(sonpath, base, '_data_star_la.dat', 'float32', tuple(shape_star))
 
     if len(shape_star)>2:    
        shape = shape_port.copy()
        shape[1] = shape_port[1] + shape_star[1]
-       with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'r') as ff:
-          class_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
+       class_fp = io.get_mmap_data(sonpath, base, '_data_class.dat', 'float32', tuple(shape))
+       #with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'r') as ff:
+       #   class_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
     else:
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'r') as ff:
           class_fp = np.load(ff)    

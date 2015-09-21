@@ -92,13 +92,6 @@ np.seterr(invalid='ignore')
 import warnings
 warnings.filterwarnings("ignore")
 
-#__all__ = [
-#    'map',
-#    'custom_save',
-#    'custom_save2',    
-#    'calc_beam_pos',
-#    ]
-
 #################################################
 def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 99, dowrite = 0, mode=3, nn = 128, influence = 1, numstdevs=5):
          
@@ -510,6 +503,42 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
          map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='gray', linewidth = '0')
 
       custom_save(sonpath,'map'+str(p))
+      del fig 
+
+   except:
+      print "error: map could not be created..."
+
+
+   try:
+      print "drawing and printing map ..."
+      fig = plt.figure(frameon=False)
+      map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
+       resolution = 'i', #h #f
+       llcrnrlon=np.min(humlon)-0.00001, llcrnrlat=np.min(humlat)-0.00001,
+       urcrnrlon=np.max(humlon)+0.00001, urcrnrlat=np.max(humlat)+0.00001)
+
+       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+      
+      if dogrid==1:
+         gx,gy = map.projtran(glon, glat)
+
+      ax = plt.Axes(fig, [0., 0., 1., 1.], )
+      ax.set_axis_off()
+      fig.add_axes(ax)
+
+      if dogrid==1:
+         if datm.size > 25000000:
+            print "matrix size > 25,000,000 - decimating by factor of 5 for display"
+            map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='gray', vmin=np.nanmin(datm), vmax=np.nanmax(datm))
+         else:
+            map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(datm), vmax=np.nanmax(datm))
+         del datm, dat
+      else: 
+         ## draw point cloud
+         x,y = map.projtran(humlon, humlat)
+         map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='gray', linewidth = '0')
+
+      custom_save(sonpath,'map_imagery'+str(p))
       del fig 
 
    except:
