@@ -272,10 +272,10 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowr
 
     if len(shape_star)>2:    
        for p in xrange(len(star_fp)):
-          res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], meta['pix_m'], res, cs2cs_args, sonpath, p, dogrid, dowrite, mode, nn, influence, numstdevs, meta['c'], np.arcsin(c/(1000*meta['t']*meta['f'])))
+          res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], meta['pix_m'], res, cs2cs_args, sonpath, p, dogrid, dowrite, mode, nn, influence, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f'])))
           print "grid resolution is %s" % (str(res))
     else:
-       res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, dogrid, dowrite, mode, nn, influence, numstdevs, meta['c'], np.arcsin(c/(1000*meta['t']*meta['f'])))
+       res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, dogrid, dowrite, mode, nn, influence, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f'])))
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
@@ -480,13 +480,6 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
 
    if dogrid==1:
-      ### mask
-      #if np.floor(np.sqrt(1/res))-1 > 0.0:
-      #   dat[dist> np.floor(np.sqrt(1/res))-1 ] = np.nan #np.floor(np.sqrt(1/res))-1 ] = np.nan
-      #else:
-      #   dat[dist> np.sqrt(1/res) ] = np.nan #np.floor(np.sqrt(1/res))-1 ] = np.nan
-
-      #del dist, tree
 
       dat[dat==0] = np.nan
       dat[np.isinf(dat)] = np.nan
@@ -654,4 +647,10 @@ if __name__ == '__main__':
 
    map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
 
+      ### mask
+      #if np.floor(np.sqrt(1/res))-1 > 0.0:
+      #   dat[dist> np.floor(np.sqrt(1/res))-1 ] = np.nan #np.floor(np.sqrt(1/res))-1 ] = np.nan
+      #else:
+      #   dat[dist> np.sqrt(1/res) ] = np.nan #np.floor(np.sqrt(1/res))-1 ] = np.nan
 
+      #del dist, tree
