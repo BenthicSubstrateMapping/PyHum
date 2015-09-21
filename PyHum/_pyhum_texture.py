@@ -65,6 +65,7 @@ except:
    pass
 import warnings
 warnings.simplefilter('ignore', RuntimeWarning)
+import PyHum.io as io
 
 # numerical
 import numpy as np
