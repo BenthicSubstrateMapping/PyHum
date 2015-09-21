@@ -269,6 +269,9 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowr
     #dat_port = port_fp[p]
     #dat_star = star_fp[p]
     #data_R = R_fp[p]
+    #dx = np.arcsin(meta['c']/(1000*meta['t']*meta['f']))
+    #pix_m = meta['pix_m']
+    #c = meta['c']
 
     if len(shape_star)>2:    
        for p in xrange(len(star_fp)):
@@ -292,7 +295,6 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    trans =  pyproj.Proj(init=cs2cs_args)   
 
    merge = np.vstack((dat_port,dat_star))
-   #merge = np.vstack((np.flipud(port_fp[p]),star_fp[p]))
    
    merge[np.isnan(merge)] = 0
    merge = merge[:,:len(n)]
@@ -468,9 +470,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       mask = np.isnan(dat2)
 
       mask = ~binary_dilation(binary_erosion(~mask,structure=np.ones((15,15))), structure=np.ones((15,15)))
-      #mask = binary_fill_holes(mask, structure=np.ones((15,15)))
-      #mask = ~binary_fill_holes(~mask, structure=np.ones((15,15)))
-
+      
       dat2[mask==1] = np.nan
       dat2[dat2<1] = np.nan
 
@@ -530,7 +530,6 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    ground.latlonbox.west =  np.min(humlon)-0.00001
    ground.latlonbox.rotation = 0
 
-   #kml.save(sonpath+'GroundOverlay'+str(p)+'.kml')
    kml.save(os.path.normpath(os.path.join(sonpath,'GroundOverlay'+str(p)+'.kml')))
 
    del humlat, humlon
@@ -600,7 +599,6 @@ def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mo
 # =========================================================
 def getxy(e, n, yvec, d, t,extent):
    x = np.concatenate((np.tile(e,extent) , np.tile(e,extent)))
-   #y = np.concatenate((n[k]+yvec, n[k]-yvec))
    rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d, 2.0))
    y = np.concatenate((n+rangedist, n-rangedist))
    # Rotate line around center point
@@ -614,7 +612,7 @@ def getxy(e, n, yvec, d, t,extent):
 def getXY(e,n,yvec,d,t,extent):
    print "getting point cloud ..." 
 
-   o = Parallel(n_jobs = -1, verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
+   o = Parallel(n_jobs = -1, verbose=0)(delayed(getxy)(e[k], n[k], np.squeeze(yvec), np.squeeze(d)[k], t[k], extent) for k in xrange(len(n)))
 
    #eating, northing, distance to sonar, depth, heading
    X, Y, D, h, t = zip(*o)
@@ -646,6 +644,15 @@ def getXY(e,n,yvec,d,t,extent):
 if __name__ == '__main__':
 
    map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
+
+   #kml.save(sonpath+'GroundOverlay'+str(p)+'.kml')
+   
+   #y = np.concatenate((n[k]+yvec, n[k]-yvec))
+   
+   #merge = np.vstack((np.flipud(port_fp[p]),star_fp[p]))      
+      #mask = binary_fill_holes(mask, structure=np.ones((15,15)))
+      #mask = ~binary_fill_holes(~mask, structure=np.ones((15,15)))
+
 
       ### mask
       #if np.floor(np.sqrt(1/res))-1 > 0.0:
