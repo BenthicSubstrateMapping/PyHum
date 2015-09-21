@@ -92,12 +92,12 @@ np.seterr(invalid='ignore')
 import warnings
 warnings.filterwarnings("ignore")
 
-__all__ = [
-    'map',
-    'custom_save',
-    'custom_save2',    
-    'calc_beam_pos',
-    ]
+#__all__ = [
+#    'map',
+#    'custom_save',
+#    'custom_save2',    
+#    'calc_beam_pos',
+#    ]
 
 #################################################
 def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowrite = 0, mode=3, nn = 64, influence = 1, numstdevs=4):
@@ -206,7 +206,6 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowr
        numstdevs = int(numstdevs)
        print 'Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept: %s' % (str(numstdevs))             
 
-
     # start timer
     if os.name=='posix': # true if linux/mac or cygwin on windows
        start = time.time()
@@ -229,10 +228,6 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowr
 
     esi = np.squeeze(meta['e'])
     nsi = np.squeeze(meta['n']) 
-
-    #pix_m = np.squeeze(meta['pix_m'])
-    #dep_m = np.squeeze(meta['dep_m'])
-    #c = np.squeeze(meta['c'])
     
     theta = np.squeeze(meta['heading'])/(180/np.pi)
 
@@ -255,7 +250,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowr
     tvg = ((8.5*10**-5)+(3/76923)+((8.5*10**-5)/4))*meta['c']
         
     # depth correction
-    dist_tvg = ((np.tan(np.radians(25)))*np.squeeze(meta['dep_m']))-(tvg)
+    dist_tvg = np.squeeze(((np.tan(np.radians(25)))*np.squeeze(meta['dep_m']))-(tvg))
 
     # read in range data
     R_fp = io.get_mmap_data(sonpath, base, '_data_range.dat', 'float32', tuple(shape_star))
@@ -317,9 +312,9 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    # get number pixels in scan line
    extent = int(np.shape(merge)[0]/2)
 
-   yvec = np.linspace(pix_m,extent*pix_m,extent)
+   yvec = np.squeeze(np.linspace(np.squeeze(pix_m),extent*np.squeeze(pix_m),extent))
 
-   X, Y, D, h, t  = getXY(e,n,yvec,d,t,extent)
+   X, Y, D, h, t  = getXY(e,n,yvec,np.squeeze(d),t,extent)
    
    D[np.isnan(D)] = 0
    h[np.isnan(h)] = 0
@@ -369,23 +364,18 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       while complete==0:
          try:
             grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
-            #del X, Y
             longrid, latgrid = trans(grid_x, grid_y, inverse=True)
             shape = np.shape(grid_x)
-            #del grid_y, grid_x
 
             targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
             del longrid, latgrid
 
             orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
-            #del humlat, humlon
             if 'orig_def' in locals(): 
                complete=1 
          except:
             print "memory error: trying grid resolution of %s" % (str(res*2))
             res = res*2
-
-      #influence = 1 #m
 
       if mode==1:
 
@@ -491,7 +481,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    try:
       print "drawing and printing map ..."
       fig = plt.figure(frameon=False)
-      map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
+      map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
        resolution = 'i', #h #f
        llcrnrlon=np.min(humlon)-0.00001, llcrnrlat=np.min(humlat)-0.00001,
        urcrnrlon=np.max(humlon)+0.00001, urcrnrlat=np.max(humlat)+0.00001)
@@ -538,7 +528,6 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
 # =========================================================
 def custom_save(figdirec,root):
-    #plt.savefig(figdirec+root,bbox_inches='tight',dpi=600,transparent=True)
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=1000, transparent=True)
 
 # =========================================================
@@ -612,7 +601,7 @@ def getxy(e, n, yvec, d, t,extent):
 def getXY(e,n,yvec,d,t,extent):
    print "getting point cloud ..." 
 
-   o = Parallel(n_jobs = -1, verbose=0)(delayed(getxy)(e[k], n[k], np.squeeze(yvec), np.squeeze(d)[k], t[k], extent) for k in xrange(len(n)))
+   o = Parallel(n_jobs = -1, verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
 
    #eating, northing, distance to sonar, depth, heading
    X, Y, D, h, t = zip(*o)
