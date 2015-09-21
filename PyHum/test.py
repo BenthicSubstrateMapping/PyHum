@@ -145,8 +145,8 @@ def dotest():
    # grid and map the scans
 #   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
 
-#   res = 0.5 # grid resolution in metres
-#   numstdevs = 5
+   res = 0.5 # grid resolution in metres
+   numstdevs = 5
    
    # grid and map the texture lengthscale maps
    PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, res, mode, nn, influence, numstdevs)

@@ -334,46 +334,49 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
           make_kml(p, sonpath, humlat, humlon)
 
-          X = []; Y = []; S = [];
-          for p in xrange(len(class_fp)):
-             dat = np.genfromtxt(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')), delimiter=' ')
-             X.append(dat[:,0])
-             Y.append(dat[:,1])
-             S.append(dat[:,2])
-             del dat
+       ## draw concatenated
+       X = []; Y = []; S = [];
+       for p in xrange(len(class_fp)):
+          dat = np.genfromtxt(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')), delimiter=' ')
+          X.append(dat[:,0])
+          Y.append(dat[:,1])
+          S.append(dat[:,2])
+          del dat
 
-          # merge flatten and stack
-          X = np.asarray(np.hstack(X),'float')
-          X = X.flatten()
+       # merge flatten and stack
+       X = np.asarray(np.hstack(X),'float')
+       X = X.flatten()
 
-          # merge flatten and stack
-          Y = np.asarray(np.hstack(Y),'float')
-          Y = Y.flatten()
+       # merge flatten and stack
+       Y = np.asarray(np.hstack(Y),'float')
+       Y = Y.flatten()
 
-          # merge flatten and stack
-          S = np.asarray(np.hstack(S),'float')
-          S = S.flatten()
+       # merge flatten and stack
+       S = np.asarray(np.hstack(S),'float')
+       S = S.flatten()
 
-          humlon, humlat = trans(X, Y, inverse=True)
+       humlon, humlat = trans(X, Y, inverse=True)
 
-          if dogrid==1:
+       if dogrid==1:
 
-             orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
-             
-             dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
+          orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
+
+          sigmas = 1 #m
+          eps = 2             
+          dat, res = get_grid(mode, orig_def, targ_def, S, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
             
-          if dogrid==1:
-             dat[dat==0] = np.nan
-             dat[np.isinf(dat)] = np.nan
+       if dogrid==1:
+          dat[dat==0] = np.nan
+          dat[np.isinf(dat)] = np.nan
 
-             datm = np.ma.masked_invalid(dat)
+          datm = np.ma.masked_invalid(dat)
 
-             glon, glat = trans(grid_x, grid_y, inverse=True)
-             del grid_x, grid_y
+          glon, glat = trans(grid_x, grid_y, inverse=True)
+          del grid_x, grid_y
 
-          print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p)
+       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, S, sonpath, p)
 
-    else:    
+    else: #just 1 chunk   
     
        e = esi
        n = nsi
@@ -461,7 +464,7 @@ def make_kml(p, sonpath, humlat, humlon):
 # =========================================================
 def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p):
 
-    levels = [0.5,0.75,1.25,1.5,1.75,2,3]
+    #levels = [0,0.25,0.5,0.75,1.25,1.5,1.75,2,3,5]
           
     try:
        print "drawing and printing map ..."
@@ -478,18 +481,22 @@ def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merg
        ax.set_axis_off()
        fig.add_axes(ax)
 
+       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+      
        if dogrid==1:
           if datm.size > 25000000:
              print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-             map.contourf(gx[::5,::5], gy[::5,::5], datm[::5,::5], levels, cmap='YlOrRd')
+             #map.contourf(gx[::5,::5], gy[::5,::5], datm[::5,::5], levels, cmap='YlOrRd')
+             map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0, vmax=5)
           else:
-             map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
-
+             #map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
+             map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='YlOrRd', vmin=0, vmax=5)
+             
        else: 
           ## draw point cloud
           x,y = map.projtran(humlon, humlat)
           map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='YlOrRd', linewidth = '0')
-
+             
        custom_save(sonpath,'class_map_imagery'+str(p))
        del fig 
 
@@ -517,9 +524,9 @@ def print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpa
        if dogrid==1:
           if datm.size > 25000000:
              print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-             map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='YlOrRd', vmin=0.25, vmax=2)
+             map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='YlOrRd', vmin=0, vmax=5)
           else:
-             map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0.25, vmax=2)
+             map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0, vmax=5)
 
        else: 
           ## draw point cloud
