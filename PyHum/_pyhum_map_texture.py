@@ -64,14 +64,12 @@ try:
 except:
    pass
 from joblib import Parallel, delayed, cpu_count
+import PyHum.io as io
 
 # numerical
 import numpy as np
 import pyproj
 import PyHum.utils as humutils
-#from scipy.interpolate import griddata
-#from scipy.spatial import cKDTree as KDTree
-#from scipy.ndimage.filters import median_filter
 
 import pyresample
 import replace_nans
@@ -93,12 +91,12 @@ np.seterr(invalid='ignore')
 import warnings
 warnings.filterwarnings("ignore")
 
-__all__ = [
-    'map_texture',
-    'custom_save',
-    'custom_save2',    
-    'calc_beam_pos',
-    ]
+#__all__ = [
+#    'map_texture',
+#    'custom_save',
+#    'custom_save2',    
+#    'calc_beam_pos',
+#    ]
 
 #################################################
 def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.5, mode=3, nn = 64, influence = 10, numstdevs=5):
@@ -239,7 +237,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
     # load memory mapped scans
     shape_port = np.squeeze(meta['shape_port'])
     if shape_port!='':
-       #port_fp = np.memmap(sonpath+base+'_data_port_l.dat', dtype='float32', mode='r', shape=tuple(shape_port))
        if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat'))):
           with open(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), 'r') as ff:
              port_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_port))
@@ -249,7 +246,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
     shape_star = np.squeeze(meta['shape_star'])
     if shape_star!='':
-       #star_fp = np.memmap(sonpath+base+'_data_star_l.dat', dtype='float32', mode='r', shape=tuple(shape_star))
        if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat'))):
           with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'r') as ff:
              star_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape_star))
@@ -260,7 +256,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
     if len(shape_star)>2:    
        shape = shape_port.copy()
        shape[1] = shape_port[1] + shape_star[1]
-       #class_fp = np.memmap(sonpath+base+'_data_class.dat', dtype='float32', mode='r', shape=tuple(shape))
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'r') as ff:
           class_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
     else:
@@ -312,7 +307,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           X, Y, merge = trim_xys(X, Y, merge, index)
 
           # write raw bs to file
-          #outfile = sonpath+'x_y_class'+str(p)+'.asc' 
           outfile = os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc'))
           with open(outfile, 'w') as f:
              np.savetxt(f, np.hstack((humutils.ascol(X),humutils.ascol(Y), humutils.ascol(merge))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
@@ -325,7 +319,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
                           
              sigmas = 1 #m
              eps = 2
-             dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans)
+             dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
              
           if dogrid==1:
              dat[dat==0] = np.nan
@@ -342,7 +336,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
           X = []; Y = []; S = [];
           for p in xrange(len(class_fp)):
-             #dat = np.genfromtxt(sonpath+'x_y_class'+str(p)+'.asc', delimiter=' ')
              dat = np.genfromtxt(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')), delimiter=' ')
              X.append(dat[:,0])
              Y.append(dat[:,1])
@@ -367,7 +360,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
              orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
              
-             dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans)
+             dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
             
           if dogrid==1:
              dat[dat==0] = np.nan
@@ -420,7 +413,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
        X, Y, merge = trim_xys(X, Y, merge, index)
 
        # write raw bs to file
-       #outfile = sonpath+'x_y_class'+str(p)+'.asc' 
        outfile = os.path.normpath(os.path.join(sonpath,'x_y_class'+str(0)+'.asc'))
        with open(outfile, 'w') as f:
           np.savetxt(f, np.hstack((humutils.ascol(X),humutils.ascol(Y), humutils.ascol(merge))), delimiter=' ', fmt="%8.6f %8.6f %8.6f")
@@ -433,7 +425,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
              
           sigmas = 1 #m
           eps = 2
-          dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans)
+          dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
           
 
        if dogrid==1:
@@ -464,7 +456,6 @@ def make_kml(p, sonpath, humlat, humlon):
     ground.latlonbox.west =  np.min(humlon)-0.00001
     ground.latlonbox.rotation = 0
 
-    #kml.save(sonpath+'class_GroundOverlay'+str(p)+'.kml')
     kml.save(os.path.normpath(os.path.join(sonpath,'class_GroundOverlay'+str(p)+'.kml')))
           
 # =========================================================
@@ -494,8 +485,6 @@ def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merg
           else:
              map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
 
-          #map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0.25, vmax=2)
-          #del dat
        else: 
           ## draw point cloud
           x,y = map.projtran(humlon, humlat)
@@ -532,8 +521,6 @@ def print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpa
           else:
              map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0.25, vmax=2)
 
-          #map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0.25, vmax=2)
-          #del dat
        else: 
           ## draw point cloud
           x,y = map.projtran(humlon, humlat)
@@ -546,7 +533,7 @@ def print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpa
        print "error: map could not be created..."
 
 # =========================================================
-def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY, res, nn, sigmas, eps, shape, numstdevs, trans):
+def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY, res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat):
 
     if mode==1:
 
@@ -606,9 +593,7 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
     mask = np.isnan(dat2)
 
     mask = ~binary_dilation(binary_erosion(~mask,structure=np.ones((15,15))), structure=np.ones((15,15)))
-    #mask = binary_fill_holes(mask, structure=np.ones((15,15)))
-    #mask = ~binary_fill_holes(~mask, structure=np.ones((15,15)))
-
+    
     dat2[mask==1] = np.nan
     dat2[dat2<1] = np.nan
     del dat
@@ -624,16 +609,13 @@ def get_griddefs(minX, maxX, minY, maxY, res, humlon, humlat, trans):
     while complete==0:
        try:
           grid_x, grid_y, res = getmesh(minX, maxX, minY, maxY, res)
-          #del X, Y
           longrid, latgrid = trans(grid_x, grid_y, inverse=True)
           shape = np.shape(grid_x)
-          #del grid_y, grid_x
 
           targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
           del longrid, latgrid
 
           orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
-          #del humlat, humlon
           if 'orig_def' in locals(): 
              complete=1 
        except:
@@ -741,12 +723,10 @@ def getXY(e,n,yvec,d,t,extent):
 
 # =========================================================
 def custom_save(figdirec,root):
-    #plt.savefig(figdirec+root,bbox_inches='tight',dpi=600,transparent=True)
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=1000, transparent=True)
 
 # =========================================================
 def custom_save2(figdirec,root):
-    #plt.savefig(figdirec+root,bbox_inches='tight',dpi=600)
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=600)
 
 # =========================================================
@@ -762,432 +742,3 @@ if __name__ == '__main__':
 
    map_texture(humfile, sonpath, cs2cs_args, dogrid, res, mode, nn, influence, numstdevs)
 
-
-
-#          levels = [0.5,0.75,1.25,1.5,1.75,2,3]
-
-#          try:
-#             print "drawing and printing map ..."
-#             fig = plt.figure()
-#             map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1],
-#              resolution = 'i',
-#              llcrnrlon=np.min(humlon)-0.00001, llcrnrlat=np.min(humlat)-0.00001,
-#              urcrnrlon=np.max(humlon)+0.00001, urcrnrlat=np.max(humlat)+0.00001)
-
-#             map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
-#             if dogrid==1:
-#                gx,gy = map.projtran(glon, glat)
-
-#             if dogrid==1:
-
-#                if datm.size > 25000000:
-#                   print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-#                   map.contourf(gx[::5,::5], gy[::5,::5], datm[::5,::5], levels, cmap='YlOrRd')
-#                else:
-#                   map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
-
-#             else: 
-#                ## draw point cloud
-#                x,y = map.projtran(humlon, humlat)
-#                map.scatter(x.flatten(), y.flatten(), 0.5, S.flatten(), cmap='YlOrRd', linewidth = '0')
-
-#             custom_save2(sonpath,'class_map_imagery'+str(p))
-#             del fig 
-#          except:
-#             print "error: map could not be created..."
-
-#          try:
-#             print "drawing and printing map ..."
-#             fig = plt.figure(frameon=False)
-#             map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
-#              resolution = 'i', #h #f
-#              llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
-#              urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
-
-#             if dogrid==1:
-#                gx,gy = map.projtran(glon, glat)
-
-#             ax = plt.Axes(fig, [0., 0., 1., 1.], )
-#             ax.set_axis_off()
-#             fig.add_axes(ax)
-
-#             if dogrid==1:
-#                if datm.size > 25000000:
-#                   print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-#                   map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='YlOrRd', vmin=0.25, vmax=2)
-#                else:
-#                   map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0.25, vmax=2)
-
-#                #map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0.25, vmax=2)
-#                del dat
-#             else: 
-#                ## draw point cloud
-#                x,y = map.projtran(humlon, humlat)
-#                map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='YlOrRd', linewidth = '0')
-
-#             custom_save(sonpath,'class_map'+str(p))
-#             del fig 
-
-#          except:
-#             print "error: map could not be created..."
-
-#             if mode==1:
-
-#                complete=0
-#                while complete==0:
-#                   try:
-#                      dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count()) 
-#                      if 'dat' in locals(): 
-#                         complete=1 
-#                   except:
-#                      del grid_x, grid_y, targ_def, orig_def
-#                      dat, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode)
-
-#             elif mode==2:
-#                # custom inverse distance 
-#                wf = lambda r: 1/r**2
-
-#                complete=0
-#                while complete==0:
-#                   try:
-#                      dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
-#                      if 'dat' in locals(): 
-#                         complete=1 
-#                   except:
-#                      del grid_x, grid_y, targ_def, orig_def
-#                      dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode)
-
-#             elif mode==3:
-#                sigmas = 1 #m
-#                eps = 2
-
-#                complete=0
-#                while complete==0:
-#                   try:
-#                      dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
-#                      if 'dat' in locals(): 
-#                         complete=1 
-#                   except:
-#                      del grid_x, grid_y, targ_def, orig_def
-#                      dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode)
-
-#             dat = dat.reshape(shape)
-
-#             if mode>1:
-#                stdev = stdev.reshape(shape)
-#                counts = counts.reshape(shape)
-
-#             mask = dat.mask.copy()
-
-#             dat[mask==1] = 0
-
-#             if mode>1:
-#                dat[(stdev>3) & (mask!=0)] = np.nan
-#                dat[(counts<nn) & (counts>0)] = np.nan
-
-#             dat2 = replace_nans.RN(dat.astype('float64'),1000,0.01,2,'localmean').getdata()
-#             dat2[dat==0] = np.nan
-
-#             # get a new mask
-#             mask = np.isnan(dat2)
-
-#             mask = ~binary_dilation(binary_erosion(~mask,structure=np.ones((15,15))), structure=np.ones((15,15)))
-#             #mask = binary_fill_holes(mask, structure=np.ones((15,15)))
-#             #mask = ~binary_fill_holes(~mask, structure=np.ones((15,15)))
-
-#             dat2[mask==1] = np.nan
-#             dat2[dat2<1] = np.nan
-
-#             del dat
-#             dat = dat2
-#             del dat2
-
-#             complete=0
-#             while complete==0:
-#                try:
-#                   grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
-#                   #del X, Y
-#                   longrid, latgrid = trans(grid_x, grid_y, inverse=True)
-#                   shape = np.shape(grid_x)
-#                   #del grid_y, grid_x
-
-#                   targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
-#                   del longrid, latgrid
-
-#                   orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
-#                   #del humlat, humlon
-#                   if 'orig_def' in locals(): 
-#                      complete=1 
-#                except:
-#                   print "memory error: trying grid resolution of %s" % (str(res*2))
-#                   res = res*2
-
-
-#          X = X.flatten()[index]
-#          Y = Y.flatten()[index]
-#          merge = merge.flatten()[index]
-
-#          X = X[np.where(np.logical_not(np.isnan(Y)))]
-#          merge = merge.flatten()[np.where(np.logical_not(np.isnan(Y)))]
-#          Y = Y[np.where(np.logical_not(np.isnan(Y)))]
-
-#          Y = Y[np.where(np.logical_not(np.isnan(X)))]
-#          merge = merge.flatten()[np.where(np.logical_not(np.isnan(X)))]
-#          X = X[np.where(np.logical_not(np.isnan(X)))]
-
-#          X = X[np.where(np.logical_not(np.isnan(merge)))]
-#          Y = Y[np.where(np.logical_not(np.isnan(merge)))]
-#          merge = merge[np.where(np.logical_not(np.isnan(merge)))]
-
-#          complete=0
-#          while complete==0:
-#             try:
-#                grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
-#                #del X, Y
-#                longrid, latgrid = trans(grid_x, grid_y, inverse=True)
-#                shape = np.shape(grid_x)
-#                #del grid_y, grid_x
-
-#                targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
-#                del longrid, latgrid
-
-#                orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
-#                #del humlat, humlon
-#                if 'dat' in locals(): 
-#                   complete=1 
-#             except:
-#                print "memory error: trying grid resolution of %s" % (str(res*2))
-#                res = res*2
-
-#          if mode==1:
-
-#             complete=0
-#             while complete==0:
-#                try:
-#                   dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
-#                   if 'dat' in locals(): 
-#                      complete=1 
-#                except:
-#                   del grid_x, grid_y, longrid, latgrid, targ_def, orig_def
-#                   grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
-#                   longrid, latgrid = trans(grid_x, grid_y, inverse=True)
-#                   shape = np.shape(grid_x)
-
-#                   targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
-#                   del longrid, latgrid
-
-#                   orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
-
-#                   dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count()) 
-
-#                   if 'dat' in locals(): 
-#                      complete=1     
-
-
-#          elif mode==2:
-#             # custom inverse distance 
-#             wf = lambda r: 1/r**2
-
-#             complete=0
-#             while complete==0:
-#                try:
-#                   dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
-#                   if 'dat' in locals(): 
-#                      complete=1 
-#                except:
-#                   del grid_x, grid_y, longrid, latgrid, targ_def, orig_def
-#                   grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
-#                   longrid, latgrid = trans(grid_x, grid_y, inverse=True)
-#                   shape = np.shape(grid_x)
-
-#                   targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
-#                   del longrid, latgrid
-
-#                   orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
-
-#                   dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
-
-#                   if 'dat' in locals(): 
-#                      complete=1     
-
-#          elif mode==3:
-#             sigmas = 1 #m
-#             eps = 2
-
-#             complete=0
-#             while complete==0:
-#                try:
-#                   dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
-#                   if 'dat' in locals(): 
-#                      complete=1 
-#                except:
-#                   del grid_x, grid_y, longrid, latgrid, targ_def, orig_def
-#                   grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
-#                   longrid, latgrid = trans(grid_x, grid_y, inverse=True)
-#                   shape = np.shape(grid_x)
-
-#                   targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
-#                   del longrid, latgrid
-
-#                   orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
-
-#                   dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
-
-#                   if 'dat' in locals(): 
-#                      complete=1 
-
-
-
-#             try:
-#                # nearest neighbour
-#                dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
-#             except:
-#                # nearest neighbour
-#                dat, stdev, counts = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, with_uncert = True, nprocs = 1)
-
-
-#          grid_x, grid_y, res = getmesh(np.min(X), np.max(X), np.min(Y), np.max(Y), res)
-
-#          #grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
-
-#          #del X, Y
-#          longrid, latgrid = trans(grid_x, grid_y, inverse=True)
-#          shape = np.shape(grid_x)
-#          #del grid_y, grid_x
-
-#          targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
-#          del longrid, latgrid
-
-#          orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
-#          #del humlat, humlon
-
-#          #influence = 1 #m
-#          #numneighbours = 64
-
-#             try:
-#                dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
-#             except:
-#                dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = 1, epsilon = eps)
-
-#             try:
-#                dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
-#             except:
-#                dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = 1)   
-
-#             try:
-#                # nearest neighbour
-#                dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
-#             except:
-#                # nearest neighbour
-#                dat, stdev, counts = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, with_uncert = True, nprocs = 1)
-
-
-#          grid_x, grid_y = np.meshgrid( np.arange(np.min(X), np.max(X), res), np.arange(np.min(Y), np.max(Y), res) )  
-
-#          #dat = griddata(np.c_[X.flatten(),Y.flatten()], S.flatten(), (grid_x, grid_y), method='nearest')
-#          ### create mask for where the data is not
-#          #tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-#          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
-#          #dist = dist.reshape(grid_x.shape)
-
-#          tree = KDTree(zip(X.flatten(), Y.flatten()))
-
-#          #nearest neighbour
-#          dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
-#          dat = S.flatten()[inds].reshape(grid_x.shape)
-
-#          ## inverse distance weighting, using 10 nearest neighbours
-#          #d, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 10)
-#          #w = 1.0 / d**2
-#          #dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
-#          #dat.shape = grid_x.shape
-
-#          ## create mask for where the data is not
-#          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
-#          dist = dist.reshape(grid_x.shape)
-
-
-
-
-#          #dat = griddata(np.c_[X.flatten(),Y.flatten()], S.flatten(), (grid_x, grid_y), method='nearest')
-#          ### create mask for where the data is not
-#          #tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-#          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
-#          #dist = dist.reshape(grid_x.shape)
-
-#          tree = KDTree(zip(X.flatten(), Y.flatten()))
-
-#          #nearest neighbour
-#          dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 1)
-#          dat = merge.flatten()[inds].reshape(grid_x.shape)
-
-#          ## inverse distance weighting, using 10 nearest neighbours
-#          #d, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = 10)
-#          #w = 1.0 / d**2
-#          #dat = np.sum(w * merge.flatten()[inds], axis=1) / np.sum(w, axis=1)
-#          #dat.shape = grid_x.shape
-
-#          ## create mask for where the data is not
-#          #dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
-#          dist = dist.reshape(grid_x.shape)
-
-#       del X, Y
-
-#    if not cs2cs_args:
-#       # arguments to pass to cs2cs for coordinate transforms
-#       cs2cs_args = "epsg:26949"
-#       print '[Default] cs2cs arguments are %s' % (cs2cs_args)
-
-#    if not dogrid:
-#       if dogrid != 0:
-#          dogrid = 1
-#          print "[Default] Data will be gridded"
-
-#    if not calc_bearing:
-#       if calc_bearing != 1:
-#          calc_bearing = 0
-#          print "[Default] Heading recorded by instrument will be used"
-
-#    if not filt_bearing:
-#       if filt_bearing != 1:
-#          filt_bearing = 0
-#          print "[Default] Heading will not be filtered"
-
-#    if not res:
-#       res = 0.5
-#       print '[Default] Grid resolution is %s m' % (str(res))
-
-#    if not cog:
-#       if cog != 0:
-#          cog = 1
-#          print "[Default] Heading based on course-over-ground"
-
-#    if not dowrite:
-#       if dowrite != 0:
-#          dowrite = 1
-#          print "[Default] Point cloud data will be written to ascii file"
-
-#       print "getting point cloud ..."
-#       # get the points by rotating the [x,y] vector so it lines up with boat heading
-#       X=[]; Y=[]; 
-#       for k in range(len(n)): 
-#          x = np.concatenate((np.tile(e[k],extent) , np.tile(e[k],extent)))
-#          #y = np.concatenate((n[k]+yvec, n[k]-yvec))
-#          rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d[k], 2.0))
-#          y = np.concatenate((n[k]+rangedist, n[k]-rangedist))
-#          # Rotate line around center point
-#          xx = e[k] - ((x - e[k]) * np.cos(t[k])) - ((y - n[k]) * np.sin(t[k]))
-#          yy = n[k] - ((x - e[k]) * np.sin(t[k])) + ((y - n[k]) * np.cos(t[k]))
-#          xx, yy = calc_beam_pos(d[k], t[k], xx, yy)
-#          X.append(xx)
-#          Y.append(yy) 
-
-#       del e, n, t, x, y
-
-#       # merge flatten and stack
-#       X = np.asarray(X,'float')
-#       X = X.flatten()
-
-#       # merge flatten and stack
-#       Y = np.asarray(Y,'float')
-#       Y = Y.flatten()
