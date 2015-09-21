@@ -457,7 +457,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             fp = np.memmap(ff, dtype='float32', mode='w+', shape=tuple(shape))
 
          for p in xrange(len(port_fp)):
-            wc = get_kclass(class_fp[p].copy())
+            wc = get_kclass(class_fp[p].copy(), numclasses)
             #Sk = class_fp[p].copy()
             #Sk[np.isnan(Sk)] = 0
             #wc, values = humutils.cut_kmeans(Sk,numclasses+1)
@@ -473,7 +473,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
          #   kclass_fp = np.memmap(ff, dtype='float32', mode='r', shape=tuple(shape))
             
       else:
-         wc = get_kclass(class_fp.copy())
+         wc = get_kclass(class_fp.copy(), numclasses)
          #Sk = class_fp.copy()
          #Sk[np.isnan(Sk)] = 0
          #wc, values = humutils.cut_kmeans(Sk,numclasses+1)
@@ -534,7 +534,7 @@ def get_srt(Z,ind,maxscale, notes, win, density):
             return srt+srt2
             
 # =========================================================
-def get_kclass(Sk):   
+def get_kclass(Sk, numclasses):   
     Sk[np.isnan(Sk)] = 0
     wc, values = humutils.cut_kmeans(Sk,numclasses+1)
     wc[Sk==0] = np.nan
