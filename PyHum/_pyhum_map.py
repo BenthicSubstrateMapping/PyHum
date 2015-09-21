@@ -230,9 +230,9 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowr
     esi = np.squeeze(meta['e'])
     nsi = np.squeeze(meta['n']) 
 
-    pix_m = np.squeeze(meta['pix_m'])
-    dep_m = np.squeeze(meta['dep_m'])
-    c = np.squeeze(meta['c'])
+    #pix_m = np.squeeze(meta['pix_m'])
+    #dep_m = np.squeeze(meta['dep_m'])
+    #c = np.squeeze(meta['c'])
     
     theta = np.squeeze(meta['heading'])/(180/np.pi)
 
@@ -252,10 +252,10 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowr
           star_fp = io.get_mmap_data(sonpath, base, '_data_star_la.dat', 'float32', tuple(shape_star))
 
     # time varying gain
-    tvg = ((8.5*10**-5)+(3/76923)+((8.5*10**-5)/4))*c
+    tvg = ((8.5*10**-5)+(3/76923)+((8.5*10**-5)/4))*meta['c']
         
     # depth correction
-    dist_tvg = ((np.tan(np.radians(25)))*dep_m)-(tvg)
+    dist_tvg = ((np.tan(np.radians(25)))*np.squeeze(meta['dep_m']))-(tvg)
 
     # read in range data
     R_fp = io.get_mmap_data(sonpath, base, '_data_range.dat', 'float32', tuple(shape_star))
@@ -272,10 +272,10 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowr
 
     if len(shape_star)>2:    
        for p in xrange(len(star_fp)):
-          res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, mode, nn, influence, numstdevs)
+          res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], meta['pix_m'], res, cs2cs_args, sonpath, p, dogrid, dowrite, mode, nn, influence, numstdevs, meta['c'], np.arcsin(c/(1000*meta['t']*meta['f'])))
           print "grid resolution is %s" % (str(res))
     else:
-       res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, pix_m, res, cs2cs_args, sonpath, 0, dogrid, dowrite, mode, nn, influence, numstdevs)
+       res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, dogrid, dowrite, mode, nn, influence, numstdevs, meta['c'], np.arcsin(c/(1000*meta['t']*meta['f'])))
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
@@ -287,7 +287,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.1, dowr
 
 
 # =========================================================
-def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, mode, nn, influence, numstdevs):
+def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, mode, nn, influence, numstdevs, c, dx):
    
    trans =  pyproj.Proj(init=cs2cs_args)   
 
@@ -298,7 +298,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    merge = merge[:,:len(n)]
 
    ## actual along-track resolution is this: dx times dy = Af
-   tmp = data_R * np.arcsin(c/(1000*meta['t']*meta['f'])) * (c*0.007 / 2)
+   tmp = data_R * dx * (c*0.007 / 2) #dx = np.arcsin(c/(1000*meta['t']*meta['f']))
    res_grid = np.vstack((tmp, tmp))
    del tmp 
 

@@ -139,7 +139,7 @@ def dotest():
 #   PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
    # Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
-   PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+#   PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
    # grid and map the scans
    PyHum.map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
