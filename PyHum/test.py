@@ -149,7 +149,7 @@ def dotest():
    numstdevs = 5
    
    # grid and map the texture lengthscale maps
-   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
+   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, res, mode, nn, influence, numstdevs)
 
 #   # calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
 #   PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)

@@ -101,7 +101,7 @@ __all__ = [
     ]
 
 #################################################
-def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.5, dowrite = 0, mode=3, nn = 64, influence = 10, numstdevs=5):
+def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.5, mode=3, nn = 64, influence = 10, numstdevs=5):
          
     '''
     Create plots of the texture lengthscale maps made in PyHum.texture module 
@@ -113,7 +113,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
     Syntax
     ----------
-    [] = PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
+    [] = PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, res, mode, nn, influence, numstdevs)
 
     Parameters
     ----------
@@ -130,9 +130,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
        Otherwise, point cloud will be plotted
     res : float, *optional* [Default=0.5]
        grid resolution of output gridded texture map
-    dowrite: int, *optional* [Default=0]
-       if 1, point cloud data from each chunk is written to ascii file
-       if 0, processing times are speeded up considerably but point clouds are not available for further analysis
     mode: int, *optional* [Default=3]
        gridding mode. 1 = nearest neighbour
                       2 = inverse weighted nearest neighbour
@@ -197,11 +194,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
     if res:
        res = np.asarray(res,float)
        print 'Gridding resolution: %s' % (str(res))      
-
-    if dowrite:
-       dowrite = int(dowrite)
-       if dowrite==0:
-          print "Point cloud data will be written to ascii file" 
 
     if mode:
        mode = int(mode)
@@ -768,7 +760,7 @@ def calc_beam_pos(dist, bearing, x, y):
 # =========================================================
 if __name__ == '__main__':
 
-   map_texture(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
+   map_texture(humfile, sonpath, cs2cs_args, dogrid, res, mode, nn, influence, numstdevs)
 
 
 
