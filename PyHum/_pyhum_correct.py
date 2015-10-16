@@ -311,7 +311,10 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     R[np.isnan(R)] = 0
 
-    alpha_w = water_atten(R,meta['f'],meta['c'], ph, temp, salinity)
+    try:
+       alpha_w = water_atten(R,meta['f'],meta['c'], ph, temp, salinity)
+    except:
+       alpha_w = 1e-5
 
     # compute transmission losses
     TL = (40 * np.log10(R) + alpha_w + (2*alpha)*R/1000)/255
