@@ -692,56 +692,59 @@ def do_ppdrc(fp, filtsize):
 # =========================================================
 def plot_merged_scans(dat_port, dat_star, dist_m, shape_port, ft, sonpath, p):
 
-   if len(shape_port)>2:
-      Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
-      extent = shape_port[1] #np.shape(merge)[0]
-   else:
-      Zdist = dist_m
-      extent = shape_port[0] #np.shape(merge)[0]
+   if ~os.path.isfile(os.path.normpath(os.path.join(sonpath,'merge_corrected_scan'+str(p)))):
+      if len(shape_port)>2:
+         Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
+         extent = shape_port[1] #np.shape(merge)[0]
+      else:
+         Zdist = dist_m
+         extent = shape_port[0] #np.shape(merge)[0]
 
-   fig = plt.figure()
-   plt.imshow(np.vstack((np.flipud(dat_port), dat_star)), cmap='gray', extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)])
-   plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
+      fig = plt.figure()
+      plt.imshow(np.vstack((np.flipud(dat_port), dat_star)), cmap='gray', extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)])
+      plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
 
-   plt.axis('normal'); plt.axis('tight')
-   custom_save(sonpath,'merge_corrected_scan'+str(p))
-   del fig
+      plt.axis('normal'); plt.axis('tight')
+      custom_save(sonpath,'merge_corrected_scan'+str(p))
+      del fig
 
 # =========================================================
 def plot_dwnlow_scans(dat_dwnlow, dist_m, shape_low, ft, sonpath, p):
 
-    if len(shape_low)>2:
-       Zdist = dist_m[shape_low[-1]*p:shape_low[-1]*(p+1)]
-       extent = shape_low[1] #np.shape(merge)[0]
-    else:
-      Zdist = dist_m
-      extent = shape_low[0] #np.shape(merge)[0]  
+    if ~os.path.isfile(os.path.normpath(os.path.join(sonpath,'dwnlow_corrected_scan'+str(p)))):
+       if len(shape_low)>2:
+          Zdist = dist_m[shape_low[-1]*p:shape_low[-1]*(p+1)]
+          extent = shape_low[1] #np.shape(merge)[0]
+       else:
+         Zdist = dist_m
+         extent = shape_low[0] #np.shape(merge)[0]  
  
-    fig = plt.figure()
-    plt.imshow(dat_dwnlow, cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
-    plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
+       fig = plt.figure()
+       plt.imshow(dat_dwnlow, cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
+       plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
 
-    plt.axis('normal'); plt.axis('tight')
-    custom_save(sonpath,'dwnlow_corrected_scan'+str(p))
-    del fig
+       plt.axis('normal'); plt.axis('tight')
+       custom_save(sonpath,'dwnlow_corrected_scan'+str(p))
+       del fig
 
 # =========================================================
 def plot_dwnhi_scans(dat_dwnhi, dist_m, shape_hi, ft, sonpath, p):
 
-    if len(shape_hi)>2:
-       Zdist = dist_m[shape_hi[-1]*p:shape_hi[-1]*(p+1)]
-       extent = shape_hi[1] #np.shape(merge)[0]
-    else:
-      Zdist = dist_m
-      extent = shape_hi[0] #np.shape(merge)[0]  
+    if ~os.path.isfile(os.path.normpath(os.path.join(sonpath,'dwnhi_corrected_scan'+str(p)))):
+       if len(shape_hi)>2:
+          Zdist = dist_m[shape_hi[-1]*p:shape_hi[-1]*(p+1)]
+          extent = shape_hi[1] #np.shape(merge)[0]
+       else:
+          Zdist = dist_m
+          extent = shape_hi[0] #np.shape(merge)[0]  
     
-    fig = plt.figure()
-    plt.imshow(dat_dwnhi, cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
-    plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
+       fig = plt.figure()
+       plt.imshow(dat_dwnhi, cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
+       plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
 
-    plt.axis('normal'); plt.axis('tight')
-    custom_save(sonpath,'dwnhi_corrected_scan'+str(p))
-    del fig
+       plt.axis('normal'); plt.axis('tight')
+       custom_save(sonpath,'dwnhi_corrected_scan'+str(p))
+       del fig
 
 
 # =========================================================
