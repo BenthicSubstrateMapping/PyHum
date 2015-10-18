@@ -344,7 +344,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     print "WARNING: Because files have to be read in byte by byte,"
     print "this could take a very long time ..."
 
-    data = Pyread.Pyread(sonfiles, humfile, c, model, cs2cs_args)
+    data = pyread.Pyread(sonfiles, humfile, c, model, cs2cs_args)
 
     dat = data.gethumdat() 
     metadat = data.getmetadata()
