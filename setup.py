@@ -133,7 +133,7 @@ if USE_CYTHON:
     ext_modules += [
         Extension("PyHum.cwt", [ "PyHum/_cwt.pyx" ],
         include_dirs=[np.get_include()]),
-        Extension("PyHum.pyread", [ "PyHum/_pyread.pyx" ],
+        Extension("PyHum.pyread", [ "PyHum/pyread.pyx" ],
         include_dirs=[np.get_include()]),
         Extension("PyHum.ppdrc", [ "PyHum/_ppdrc.pyx" ],
         include_dirs=[np.get_include()]),    
@@ -152,7 +152,7 @@ else:
     ext_modules += [
         Extension("PyHum.cwt", [ "PyHum/_cwt.c" ],
         include_dirs=[np.get_include()]),
-        Extension("PyHum.pyread", [ "PyHum/_pyread.c" ],
+        Extension("PyHum.pyread", [ "PyHum/pyread.c" ],
         include_dirs=[np.get_include()]),
         Extension("PyHum.ppdrc", [ "PyHum/_ppdrc.c" ],
         include_dirs=[np.get_include()]),   
