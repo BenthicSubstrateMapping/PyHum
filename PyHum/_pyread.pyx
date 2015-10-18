@@ -37,7 +37,7 @@ import os, struct
 import PyHum.utils as humutils
 
 # =========================================================
-cdef class Pyread:
+cdef class pyread:
     """
     read a humminbird file
     """
