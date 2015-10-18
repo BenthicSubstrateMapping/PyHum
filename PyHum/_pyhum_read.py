@@ -68,7 +68,7 @@ import csv
 import PyHum.io as io
 
 #numerical
-import pyread
+#import pyread
 import PyHum.utils as humutils
 import numpy as np
 import pyproj
