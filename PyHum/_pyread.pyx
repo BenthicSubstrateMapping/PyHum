@@ -26,8 +26,6 @@ http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 from __future__ import generators
 from __future__ import division
 
-STUFF = "Hi"
-
 import numpy as np
 cimport numpy as np
 from libc.math cimport tan, atan, exp, sin, cos
@@ -39,7 +37,7 @@ import os, struct
 import PyHum.utils as humutils
 
 # =========================================================
-cdef class Pyread:
+cdef class pyread:
     """
     read a humminbird file
     """
@@ -148,8 +146,8 @@ cdef class Pyread:
 
 
     # =========================================================
-    cpdef tuple _calc_beam_pos(self, float dist, float bearing, tuple point):
-
+    #cpdef tuple _calc_beam_pos(self, float dist, float bearing, tuple point):
+    def _calc_beam_pos(self, float dist, float bearing, tuple point):
        cdef float dist_x, dist_y, x_final, y_final
        dist_x, dist_y = (dist*sin(bearing), dist*cos(bearing))
        xfinal, yfinal = (point[0] + dist_x, point[1] + dist_y)
@@ -189,7 +187,8 @@ cdef class Pyread:
              yield startPos
 
     # =========================================================
-    cpdef list _fread(self, object infile, int num, str typ):
+    #cpdef list _fread(self, object infile, int num, str typ):
+    def _fread(self, object infile, int num, str typ):
        dat = arr(typ)
        dat.fromfile(infile, num)
        if typ == 'c': #character
@@ -200,7 +199,8 @@ cdef class Pyread:
           return(list(dat))
 
     # =========================================================
-    cpdef list _gethead(self, object fid, object trans, float c, int model, int linesize): #transWGS84,
+    #cpdef list _gethead(self, object fid, object trans, float c, int model, int linesize): #transWGS84,
+    def _gethead(self, object fid, object trans, float c, int model, int linesize): #transWGS84,
        cdef list hd = self._fread(fid, 3, 'B')
        cdef list head=[] #pre-allocate list
        cdef int flag
@@ -330,7 +330,8 @@ cdef class Pyread:
 
 
     # =========================================================
-    cpdef dict _decode_humdat(self, object fid2, object trans): #, transWGS84): 
+    #cpdef dict _decode_humdat(self, object fid2, object trans): #, transWGS84): 
+    def _decode_humdat(self, object fid2, object trans): #, transWGS84): 
        """
        returns data from .DAT file
        """
@@ -380,7 +381,8 @@ cdef class Pyread:
 
 
     # =========================================================
-    cpdef list _getsonar(self, str sonarstring):
+    #cpdef list _getsonar(self, str sonarstring):
+    def _getsonar(self, str sonarstring):    
         """
         returns sonar data
         """
@@ -390,7 +392,8 @@ cdef class Pyread:
               return k  
                  
     # =========================================================
-    cpdef np.ndarray _get_scans(self, list scan, int packet):
+    #cpdef np.ndarray _get_scans(self, list scan, int packet):
+    def _get_scans(self, list scan, int packet):    
         """
         returns an individual scan
         """ 
@@ -401,14 +404,16 @@ cdef class Pyread:
                    
     # external functions ======================================                        
     # =========================================================
-    cpdef dict gethumdat(self):
+    #cpdef dict gethumdat(self):
+    def gethumdat(self):    
         """
         returns data in .DAT file
         """  
         return self.humdat
 
     # =========================================================
-    cpdef np.ndarray getportscans(self):
+    #cpdef np.ndarray getportscans(self):
+    def getportscans(self):    
         """
         returns compiled scans
         """       
@@ -423,7 +428,8 @@ cdef class Pyread:
         return np.asarray(c_port,'float16').T
 
     # =========================================================
-    cpdef np.ndarray getstarscans(self):
+    #cpdef np.ndarray getstarscans(self):
+    def getstarscans(self):    
         """
         returns compiled scans
         """       
@@ -438,7 +444,8 @@ cdef class Pyread:
         return np.asarray(c_star,'float16').T
 
     # =========================================================
-    cpdef np.ndarray getlowscans(self):
+    #cpdef np.ndarray getlowscans(self):
+    def getlowscans(self):    
         """
         returns compiled scans
         """       
@@ -453,7 +460,8 @@ cdef class Pyread:
         return np.asarray(c_lo,'float16').T
 
     # =========================================================
-    cpdef np.ndarray gethiscans(self):
+    #cpdef np.ndarray gethiscans(self):
+    def gethiscans(self):    
         """
         returns compiled scans
         """       
@@ -468,7 +476,8 @@ cdef class Pyread:
         return np.asarray(c_hi,'float16').T
 
     # =========================================================
-    cpdef dict getmetadata(self):
+    #cpdef dict getmetadata(self):
+    def getmetadata(self):    
         """
         returns meta data
         """  
