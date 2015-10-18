@@ -67,8 +67,6 @@ except:
 import csv
 import PyHum.io as io
 
-import dask.array as da
-
 #numerical
 import pyread
 import PyHum.utils as humutils
@@ -892,7 +890,6 @@ def custom_save(figdirec,root):
 def makechunks_simple(dat, numchunks):
    Ny, Nx = np.shape(dat)
    # get windowed data
-   dat = da.from_array(dat, chunks=1000)
    return humutils.sliding_window(dat,(Ny,Nx/int(numchunks)))                  
 
 # =========================================================

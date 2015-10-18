@@ -30,6 +30,8 @@ from scipy.interpolate import RectBivariateSpline
 import string, random
 from scipy.ndimage.filters import median_filter
 
+import dask.array as da
+
 # suppress divide and invalid warnings
 np.seterr(all='ignore')
 
@@ -70,6 +72,9 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp):
       imu.append(port_fp[np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
         
     imu = np.squeeze(np.asarray(imu, 'float64'))
+    
+    imu = da.from_array(imu, chunks=1000)   #dask implementation
+       
     imu = median_filter(imu,(20,20))
 
     ## narrow image to within range of estimated bed
@@ -143,9 +148,14 @@ def get_bearing(calc_bearing, cog, filt_bearing, lat, lon, heading):
        from sklearn.cluster import MiniBatchKMeans
        # can have two modes
        data = np.column_stack([bearing, bearing])
+       
+       data = da.from_array(data, chunks=1000)   #dask implementation
+          
        k_means = MiniBatchKMeans(2)
        # fit the model
        k_means.fit(data) 
+       del data
+       
        values = k_means.cluster_centers_.squeeze()
        labels = k_means.labels_
 
@@ -377,9 +387,13 @@ def cut_kmeans(w,numclusters):
    perform a k-means segmentation of image
    '''
    wc = w.reshape((-1, 1)) # We need an (n_sample, n_feature) array
+   
+   wc = da.from_array(wc, chunks=1000)   #dask implementation
+   
    k_means = MiniBatchKMeans(numclusters)
    # fit the model
    k_means.fit(wc) 
+   del wc
    values = k_means.cluster_centers_.squeeze()
    labels = k_means.labels_
    # make the cut and reshape
@@ -395,6 +409,9 @@ def im_resize(im,Nx,Ny):
    ny, nx = np.shape(im)
    xx = np.linspace(0,nx,Nx)
    yy = np.linspace(0,ny,Ny)
+   
+   im = da.from_array(im, chunks=1000)   #dask implementation
+   
    newKernel = RectBivariateSpline(np.r_[:ny],np.r_[:nx],im) 
    return newKernel(yy,xx)
 
