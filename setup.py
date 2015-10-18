@@ -152,7 +152,7 @@ else:
     ext_modules += [
         Extension("PyHum.cwt", [ "PyHum/_cwt.c" ],
         include_dirs=[np.get_include()]),
-        Extension("PyHum.pyread", [ "PyHum/_pyread.c" ],
+        Extension("PyHum._pyread", [ "PyHum/_pyread.c" ],
         include_dirs=[np.get_include()]),
         Extension("PyHum.ppdrc", [ "PyHum/_ppdrc.c" ],
         include_dirs=[np.get_include()]),   
