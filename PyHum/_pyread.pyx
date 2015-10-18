@@ -23,9 +23,11 @@ This software is in the public domain because it contains materials that origina
 For more information, see the official USGS copyright policy at 
 http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 """
-
 from __future__ import generators
 from __future__ import division
+
+STUFF = "Hi"
+
 import numpy as np
 cimport numpy as np
 from libc.math cimport tan, atan, exp, sin, cos
@@ -37,7 +39,7 @@ import os, struct
 import PyHum.utils as humutils
 
 # =========================================================
-cdef class pyread:
+cdef class Pyread:
     """
     read a humminbird file
     """
@@ -47,7 +49,7 @@ cdef class pyread:
     cdef object humdat
     
     # =========================================================
-    def __cinit__(self, list sonfiles, str humfile, float c, int model=998, str cs2cs_args1="epsg:26949"):
+    def __init__(self, list sonfiles, str humfile, float c, int model=998, str cs2cs_args1="epsg:26949"):
        """
        PyRead
 
