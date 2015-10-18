@@ -1,3 +1,7 @@
+# cython: boundscheck=False
+# cython: cdivision=True
+# cython: wraparound=False
+# cython: nonecheck=False
 """
 Part of PyHum software 
 
@@ -34,10 +38,6 @@ cdef class proc:
    """
    cdef object data
 
-   @cython.boundscheck(False)
-   @cython.cdivision(True)
-   @cython.wraparound(False)
-   @cython.nonecheck(False)
    # =========================================================
    def __init__(self, np.ndarray[np.float64_t, ndim=1] points): 
 
@@ -59,10 +59,6 @@ cdef class proc:
       return
 
    # =========================================================
-   @cython.boundscheck(False)
-   @cython.cdivision(True)
-   @cython.wraparound(False)
-   @cython.nonecheck(False)
    cpdef list getdata(self):
       return self.data
 

@@ -1,3 +1,7 @@
+# cython: boundscheck=False
+# cython: cdivision=True
+# cython: wraparound=False
+# cython: nonecheck=False
 """
 Part of PyHum software 
 
@@ -34,10 +38,6 @@ cdef class Noise:
    cdef object res
 
    # =========================================================
-   @cython.boundscheck(False)
-   @cython.cdivision(True)
-   @cython.wraparound(False)
-   @cython.nonecheck(False)
    def __init__(self, np.ndarray[np.float64_t, ndim=2] im, float factor=1.25):
       cdef int cols, rows
       cols, rows = np.shape(im)
@@ -71,10 +71,6 @@ cdef class Noise:
       return 
 
    # =========================================================
-   @cython.boundscheck(False)
-   @cython.cdivision(True)
-   @cython.wraparound(False)
-   @cython.nonecheck(False)
    cpdef np.ndarray _rescale(self, np.ndarray dat, float mn, float mx):
       """
       rescales an input dat between mn and mx
@@ -84,10 +80,6 @@ cdef class Noise:
       return (mx-mn)*(dat-m)/(M-m)+mn
 
    # =========================================================
-   @cython.boundscheck(False)
-   @cython.cdivision(True)
-   @cython.wraparound(False)
-   @cython.nonecheck(False)
    cpdef np.ndarray _im_resize(self, np.ndarray im, int Nx, int Ny):
       '''
       resize array by bivariate spline interpolation

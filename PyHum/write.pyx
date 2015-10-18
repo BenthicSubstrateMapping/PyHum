@@ -1,14 +1,12 @@
-
-# import libraries
+# cython: boundscheck=False
+# cython: cdivision=True
+# cython: wraparound=False
+# cython: nonecheck=False
 import numpy as np
 cimport numpy as np
 cimport cython
 
 # =========================================================
-@cython.boundscheck(False)
-@cython.cdivision(True)
-@cython.wraparound(False)
-@cython.nonecheck(False)
 def txtwrite(str outfile, np.ndarray[np.float64_t, ndim=2] towrite):
    '''
    Custom fast numpy array to comma-delimited ASCII txt file

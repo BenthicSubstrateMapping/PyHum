@@ -1,3 +1,7 @@
+# cython: boundscheck=False
+# cython: cdivision=True
+# cython: wraparound=False
+# cython: nonecheck=False
 """
 Part of PyHum software 
 
@@ -31,10 +35,6 @@ cdef class ppdrc:
    cdef object res
 
    # =========================================================
-   @cython.boundscheck(False)
-   @cython.cdivision(True)
-   @cython.wraparound(False)
-   @cython.nonecheck(False)
    def __init__(self, np.ndarray[np.float64_t, ndim=2] im, int wavelength=768, int n=2):
 
 

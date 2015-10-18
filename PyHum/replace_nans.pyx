@@ -1,5 +1,7 @@
-# cython module for replacing nans
-# Daniel Buscombe, June-Aug 2014
+# cython: boundscheck=False
+# cython: cdivision=True
+# cython: wraparound=False
+# cython: nonecheck=False
 """
 Part of PyHum software 
 
@@ -26,7 +28,7 @@ from __future__ import division
 import numpy as np
 cimport numpy as np
 
-from cython.parallel cimport prange
+#from cython.parallel cimport prange
 
 # =========================================================
 cdef class RN:
@@ -160,7 +162,7 @@ cdef class RN:
     return #filled
 
    # =========================================================    
-   def getdata(self):
+   cpdef np.ndarray getdata(self):
       return self.data
        
        
