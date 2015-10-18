@@ -1,7 +1,7 @@
-# cython: boundscheck=False
-# cython: cdivision=True
-# cython: wraparound=False
-# cython: nonecheck=False
+#### cython: boundscheck=False
+#### cython: cdivision=True
+#### cython: wraparound=False
+#### cython: nonecheck=False
 """
 Part of PyHum software 
 
