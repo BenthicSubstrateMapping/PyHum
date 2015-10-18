@@ -47,7 +47,7 @@ cdef class Pyread:
     cdef object humdat
     
     # =========================================================
-    def __init__(self, list sonfiles, str humfile, float c, int model=998, str cs2cs_args1="epsg:26949"):
+    def __cinit__(self, list sonfiles, str humfile, float c, int model=998, str cs2cs_args1="epsg:26949"):
        """
        PyRead
 
