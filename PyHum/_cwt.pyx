@@ -26,7 +26,7 @@ from __future__ import division
 import numpy as np
 cimport numpy as np
 cimport cython
-from libc.math cimport sqrt,log,abs
+from libc.math cimport sqrt,log,abs, exp
 
 # =========================================================
 cdef class Cwt:
@@ -148,7 +148,7 @@ cdef class Cwt:
        Morlet mother wavelet
        """    
        cdef np.ndarray[np.int64_t, ndim=1] H = np.ones(np.shape(s_omega), np.int64)
-       return 0.75112554*( np.exp(-(s_omega-6.0)**2/2.0))*H
+       return 0.75112554*( exp(-(s_omega-6.0)**2/2.0))*H
       
     # =========================================================
     @cython.boundscheck(False)   
@@ -205,7 +205,7 @@ cdef class Cwt:
         cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64)
         dat = np.var(np.var(wave.T,axis=1),axis=0)
 
-        dat = dat/np.sum(dat) * np.exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
+        dat = dat/np.sum(dat) * exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
         dat = dat/np.sum(dat)
            
         #return sqrt(np.sum(dat*((self.scales- np.sum(dat*self.scales) )**2)))

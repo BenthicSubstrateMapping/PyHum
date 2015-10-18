@@ -35,7 +35,7 @@ import os, struct
 import PyHum.utils as humutils
 
 # =========================================================
-cdef class pyread:
+cdef class Pyread:
     """
     read a humminbird file
     """
@@ -144,6 +144,10 @@ cdef class pyread:
 
 
     # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
     cpdef tuple _calc_beam_pos(self, float dist, float bearing, tuple point):
 
        cdef float dist_x, dist_y, x_final, y_final
@@ -185,6 +189,10 @@ cdef class pyread:
              yield startPos
 
     # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
     cpdef list _fread(self, object infile, int num, str typ):
        dat = arr(typ)
        dat.fromfile(infile, num)
@@ -196,6 +204,10 @@ cdef class pyread:
           return(list(dat))
 
     # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
     cpdef list _gethead(self, object fid, object trans, float c, int model, int linesize): #transWGS84,
        cdef list hd = self._fread(fid, 3, 'B')
        cdef list head=[] #pre-allocate list
@@ -326,6 +338,10 @@ cdef class pyread:
 
 
     # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
     cpdef dict _decode_humdat(self, object fid2, object trans): #, transWGS84): 
        """
        returns data from .DAT file
@@ -376,6 +392,10 @@ cdef class pyread:
 
 
     # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
     cpdef list _getsonar(self, str sonarstring):
         """
         returns sonar data
@@ -386,6 +406,10 @@ cdef class pyread:
               return k  
                  
     # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
     cpdef np.ndarray _get_scans(self, list scan, int packet):
         """
         returns an individual scan
@@ -397,6 +421,10 @@ cdef class pyread:
                    
     # external functions ======================================                        
     # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
     cpdef dict gethumdat(self):
         """
         returns data in .DAT file
@@ -404,6 +432,10 @@ cdef class pyread:
         return self.humdat
 
     # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
     cpdef np.ndarray getportscans(self):
         """
         returns compiled scans
@@ -419,6 +451,10 @@ cdef class pyread:
         return np.asarray(c_port,'float16').T
 
     # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
     cpdef np.ndarray getstarscans(self):
         """
         returns compiled scans
@@ -434,6 +470,10 @@ cdef class pyread:
         return np.asarray(c_star,'float16').T
 
     # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
     cpdef np.ndarray getlowscans(self):
         """
         returns compiled scans
@@ -449,6 +489,10 @@ cdef class pyread:
         return np.asarray(c_lo,'float16').T
 
     # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
     cpdef np.ndarray gethiscans(self):
         """
         returns compiled scans
@@ -464,6 +508,10 @@ cdef class pyread:
         return np.asarray(c_hi,'float16').T
 
     # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
     cpdef dict getmetadata(self):
         """
         returns meta data
