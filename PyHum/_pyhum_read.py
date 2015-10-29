@@ -56,16 +56,16 @@
 
 #operational
 import glob, sys, getopt
-from scipy.io import savemat
+from scipy.io import savemat #, loadmat
 import os, time
 try:
    from Tkinter import Tk
    from tkFileDialog import askopenfilename, askdirectory
-   import tkMessageBox
 except:
    pass
 import csv
-import PyHum.io as io
+#from fractions import gcd
+#from joblib import Parallel, delayed, cpu_count
 
 #numerical
 import pyread
@@ -73,9 +73,16 @@ import PyHum.utils as humutils
 import numpy as np
 import pyproj
 
+#import ppdrc
+from scipy.ndimage.filters import median_filter
+
 #plotting
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+#from mpl_toolkits.axes_grid1 import make_axes_locatable
+#from matplotlib import rc
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+#rc('text', usetex=True)
 import simplekml
 
 import warnings
@@ -142,7 +149,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        'd' - parse chunks based on distance, then number which is distance in m
        'p' - parse chunks based on number of pings, then number which is number of pings 
        'h' - parse chunks based on change in heading, then number which is the change in heading in degrees
-       '1' - process just 1 chunk
                    
     Returns
     ---------
@@ -217,47 +223,36 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     # print given arguments to screen and convert data type where necessary
     if humfile:
       print 'Input file is %s' % (humfile)
-      
     if sonpath:
       print 'Son files are in %s' % (sonpath)
-      
     if cs2cs_args:
       print 'cs2cs arguments are %s' % (cs2cs_args)
-      
     if draft:
       draft = float(draft)
       print 'Draft: %s' % (str(draft))
-      
     if c:
       c = float(c)
       print 'Celerity of sound: %s m/s' % (str(c))
-      
     if doplot:
       doplot = int(doplot)
       if doplot==0:
          print "Plots will not be made"
-         
     if flip_lr:
       flip_lr = int(flip_lr)
       if flip_lr==1:
          print "Port and starboard will be flipped"
-         
     if t:
       t = np.asarray(t,float)
       print 'Transducer length is %s m' % (str(t))
-      
     if f:
       f = np.asarray(f,int)
       print 'Frequency is %s kHz' % (str(f))
-      
     if bedpick:
       bedpick = np.asarray(bedpick,int)
       if bedpick==1:
          print 'Bed picking is auto'
-      elif bedpick==0:
-         print 'Bed picking is manual'
       else:
-         print 'User will be prompted per chunk about bed picking method'
+         print 'Bed picking is manual'
 
     if chunk:
        chunk = str(chunk)
@@ -273,9 +268,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           chunkmode=3
           chunkval = int(chunk[1:])
           print 'Chunks based on heading devation of %s degrees' % (str(chunkval))
-       elif chunk[0]=='1':          
-          chunkmode=4
-          print 'Only 1 chunk will be produced'
        else:
           print "Chunk mode not understood - should be 'd', 'p', or 'h' - using defaults"
           chunkmode=1
@@ -308,17 +300,16 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     #model=998; cog=1; calc_bearing=0; filt_bearing=0
 
     try:
-       print "Checking the epsg code you have chosen for compatibility with Basemap ... "
        from mpl_toolkits.basemap import Basemap
        m = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
           resolution = 'i', llcrnrlon=10, llcrnrlat=10, urcrnrlon=30, urcrnrlat=30)
        del m
-       print "... epsg code compatible"
     except:
        print "Error: the epsg code you have chosen is not compatible with Basemap"
        print "please choose a different epsg code (http://spatialreference.org/)"
        print "program will now close"
        sys.exit()
+
 
     # start timer
     if os.name=='posix': # true if linux/mac or cygwin on windows
@@ -330,16 +321,23 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     if sonpath[-1]!=os.sep:
        sonpath = sonpath + os.sep
 
-    # get the SON files from this directory
-    sonfiles = glob.glob(sonpath+'*.SON')
-    if not sonfiles:
-        sonfiles = glob.glob(os.getcwd()+os.sep+sonpath+'*.SON')
-        
     base = humfile.split('.DAT') # get base of file name for output
     base = base[0].split(os.sep)[-1]
 
     # remove underscores, negatives and spaces from basename
-    base = humutils.strip_base(base)
+    if base.find('_')>-1:
+       base = base[:base.find('_')]
+
+    if base.find('-')>-1:
+       base = base[:base.find('-')]
+
+    if base.find(' ')>-1:
+       base = base[:base.find(' ')]
+
+    # get the SON files from this directory
+    sonfiles = glob.glob(sonpath+'*.SON')
+    if not sonfiles:
+        sonfiles = glob.glob(os.getcwd()+os.sep+sonpath+'*.SON')
 
     print "WARNING: Because files have to be read in byte by byte,"
     print "this could take a very long time ..."
@@ -351,9 +349,46 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     nrec = len(metadat['n'])   
 
+    #heading = np.squeeze(loadmat(sonpath+base+'meta.mat')['heading'])[:nrec]
     metadat['heading'] = metadat['heading'][:nrec]
-    
-    metadat['heading'] = humutils.get_bearing(calc_bearing, filt_bearing, cog, metadat['lat'], metadat['lon'], metadat['heading'])
+
+    # over-ride measured bearing and calc from positions
+    if calc_bearing==1:
+       lat = np.squeeze(metadat['lat'])
+       lon = np.squeeze(metadat['lon']) 
+
+       #point-to-point bearing
+       bearing = np.zeros(len(lat))
+       for k in xrange(len(lat)-1):
+          bearing[k] = humutils.bearingBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+       del lat, lon
+
+    else:
+       # reported bearing by instrument (Kalman filtered?)
+       bearing = np.squeeze(metadat['heading'])
+
+    # if stdev in heading is large, there's probably noise that needs to be filtered out
+    if np.std(bearing)>180:
+       print "WARNING: large heading stdev - attempting filtering"
+       from sklearn.cluster import MiniBatchKMeans
+       # can have two modes
+       data = np.column_stack([bearing, bearing])
+       k_means = MiniBatchKMeans(2)
+       # fit the model
+       k_means.fit(data) 
+       values = k_means.cluster_centers_.squeeze()
+       labels = k_means.labels_
+
+       if np.sum(labels==0) > np.sum(labels==1):
+          bearing[labels==1] = np.nan
+       else:
+          bearing[labels==0] = np.nan
+
+       nans, y= humutils.nan_helper(bearing)
+       bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans]) 
+
+    if filt_bearing ==1:
+       bearing = humutils.runningMeanFast(bearing, len(bearing)/100)
 
     try:
        es = humutils.runningMeanFast(metadat['e'][:nrec],len(metadat['e'][:nrec])/100)
@@ -374,15 +409,35 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     metadat['lon'] = lon
     metadat['lat'] = lat
 
-    dist_m = humutils.get_dist(lat, lon)  
-    metadat['dist_m'] = dist_m  
+    if cog==1:
+       theta = np.asarray(bearing, 'float')/(180/np.pi)
+       #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
+       #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU 
+       # (East-North-Up) coordinate frame. 
+       #Subtract pi/2 from your heading
+       theta = theta - np.pi/2
+       # (re-wrap to Pi to -Pi)
+       theta = np.unwrap(-theta)
+       metadat['heading'] = theta * (180/np.pi)
+    else:
+       metadat['heading'] = bearing
+
+
+    dist = np.zeros(len(lat))
+    for k in xrange(len(lat)-1):
+       dist[k] = humutils.distBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
+
+    dist_m = np.cumsum(dist)
+    metadat['dist_m'] = dist_m    
     
     # theta at 3dB in the horizontal
     theta3dB = np.arcsin(c/(t*(f*1000)))
     #resolution of 1 sidescan pixel to nadir
     ft = (np.pi/2)*(1/theta3dB)
 
-    dep_m = humutils.get_depth(metadat['dep_m'][:nrec])
+    dep_m = np.squeeze(metadat['dep_m'][:nrec]) #loadmat(sonpath+base+'meta.mat')['dep_m'])
+    dep_m = humutils.rm_spikes(dep_m,2)
+    dep_m = humutils.runningMeanFast(dep_m, 3)         
 
     # port scan
     try:
@@ -395,17 +450,53 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        print "portside scan not available"
 
     if data_port!='':
-    
-       Zt, ind_port = makechunks_scan(chunkmode, chunkval, metadat, data_port, 0)
+       #Zt, ind_port = makechunks(data_port, chunksize)
+       if chunkmode==1:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = metadat['dist_m']/chunkval #length_chunk
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "port sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_port = makechunks_simple(data_port, nchunks) 
 
+       elif chunkmode==2:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.max(np.shape(data_port))/chunkval #length_chunk
+             nchunks = np.floor(tmp)
+             del tmp
+          print "port sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_port = makechunks_simple(data_port, nchunks)           
+
+       elif chunkmode==3:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "port sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_port = makechunks_simple(data_port, nchunks) 
+          
        del data_port 
           
-       ## create memory mapped file for Z          
-       shape_port = io.set_mmap_data(sonpath, base, '_data_port.dat', 'int16', Zt)
-
-       ##we are only going to access the portion of memory required       
-       port_fp = io.get_mmap_data(sonpath, base, '_data_port.dat', 'int16', shape_port)
-   
+       # create memory mapped file for Z
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+       del fp
+       shape_port = np.shape(Zt)
+       del Zt
+       #we are only going to access the portion of memory required
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')), 'r') as ff:
+          port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_port)
+          
     # starboard scan          
     try:
        if flip_lr==0:
@@ -417,15 +508,53 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        print "starboardside scan not available"
 
     if data_star!='':
+       #Zt, ind_star = makechunks(data_star, chunksize)
+       if chunkmode==1: # distance
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1       
+             tmp = metadat['dist_m']/chunkval #length_chunk
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_star = makechunks_simple(data_star, nchunks) 
+          
+       elif chunkmode==2: #pings
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.max(np.shape(data_star))/chunkval #length_chunk
+             nchunks = np.floor(tmp)
+             del tmp
+          print "starboard sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_star = makechunks_simple(data_star, nchunks) 
 
-       Zt, ind_star = makechunks_scan(chunkmode, chunkval, metadat, data_star, 1)
-       
+       elif chunkmode==3:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "starboard sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_star = makechunks_simple(data_star, nchunks) 
+                    
        del data_star
 
        # create memory mapped file for Z
-       shape_star = io.set_mmap_data(sonpath, base, '_data_star.dat', 'int16', Zt)
-       
-       star_fp = io.get_mmap_data(sonpath, base, '_data_star.dat', 'int16', shape_star)
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+       del fp
+       shape_star = np.shape(Zt)
+       del Zt
+       #we are only going to access the portion of memory required
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')), 'r') as ff:
+          star_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_star)
+
 
     if 'star_fp' in locals() and 'port_fp' in locals():
        # check that port and starboard are same size
@@ -440,12 +569,16 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              del tmp
      
              # create memory mapped file for Z
-             shape_port = io.set_mmap_data(sonpath, base, '_data_port2.dat', 'int16', tmp2)
-             shape_star = shape_port.copy()
-
-             ##we are only going to access the portion of memory required             
-             port_fp = io.get_mmap_data(sonpath, base, '_data_port2.dat', 'int16', shape_port)
-
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_port2.dat')), 'w+') as ff:
+                fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
+             fp[:] = tmp2[:]
+             del fp
+             shape_port = np.shape(tmp2)
+             shape_star = np.shape(tmp2)
+             del tmp2
+             #we are only going to access the portion of memory required
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_port2.dat')), 'r') as ff:
+                port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_port)
              ind_port = list(ind_port)
              ind_port[-1] = np.shape(star_fp[0])[1]
              ind_port = tuple(ind_port)
@@ -458,12 +591,16 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              del tmp
     
              # create memory mapped file for Z
-             shape_port = io.set_mmap_data(sonpath, base, '_data_star2.dat', 'int16', tmp2)
-             shape_star = shape_port.copy()             
-
-             #we are only going to access the portion of memory required 
-             star_fp = io.get_mmap_data(sonpath, base, '_data_star2.dat', 'int16', shape_star)
-                          
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat')), 'w+') as ff:
+                fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
+             fp[:] = tmp2[:]
+             del fp
+             shape_star = np.shape(tmp2)
+             shape_port = np.shape(tmp2)
+             del tmp2
+             #we are only going to access the portion of memory required
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_star2.dat')), 'r') as ff:
+                port_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_star)
              ind_star = list(ind_star)
              ind_star[-1] = np.shape(port_fp[0])[1]
              ind_star = tuple(ind_star)
@@ -476,17 +613,52 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        print "low-freq. scan not available"
    
     if data_dwnlow!='':
-    
-       Zt, ind_low = makechunks_scan(chunkmode, chunkval, metadat, data_dwnlow, 2)
-           
+       if chunkmode==1: #distance
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = metadat['dist_m']/chunkval #length_chunk
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_low = makechunks_simple(data_dwnlow, nchunks) 
+          
+       elif chunkmode==2: #pings
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.max(np.shape(data_dwnlow))/chunkval #length_chunk
+             nchunks = np.floor(tmp)
+             del tmp
+          print "low-freq. sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_low = makechunks_simple(data_dwnlow, nchunks)
+
+       elif chunkmode==3:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "low-freq. sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_low = makechunks_simple(data_dwnlow, nchunks) 
+                     
        del data_dwnlow
 
        # create memory mapped file for Z
-       shape_low = io.set_mmap_data(sonpath, base, '_data_dwnlow.dat', 'int16', Zt)
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+       del fp
+       shape_low = np.shape(Zt)
+       del Zt
+       #we are only going to access the portion of memory required      
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')), 'r') as ff:
+          dwnlow_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_low)
 
-       ##we are only going to access the portion of memory required             
-       dwnlow_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow.dat', 'int16', shape_low)
- 
     # hi-freq. sonar
     try:
        data_dwnhi = data.gethiscans().astype('int16')
@@ -495,20 +667,58 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        print "high-freq. scan not available"
 
     if data_dwnhi!='':
-    
-       Zt, ind_hi = makechunks_scan(chunkmode, chunkval, metadat, data_dwnhi, 3)
+       if chunkmode==1: # distance
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = metadat['dist_m']/chunkval #length_chunk
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_hi = makechunks_simple(data_dwnhi, nchunks)  
+          
+       elif chunkmode==2: #pings
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.max(np.shape(data_dwnhi))/chunkval #length_chunk
+             nchunks = np.floor(tmp)
+             del tmp
+          print "high-freq. sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_hi = makechunks_simple(data_dwnhi, nchunks)
 
+       elif chunkmode==3:
+          nchunks = 0
+          while nchunks<2:
+             chunkval = chunkval-1
+             tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
+             nchunks = np.floor(tmp.max())
+             del tmp
+          print "high-freq. sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
+          chunkval = chunkval+1
+          Zt, ind_hi = makechunks_simple(data_dwnhi, nchunks) 
+                   
        del data_dwnhi
 
        # create memory mapped file for Z
-       shape_hi = io.set_mmap_data(sonpath, base, '_data_dwnhi.dat', 'int16', Zt)        
-       
-       dwnhi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi.dat', 'int16', shape_hi)       
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'w+') as ff:
+          fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(Zt))
+
+       fp[:] = Zt[:]
+       del fp
+       shape_hi = np.shape(Zt)
+       del Zt
+       #we are only going to access the portion of memory required
+       with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')), 'r') as ff:
+          dwnhi_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_hi)
+
 
     if 'dwnhi_fp' in locals() and 'dwnlow_fp' in locals():
        # check that low and high are same size
        # and trim if not
-       if (np.shape(dwnhi_fp)!=np.shape(dwnlow_fp)) and (chunkmode!=4):
+       if np.shape(dwnhi_fp)!=np.shape(dwnlow_fp):
           print "dwnhi and dwnlow are different sizes ... rectifying"
           if np.shape(dwnhi_fp[0])[1] > np.shape(dwnlow_fp[0])[1]:
              tmp = dwnhi_fp.copy()
@@ -518,12 +728,16 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              del tmp
   
              # create memory mapped file for Z
-             shape_low = io.set_mmap_data(sonpath, base, '_data_dwnhi2.dat', 'int16', tmp2)             
-             shape_hi = shape_low.copy() 
-
-             ##we are only going to access the portion of memory required             
-             dwnhi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi2.dat', 'int16', shape_hi)             
-
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi2.dat')), 'w+') as ff:
+                fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
+             fp[:] = tmp2[:]
+             del fp
+             shape_hi = np.shape(tmp2)
+             shape_low = np.shape(tmp2)
+             del tmp2
+             #we are only going to access the portion of memory required
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi2.dat')), 'r') as ff:
+                dwnhi_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_hi)
              ind_hi = list(ind_hi)
              ind_hi[-1] = np.shape(dwnlow_fp[0])[1]
              ind_hi = tuple(ind_hi)
@@ -536,190 +750,179 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              del tmp
  
              # create memory mapped file for Z
-             shape_low = io.set_mmap_data(sonpath, base, '_data_dwnlow2.dat', 'int16', tmp2)             
-             shape_hi = shape_low.copy()         
-
-             ##we are only going to access the portion of memory required             
-             dwnlow_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow2.dat', 'int16', shape_low)             
-
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'w+') as ff:
+                fp = np.memmap(ff, dtype='int16', mode='w+', shape=np.shape(tmp2))
+             fp[:] = tmp2[:]
+             del fp
+             shape_low = np.shape(tmp2)
+             shape_hi = np.shape(tmp2)
+             del tmp2
+             #we are only going to access the portion of memory required
+             with open(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat')), 'r') as ff:
+                dwnlow_fp = np.memmap(ff, dtype='int16', mode='r', shape=shape_low)
              ind_low = list(ind_low)
              ind_low[-1] = np.shape(dwnhi_fp[0])[1]
              ind_low = tuple(ind_low)
 
     del data
 
-    if ('shape_port' in locals()) and (chunkmode!=4):
+    if 'shape_port' in locals():
        metadat['shape_port'] = shape_port
        nrec = metadat['shape_port'][0] * metadat['shape_port'][2]
-    elif ('shape_port' in locals()) and (chunkmode==4):
-       metadat['shape_port'] = shape_port
-       nrec = metadat['shape_port'][1]
     else:
        metadat['shape_port'] = ''   
 
-    if ('shape_star' in locals()) and (chunkmode!=4):
+    if 'shape_star' in locals():
        metadat['shape_star'] = shape_star
        nrec = metadat['shape_star'][0] * metadat['shape_star'][2]
-    elif ('shape_star' in locals()) and (chunkmode==4):
-       metadat['shape_star'] = shape_star
-       nrec = metadat['shape_star'][1]
     else:
        metadat['shape_star'] = ''   
 
-    if ('shape_hi' in locals()) and (chunkmode!=4):
+    if 'shape_hi' in locals():
        metadat['shape_hi'] = shape_hi
        #nrec = metadat['shape_hi'][0] * metadat['shape_hi'][2] * 2
-    elif ('shape_hi' in locals()) and (chunkmode==4):
-       metadat['shape_hi'] = shape_hi
     else:
        metadat['shape_hi'] = ''   
 
-    if ('shape_low' in locals()) and (chunkmode!=4):
+    if 'shape_low' in locals():
        metadat['shape_low'] = shape_low
        #nrec = metadat['shape_low'][0] * metadat['shape_low'][2] * 2
-    elif ('shape_low' in locals()) and (chunkmode==4):
-       metadat['shape_low'] = shape_low
     else:
        metadat['shape_low'] = ''   
 
-    #make kml boat trackline
-    humutils.make_trackline(lon,lat, sonpath, base)
+    try:
+       import simplekml
+       # create kml for loading path into google earth
+       kml = simplekml.Kml()
+       ls = kml.newlinestring(name='trackline')
+       ls.coords = zip(lon,lat)
+       ls.extrude = 1
+       ls.altitudemode = simplekml.AltitudeMode.relativetoground
+       ls.style.linestyle.width = 5
+       ls.style.linestyle.color = simplekml.Color.red
+       #kml.save(sonpath+base+"trackline.kml")
+       kml.save(os.path.normpath(os.path.join(sonpath,base+'trackline.kml')))
+    except:
+       print "install simplekml for kml plots"
+
 
     if 'port_fp' in locals() and 'star_fp' in locals():
-
-       if bedpick == 1: # auto
-
-          x, bed = humutils.auto_bedpick(ft, dep_m, chunkmode, port_fp)
-
-          if len(dist_m)<len(bed):
-             dist_m = np.append(dist_m,dist_m[-1]*np.ones(len(bed)-len(dist_m)))
-
-          if doplot==1:
-             if chunkmode!=4:
+        if not os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'meta.mat'))):
+            if bedpick == 1: # auto
+        
+                buff = 10
+        
+                # get bed from depth trace
+                bed = ft*dep_m
+        
+                imu = []
+        
+                for k in xrange(len(port_fp)):
+                    #imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
+                    imu.append(port_fp[k][np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+                imu = np.hstack(imu)
+        
+                imu = np.asarray(imu, 'float64')
+        
+                #imu = ppdrc.ppdrc(imu, np.shape(imu)[1]/2).getdata()
+        
+                imu = median_filter(imu,(20,20))
+        
+                ## narrow image to within range of estimated bed
+                #imu = data_port[int(np.min(bed)):int(np.max(bed)),:]
+                # use dynamic boundary tracing to get 2nd estimate of bed  
+                x = np.squeeze(int(np.min(bed))+humutils.dpboundary(-imu.T)) 
+                #x = np.squeeze(humutils.dpboundary(-imu.T))
+                del imu 
+        
+                if len(x)<len(bed):
+                    x = np.append(x,x[-1]*np.ones(len(bed)-len(x)))
+                elif len(x)>len(bed):
+                    bed = np.append(bed,bed[-1]*np.ones(len(x)-len(bed)))
+        
+                # if standard deviation of auto bed pick is too small, then use acoustic bed pick
+                if np.std(x)<5:
+                    print "stdev of auto bed pick is low, using acoustic pick"
+                    x = bed.copy()
+        
+                if len(dist_m)<len(bed):
+                    dist_m = np.append(dist_m,dist_m[-1]*np.ones(len(bed)-len(dist_m)))
+        
+                if doplot==1:
+                    # treats each chunk in parallel for speed
+                    #try:
+                    #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_2bedpicks)(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
+                    #except:
+                    for k in xrange(len(star_fp)):
+                        plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+        
+                # 'real' bed is estimated to be the minimum of the two
+                #bed = np.max(np.vstack((bed,np.squeeze(x))),axis=0) 
+                bed = np.min(np.vstack((bed[:nrec],np.squeeze(x[:nrec]))),axis=0) 
+                bed = humutils.runningMeanFast(bed, 3)
+        
+            else: #manual
+        
+                beds=[]
+                for k in xrange(len(port_fp)):
+                    raw_input("Bed picking "+str(k+1)+" of "+str(len(port_fp))+", are you ready? 30 seconds. Press Enter to continue...")
+                    bed={}
+                    fig = plt.figure()
+                    ax = plt.gca()
+                    im = ax.imshow(port_fp[k], cmap = 'gray', origin = 'upper')
+                    pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 60 seconds
+                    x1=map(lambda x: x[0],pts1) # map applies the function passed as 
+                    y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
+                    bed = np.interp(np.r_[:ind_port[-1]],x1,y1)
+                    plt.close()
+                    del fig
+                    beds.append(bed)
+                    extent = np.shape(port_fp[k])[0]
+                bed = np.asarray(np.hstack(beds),'float')
+        
+            # now revise the depth in metres
+            dep_m = (1/ft)*bed
+        
+            if doplot==1:
+                # treats each chunk in parallel for speed
+                #try:
+                #   d = Parallel(n_jobs = -1, verbose=0)(delayed(plot_bedpick)(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k) for k in xrange(len(star_fp)))
+                #except:
                 for k in xrange(len(star_fp)):
-                   plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k, chunkmode)
-             else:
-                plot_2bedpicks(port_fp, star_fp, bed, dist_m, x, ft, shape_port, sonpath, 0, chunkmode)             
+                    plot_bedpick(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k)
+        
+        
+                metadat['bed'] = bed[:nrec]
+        
+            else:
+                metadat['bed'] = dep_m[:nrec]*ft
+            
+                metadat['heading'] = metadat['heading'][:nrec]
+                metadat['lon'] = lon[:nrec]
+                metadat['lat'] = lat[:nrec]
+                metadat['dist_m'] = dist_m[:nrec]
+                metadat['dep_m'] = dep_m[:nrec]
+                metadat['pix_m'] = 1/ft
+                metadat['bed'] = metadat['bed'][:nrec]
+                metadat['c'] = c
+                metadat['t'] = t
+                metadat['f'] = f
+            
+                metadat['spd'] = metadat['spd'][:nrec]
+                metadat['time_s'] = metadat['time_s'][:nrec]
+                metadat['e'] = metadat['e'][:nrec]
+                metadat['n'] = metadat['n'][:nrec]
+                metadat['es'] = metadat['es'][:nrec]
+                metadat['ns'] = metadat['ns'][:nrec]
+                metadat['caltime'] = metadat['caltime'][:nrec]
+                
+                #savemat(sonpath+base+'meta.mat', metadat ,oned_as='row')
+                savemat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')), metadat ,oned_as='row')
+        
+        else:
+            print '.mat file already exists'
 
-          # 'real' bed is estimated to be the minimum of the two
-          bed = np.min(np.vstack((bed[:nrec],np.squeeze(x[:nrec]))),axis=0) 
-          bed = humutils.runningMeanFast(bed, 3)
-
-       elif bedpick>1: # user prompt
-
-          x, bed = humutils.auto_bedpick(ft, dep_m, chunkmode, port_fp)
-
-          if len(dist_m)<len(bed):
-             dist_m = np.append(dist_m,dist_m[-1]*np.ones(len(bed)-len(dist_m)))
-
-          # 'real' bed is estimated to be the minimum of the two
-          bed = np.min(np.vstack((bed[:nrec],np.squeeze(x[:nrec]))),axis=0) 
-          bed = humutils.runningMeanFast(bed, 3)
-
-          # manually intervene
-          fig = plt.figure()
-          ax = plt.gca()
-          if chunkmode !=4:
-             im = ax.imshow(np.hstack(port_fp), cmap = 'gray', origin = 'upper')
-          else:
-             im = ax.imshow(port_fp, cmap = 'gray', origin = 'upper')
-          plt.plot(bed,'r')
-          plt.axis('normal'); plt.axis('tight')
-
-          pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 60 seconds
-          x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-          y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-          plt.close()
-          del fig
-
-          if x1 != []: # if x1 is not empty
-             from scipy.spatial import cKDTree as KDTree
-             tree = KDTree(zip(np.arange(1,len(bed)), bed))
-             dist, inds = tree.query(zip(x1, y1), k = 100, eps=5)
-             b = np.interp(inds,x1,y1)
-             bed2 = bed.copy()
-             bed2[inds] = b
-             bed = bed2
-
-          if doplot==1:
-             if chunkmode!=4:
-                for k in xrange(len(star_fp)):
-                   plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k, chunkmode)
-             else:
-                plot_2bedpicks(port_fp, star_fp, bed, dist_m, x, ft, shape_port, sonpath, 0, chunkmode)
-
-       else: #manual
-  
-          beds=[]
-
-          if chunkmode!=4:          
-             for k in xrange(len(port_fp)):
-                raw_input("Bed picking "+str(k+1)+" of "+str(len(port_fp))+", are you ready? 30 seconds. Press Enter to continue...")
-                bed={}
-                fig = plt.figure()
-                ax = plt.gca()
-                im = ax.imshow(port_fp[k], cmap = 'gray', origin = 'upper')
-                pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 60 seconds
-                x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-                y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-                bed = np.interp(np.r_[:ind_port[-1]],x1,y1)
-                plt.close()
-                del fig
-                beds.append(bed)
-                extent = np.shape(port_fp[k])[0]
-             bed = np.asarray(np.hstack(beds),'float')
-          else:
-             raw_input("Bed picking - are you ready? 30 seconds. Press Enter to continue...")
-             bed={}
-             fig = plt.figure()
-             ax = plt.gca()
-             im = ax.imshow(port_fp, cmap = 'gray', origin = 'upper')
-             pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 60 seconds
-             x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-             y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-             bed = np.interp(np.r_[:ind_port[-1]],x1,y1)
-             plt.close()
-             del fig
-             beds.append(bed)
-             extent = np.shape(port_fp)[1]
-             bed = np.asarray(np.hstack(beds),'float')
-
-       # now revise the depth in metres
-       dep_m = (1/ft)*bed
-
-       if doplot==1:
-          if chunkmode!=4:
-             for k in xrange(len(star_fp)):
-                plot_bedpick(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k, chunkmode)
-          else:
-             plot_bedpick(port_fp, star_fp, (1/ft)*bed, dist_m, ft, shape_port, sonpath, 0, chunkmode)
-
-       metadat['bed'] = bed[:nrec]
-
-    else:
-       metadat['bed'] = dep_m[:nrec]*ft
-
-    metadat['heading'] = metadat['heading'][:nrec]
-    metadat['lon'] = lon[:nrec]
-    metadat['lat'] = lat[:nrec]
-    metadat['dist_m'] = dist_m[:nrec]
-    metadat['dep_m'] = dep_m[:nrec]
-    metadat['pix_m'] = 1/ft
-    metadat['bed'] = metadat['bed'][:nrec]
-    metadat['c'] = c
-    metadat['t'] = t
-    metadat['f'] = f
-
-    metadat['spd'] = metadat['spd'][:nrec]
-    metadat['time_s'] = metadat['time_s'][:nrec]
-    metadat['e'] = metadat['e'][:nrec]
-    metadat['n'] = metadat['n'][:nrec]
-    metadat['es'] = metadat['es'][:nrec]
-    metadat['ns'] = metadat['ns'][:nrec]
-    metadat['caltime'] = metadat['caltime'][:nrec]
-    
-    savemat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')), metadat ,oned_as='row')
-
+    #f = open(sonpath+base+'rawdat.csv', 'wt')
     f = open(os.path.normpath(os.path.join(sonpath,base+'rawdat.csv')), 'wt')
     writer = csv.writer(f)
     writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth (m)', 'distance (m)', 'heading (deg.)' ) )
@@ -731,15 +934,51 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     if doplot==1:
 
-       plot_pos(sonpath, metadat, es, ns)
+       fig = plt.figure()
+       fig.subplots_adjust(wspace = 0.5, hspace=0.5)
+       plt.subplot(221)
+       plt.plot(metadat['e'],metadat['n'],'k')
+       plt.plot(es,ns,'r.')
+       #plt.plot(esi,nsi,'b.')
+       plt.xlabel('Easting (m)')
+       plt.ylabel('Northing (m)')
+       plt.setp(plt.xticks()[1], rotation=30)
+       plt.axis('normal'); plt.axis('tight')
+       #custom_save(sonpath,'raw_filt_pos_en')
+       #del fig
+
+       plt.subplot(222)
+       plt.plot(metadat['lon'],metadat['lat'],'k')
+       plt.xlabel('Longitude')
+       plt.ylabel('Latitude')
+       plt.axis('normal'); plt.axis('tight')
+       plt.setp(plt.xticks()[1], rotation=30)
+       custom_save(sonpath,'raw_filt_pos')
+       plt.close(); del fig
 
        if 'dwnlow_fp' in locals():
 
-          plot_dwnlow(dwnlow_fp, chunkmode, sonpath)
+          for k in xrange(len(dwnlow_fp)):
+             fig = plt.figure()
+             plt.imshow(dwnlow_fp[k],cmap='gray')
+             plt.axis('normal'); plt.axis('tight')
+             plt.xlabel('Ping Number (Time)')
+             plt.ylabel('Range (Distance)')
+
+             custom_save(sonpath,'raw_dwnlow'+str(k))
+             plt.close(); del fig
 
        if 'dwnhi_fp' in locals():
 
-          plot_dwnhi(dwnhi_fp, chunkmode, sonpath)
+          for k in xrange(len(dwnhi_fp)):
+             fig = plt.figure()
+             plt.imshow(dwnhi_fp[k],cmap='gray')
+             plt.axis('normal'); plt.axis('tight')
+             plt.xlabel('Ping Number (Time)')
+             plt.ylabel('Range (Distance)')
+
+             custom_save(sonpath,'raw_dwnhi'+str(k))
+             plt.close(); del fig
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
@@ -748,138 +987,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     print "Processing took ", elapsed , "seconds to analyse"
 
     print "Done!"
-
-
-# =========================================================
-def plot_dwnhi(dwnhi_fp, chunkmode, sonpath):
-
-    if chunkmode!=4:
-       for k in xrange(len(dwnhi_fp)):
-          fig = plt.figure()
-          plt.imshow(dwnhi_fp[k],cmap='gray')
-          plt.axis('normal'); plt.axis('tight')
-          plt.xlabel('Ping Number (Time)')
-          plt.ylabel('Range (Distance)')
-
-          custom_save(sonpath,'raw_dwnhi'+str(k))
-          plt.close(); del fig
-
-    else:
-       fig = plt.figure()
-       plt.imshow(dwnhi_fp,cmap='gray')
-       plt.axis('normal'); plt.axis('tight')
-       plt.xlabel('Ping Number (Time)')
-       plt.ylabel('Range (Distance)')
-
-       custom_save(sonpath,'raw_dwnhi'+str(0))
-       plt.close(); del fig
-             
-# =========================================================
-def plot_dwnlow(dwnlow_fp, chunkmode, sonpath):
-
-    if chunkmode!=4:
-       for k in xrange(len(dwnlow_fp)):
-          fig = plt.figure()
-          plt.imshow(dwnlow_fp[k],cmap='gray')
-          plt.axis('normal'); plt.axis('tight')
-          plt.xlabel('Ping Number (Time)')
-          plt.ylabel('Range (Distance)')
-
-          custom_save(sonpath,'raw_dwnlow'+str(k))
-          plt.close(); del fig
-    else:
-       fig = plt.figure()
-       plt.imshow(dwnlow_fp,cmap='gray')
-       plt.axis('normal'); plt.axis('tight')
-       plt.xlabel('Ping Number (Time)')
-       plt.ylabel('Range (Distance)')
-
-       custom_save(sonpath,'raw_dwnlow'+str(0))
-       plt.close(); del fig
-             
-# =========================================================
-def plot_pos(sonpath, metadat, es, ns):
-
-    fig = plt.figure()
-    fig.subplots_adjust(wspace = 0.5, hspace=0.5)
-    plt.subplot(221)
-    plt.plot(metadat['e'],metadat['n'],'k')
-    plt.plot(es,ns,'r.')
-    plt.xlabel('Easting (m)')
-    plt.ylabel('Northing (m)')
-    plt.setp(plt.xticks()[1], rotation=30)
-    plt.axis('normal'); plt.axis('tight')
-
-    plt.subplot(222)
-    plt.plot(metadat['lon'],metadat['lat'],'k')
-    plt.xlabel('Longitude')
-    plt.ylabel('Latitude')
-    plt.axis('normal'); plt.axis('tight')
-    plt.setp(plt.xticks()[1], rotation=30)
-    custom_save(sonpath,'raw_filt_pos')
-    plt.close(); del fig
-       
-# =========================================================
-def makechunks_scan(chunkmode, chunkval, metadat, data, flag):
-
-    if chunkmode==1:
-       nchunks = 0
-       while nchunks<2:
-          chunkval = chunkval-1
-          tmp = metadat['dist_m']/chunkval #length_chunk
-          nchunks = np.floor(tmp.max())
-          del tmp
-       if flag==0:
-          print "port sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
-       elif flag==1:
-          print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))          
-       elif flag==2:
-          print "low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))  
-       elif flag==3:
-          print "high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))  
-       chunkval = chunkval+1
-       Zt, ind = makechunks_simple(data, nchunks) 
-
-    elif chunkmode==2:
-       nchunks = 0
-       while nchunks<2:
-          chunkval = chunkval-1
-          tmp = np.max(np.shape(data))/chunkval #length_chunk
-          nchunks = np.floor(tmp)
-          del tmp
-       if flag==0:
-          print "port sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
-       elif flag==1:
-          print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)) 
-       elif flag==2:
-          print "low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))  
-       elif flag==3:
-          print "high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))  
-       chunkval = chunkval+1
-       Zt, ind = makechunks_simple(data, nchunks)           
-
-    elif chunkmode==3:
-       nchunks = 0
-       while nchunks<2:
-          chunkval = chunkval-1
-          tmp = np.abs(metadat['heading']-metadat['heading'][0])/chunkval
-          nchunks = np.floor(tmp.max())
-          del tmp
-       if flag==0:
-          print "port sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
-       elif flag==1:
-          print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)) 
-       elif flag==2:
-          print "low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))  
-       elif flag==3:
-          print "high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))  
-       chunkval = chunkval+1
-       Zt, ind = makechunks_simple(data, nchunks) 
-          
-    elif chunkmode==4:
-       Zt, ind = makechunks_simple(data, 1)
-          
-    return Zt, ind
 
 # =========================================================
 def custom_save(figdirec,root):
@@ -893,12 +1000,9 @@ def makechunks_simple(dat, numchunks):
    return humutils.sliding_window(dat,(Ny,Nx/int(numchunks)))                  
 
 # =========================================================
-def plot_2bedpicks(dat_port, dat_star, Zbed, Zdist, Zx, ft, shape_port, sonpath, k, chunkmode):
+def plot_2bedpicks(dat_port, dat_star, Zbed, Zdist, Zx, ft, shape_port, sonpath, k):
 
-   if chunkmode != 4:
-      extent = shape_port[1] #np.shape(merge)[0]
-   else:
-      extent = shape_port[0]
+   extent = shape_port[1] #np.shape(merge)[0]
 
    fig = plt.figure()
    fig.subplots_adjust(wspace = 0.1, hspace=0.1)
@@ -921,18 +1025,15 @@ def plot_2bedpicks(dat_port, dat_star, Zbed, Zdist, Zx, ft, shape_port, sonpath,
    plt.plot(Zdist,Zbed/ft,'k')
    plt.plot(Zdist,Zx[:len(Zdist)]/ft,'r')
    plt.axis('normal'); plt.axis('tight')
-   plt.ylim(np.max(Zbed/ft)+5,0)
+   plt.ylim(10,0)
    plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
    custom_save(sonpath,'bed_2picks'+str(k))
    plt.close(); del fig
 
 # =========================================================
-def plot_bedpick(dat_port, dat_star, Zbed, Zdist, ft, shape_port, sonpath, k, chunkmode):
+def plot_bedpick(dat_port, dat_star, Zbed, Zdist, ft, shape_port, sonpath, k):
 
-   if chunkmode != 4:
-      extent = shape_port[1] #np.shape(merge)[0]
-   else:
-      extent = shape_port[0]
+   extent = shape_port[1] #np.shape(merge)[0]
 
    fig = plt.figure()
    plt.subplot(2,2,1)
@@ -949,10 +1050,124 @@ def plot_bedpick(dat_port, dat_star, Zbed, Zdist, ft, shape_port, sonpath, k, ch
 
    custom_save(sonpath,'bed_pick'+str(k))
    plt.close(); del fig
-
+   
 # =========================================================
 # =========================================================
 if __name__ == '__main__':
 
    read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
+
+
+
+#    if man_chunk==0:
+#    
+#    elif man_chunk == 1:
+#       # heading
+#       plt.scatter(metadat['e'], metadat['n'], 50, metadat['heading'], linewidth=0)
+#       cbar = plt.colorbar()
+#       plt.xlabel('Easting'); plt.ylabel('Northing')
+#       cbar.set_label('Heading (deg.)')
+#       plt.axis('tight')
+#       plt.ginput(mouse_stop=3)
+#       #plt.show()
+
+#    elif man_chunk == 2:
+#       # heading deviation
+#       plt.scatter(metadat['e'], metadat['n'], 50, np.abs(metadat['heading']-metadat['heading'][0]), linewidth=0)
+#       cbar = plt.colorbar()
+#       plt.xlabel('Easting'); plt.ylabel('Northing')
+#       cbar.set_label('Heading deviation (deg.)')
+#       plt.axis('tight')
+#       plt.show()
+#       
+#    elif man_chunk == 3:
+#       # distance along track
+#       plt.scatter(metadat['e'], metadat['n'], 50, np.sqrt((metadat['e']-metadat['e'].min())**2 + (metadat['n']-metadat['n'].min())**2), linewidth=0)
+#       cbar = plt.colorbar()
+#       plt.xlabel('Easting'); plt.ylabel('Northing')
+#       cbar.set_label('Distance (m)')
+#       plt.axis('tight')
+#       plt.show()
+
+#__all__ = [
+#    'read',
+#    'custom_save',
+#    'distBetweenPoints',
+#    'makechunks',
+#    'plot_2bedpicks',
+#    'plot_bedpick',
+#    ]
+
+## =========================================================
+#def makechunks(dat, chunksize=0):
+#   Ny, Nx = np.shape(dat)
+#   
+#   if chunksize==0:
+#      # get optimal number of slices
+#      if Nx%2==0:
+#         H = []
+#         for k in xrange(2,50):
+#            H.append(gcd(Nx,Nx/k))
+#         hslice = np.max(H)
+#      else:
+#         dat = np.hstack( (dat,np.ones((Ny,1))) )
+#         Ny, Nx = np.shape(dat)
+#         H = []
+#         for k in xrange(2,50):
+#            H.append(gcd(Nx,Nx/k))
+#         hslice = np.max(H)
+#   
+#      # get windowed data
+#      Zt,ind = humutils.sliding_window(dat,(Ny,hslice))
+
+#   else:
+#      if chunksize<np.shape(dat)[1]:
+#         Zt,ind = humutils.sliding_window(dat,(Ny,chunksize))
+#      else:
+#         print "Error: chunk size is larger than number of scan lines. Please choose smaller chunk size ... exiting"
+
+#   return Zt, ind
+
+    #if chunksize:
+    #  chunksize = int(chunksize)
+    #  if chunksize>0:
+    #     print 'Chunk size: %s' % (str(chunksize))
+    #  else:
+    #     print "Chunk size will be determined automatically"
+    #if chunksize!=0:
+    #   nrec = len(data.getportscans())*chunksize
+    #else:    
+       #if chunksize != 0:
+       #   Zt, ind_low = makechunks(data_dwnlow, chunksize/2)
+       #else:
+       #Zt, ind_low = makechunks(data_dwnlow, chunksize)
+              
+       #if chunksize != 0:
+       #   Zt, ind_hi = makechunks(data_dwnhi, chunksize/2)
+       #else:
+       #Zt, ind_hi = makechunks(data_dwnhi, chunksize)
+    #if chunksize!=0:
+    #   nrec = len(dwnlow_fp)*chunksize
+    #else:
+    #nrec = len(metadat['n']) 
+    
+             #port_fp.flush()
+             #del port_fp
+             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat'))):
+             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_port.dat')))
+           
+             #star_fp.flush()
+             #del star_fp
+             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat'))):
+             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_star.dat')))
+            
+             #dwnhi_fp.flush()
+             #del dwnhi_fp
+             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat'))):
+             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_dwnhi.dat')))
+              
+             #dwnlow_fp.flush()
+             #del dwnlow_fp
+             #if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat'))):
+             #   os.remove(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow.dat')))
                
