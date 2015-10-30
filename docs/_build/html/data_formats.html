@@ -183,42 +183,42 @@ gcc -shared pyread.o -o pyread.so
 <li>bytes 16 = spacer</li>
 <li>bytes 17-20 = character, UTM y coordinate</li>
 <li>bytes 21 = spacer</li>
-<li>bytes 21-22 = short integer, GPS quality flag (0 = good, 1=bad)</li>
-<li>bytes 23-24 = short integer, heading in tenths of a degree</li>
-<li>byte 25 = spacer</li>
-<li>bytes 26-27 = short integer, GPS quality flag (0 = good, 1=bad)</li>
-<li>bytes 28-29 = short integer, speed in cm / s</li>
-<li>bytes 30-35 = spacer</li>
-<li>bytes 36-39 = character, depth in cm</li>
-<li>byte 40 = spacer</li>
-<li>byte 41 = integer, beam number (=0, 50 or 83 kHz; =1 200 kHz; =2 SI Poort; =3 SI Starboard)</li>
-<li>byte 42 = spacer</li>
-<li>byte 43 = integer, volt scale</li>
-<li>byte 44 = spacer</li>
-<li>bytes 45-48 = character, frequency in Hz</li>
+<li>bytes 22-23 = short integer, GPS quality flag (0 = good, 1=bad)</li>
+<li>bytes 24-25 = short integer, heading in tenths of a degree</li>
+<li>byte 26 = spacer</li>
+<li>bytes 27-28 = short integer, GPS quality flag (0 = good, 1=bad)</li>
+<li>bytes 29-30 = short integer, speed in cm / s</li>
+<li>bytes 31-36 = spacer</li>
+<li>bytes 37-40 = character, depth in cm</li>
+<li>byte 41 = spacer</li>
+<li>byte 42 = integer, beam number (=0, 50 or 83 kHz; =1 200 kHz; =2 SI Poort; =3 SI Starboard)</li>
+<li>byte 43 = spacer</li>
+<li>byte 44 = integer, volt scale</li>
+<li>byte 45 = spacer</li>
+<li>bytes 46-49 = character, frequency in Hz</li>
 </ol>
 <p>Then, the data structure is different for different models.</p>
 <p>1199 model</p>
 <ol class="arabic simple" start="23">
-<li>bytes 49-63 = spacer</li>
-<li>bytes 44-67 = character, sentence length</li>
-<li>bytes 68 = spacer</li>
+<li>bytes 50-64 = spacer</li>
+<li>bytes 45-68 = character, sentence length</li>
+<li>bytes 69 = spacer</li>
 </ol>
 <p>798 model</p>
 <ol class="arabic simple" start="23">
-<li>byte 49 = spacer</li>
-<li>bytes 50-61 = character, spacer</li>
-<li>byte 62 = spacer</li>
-<li>bytes 63-66 = character, sentence length</li>
-<li>bytes 67-72 = spacer</li>
+<li>byte 50 = spacer</li>
+<li>bytes 51-62 = character, spacer</li>
+<li>byte 63 = spacer</li>
+<li>bytes 64-67 = character, sentence length</li>
+<li>bytes 68-73 = spacer</li>
 </ol>
 <p>998 or 1198 models</p>
 <ol class="arabic simple" start="23">
-<li>bytes 49-53 = spacer</li>
-<li>bytes 54-57 = character, spacer</li>
-<li>bytes 58-62 = spacer</li>
-<li>bytes 63-66 = character, sentence length</li>
-<li>bytes 67 = spacer</li>
+<li>bytes 50-54 = spacer</li>
+<li>bytes 55-58 = character, spacer</li>
+<li>bytes 59-63 = spacer</li>
+<li>bytes 64-67 = character, sentence length</li>
+<li>bytes 68 = spacer</li>
 </ol>
 </div>
 <div class="section" id="son-file-sonar-data-packet">

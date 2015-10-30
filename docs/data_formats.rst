@@ -155,43 +155,43 @@ Common to all units
 7. bytes 16 = spacer
 8. bytes 17-20 = character, UTM y coordinate
 9. bytes 21 = spacer
-10. bytes 21-22 = short integer, GPS quality flag (0 = good, 1=bad)
-11. bytes 23-24 = short integer, heading in tenths of a degree
-12. byte 25 = spacer
-13. bytes 26-27 = short integer, GPS quality flag (0 = good, 1=bad)
-14. bytes 28-29 = short integer, speed in cm / s
-15. bytes 30-35 = spacer
-16. bytes 36-39 = character, depth in cm
-17. byte 40 = spacer
-18. byte 41 = integer, beam number (=0, 50 or 83 kHz; =1 200 kHz; =2 SI Poort; =3 SI Starboard)
-19. byte 42 = spacer
-20. byte 43 = integer, volt scale
-21. byte 44 = spacer
-22. bytes 45-48 = character, frequency in Hz
+10. bytes 22-23 = short integer, GPS quality flag (0 = good, 1=bad)
+11. bytes 24-25 = short integer, heading in tenths of a degree
+12. byte 26 = spacer
+13. bytes 27-28 = short integer, GPS quality flag (0 = good, 1=bad)
+14. bytes 29-30 = short integer, speed in cm / s
+15. bytes 31-36 = spacer
+16. bytes 37-40 = character, depth in cm
+17. byte 41 = spacer
+18. byte 42 = integer, beam number (=0, 50 or 83 kHz; =1 200 kHz; =2 SI Poort; =3 SI Starboard)
+19. byte 43 = spacer
+20. byte 44 = integer, volt scale
+21. byte 45 = spacer
+22. bytes 46-49 = character, frequency in Hz
 
 Then, the data structure is different for different models.
 
 1199 model
 
-23. bytes 49-63 = spacer
-24. bytes 44-67 = character, sentence length
-25. bytes 68 = spacer
+23. bytes 50-64 = spacer
+24. bytes 45-68 = character, sentence length
+25. bytes 69 = spacer
 
 798 model
 
-23. byte 49 = spacer
-24. bytes 50-61 = character, spacer
-25. byte 62 = spacer
-26. bytes 63-66 = character, sentence length
-27. bytes 67-72 = spacer
+23. byte 50 = spacer
+24. bytes 51-62 = character, spacer
+25. byte 63 = spacer
+26. bytes 64-67 = character, sentence length
+27. bytes 68-73 = spacer
 
 998 or 1198 models
 
-23. bytes 49-53 = spacer
-24. bytes 54-57 = character, spacer
-25. bytes 58-62 = spacer
-26. bytes 63-66 = character, sentence length
-27. bytes 67 = spacer
+23. bytes 50-54 = spacer
+24. bytes 55-58 = character, spacer
+25. bytes 59-63 = spacer
+26. bytes 64-67 = character, sentence length
+27. bytes 68 = spacer
 
 
 SON file sonar data packet 
