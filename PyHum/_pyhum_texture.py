@@ -285,8 +285,10 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             R_fp = io.get_mmap_data(sonpath, base, '_data_range.dat', 'float32', tuple(shape_star))
 
             R = np.vstack((np.flipud(R_fp[0]),R_fp[0]))
+            
+            R = R/np.max(R)
 
-            R[R>0.8] = np.nan
+            #R[R>0.8] = np.nan
 
             rn = replace_nans.RN(R.astype('float64'),1000,0.01,2,'localmean')
             R = rn.getdata()
@@ -330,8 +332,9 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             R_fp = io.get_mmap_data(sonpath, base, '_data_range.dat', 'float32', tuple(shape_star))
 
             R = np.vstack((np.flipud(R_fp),R_fp))
-
-            R[R>0.8] = np.nan
+            R = R/np.max(R)
+            
+            #R[R>0.8] = np.nan
 
             rn = replace_nans.RN(R.astype('float64'),1000,0.01,2,'localmean')
             R = rn.getdata()
