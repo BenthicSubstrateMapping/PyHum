@@ -340,6 +340,15 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    R = R[np.where(np.logical_not(np.isnan(merge)))]
    h = h[np.where(np.logical_not(np.isnan(merge)))]
    t = t[np.where(np.logical_not(np.isnan(merge)))]   
+
+   X = X[np.where(np.logical_not(np.isinf(merge)))]
+   Y = Y[np.where(np.logical_not(np.isinf(merge)))]
+   merge = merge[np.where(np.logical_not(np.isinf(merge)))]
+   res_grid = res_grid.flatten()[np.where(np.logical_not(np.isinf(merge)))]
+   D = D[np.where(np.logical_not(np.isinf(merge)))]
+   R = R[np.where(np.logical_not(np.isinf(merge)))]
+   h = h[np.where(np.logical_not(np.isinf(merge)))]
+   t = t[np.where(np.logical_not(np.isinf(merge)))] 
          
    if dowrite==1:
       ## write raw bs to file
