@@ -315,11 +315,11 @@ cdef class pyread:
           #x_utm, y_utm = self._calc_beam_pos(dist, bearing, (head[2],head[3]))
           x_utm = head[2]
           y_utm = head[3]
-          #lat = atan(tan(atan(exp(y_utm/ 6378388.0)) * 2.0 - 1.570796326794897) * 1.0067642927) * 57.295779513082302
-          #lon = x_utm * 57.295779513082302 / 6378388.0
+          lat = atan(tan(atan(exp(y_utm/ 6378388.0)) * 2.0 - 1.570796326794897) * 1.0067642927) * 57.295779513082302
+          lon = x_utm * 57.295779513082302 / 6378388.0
 
-          lat = atan(tan(atan(exp(y_utm/ 6378137.0)) * 2.0 - 1.570796326794897) * 1.006705621329495) * 57.295779513082302
-          lon = x_utm * 57.295779513082302 / 6378137.0          
+          #lat = atan(tan(atan(exp(y_utm/ 6378137.0)) * 2.0 - 1.570796326794897) * 1.006705621329495) * 57.295779513082302
+          #lon = x_utm * 57.295779513082302 / 6378137.0          
           head.append(lat)
           head.append(lon)
           lon, lat = trans(lon, lat)
