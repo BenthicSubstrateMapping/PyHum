@@ -93,7 +93,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 99, dowrite = 0, mode=3, nn = 128, influence = 1, numstdevs=5):
+def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0, dowrite = 0, mode=3, nn = 128, influence = 1, numstdevs=5):
          
     '''
     Create plots of the spatially referenced sidescan echograms
@@ -115,9 +115,9 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 99, dowri
     dogrid : float, *optional* [Default=1]
        if 1, textures will be gridded with resolution 'res'. 
        Otherwise, point cloud will be plotted
-    res : float, *optional* [Default=99]
+    res : float, *optional* [Default=0]
        grid resolution of output gridded texture map
-       if res=99, res will be determined automatically from the spatial resolution of 1 pixel
+       if res=0, res will be determined automatically from the spatial resolution of 1 pixel
     dowrite: int, *optional* [Default=0]
        if 1, point cloud data from each chunk is written to ascii file
        if 0, processing times are speeded up considerably but point clouds are not available for further analysis
@@ -361,7 +361,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
    if dogrid==1:
 
-      if res==99:
+      if res==0:
          resg = np.min(res_grid[res_grid>0])
       else:
          resg = res

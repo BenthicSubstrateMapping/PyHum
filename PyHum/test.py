@@ -113,8 +113,8 @@ def dotest():
 
    # for mapping
    dogrid = 1 # yes
-   res = 99 # grid resolution in metres
-   # if res==99, the program will automatically calc res from the spatial res of the scans
+   res = 0 # grid resolution in metres
+   # if res==0, the program will automatically calc res from the spatial res of the scans
    mode = 1 # gridding mode (simple nearest neighbour)
    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
    #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
