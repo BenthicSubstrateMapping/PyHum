@@ -587,7 +587,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     if 'port_fp' in locals() and 'star_fp' in locals():
 
-       if not os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'meta.mat'))):
+       #if not os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'meta.mat'))):
+       if 2>1:
           if bedpick == 1: # auto
 
              x, bed = humutils.auto_bedpick(ft, dep_m, chunkmode, port_fp)
