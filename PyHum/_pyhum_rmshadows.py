@@ -210,7 +210,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
        Zt = []
        if len(np.shape(star_fp))>2:
           for p in xrange(len(star_fp)):
-             raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue...")
+             raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue... FUCK")
              shoreline_star={}
              fig = plt.figure()
              ax = plt.gca()
@@ -224,10 +224,21 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
              del fig
 
              star_mg = star_fp[p].copy()
+             
+             shoreline_star = np.asarray(shoreline_star,'int')
+             # shift proportionally depending on where the bed is
+             for k in xrange(np.shape(star_mg)[1]):
+                star_mg[shoreline_star[k]:,k] = np.nan
 
+             del shoreline_star
+
+             Zt.append(star_mg)
+             Zt = np.squeeze(Zt)
+             print np.shape(Zt)
+             
        else:
 
-          raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue...")
+          raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue... SHIT")
           shoreline_star={}
           fig = plt.figure()
           ax = plt.gca()
@@ -251,7 +262,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
 
           Zt.append(star_mg)
           Zt = np.squeeze(Zt)
-
+          print np.shape(Zt)
        ## create memory mapped file for Z
        #p = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
        #fp[:] = Zt[:]
