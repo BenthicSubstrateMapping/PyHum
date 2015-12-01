@@ -225,22 +225,22 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
 
              star_mg = star_fp[p].copy()
 
-          else:
+       else:
 
-             raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue...")
-             shoreline_star={}
-             fig = plt.figure()
-             ax = plt.gca()
-             im = ax.imshow(star_fp, cmap = 'gray') #, origin = 'upper')
-             plt.axis('normal'); plt.axis('tight')
-             pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
-             x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-             y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-             shoreline_star = np.interp(np.r_[:np.shape(star_fp)[1]],x1,y1)
-             plt.close()
-             del fig
+          raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue...")
+          shoreline_star={}
+          fig = plt.figure()
+          ax = plt.gca()
+          im = ax.imshow(star_fp, cmap = 'gray') #, origin = 'upper')
+          plt.axis('normal'); plt.axis('tight')
+          pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
+          x1=map(lambda x: x[0],pts1) # map applies the function passed as 
+          y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
+          shoreline_star = np.interp(np.r_[:np.shape(star_fp)[1]],x1,y1)
+          plt.close()
+          del fig
 
-             star_mg = star_fp.copy()
+          star_mg = star_fp.copy()
 
           shoreline_star = np.asarray(shoreline_star,'int')
           # shift proportionally depending on where the bed is
@@ -287,23 +287,22 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
 
              port_mg = port_fp[p].copy()
 
-          else:
+       else:
 
-             raw_input("Shore picking (port), are you ready? 30 seconds. Press Enter to continue...")
-             shoreline_port={}
-             fig = plt.figure()
-             ax = plt.gca()
-             im = ax.imshow(port_fp, cmap = 'gray') #, origin = 'upper')
-             plt.axis('normal'); plt.axis('tight')
-             pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
-             x1=map(lambda x: x[0],pts1) # map applies the function passed as 
-             y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
-             shoreline_port = np.interp(np.r_[:np.shape(port_fp)[1]],x1,y1)
-             plt.close()
-             del fig
+          raw_input("Shore picking (port), are you ready? 30 seconds. Press Enter to continue...")
+          shoreline_port={}
+          fig = plt.figure()
+          ax = plt.gca()
+          im = ax.imshow(port_fp, cmap = 'gray') #, origin = 'upper')
+          plt.axis('normal'); plt.axis('tight')
+          pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
+          x1=map(lambda x: x[0],pts1) # map applies the function passed as 
+          y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
+          shoreline_port = np.interp(np.r_[:np.shape(port_fp)[1]],x1,y1)
+          plt.close()
+          del fig
 
-             port_mg = port_fp.copy()
-
+          port_mg = port_fp.copy()
 
           shoreline_port = np.asarray(shoreline_port,'int')
           # shift proportionally depending on where the bed is
