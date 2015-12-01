@@ -210,7 +210,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
        Zt = []
        if len(np.shape(star_fp))>2:
           for p in xrange(len(star_fp)):
-             raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue... FUCK")
+             raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue...")
              shoreline_star={}
              fig = plt.figure()
              ax = plt.gca()
@@ -233,11 +233,10 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
              del shoreline_star
 
              Zt.append(star_mg)
-             print np.shape(Zt)
              
        else:
 
-          raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue... SHIT")
+          raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue...")
           shoreline_star={}
           fig = plt.figure()
           ax = plt.gca()
@@ -261,7 +260,6 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
 
           Zt.append(star_mg)
 
-          print np.shape(Zt)
        ## create memory mapped file for Z
        #p = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
        #fp[:] = Zt[:]
@@ -299,6 +297,15 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
 
              port_mg = port_fp[p].copy()
 
+             shoreline_port = np.asarray(shoreline_port,'int')
+             # shift proportionally depending on where the bed is
+             for k in xrange(np.shape(port_mg)[1]):
+                port_mg[shoreline_port[k]:,k] = np.nan
+
+             del shoreline_port
+
+             Zt.append(port_mg)
+          
        else:
 
           raw_input("Shore picking (port), are you ready? 30 seconds. Press Enter to continue...")
@@ -325,7 +332,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
 
           Zt.append(port_mg)
 
-          Zt = np.squeeze(Zt)
+       Zt = np.squeeze(Zt)
        ## create memory mapped file for Z
        #fp = np.memmap(sonpath+base+'_data_port_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
        #fp[:] = Zt[:]
