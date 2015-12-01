@@ -233,7 +233,6 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
              del shoreline_star
 
              Zt.append(star_mg)
-             Zt = np.squeeze(Zt)
              print np.shape(Zt)
              
        else:
@@ -261,13 +260,15 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
           del shoreline_star
 
           Zt.append(star_mg)
-          Zt = np.squeeze(Zt)
+
           print np.shape(Zt)
        ## create memory mapped file for Z
        #p = np.memmap(sonpath+base+'_data_star_la.dat', dtype='float32', mode='w+', shape=np.shape(Zt))
        #fp[:] = Zt[:]
        #del fp
 
+       Zt = np.squeeze(Zt)
+             
        # create memory mapped file for Zs
        #fp = np.memmap(sonpath+base+'_data_star_lar.dat', dtype='float32', mode='w+', shape=np.shape(Zs))
        with open(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat')), 'w+') as ff:
