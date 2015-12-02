@@ -320,7 +320,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
              glon, glat = trans(grid_x, grid_y, inverse=True)
              del grid_x, grid_y
 
-          print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p)
+          print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
 
           make_kml(p, sonpath, humlat, humlon)
 
@@ -364,7 +364,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           glon, glat = trans(grid_x, grid_y, inverse=True)
           del grid_x, grid_y
 
-       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, S, sonpath, p)
+       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, S, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
 
     else: #just 1 chunk   
     
@@ -430,11 +430,11 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           glon, glat = trans(grid_x, grid_y, inverse=True)
           del grid_x, grid_y
 
-       print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, 0)
+       print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
 
        make_kml(0, sonpath, humlat, humlon)
 
-       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, 0)
+       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
 
 
 # =========================================================
@@ -452,7 +452,7 @@ def make_kml(p, sonpath, humlat, humlon):
     kml.save(os.path.normpath(os.path.join(sonpath,'class_GroundOverlay'+str(p)+'.kml')))
           
 # =========================================================
-def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p):
+def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p, vmin, vmax):
 
     #levels = [0,0.25,0.5,0.75,1.25,1.5,1.75,2,3,5]
           
@@ -477,15 +477,15 @@ def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merg
           if datm.size > 25000000:
              print "matrix size > 25,000,000 - decimating by factor of 5 for display"
              #map.contourf(gx[::5,::5], gy[::5,::5], datm[::5,::5], levels, cmap='YlOrRd')
-             map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0, vmax=5)
+             map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=vmin, vmax=vmax)
           else:
              #map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
-             map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='YlOrRd', vmin=0, vmax=5)
+             map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='pink', vmin=vmin, vmax=vmax)
              
        else: 
           ## draw point cloud
           x,y = map.projtran(humlon, humlat)
-          map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='YlOrRd', linewidth = '0')
+          map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='pink', linewidth = '0')
              
        custom_save(sonpath,'class_map_imagery'+str(p))
        del fig 
@@ -494,7 +494,7 @@ def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merg
        print "error: map could not be created..."
        
 # =========================================================
-def print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p):
+def print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p, vmin, vmax):
 
     try:
        print "drawing and printing map ..."
@@ -514,14 +514,14 @@ def print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpa
        if dogrid==1:
           if datm.size > 25000000:
              print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-             map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='YlOrRd', vmin=0, vmax=5)
+             map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='pink', vmin=vmin, vmax=vmax)
           else:
-             map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=0, vmax=5)
+             map.pcolormesh(gx, gy, datm, cmap='pink', vmin=vmin, vmax=vmax)
 
        else: 
           ## draw point cloud
           x,y = map.projtran(humlon, humlat)
-          map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='YlOrRd', linewidth = '0')
+          map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='pink', linewidth = '0')
 
        custom_save(sonpath,'class_map'+str(p))
        del fig 
