@@ -251,16 +251,16 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0, dowrit
 
     ## for debugging/testing
     #p=0
-    e = esi[shape_port[-1]*p:shape_port[-1]*(p+1)]
-    n = nsi[shape_port[-1]*p:shape_port[-1]*(p+1)]
-    t = theta[shape_port[-1]*p:shape_port[-1]*(p+1)]
-    d = dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)]
-    dat_port = port_fp[p]
-    dat_star = star_fp[p]
-    data_R = R_fp[p]
-    dx = np.arcsin(meta['c']/(1000*meta['t']*meta['f']))
-    pix_m = meta['pix_m']
-    c = meta['c']
+#    e = esi[shape_port[-1]*p:shape_port[-1]*(p+1)]
+#    n = nsi[shape_port[-1]*p:shape_port[-1]*(p+1)]
+#    t = theta[shape_port[-1]*p:shape_port[-1]*(p+1)]
+#    d = dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)]
+#    dat_port = port_fp[p]
+#    dat_star = star_fp[p]
+#    data_R = R_fp[p]
+#    dx = np.arcsin(meta['c']/(1000*meta['t']*meta['f']))
+#    pix_m = meta['pix_m']
+#    c = meta['c']
 
     if len(shape_star)>2:    
        for p in xrange(len(star_fp)):
