@@ -364,7 +364,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
        if dogrid==1:
           dat[dat==0] = np.nan
           dat[np.isinf(dat)] = np.nan
-          dat[dist>res] = np.nan
+          dat[dist>res*2] = np.nan
           del dist
 
           datm = np.ma.masked_invalid(dat)
@@ -436,7 +436,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
        if dogrid==1:
           dat[dat==0] = np.nan
           dat[np.isinf(dat)] = np.nan
-          dat[dist>res] = np.nan
+          dat[dist>res*2] = np.nan
           del dist
 
           datm = np.ma.masked_invalid(dat)
