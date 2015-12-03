@@ -74,6 +74,7 @@ import PyHum.utils as humutils
 import pyresample
 import replace_nans
 from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
+from scipy.spatial import cKDTree as KDTree
 
 # plotting
 import matplotlib.pyplot as plt
@@ -351,6 +352,11 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
           orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
 
+          ## create mask for where the data is not
+          tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+          dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+          dist = dist.reshape(grid_x.shape)
+
           sigmas = 1 #m
           eps = 2             
           dat, res = get_grid(mode, orig_def, targ_def, S, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
@@ -358,6 +364,8 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
        if dogrid==1:
           dat[dat==0] = np.nan
           dat[np.isinf(dat)] = np.nan
+          dat[dist>res] = np.nan
+          del dist
 
           datm = np.ma.masked_invalid(dat)
 
@@ -415,15 +423,21 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
        if dogrid==1:
 
           orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
+
+          ## create mask for where the data is not
+          tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+          dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+          dist = dist.reshape(grid_x.shape)
              
           sigmas = 1 #m
           eps = 2
           dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
-          
 
        if dogrid==1:
           dat[dat==0] = np.nan
           dat[np.isinf(dat)] = np.nan
+          dat[dist>res] = np.nan
+          del dist
 
           datm = np.ma.masked_invalid(dat)
 
@@ -456,43 +470,46 @@ def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merg
 
     #levels = [0,0.25,0.5,0.75,1.25,1.5,1.75,2,3,5]
           
+
+    print "drawing and printing map ..."
+    fig = plt.figure(frameon=False)
+    map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
+     resolution = 'i', #h #f
+     llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
+     urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
+
+    if dogrid==1:
+       gx,gy = map.projtran(glon, glat)
+
+    ax = plt.Axes(fig, [0., 0., 1., 1.], )
+    ax.set_axis_off()
+    fig.add_axes(ax)
+
     try:
-       print "drawing and printing map ..."
-       fig = plt.figure(frameon=False)
-       map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
-        resolution = 'i', #h #f
-        llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
-        urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
-
-       if dogrid==1:
-          gx,gy = map.projtran(glon, glat)
-
-       ax = plt.Axes(fig, [0., 0., 1., 1.], )
-       ax.set_axis_off()
-       fig.add_axes(ax)
-
-       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
-      
-       if dogrid==1:
-          if datm.size > 25000000:
-             print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-             #map.contourf(gx[::5,::5], gy[::5,::5], datm[::5,::5], levels, cmap='YlOrRd')
-             map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=vmin, vmax=vmax)
-          else:
-             #map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
-             map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='pink', vmin=vmin, vmax=vmax)
-             
-       else: 
-          ## draw point cloud
-          x,y = map.projtran(humlon, humlat)
-          map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='pink', linewidth = '0')
-             
-       custom_save(sonpath,'class_map_imagery'+str(p))
-       del fig 
-
+       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
     except:
+       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+    finally:
        print "error: map could not be created..."
-       
+             
+    if dogrid==1:
+       if datm.size > 25000000:
+          print "matrix size > 25,000,000 - decimating by factor of 5 for display"
+          #map.contourf(gx[::5,::5], gy[::5,::5], datm[::5,::5], levels, cmap='YlOrRd')
+          map.pcolormesh(gx, gy, datm, cmap='YlOrRd', vmin=vmin, vmax=vmax)
+       else:
+          #map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
+          map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='pink', vmin=vmin, vmax=vmax)
+             
+    else: 
+       ## draw point cloud
+       x,y = map.projtran(humlon, humlat)
+       map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='pink', linewidth = '0')
+             
+    custom_save2(sonpath,'class_map_imagery'+str(p))
+    del fig 
+
+
 # =========================================================
 def print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p, vmin, vmax):
 
@@ -592,7 +609,7 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
     mask = ~binary_dilation(binary_erosion(~mask,structure=np.ones((15,15))), structure=np.ones((15,15)))
     
     dat2[mask==1] = np.nan
-    dat2[dat2<1] = np.nan
+    dat2[dat2<0] = np.nan
     del dat
     dat = dat2
     del dat2

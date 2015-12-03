@@ -373,6 +373,11 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
             longrid, latgrid = trans(grid_x, grid_y, inverse=True)
             shape = np.shape(grid_x)
 
+            ## create mask for where the data is not
+            tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+            dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+            dist = dist.reshape(grid_x.shape)
+      
             targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())
             del longrid, latgrid
 
@@ -443,6 +448,10 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       del X, Y
 
       dat = dat.reshape(shape)
+
+      dat[dist>res] = np.nan
+      del dist
+
       r_dat = r_dat.reshape(shape)
       dat = dat*np.sqrt(np.cos(np.deg2rad(r_dat))) #dat*np.sqrt(r_dat) + dat
       del r_dat
@@ -529,40 +538,41 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
    kml.save(os.path.normpath(os.path.join(sonpath,'GroundOverlay'+str(p)+'.kml')))
 
+   print "drawing and printing map ..."
+   fig = plt.figure(frameon=False)
+   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
+    resolution = 'i', #h #f
+    llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
+    urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
+
    try:
-      print "drawing and printing map ..."
-      fig = plt.figure(frameon=False)
-      map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
-       resolution = 'i', #h #f
-       llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
-       urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
-
-      map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
-      
-      if dogrid==1:
-         gx,gy = map.projtran(glon, glat)
-
-      ax = plt.Axes(fig, [0., 0., 1., 1.], )
-      ax.set_axis_off()
-      fig.add_axes(ax)
-
-      if dogrid==1:
-         if datm.size > 25000000:
-            print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-            map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='gray', vmin=np.nanmin(datm), vmax=np.nanmax(datm))
-         else:
-            map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(datm), vmax=np.nanmax(datm))
-         del datm, dat
-      else: 
-         ## draw point cloud
-         x,y = map.projtran(humlon, humlat)
-         map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='gray', linewidth = '0')
-
-      custom_save2(sonpath,'map_imagery'+str(p))
-      del fig 
-
+      map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
    except:
+      map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+   finally:
       print "error: map could not be created..."
+      
+   if dogrid==1:
+      gx,gy = map.projtran(glon, glat)
+
+   ax = plt.Axes(fig, [0., 0., 1., 1.], )
+   ax.set_axis_off()
+   fig.add_axes(ax)
+
+   if dogrid==1:
+      if datm.size > 25000000:
+         print "matrix size > 25,000,000 - decimating by factor of 5 for display"
+         map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='gray', vmin=np.nanmin(datm), vmax=np.nanmax(datm))
+      else:
+         map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(datm), vmax=np.nanmax(datm))
+      del datm, dat
+   else: 
+      ## draw point cloud
+      x,y = map.projtran(humlon, humlat)
+      map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='gray', linewidth = '0')
+
+   custom_save2(sonpath,'map_imagery'+str(p))
+   del fig 
 
 
    del humlat, humlon
