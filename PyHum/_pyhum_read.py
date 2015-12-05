@@ -637,7 +637,12 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              if x1 != []: # if x1 is not empty
                 from scipy.spatial import cKDTree as KDTree
                 tree = KDTree(zip(np.arange(1,len(bed)), bed))
-                dist, inds = tree.query(zip(x1, y1), k = 100, eps=5)
+                try:
+                   dist, inds = tree.query(zip(x1, y1), k = 100, eps=5, n_jobs=-1)
+                except:
+                   print ".... update your scipy installation to use faster kd-tree queries"
+                   dist, inds = tree.query(zip(x1, y1), k = 100, eps=5)
+
                 b = np.interp(inds,x1,y1)
                 bed2 = bed.copy()
                 bed2[inds] = b

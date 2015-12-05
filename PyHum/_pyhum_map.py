@@ -376,7 +376,12 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
             ## create mask for where the data is not
             tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-            dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+            try:
+               dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=-1)
+            except:
+               print ".... update your scipy installation to use faster kd-tree queries"
+               dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+
             dist = dist.reshape(grid_x.shape)
       
             targ_def = pyresample.geometry.SwathDefinition(lons=longrid.flatten(), lats=latgrid.flatten())

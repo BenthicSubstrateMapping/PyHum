@@ -354,7 +354,12 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
           ## create mask for where the data is not
           tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-          dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+          try:
+             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=-1)
+          except:
+             print ".... update your scipy installation to use faster kd-tree queries"
+             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+
           dist = dist.reshape(grid_x.shape)
 
           sigmas = 1 #m
@@ -426,7 +431,13 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
           ## create mask for where the data is not
           tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-          dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+
+          try:
+             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=-1)
+          except:
+             print ".... update your scipy installation to use faster kd-tree queries"
+             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+
           dist = dist.reshape(grid_x.shape)
              
           sigmas = 1 #m
