@@ -368,16 +368,16 @@ def sliding_window(a,ws,ss = None,flatten = True):
             start = j * ss[i]
             stop = start + ws[i]
             slices[i].append(slice(start,stop))
-       # Get an iterator over all valid n-dimensional slices of the input
-       allslices = product(*slices)
+      # Get an iterator over all valid n-dimensional slices of the input
+      allslices = product(*slices)
      
-       # Allocate memory to hold all valid n-dimensional slices
-       nslices = np.product([len(s) for s in slices])
-       out = np.ndarray((nslices,) + tuple(ws),dtype = a.dtype)
-       for i,s in enumerate(allslices):
-          out[i] = a[s]
+      # Allocate memory to hold all valid n-dimensional slices
+      nslices = np.product([len(s) for s in slices])
+      out = np.ndarray((nslices,) + tuple(ws),dtype = a.dtype)
+      for i,s in enumerate(allslices):
+         out[i] = a[s]
          
-       return out, newshape   
+      return out, newshape   
 
 # =========================================================
 def dpboundary(imu):
