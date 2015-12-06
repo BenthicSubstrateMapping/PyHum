@@ -299,6 +299,7 @@ def norm_shape(shap):
      
    raise TypeError('shape must be an int, or a tuple of ints')
 
+
 # =========================================================
 # Return a sliding window over a in any number of dimensions
 def sliding_window(a,ws,ss = None,flatten = True):
@@ -331,26 +332,52 @@ def sliding_window(a,ws,ss = None,flatten = True):
       raise ValueError(\
       'ws cannot be larger than a in any dimension.\
  a.shape was %s and ws was %s' % (str(a.shape),str(ws)))
+
    # how many slices will there be in each dimension?
    newshape = norm_shape(((shap - ws) // ss) + 1)
    # the shape of the strided array will be the number of slices in each dimension
    # plus the shape of the window (tuple addition)
    newshape += norm_shape(ws)
    # the strides tuple will be the array's strides multiplied by step size, plus
-   # the array's strides (tuple addition)
-   newstrides = norm_shape(np.array(a.strides) * ss) + a.strides
-   a = ast(a,shape = newshape,strides = newstrides)
-   if not flatten:
-      return a
-   # Collapse strided so that it has one more dimension than the window.  I.e.,
-   # the new array is a flat list of slices.
-   meat = len(ws) if ws.shape else 0
-   firstdim = (int(np.product(newshape[:-meat])),) if ws.shape else ()
-   dim = firstdim + (newshape[-meat:])
-   # remove any dimensions with size 1
-   dim = filter(lambda i : i != 1,dim) 
     
-   return a.reshape(dim), newshape
+   try:
+      # the array's strides (tuple addition)
+      newstrides = norm_shape(np.array(a.strides) * ss) + a.strides
+      a = ast(a,shape = newshape,strides = newstrides)
+      if not flatten:
+         return a
+      # Collapse strided so that it has one more dimension than the window.  I.e.,
+      # the new array is a flat list of slices.
+      meat = len(ws) if ws.shape else 0
+      firstdim = (int(np.product(newshape[:-meat])),) if ws.shape else ()
+      dim = firstdim + (newshape[-meat:])
+      # remove any dimensions with size 1
+      dim = filter(lambda i : i != 1,dim) 
+    
+      return a.reshape(dim), newshape
+   
+   except:
+   
+      from itertools import product   
+      print "memory error, windowing using slower method"
+      # For each dimension, create a list of all valid slices
+      slices = [[] for i in range(len(ws))]
+      for i in xrange(len(ws)):
+         nslices = ((shape[i] - ws[i]) // ss[i]) + 1
+         for j in xrange(0,nslices):
+            start = j * ss[i]
+            stop = start + ws[i]
+            slices[i].append(slice(start,stop))
+       # Get an iterator over all valid n-dimensional slices of the input
+       allslices = product(*slices)
+     
+       # Allocate memory to hold all valid n-dimensional slices
+       nslices = np.product([len(s) for s in slices])
+       out = np.ndarray((nslices,) + tuple(ws),dtype = a.dtype)
+       for i,s in enumerate(allslices):
+          out[i] = a[s]
+         
+       return out, newshape   
 
 # =========================================================
 def dpboundary(imu):

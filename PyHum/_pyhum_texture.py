@@ -259,30 +259,8 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       if len(shape_star)>2:
          #SRT = []
          for p in xrange(len(port_fp)):
-
-            #tmp = np.vstack((np.flipud(port_fp[p]), star_fp[p]))
-            #tmpshape = np.shape(tmp)
-            ## create memory mapped file for Sp
-            #with open(os.path.normpath(os.path.join(sonpath,base+'_tmp.dat')), 'w+') as ff:
-            #   tmpfp = np.memmap(ff, dtype='float32', mode='w+', shape=tmpshape)
-
-            #tmpfp = tmp.astype('float32')
-            #del tmp
-
-            #del tmpfp # flush data to file
-            #tmpfp = io.get_mmap_data(sonpath, base, '_tmp.dat', 'float32', tmpshape)
-
-            Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))   
-            #Z,ind = humutils.sliding_window(tmpfp,(win,win),(shift,shift))        
-            #os.remove(os.path.normpath(os.path.join(sonpath,base+'_tmp.dat')))
-                                
-            #try:
-            #   Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift)) 
-            #except:
-            #   print "memory error ... using dask array on scan"
-            #   dat = da.from_array(np.vstack((np.flipud(port_fp[p]), star_fp[p])), chunks=1000)
-            #   Z,ind = humutils.sliding_window(dat,(win,win),(shift,shift))
-            #   del dat               
+            
+            Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))                
 
             Snn = get_srt(Z,ind,maxscale, notes, win, density)
 
@@ -327,32 +305,9 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
          class_fp = io.get_mmap_data(sonpath, base, '_data_class.dat', 'float32', tuple(shape))
 
-      else:
-
-            #try:
-            #   Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp), star_fp)),(win,win),(shift,shift))
-            #except:
-            #   print "memory error ... using dask array on scan"
-            #   dat = da.from_array(np.vstack((np.flipud(port_fp), star_fp)), chunks=1000)
-            #   Z,ind = humutils.sliding_window(dat,(win,win),(shift,shift))
-            #   del dat  
-
-            #tmp = np.vstack((np.flipud(port_fp), star_fp))
-            #tmpshape = np.shape(tmp)
-            ## create memory mapped file for Sp
-            #with open(os.path.normpath(os.path.join(sonpath,base+'_tmp.dat')), 'w+') as ff:
-            #   tmpfp = np.memmap(ff, dtype='float32', mode='w+', shape=tmpshape)
-
-            #tmpfp = tmp.astype('float32')
-            #del tmp
-
-            #del tmpfp # flush data to file
-            #tmpfp = io.get_mmap_data(sonpath, base, '_tmp.dat', 'float32', tmpshape)
+      else: 
 
             Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))   
-            
-            #Z,ind = humutils.sliding_window(tmpfp,(win,win),(shift,shift))  
-            #os.remove(os.path.normpath(os.path.join(sonpath,base+'_tmp.dat'))) 
             
             Snn = get_srt(Z,ind,maxscale, notes, win, density)
             
@@ -600,14 +555,14 @@ def plot_kmeans(dist_m, shape_port, dat_port, dat_star, dat_kclass, ft, humfile,
       Zdist = dist_m
       extent = shape_port[0]
 
-   levels = [0.5,0.75,1.25,1.5,1.75,2,3]
+   #levels = [0.5,0.75,1.25,1.5,1.75,2,3]
 
    fig = plt.figure()
    plt.subplot(2,1,1)
    ax = plt.gca()
    plt.imshow(np.vstack((np.flipud(dat_port), dat_star)), cmap='gray',extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
    
-   CS = plt.contourf(np.flipud(dat_kclass), levels, alpha=0.4, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper', cmap='YlOrRd')#, vmin=0.5, vmax=3)   
+   CS = plt.contourf(np.flipud(dat_kclass), alpha=0.4, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper', cmap='YlOrRd')#, levels, vmin=0.5, vmax=3)   
    plt.ylabel('Horizontal distance (m)')
    plt.xlabel('Distance along track (m)')
    plt.axis('tight')
@@ -627,6 +582,29 @@ def plot_kmeans(dist_m, shape_port, dat_port, dat_star, dat_kclass, ft, humfile,
 if __name__ == '__main__':
 
    texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+
+            #tmp = np.vstack((np.flipud(port_fp[p]), star_fp[p]))
+            #tmpshape = np.shape(tmp)
+            ## create memory mapped file for Sp
+            #with open(os.path.normpath(os.path.join(sonpath,base+'_tmp.dat')), 'w+') as ff:
+            #   tmpfp = np.memmap(ff, dtype='float32', mode='w+', shape=tmpshape)
+
+            #tmpfp = tmp.astype('float32')
+            #del tmp
+
+            #del tmpfp # flush data to file
+            #tmpfp = io.get_mmap_data(sonpath, base, '_tmp.dat', 'float32', tmpshape)
+
+            #Z,ind = humutils.sliding_window(tmpfp,(win,win),(shift,shift))        
+            #os.remove(os.path.normpath(os.path.join(sonpath,base+'_tmp.dat')))
+                                
+            #try:
+            #   Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift)) 
+            #except:
+            #   print "memory error ... using dask array on scan"
+            #   dat = da.from_array(np.vstack((np.flipud(port_fp[p]), star_fp[p])), chunks=1000)
+            #   Z,ind = humutils.sliding_window(dat,(win,win),(shift,shift))
+            #   del dat
 
          #Sk = class_fp.copy()
          #Sk[np.isnan(Sk)] = 0
