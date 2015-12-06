@@ -375,7 +375,7 @@ def sliding_window(a,ws,ss = None,flatten = True):
       # Allocate memory to hold all valid n-dimensional slices
       nslices = np.product([len(s) for s in slices])
       #out = np.ndarray((nslices,) + tuple(ws),dtype = a.dtype)
-      nowshape = (nslices,) + tuple(ws)
+      nowshape = (nslices,) #+ tuple(ws)
       atype = a.dtype
       
       out = np.memmap('tmp2.dat', dtype=atype, mode='w+', shape= nowshape)
