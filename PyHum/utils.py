@@ -363,7 +363,7 @@ def sliding_window(a,ws,ss = None,flatten = True):
       # For each dimension, create a list of all valid slices
       slices = [[] for i in range(len(ws))]
       for i in xrange(len(ws)):
-         nslices = ((shape[i] - ws[i]) // ss[i]) + 1
+         nslices = ((shap[i] - ws[i]) // ss[i]) + 1
          for j in xrange(0,nslices):
             start = j * ss[i]
             stop = start + ws[i]
