@@ -313,6 +313,12 @@ def sliding_window(a,ws,ss = None,flatten = True):
    # convert ws, ss, and a.shape to numpy arrays
    ws = np.array(ws)
    ss = np.array(ss)
+   
+   import PyHum.io as io
+   shape_tmp = io.set_mmap_data('', '', '_tmp.dat', 'float32', a)
+   del a
+   a = io.get_mmap_data('', '', '_tmp.dat', 'float32', shape_tmp)
+   
    shap = np.array(a.shape)
    # ensure that ws, ss, and a.shape all have the same number of dimensions
    ls = [len(shap),len(ws),len(ss)]
