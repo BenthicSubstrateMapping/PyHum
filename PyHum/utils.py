@@ -319,6 +319,7 @@ def sliding_window(a,ws,ss = None,flatten = True):
    shape_tmp = io.set_mmap_data('', '', '_tmp.dat', 'float32', a)
    del a
    a = io.get_mmap_data('', '', '_tmp.dat', 'float32', shape_tmp)
+   os.remove('_tmp.dat')
    
    shap = np.array(a.shape)
    # ensure that ws, ss, and a.shape all have the same number of dimensions
@@ -373,10 +374,18 @@ def sliding_window(a,ws,ss = None,flatten = True):
      
       # Allocate memory to hold all valid n-dimensional slices
       nslices = np.product([len(s) for s in slices])
-      out = np.ndarray((nslices,) + tuple(ws),dtype = a.dtype)
+      #out = np.ndarray((nslices,) + tuple(ws),dtype = a.dtype)
+      nowshape = (nslices,) + tuple(ws)
+      atype = a.dtype
+      
+      out = np.memmap('tmp2.dat', dtype=atype, mode='w+', shape= nowshape)
       for i,s in enumerate(allslices):
          out[i] = a[s]
-         
+      
+      del out, a
+      out = np.asarray(np.memmap('tmp2.dat', dtype=atype, mode='r', shape=nowshape))
+      os.remove('tmp2.dat')
+      
       return out, newshape   
 
 # =========================================================
