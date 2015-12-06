@@ -82,6 +82,8 @@ try:
 except:
    pass
    
+import dask.array as da
+   
 # suppress divide and invalid warnings
 np.seterr(divide='ignore')
 np.seterr(invalid='ignore')
@@ -258,7 +260,13 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
          #SRT = []
          for p in xrange(len(port_fp)):
 
-            Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))
+            try:
+               Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))
+            except:
+               print "memory error ... using dask array on scan"
+               dat = da.from_array(np.vstack((np.flipud(port_fp[p]), star_fp[p])), chunks=1000)
+               Z,ind = humutils.sliding_window(dat,(win,win),(shift,shift))
+               del dat               
 
             Snn = get_srt(Z,ind,maxscale, notes, win, density)
 
@@ -305,7 +313,13 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
       else:
 
-            Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp), star_fp)),(win,win),(shift,shift))
+            try:
+               Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp), star_fp)),(win,win),(shift,shift))
+            except:
+               print "memory error ... using dask array on scan"
+               dat = da.from_array(np.vstack((np.flipud(port_fp), star_fp)), chunks=1000)
+               Z,ind = humutils.sliding_window(dat,(win,win),(shift,shift))
+               del dat  
             
             Snn = get_srt(Z,ind,maxscale, notes, win, density)
             

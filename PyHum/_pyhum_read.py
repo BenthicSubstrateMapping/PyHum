@@ -426,9 +426,15 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     if data_star!='':
 
-       Zt, ind_star = makechunks_scan(chunkmode, chunkval, metadat, data_star, 1)
-       
-       del data_star
+       try:
+          Zt, ind_star = makechunks_scan(chunkmode, chunkval, metadat, data_star, 1) 
+          del data_star
+       except:
+          print "memory error ... using dask array on starboard scan"
+          dat = da.from_array(data_star, chunks=1000)
+          del data_star                   
+          Zt, ind_star = makechunks_scan(chunkmode, chunkval, metadat, dat, 1) 
+          del dat          
 
        # create memory mapped file for Z
        shape_star = io.set_mmap_data(sonpath, base, '_data_star.dat', 'int16', Zt)
@@ -485,9 +491,15 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
    
     if data_dwnlow!='':
     
-       Zt, ind_low = makechunks_scan(chunkmode, chunkval, metadat, data_dwnlow, 2)
-           
-       del data_dwnlow
+       try:
+          Zt, ind_low = makechunks_scan(chunkmode, chunkval, metadat, data_dwnlow, 2)           
+          del data_dwnlow
+       except:
+          print "memory error ... using dask array on low-freq. scan"
+          dat = da.from_array(data_dwnlow, chunks=1000)
+          del data_dwnlow       
+          Zt, ind_low = makechunks_scan(chunkmode, chunkval, metadat, dat, 2)
+          del dat 
 
        # create memory mapped file for Z
        shape_low = io.set_mmap_data(sonpath, base, '_data_dwnlow.dat', 'int16', Zt)
@@ -504,10 +516,16 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     if data_dwnhi!='':
     
-       Zt, ind_hi = makechunks_scan(chunkmode, chunkval, metadat, data_dwnhi, 3)
-
-       del data_dwnhi
-
+       try:
+          Zt, ind_hi = makechunks_scan(chunkmode, chunkval, metadat, data_dwnhi, 3)
+          del data_dwnhi
+       except:
+          print "memory error ... using dask array on high-freq. scan"
+          dat = da.from_array(data_dwnhi, chunks=1000)
+          del data_dwnhi   
+          Zt, ind_hi = makechunks_scan(chunkmode, chunkval, metadat, dat, 3)
+          del dat 
+          
        # create memory mapped file for Z
        shape_hi = io.set_mmap_data(sonpath, base, '_data_dwnhi.dat', 'int16', Zt)        
        
