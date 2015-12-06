@@ -78,6 +78,8 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import simplekml
 
+import dask.array as da
+
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -396,9 +398,15 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     if data_port!='':
     
-       Zt, ind_port = makechunks_scan(chunkmode, chunkval, metadat, data_port, 0)
-
-       del data_port 
+       try:
+          Zt, ind_port = makechunks_scan(chunkmode, chunkval, metadat, data_port, 0)
+          del data_port           
+       except:
+          print "memory error ... using dask array on port scan"
+          dat = da.from_array(data_port, chunks=1000)
+          del data_port                     
+          Zt, ind_port = makechunks_scan(chunkmode, chunkval, metadat, dat, 0)
+          del dat       
           
        ## create memory mapped file for Z          
        shape_port = io.set_mmap_data(sonpath, base, '_data_port.dat', 'int16', Zt)
