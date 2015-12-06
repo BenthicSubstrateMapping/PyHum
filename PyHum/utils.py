@@ -376,11 +376,18 @@ def sliding_window(a,ws,ss = None,flatten = True):
       nslices = np.product([len(s) for s in slices])
       #out = np.ndarray((nslices,) + tuple(ws),dtype = a.dtype)
       #out = np.empty((nslices,) + tuple(ws),dtype = a.dtype) 
-      out = da.from_array(da.random.normal(10, 0.1, size=(nslices,) + tuple(ws), chunks=1000), chunks=1000)
+      #out = da.from_array(da.random.normal(10, 0.1, size=(nslices,) + tuple(ws), chunks=1000), chunks=1000)
+      out=[]
       for i,s in enumerate(allslices):
-         out[i] = a[s]
+         #out[i] = a[s]
+         out.append(a[s])
          
-      return out, newshape   
+      del a
+      import dask.bag as db
+      tmp = db.from_sequence(out, npartitions=1000)
+      del out
+         
+      return out.compute(), newshape   
 
 # =========================================================
 def dpboundary(imu):
