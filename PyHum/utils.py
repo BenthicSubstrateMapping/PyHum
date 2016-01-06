@@ -56,7 +56,7 @@ __all__ = [
 
 # =========================================================
 def auto_bedpick(ft, dep_m, chunkmode, port_fp):
-    buff = 1#10
+    buff = 10#10
 
     # get bed from depth trace
     bed = ft*dep_m
@@ -71,7 +71,7 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp):
     else:
       imu.append(port_fp[np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
         
-    imu = np.squeeze(np.asarray(imu, 'float64'))
+    imu = np.squeeze(np.asarray(imu, 'float64'))-buff
     
     imu = da.from_array(imu, chunks=1000)   #dask implementation
        
