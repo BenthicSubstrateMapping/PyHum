@@ -56,7 +56,7 @@ __all__ = [
 
 # =========================================================
 def auto_bedpick(ft, dep_m, chunkmode, port_fp):
-    buff = 10
+    buff = 1#10
 
     # get bed from depth trace
     bed = ft*dep_m
