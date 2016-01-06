@@ -362,7 +362,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
    if dogrid==1:
 
-      if res==0:
+      if res==99:
          resg = np.min(res_grid[res_grid>0])
       else:
          resg = res
@@ -455,7 +455,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
       dat = dat.reshape(shape)
 
-      dat[dist>res*2] = np.nan
+      dat[dist>res*5] = np.nan
       del dist
 
       r_dat = r_dat.reshape(shape)
