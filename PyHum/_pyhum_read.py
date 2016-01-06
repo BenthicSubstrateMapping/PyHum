@@ -84,7 +84,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=1, t=0.108, f=455, bedpick=1, flip_lr=0, model=998, calc_bearing = 0, filt_bearing = 0, cog = 1, chunk='d100'):
+def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=1, t=0.108, bedpick=1, flip_lr=0, model=998, calc_bearing = 0, filt_bearing = 0, cog = 1, chunk='d100'):
 
     '''
     Read a .DAT and associated set of .SON files recorded by a Humminbird(R)
@@ -99,7 +99,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     Syntax
     ----------
-    [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize, model, calc_bearing, filt_bearing, cog, chunk)
+    [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, chunksize, model, calc_bearing, filt_bearing, cog, chunk)
 
     Parameters
     ------------
@@ -119,9 +119,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        if 1, plots will be made
     t : float, *optional* [Default=0.108]
        length of transducer array (m).
-       Default value is that of the 998 series Humminbird(R)
-    f : float, *optional* [Default=455]
-       frequency of sidescan transducer in kHz
+       Default value is that of the 998 series Humminbird(R)    
     bedpick : int, *optional* [Default=1]
        if 1, bedpicking with be carried out automatically
        if 0, user will be prompted to pick the bed location on screen
@@ -198,7 +196,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
         bed : ndarray, depth to bed (m)
         c : float, speed of sound in water (m/s)
         t : length of sidescan transducer array (m)
-        f : frequency of sidescan sound (kHz)
         spd : ndarray, vessel speed (m/s)
         time_s : ndarray, time elapsed (s)
         caltime : ndarray, unix epoch time (s)
@@ -248,9 +245,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
       t = np.asarray(t,float)
       print 'Transducer length is %s m' % (str(t))
       
-    if f:
-      f = np.asarray(f,int)
-      print 'Frequency is %s kHz' % (str(f))
+    #if f:
+    #  f = np.asarray(f,int)
+    #  print 'Frequency is %s kHz' % (str(f))
       
     if bedpick:
       bedpick = np.asarray(bedpick,int)
@@ -308,6 +305,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     #cs2cs_args = "epsg:26949"; doplot = 1; draft = 0
     #c=1450; bedpick=1; fliplr=1; chunk = 'd100'
     #model=998; cog=1; calc_bearing=0; filt_bearing=0
+
+    f = 455
 
     try:
        print "Checking the epsg code you have chosen for compatibility with Basemap ... "
@@ -382,7 +381,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     # theta at 3dB in the horizontal
     theta3dB = np.arcsin(c/(t*(f*1000)))
     #resolution of 1 sidescan pixel to nadir
-    ft = (np.pi/2)*(1/theta3dB)
+    ft = (np.pi/2)*(1/theta3dB) #/ (f/455)
 
     dep_m = humutils.get_depth(metadat['dep_m'][:nrec])
 
@@ -967,4 +966,13 @@ if __name__ == '__main__':
        #   dat = da.from_array(data_dwnhi, chunks=1000)
        #   del data_dwnhi   
        #   Zt, ind_hi = makechunks_scan(chunkmode, chunkval, metadat, dat, 3)
-       #   del dat               
+       #   del dat  
+       
+       
+#    f : float, *optional* [Default=455]
+#       frequency of sidescan transducer in kHz
+#        f : frequency of sidescan sound (kHz)          
+#       
+       
+       
+                    

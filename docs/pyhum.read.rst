@@ -40,8 +40,6 @@ Parameters
     t : float, *optional* [Default=0.108]
        length of transducer array (m).
        Default value is that of the 998 series Humminbird(R)
-    f : float, *optional* [Default=455]
-       frequency of sidescan transducer in kHz
     bedpick : int, *optional* [Default=1]
        if 1, bedpicking with be carried out automatically
        if 0, user will be prompted to pick the bed location on screen

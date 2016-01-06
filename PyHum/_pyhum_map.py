@@ -377,7 +377,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
             ## create mask for where the data is not
             tree = KDTree(np.c_[X.flatten(),Y.flatten()])
             try:
-               dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=-1)
+               dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=cpu_count())
             except:
                print ".... update your scipy installation to use faster kd-tree queries"
                dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
@@ -534,7 +534,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       print "error: map could not be created..."
 
    kml = simplekml.Kml()
-   ground = kml.newgroundoverlay(name='GroundOverlay')
+   ground = kml.newgroundoverlay(name='GroundOverlay', altitude=1)
    ground.icon.href = 'map'+str(p)+'.png'
    ground.latlonbox.north = np.min(humlat)-0.00001
    ground.latlonbox.south = np.max(humlat)+0.00001
@@ -664,7 +664,7 @@ def getxy(e, n, yvec, d, t,extent):
 def getXY(e,n,yvec,d,t,extent):
    print "getting point cloud ..." 
 
-   o = Parallel(n_jobs = -1, verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
+   o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
 
    #eating, northing, distance to sonar, depth, heading
    X, Y, D, h, t = zip(*o)

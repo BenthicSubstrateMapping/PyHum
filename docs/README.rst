@@ -222,7 +222,6 @@ which carries out the following operations::
    bedpick = 1 # auto bed pick
    c = 1450 # speed of sound fresh water
    t = 0.108 # length of transducer
-   f = 455 # frequency kHz of sidescan sonar
    draft = 0.3 # draft in metres
    flip_lr = 1 # flip port and starboard
    model = 998 # humminbird model
@@ -363,14 +362,14 @@ The following example script::
        bedpick = 2 # manual bed pick
        c = 1450 # speed of sound fresh water
        t = 0.108 # length of transducer
-       f = 455 # frequency kHz
        draft = 0.3 # draft in metres
        flip_lr = 1 # flip port and starboard
        model = 1199 # humminbird model
-       #chunk_size = 1000 # chunk size = 1000 pings
-       chunk_size = 0 # auto chunk size
        dowrite = 0 #disable writing of point cloud data to file
- 
+       chunk = 'd100' # distance, 100m
+       #chunk = 'p1000' # pings, 1000
+       #chunk = 'h10' # heading deviation, 10 deg
+    
        # correction specific settings
        maxW = 1000 # rms output wattage
        dofilt = 1 # apply a phase preserving filter (WARNING!! takes a very long time for large scans)
