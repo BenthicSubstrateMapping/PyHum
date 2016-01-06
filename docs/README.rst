@@ -19,7 +19,7 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
 The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) and works on both sidescan and downward-looking echosounder data, where available.
 
 Some aspects of the program are detailed in:
-Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, in press.
+Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019. `Download here <http://dbuscombe-usgs.github.io/docs/10-2-2015_Automated%20.pdf>`_
 
 Full documentation of the program is forthcoming
 
@@ -444,6 +444,14 @@ or using os, e.g.::
    import os
    os.path.abspath(os.path.join('C:\Users','me','mydata','R0089'))
 
+3. Problem: on Linux, PyHum is using an older version of scipy than 0.16, as revealed by::
+
+   python -c 'import scipy;print(scipy.__version__)'
+
+Try this: remove a system installed file e.g.::
+
+   sudo apt-get remove python-scipy ##(Debian based)
+   yum remove scipy ##(Fedora based)
 
 
 .. image:: _static/pyhum_logo_colour_sm.png

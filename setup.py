@@ -167,7 +167,7 @@ else:
         Extension('_RunningStats',sources=['PyHum/RunningStats_wrap.cxx', 'PyHum/RunningStats.cpp']),
     ]
 install_requires = [
-    'numpy','scipy','Pillow','matplotlib', 'cython', 'pyproj', 'scikit-image', 'simplekml', 'joblib', 'basemap', 'scikit-learn', 'pyresample', 'dask', 'toolz'
+    'numpy','scipy>=0.16','Pillow','matplotlib', 'cython', 'pyproj', 'scikit-image', 'simplekml', 'joblib==0.7.1', 'basemap', 'scikit-learn', 'pyresample', 'dask', 'toolz'
 ]
 #'scikit-learn',
 #long_description = open('README.md').read()
@@ -175,7 +175,7 @@ install_requires = [
 def setupPackage():
    setup(name='PyHum',
          version=__version__,
-         description='Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", forthcoming.',
+         description='Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 2015.',
          #long_description=long_description,
          classifiers=[
              'Intended Audience :: Science/Research',
