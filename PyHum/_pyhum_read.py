@@ -357,8 +357,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     metadat['heading'] = humutils.get_bearing(calc_bearing, filt_bearing, cog, metadat['lat'], metadat['lon'], metadat['heading'])
     
     if calc_bearing==1: # recalculate speed, m/s
-       ds=np.gradient(np.squeeze(meta['time_s']))
-       dx=np.gradient(np.squeeze(meta['dist_m']))
+       ds=np.gradient(np.squeeze(metadat['time_s']))
+       dx=np.gradient(np.squeeze(metadat['dist_m']))
        metadat['spd'] = dx[:nrec]/ds[:nrec]
 
     try:
