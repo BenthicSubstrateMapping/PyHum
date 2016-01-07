@@ -11,7 +11,7 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
 1. read Humminbird DAT and associated SON files
 2. export data
 3. carry out rudimentary radiometric corrections to data, and 
-4. classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, in press.
+4. classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
 5. produce some maps on aerial photos and kml files for google-earth
 
 The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) and works on both sidescan and downward-looking echosounder data, where available.
@@ -53,7 +53,7 @@ Full documentation of the program is forthcoming
           | Logan, UT 84322
           | dhamill@usgs.gov
 
-Version: 1.3.2    |  Revision: July, 2015
+Version: 1.3.4    |  Revision: Jan, 2016
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -252,7 +252,6 @@ which carries out the following operations:
    bedpick = 1 # auto bed pick
    c = 1450 # speed of sound fresh water
    t = 0.108 # length of transducer
-   f = 455 # frequency kHz of sidescan sonar
    draft = 0.3 # draft in metres
    flip_lr = 1 # flip port and starboard
    model = 998 # humminbird model
@@ -301,7 +300,7 @@ which carries out the following operations:
    numclusters = 3 # number of acoustic classes to group observations
 
    # read data in SON files into PyHum memory mapped format (.dat)
-   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
+   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
 
    # correct scans and remove water column
    PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
@@ -423,7 +422,6 @@ if __name__ == '__main__':
     bedpick = 1 # auto bed pick
     c = 1450 # speed of sound fresh water
     t = 0.108 # length of transducer
-    f = 455 # frequency kHz of sidescan sonar
     draft = 0.3 # draft in metres
     flip_lr = 1 # flip port and starboard
     model = 998 # humminbird model
@@ -450,7 +448,7 @@ if __name__ == '__main__':
     res = 0.05 # grid resolution in metres
     cog = 1 # GPS course-over-ground used for heading
 
-    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
+    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, chunk_size, model)
 
     PyHum.correct(humfile, sonpath, maxW, doplot)
 

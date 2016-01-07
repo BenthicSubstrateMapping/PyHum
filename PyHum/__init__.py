@@ -61,7 +61,7 @@ from PyHum.utils import *
 from PyHum.test import *
 
 from PyHum.io import *
-
+from PyHum._pyhum_mosaic import mosaic
 
 
 

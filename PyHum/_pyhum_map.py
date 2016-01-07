@@ -95,7 +95,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0, dowrite = 0, mode=3, nn = 128, influence = 1, numstdevs=5):
+def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 99, dowrite = 0, mode=3, nn = 128, influence = 1, numstdevs=5):
          
     '''
     Create plots of the spatially referenced sidescan echograms
@@ -263,6 +263,9 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0, dowrit
 #    dx = np.arcsin(meta['c']/(1000*meta['t']*meta['f']))
 #    pix_m = meta['pix_m']
 #    c = meta['c']
+
+    if res==0:
+       res=99
 
     if len(shape_star)>2:    
        for p in xrange(len(star_fp)):
