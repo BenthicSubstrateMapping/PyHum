@@ -71,6 +71,8 @@ import write
 import PyHum.io as io
 import cPickle as pickle
 
+from pandas import read_csv
+
 # numerical
 import numpy as np
 import PyHum.utils as humutils
@@ -434,7 +436,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
           
 # =========================================================
 def getdat(inputfile, filenum):
-   tmp = pd.read_csv(inputfile, sep=' ', header=None)
+   tmp = read_csv(inputfile, sep=' ', header=None)
    return np.hstack((tmp, filenum*np.ones((len(tmp),1))))
       
 # =========================================================
