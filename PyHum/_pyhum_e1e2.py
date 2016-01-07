@@ -497,7 +497,7 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
 
                    cs = map.scatter(x.flatten(), y.flatten(), 1, hard.flatten(), linewidth=0, vmin=0, vmax=8)
 
-                 try:
+                   try:
                       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
                    except:
                       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
@@ -726,7 +726,7 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
 
                    cs = map.scatter(x.flatten(), y.flatten(), 1, rough.flatten(), linewidth=0, vmin=0, vmax=8)
 
-                 try:
+                   try:
                       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
                    except:
                       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
