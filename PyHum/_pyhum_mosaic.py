@@ -230,57 +230,59 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     pix_m = meta['pix_m']
     c = meta['c']
 
-    inputfiles = []
-    if len(shape_star)>2:    
-       for p in xrange(len(star_fp)):
-          e = esi[shape_port[-1]*p:shape_port[-1]*(p+1)]
-          n = nsi[shape_port[-1]*p:shape_port[-1]*(p+1)]
-          t = theta[shape_port[-1]*p:shape_port[-1]*(p+1)]
-          d = dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)]
-          dat_port = port_fp[p]
-          dat_star = star_fp[p]
-          data_R = R_fp[p]
-          print "writing chunk %s " % (str(p))
-          write_points(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, c, dx)
+    if not os.path.isfile( os.path.normpath(os.path.join(sonpath,base+"S.p")) ):
+    #if 2 > 1:
+       inputfiles = []
+       if len(shape_star)>2:    
+          for p in xrange(len(star_fp)):
+             e = esi[shape_port[-1]*p:shape_port[-1]*(p+1)]
+             n = nsi[shape_port[-1]*p:shape_port[-1]*(p+1)]
+             t = theta[shape_port[-1]*p:shape_port[-1]*(p+1)]
+             d = dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)]
+             dat_port = port_fp[p]
+             dat_star = star_fp[p]
+             data_R = R_fp[p]
+             print "writing chunk %s " % (str(p))
+             write_points(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, c, dx)
           inputfiles.append(os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc')))
-    else:
-       print "writing chunk %s " % (str(p))
-       write_points(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, c, dx)
-       inputfiles.append(os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc')))         
+       else:
+          print "writing chunk %s " % (str(p))
+          write_points(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, c, dx)
+          inputfiles.append(os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc')))         
           
-    trans =  pyproj.Proj(init=cs2cs_args)
+       trans =  pyproj.Proj(init=cs2cs_args)
 
-    # D, R, h, t
-    print "reading points from %s files" % (str(len(inputfiles)))
-    X,Y,S,D,R,h,t,i = getxys(inputfiles)
+       # D, R, h, t
+       print "reading points from %s files" % (str(len(inputfiles)))
+       X,Y,S,D,R,h,t,i = getxys(inputfiles)
 
-    print "%s points read from %s files" % (str(len(S)), str(len(inputfiles)))
+       print "%s points read from %s files" % (str(len(S)), str(len(inputfiles)))
 
-    # remove values where sidescan intensity is zero
-    ind = np.where(np.logical_not(S==0))[0]
+       # remove values where sidescan intensity is zero
+       ind = np.where(np.logical_not(S==0))[0]
 
-    X = X[ind]; Y = Y[ind]
-    S = S[ind]; D = D[ind]
-    R = R[ind]; h = h[ind]
-    t = t[ind]; i = i[ind]
-
-    del ind   
+       X = X[ind]; Y = Y[ind]
+       S = S[ind]; D = D[ind]
+       R = R[ind]; h = h[ind]
+       t = t[ind]; i = i[ind]
+       del ind   
    
-    # save to file for temporary storage
-    pickle.dump( S, open( os.path.normpath(os.path.join(sonpath,base+"S.p")), "wb" ) ); del S
-    pickle.dump( D, open( os.path.normpath(os.path.join(sonpath,base+"D.p")), "wb" ) ); del D
-    pickle.dump( t, open( os.path.normpath(os.path.join(sonpath,base+"t.p")), "wb" ) ); del t
-    pickle.dump( i, open( os.path.normpath(os.path.join(sonpath,base+"i.p")), "wb" ) ); del i
+       # save to file for temporary storage
+       pickle.dump( S, open( os.path.normpath(os.path.join(sonpath,base+"S.p")), "wb" ) ); del S
+       pickle.dump( D, open( os.path.normpath(os.path.join(sonpath,base+"D.p")), "wb" ) ); del D
+       pickle.dump( t, open( os.path.normpath(os.path.join(sonpath,base+"t.p")), "wb" ) ); del t
+       pickle.dump( i, open( os.path.normpath(os.path.join(sonpath,base+"i.p")), "wb" ) ); del i
 
-    pickle.dump( X, open( os.path.normpath(os.path.join(sonpath,base+"X.p")), "wb" ) ); del X
-    pickle.dump( Y, open( os.path.normpath(os.path.join(sonpath,base+"Y.p")), "wb" ) ); del Y
-    pickle.dump( R, open( os.path.normpath(os.path.join(sonpath,base+"R.p")), "wb" ) ); 
-    pickle.dump( h, open( os.path.normpath(os.path.join(sonpath,base+"h.p")), "wb" ) ); 
+       pickle.dump( X, open( os.path.normpath(os.path.join(sonpath,base+"X.p")), "wb" ) ); del X
+       pickle.dump( Y, open( os.path.normpath(os.path.join(sonpath,base+"Y.p")), "wb" ) ); del Y
+       pickle.dump( R, open( os.path.normpath(os.path.join(sonpath,base+"R.p")), "wb" ) ); 
+       pickle.dump( h, open( os.path.normpath(os.path.join(sonpath,base+"h.p")), "wb" ) ); 
 
-    #grazing angle
-    g = np.arctan(R.flatten(),h.flatten())
-    pickle.dump( g, open( os.path.normpath(os.path.join(sonpath,base+"g.p")), "wb" ) ); del g, R, h
+       #grazing angle
+       g = np.arctan(R.flatten(),h.flatten())
+       pickle.dump( g, open( os.path.normpath(os.path.join(sonpath,base+"g.p")), "wb" ) ); del g, R, h
    
+    print "creating grids ..."   
     #### prepare grids
     R = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"R.p")), "rb" ) )
 
@@ -306,6 +308,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     tree = KDTree(zip(X.flatten(), Y.flatten()))
     del X, Y
 
+    print "mosaicking ..."   
     #k nearest neighbour
     dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = nn)
     #del grid_x, grid_y
@@ -356,6 +359,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     glon, glat = trans(grid_x, grid_y, inverse=True)
     del grid_x, grid_y
     
+    print "creating kmz file ..."
     ## new way to create kml file  
     pixels = 1024 * 10
  
@@ -364,7 +368,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
                      urcrnrlon=glon.max(),
                      urcrnrlat=glat.max(),
                      pixels=pixels)
-    cs = ax.pcolormesh(glon, glat, datm, cmap='gray')
+    cs = ax.pcolormesh(glon, glat, Sdat_gm, cmap='gray')
     ax.set_axis_off()
     fig.savefig(os.path.normpath(os.path.join(sonpath,'overlay1.png')), transparent=True, format='png')    
     
