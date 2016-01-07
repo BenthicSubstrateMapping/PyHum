@@ -69,7 +69,11 @@ import replace_nans
 import write
 
 import PyHum.io as io
-import cPickle as pickle
+
+try:
+   import cPickle as pickle
+except:
+   import pickle
 
 from pandas import read_csv
 
