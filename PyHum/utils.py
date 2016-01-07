@@ -480,6 +480,7 @@ def histeq(im,nbr_bins=256):
 
    return im2.reshape(im.shape), cdf
 
+## http://nbviewer.ipython.org/url/ocefpaf.github.com/python4oceanographers/downloads/notebooks/2014-03-10-google-earth.ipynb
 # =========================================================    
 def gearth_fig(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat, pixels=1024):
     """Return a Matplotlib `fig` and `ax` handles for a Google-Earth Image."""

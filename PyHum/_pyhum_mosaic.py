@@ -99,14 +99,14 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisefloor = 10):
+def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisefloor = 10, weight = 1):
          
     '''
     Create mosaics of the spatially referenced sidescan echograms
 
     Syntax
     ----------
-    [] = PyHum.mosaic(humfile, sonpath, cs2cs_args, res, nn, noisefloor)
+    [] = PyHum.mosaic(humfile, sonpath, cs2cs_args, res, nn, noisefloor, weight)
 
     Parameters
     ----------
@@ -125,7 +125,12 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
        number of nearest neighbours for gridding
     noisefloor: float, *optional* [Default=10]
        noisefloor of sidescan pixel intensity, in dB W (values lower than this will be removed)     
-
+    weight: int, *optional* [Default=1]
+       specifies the type of pixel weighting in the gridding process
+       weight = 1, based on grazing angle and inverse distance weighting
+       weight = 2, based on grazing angle only
+       weight = 3, inverse distance weighting only
+       weight = 4, no weighting
     
     Returns
     -------
@@ -172,7 +177,11 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     if noisefloor:
        noisefloor = np.asarray(noisefloor,float)
        print 'Noise floor: %s dBW' % (str(noisefloor))      
-                  
+
+    if weight:
+       weight = int(weight)
+       print 'Weighting for gridding: %s' % (str(weight))                   
+
 
     ##nn = 5 #number of nearest neighbours in gridding
     ##noisefloor=10 # noise threshold in dB W
@@ -312,9 +321,23 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     #k nearest neighbour
     dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = nn)
     #del grid_x, grid_y
-    g = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"g.p")), "rb" ) )
-    w = g[inds] + 1.0 / dist**2
-    del g
+    
+    if weight==1:
+       g = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"g.p")), "rb" ) )
+       w = g[inds] + 1.0 / dist**2
+       del g
+    elif weight==2:
+       g = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"g.p")), "rb" ) )
+       w = g[inds]
+       del g
+    elif weight==3:
+       w = 1.0 / dist**2    
+    elif weight==4:
+       w = 1.0
+    
+    #g = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"g.p")), "rb" ) )
+    #w = g[inds] + 1.0 / dist**2
+    #del g
 
     w[np.isinf(w)]=1
     w[np.isnan(w)]=1

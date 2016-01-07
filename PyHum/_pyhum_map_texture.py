@@ -175,11 +175,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
     if cs2cs_args:
        print 'cs2cs arguments are %s' % (cs2cs_args)
 
-    #if dogrid:
-    #   dogrid = int(dogrid)
-    #   if dogrid==1:
-    #      print "Data will be gridded"         
-
     if res:
        res = np.asarray(res,float)
        print 'Gridding resolution: %s' % (str(res))      
@@ -385,7 +380,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
           glon, glat = trans(grid_x, grid_y, inverse=True)
           del grid_x, grid_y
 
-       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, S, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1) #dogrid, 
+       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1) #dogrid, 
 
     else: #just 1 chunk   
     
@@ -478,22 +473,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
        #make_kml(0, sonpath, humlat, humlon)
 
        print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1) #merge, dogrid, 
-
-
-## =========================================================
-#def make_kml(p, sonpath, humlat, humlon):
-
-#    kml = simplekml.Kml()
-#    ground = kml.newgroundoverlay(name='GroundOverlay', altitude=1)
-#    ground.icon.href = 'class_map'+str(p)+'.png'
-#    ground.latlonbox.north = np.min(humlat)-0.00001
-#    ground.latlonbox.south = np.max(humlat)+0.00001
-#    ground.latlonbox.east =  np.max(humlon)+0.00001
-#    ground.latlonbox.west =  np.min(humlon)-0.00001
-#    ground.latlonbox.rotation = 0
-
-#    kml.save(os.path.normpath(os.path.join(sonpath,'class_GroundOverlay'+str(p)+'.kml')))
-          
+    
 # =========================================================
 def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, vmin, vmax): #merge, 
 
@@ -530,12 +510,7 @@ def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, 
        else:
           #map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
           map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='pink', vmin=vmin, vmax=vmax)
-             
-    #else: 
-    #   ## draw point cloud
-    #   x,y = map.projtran(humlon, humlat)
-    #   map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='pink', linewidth = '0')
-             
+                   
     custom_save2(sonpath,'class_map_imagery'+str(p))
     del fig 
 
@@ -575,39 +550,6 @@ def print_map(cs2cs_args, glon, glat, datm, sonpath, p, vmin, vmax): #humlon, hu
 
     except:
        print "error: map could not be created..."
-
-    #try:
-    #   print "drawing and printing map ..."
-    #   fig = plt.figure(frameon=False)
-    #   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
-    #    resolution = 'i', #h #f
-    #    llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
-    #    urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
-
-    #   if dogrid==1:
-    #      gx,gy = map.projtran(glon, glat)
-
-    #   ax = plt.Axes(fig, [0., 0., 1., 1.], )
-    #   ax.set_axis_off()
-    #   fig.add_axes(ax)
-
-    #   if dogrid==1:
-    #      if datm.size > 25000000:
-    #         print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-    #         map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='pink', vmin=vmin, vmax=vmax)
-    #      else:
-    #         map.pcolormesh(gx, gy, datm, cmap='pink', vmin=vmin, vmax=vmax)
-
-    #   else: 
-    #      ## draw point cloud
-    #      x,y = map.projtran(humlon, humlat)
-    #      map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='pink', linewidth = '0')
-
-    #   custom_save(sonpath,'class_map'+str(p))
-    #   del fig 
-
-    #except:
-    #   print "error: map could not be created..."
 
 # =========================================================
 def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY, res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat):
@@ -822,3 +764,61 @@ if __name__ == '__main__':
 #    dogrid : float, *optional* [Default=1]
 #       if 1, textures will be gridded with resolution 'res'. 
 #       Otherwise, point cloud will be plotted
+
+    #try:
+    #   print "drawing and printing map ..."
+    #   fig = plt.figure(frameon=False)
+    #   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
+    #    resolution = 'i', #h #f
+    #    llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
+    #    urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
+
+    #   if dogrid==1:
+    #      gx,gy = map.projtran(glon, glat)
+
+    #   ax = plt.Axes(fig, [0., 0., 1., 1.], )
+    #   ax.set_axis_off()
+    #   fig.add_axes(ax)
+
+    #   if dogrid==1:
+    #      if datm.size > 25000000:
+    #         print "matrix size > 25,000,000 - decimating by factor of 5 for display"
+    #         map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='pink', vmin=vmin, vmax=vmax)
+    #      else:
+    #         map.pcolormesh(gx, gy, datm, cmap='pink', vmin=vmin, vmax=vmax)
+
+    #   else: 
+    #      ## draw point cloud
+    #      x,y = map.projtran(humlon, humlat)
+    #      map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='pink', linewidth = '0')
+
+    #   custom_save(sonpath,'class_map'+str(p))
+    #   del fig 
+
+    #except:
+    #   print "error: map could not be created..."
+
+    #else: 
+    #   ## draw point cloud
+    #   x,y = map.projtran(humlon, humlat)
+    #   map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='pink', linewidth = '0')
+       
+    #if dogrid:
+    #   dogrid = int(dogrid)
+    #   if dogrid==1:
+    #      print "Data will be gridded"         
+ 
+ ## =========================================================
+#def make_kml(p, sonpath, humlat, humlon):
+
+#    kml = simplekml.Kml()
+#    ground = kml.newgroundoverlay(name='GroundOverlay', altitude=1)
+#    ground.icon.href = 'class_map'+str(p)+'.png'
+#    ground.latlonbox.north = np.min(humlat)-0.00001
+#    ground.latlonbox.south = np.max(humlat)+0.00001
+#    ground.latlonbox.east =  np.max(humlon)+0.00001
+#    ground.latlonbox.west =  np.min(humlon)-0.00001
+#    ground.latlonbox.rotation = 0
+
+#    kml.save(os.path.normpath(os.path.join(sonpath,'class_GroundOverlay'+str(p)+'.kml')))
+      

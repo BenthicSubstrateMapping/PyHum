@@ -69,7 +69,7 @@ http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 
 Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government. 
 
-Thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info, Dan Hamill (Utah State University) and Paul Anderson (Quest Geophysical Asia) for debugging and suggestions for improvements
+Thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info, Dan Hamill (Utah State University), Paul Anderson (Quest Geophysical Asia) and various others for debugging and suggestions for improvements
 
 This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4 & 14.4, Windows 7.
 This software has (so far) been used only with Humminbird 798, 998, 1198 and 1199 series instruments. 
@@ -332,25 +332,25 @@ on the following files:
 4. B001.SON
 5. B000.SON
 
-and results in a set of outputs such as csv, mat and kml files, and including some rudimentary figures such as:
+<!--and results in a set of outputs such as csv, mat and kml files, and including some rudimentary figures such as:-->
 
-![alt tag](http://dbuscombe-usgs.github.io/figs/bed_pick.png)
-*port and starboard scans showing automated bed picks*
+<!--![alt tag](http://dbuscombe-usgs.github.io/figs/bed_pick.png)-->
+<!--*port and starboard scans showing automated bed picks*-->
 
-![alt tag](http://dbuscombe-usgs.github.io/figs/merge_corrected_scan_ppdrc.png)
-*a merged port/starboard scan*
+<!--![alt tag](http://dbuscombe-usgs.github.io/figs/merge_corrected_scan_ppdrc.png)-->
+<!--*a merged port/starboard scan*-->
 
-![alt tag](http://dbuscombe-usgs.github.io/figs/raw_dwnhi.png)
-*a raw 200 kHz downward sonar scan*
+<!--![alt tag](http://dbuscombe-usgs.github.io/figs/raw_dwnhi.png)-->
+<!--*a raw 200 kHz downward sonar scan*-->
 
-![alt tag](http://dbuscombe-usgs.github.io/figs/raw_dwnlow.png)
-*a raw 83 kHz downward sonar scan*
+<!--![alt tag](http://dbuscombe-usgs.github.io/figs/raw_dwnlow.png)-->
+<!--*a raw 83 kHz downward sonar scan*-->
 
-![alt tag](http://dbuscombe-usgs.github.io/figs/testclass1.png)
-*radiometrically corrected scan (top) and wavelet lengthscale classification (bottom)*
+<!--![alt tag](http://dbuscombe-usgs.github.io/figs/testclass1.png)-->
+<!--*radiometrically corrected scan (top) and wavelet lengthscale classification (bottom)*-->
 
-![alt tag](http://dbuscombe-usgs.github.io/figs/testclass_kmeans1.png)
-*k=4 means lengthscale classification*
+<!--![alt tag](http://dbuscombe-usgs.github.io/figs/testclass_kmeans1.png)-->
+<!--*k=4 means lengthscale classification*-->
 
 
 ### Getting Started

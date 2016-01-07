@@ -468,8 +468,11 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
 
                    cs = map.scatter(x.flatten(), y.flatten(), 1, rough.flatten(), linewidth=0, vmin=0, vmax=8)
 
-                   map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
-  
+                   try:
+                      map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
+                   except:
+                      map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)                   
+
                    cbar = map.colorbar(cs,location='bottom',pad="5%")
                    cbar.set_label('E1')
                    cbar.set_ticks([0,2,4,6,8])
@@ -494,8 +497,11 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
 
                    cs = map.scatter(x.flatten(), y.flatten(), 1, hard.flatten(), linewidth=0, vmin=0, vmax=8)
 
-                   map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
-
+                 try:
+                      map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
+                   except:
+                      map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+                      
                    cbar = map.colorbar(cs,location='bottom',pad="5%")
                    cbar.set_label('E2')
                    cbar.set_ticks([0,2,4,6,8])
@@ -720,7 +726,10 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
 
                    cs = map.scatter(x.flatten(), y.flatten(), 1, rough.flatten(), linewidth=0, vmin=0, vmax=8)
 
-                   map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+                 try:
+                      map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
+                   except:
+                      map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
   
                    cbar = map.colorbar(cs,location='bottom',pad="5%")
                    cbar.set_label('E1')
@@ -746,7 +755,10 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
 
                    cs = map.scatter(x.flatten(), y.flatten(), 1, hard.flatten(), linewidth=0, vmin=0, vmax=8)
 
-                   map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+                   try:
+                      map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
+                   except:
+                      map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
 
                    cbar = map.colorbar(cs,location='bottom',pad="5%")
                    cbar.set_label('E2')
