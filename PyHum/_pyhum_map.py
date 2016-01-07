@@ -251,8 +251,8 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 99, dowri
     # read in range data
     R_fp = io.get_mmap_data(sonpath, base, '_data_range.dat', 'float32', tuple(shape_star))
 
-    ## for debugging/testing
-    #p=2
+#    # for debugging/testing
+#    p=2
 #    e = esi[shape_port[-1]*p:shape_port[-1]*(p+1)]
 #    n = nsi[shape_port[-1]*p:shape_port[-1]*(p+1)]
 #    t = theta[shape_port[-1]*p:shape_port[-1]*(p+1)]
