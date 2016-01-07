@@ -317,9 +317,15 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
              dat[np.isinf(dat)] = np.nan
 
              datm = np.ma.masked_invalid(dat)
+             del dat
 
              glon, glat = trans(grid_x, grid_y, inverse=True)
              del grid_x, grid_y
+             
+          else:
+             glon = None
+             glat = None
+             datm = None
 
           print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
 
@@ -454,6 +460,11 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
           glon, glat = trans(grid_x, grid_y, inverse=True)
           del grid_x, grid_y
+
+       else:
+          glon = None
+          glat = None
+          datm = None
 
        print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
 

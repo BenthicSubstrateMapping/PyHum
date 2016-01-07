@@ -319,7 +319,12 @@ def sliding_window(a,ws,ss = None,flatten = True):
    shape_tmp = io.set_mmap_data('', '', '_tmp.dat', 'float32', a)
    del a
    a = io.get_mmap_data('', '', '_tmp.dat', 'float32', shape_tmp)
-   os.remove('_tmp.dat')
+   
+   try:
+      del a
+      os.remove('_tmp.dat')
+   except:
+      pass
    
    shap = np.array(a.shape)
    # ensure that ws, ss, and a.shape all have the same number of dimensions
