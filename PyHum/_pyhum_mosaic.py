@@ -261,22 +261,22 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     del ind   
    
     # save to file for temporary storage
-    pickle.dump( S, open( os.path.normpath(os.path.join(sonpath,base+"S.p"), "wb" ) ); del S
-    pickle.dump( D, open( os.path.normpath(os.path.join(sonpath,base+"D.p"), "wb" ) ); del D
-    pickle.dump( t, open( os.path.normpath(os.path.join(sonpath,base+"t.p"), "wb" ) ); del t
-    pickle.dump( i, open( os.path.normpath(os.path.join(sonpath,base+"i.p"), "wb" ) ); del i
+    pickle.dump( S, open( os.path.normpath(os.path.join(sonpath,base+"S.p")), "wb" ) ); del S
+    pickle.dump( D, open( os.path.normpath(os.path.join(sonpath,base+"D.p")), "wb" ) ); del D
+    pickle.dump( t, open( os.path.normpath(os.path.join(sonpath,base+"t.p")), "wb" ) ); del t
+    pickle.dump( i, open( os.path.normpath(os.path.join(sonpath,base+"i.p")), "wb" ) ); del i
 
-    pickle.dump( X, open( os.path.normpath(os.path.join(sonpath,base+"X.p"), "wb" ) ); del X
-    pickle.dump( Y, open( os.path.normpath(os.path.join(sonpath,base+"Y.p"), "wb" ) ); del Y
-    pickle.dump( R, open( os.path.normpath(os.path.join(sonpath,base+"R.p"), "wb" ) ); 
-    pickle.dump( h, open( os.path.normpath(os.path.join(sonpath,base+"h.p"), "wb" ) ); 
+    pickle.dump( X, open( os.path.normpath(os.path.join(sonpath,base+"X.p")), "wb" ) ); del X
+    pickle.dump( Y, open( os.path.normpath(os.path.join(sonpath,base+"Y.p")), "wb" ) ); del Y
+    pickle.dump( R, open( os.path.normpath(os.path.join(sonpath,base+"R.p")), "wb" ) ); 
+    pickle.dump( h, open( os.path.normpath(os.path.join(sonpath,base+"h.p")), "wb" ) ); 
 
     #grazing angle
     g = np.arctan(R.flatten(),h.flatten())
-    pickle.dump( g, open( os.path.normpath(os.path.join(sonpath,base+"g.p"), "wb" ) ); del g, R, h
+    pickle.dump( g, open( os.path.normpath(os.path.join(sonpath,base+"g.p")), "wb" ) ); del g, R, h
    
     #### prepare grids
-    R = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"R.p"), "rb" ) )
+    R = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"R.p")), "rb" ) )
 
     ## actual along-track resolution is this: dx times dy = Af
     tmp = R * dx * (c*0.007 / 2)
@@ -288,8 +288,8 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     else:
        resg = res
 
-    X = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"X.p"), "rb" ) )
-    Y = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"Y.p"), "rb" ) )
+    X = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"X.p")), "rb" ) )
+    Y = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"Y.p")), "rb" ) )
     
     humlon, humlat = trans(X, Y, inverse=True)
 
@@ -303,7 +303,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     #k nearest neighbour
     dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = nn)
     #del grid_x, grid_y
-    g = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"g.p"), "rb" ) )
+    g = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"g.p")), "rb" ) )
     w = g[inds] + 1.0 / dist**2
     del g
 
@@ -313,7 +313,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     w[w<=0]=1
     
     # load in sidescan intensity
-    S = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"S.p"), "rb" ) )
+    S = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"S.p")), "rb" ) )
     # filter out noise pixels
     S[S<noisefloor] = np.nan
 
