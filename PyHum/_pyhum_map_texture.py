@@ -83,7 +83,7 @@ try:
 except:
    print "Error: Basemap could not be imported"
    pass
-import simplekml
+#import simplekml
 
 # suppress divide and invalid warnings
 np.seterr(divide='ignore')
@@ -93,7 +93,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0.5, mode=3, nn = 64, influence = 10, numstdevs=5):
+def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, nn = 64, influence = 10, numstdevs=5):
          
     '''
     Create plots of the texture lengthscale maps made in PyHum.texture module 
@@ -105,7 +105,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
     Syntax
     ----------
-    [] = PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, res, mode, nn, influence, numstdevs)
+    [] = PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, influence, numstdevs)
 
     Parameters
     ----------
@@ -117,9 +117,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
        arguments to create coordinates in a projected coordinate system
        this argument gets given to pyproj to turn wgs84 (lat/lon) coordinates
        into any projection supported by the proj.4 libraries
-    dogrid : float, *optional* [Default=1]
-       if 1, textures will be gridded with resolution 'res'. 
-       Otherwise, point cloud will be plotted
     res : float, *optional* [Default=0.5]
        grid resolution of output gridded texture map
     mode: int, *optional* [Default=3]
@@ -153,7 +150,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
     References
     ----------
       .. [1] Buscombe, D., Grams, P.E., and Smith, S.M.C., 2015, Automated riverbed sediment
-       classification using low-cost sidescan sonar. Journal of Hydraulic Engineering, accepted
+       classification using low-cost sidescan sonar. Journal of Hydraulic Engineering 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
     '''
 
     # prompt user to supply file if no input file given
@@ -178,10 +175,10 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
     if cs2cs_args:
        print 'cs2cs arguments are %s' % (cs2cs_args)
 
-    if dogrid:
-       dogrid = int(dogrid)
-       if dogrid==1:
-          print "Data will be gridded"         
+    #if dogrid:
+    #   dogrid = int(dogrid)
+    #   if dogrid==1:
+    #      print "Data will be gridded"         
 
     if res:
        res = np.asarray(res,float)
@@ -304,32 +301,35 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
           humlon, humlat = trans(X, Y, inverse=True)
 
-          if dogrid==1:
+          #if dogrid==1:
 
-             orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
+          orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
                           
-             sigmas = 1 #m
-             eps = 2
-             dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
+          sigmas = 1 #m
+          eps = 2
+          dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
+          
+          del merge
              
-          if dogrid==1:
-             dat[dat==0] = np.nan
-             dat[np.isinf(dat)] = np.nan
+          #if dogrid==1:
+          dat[dat==0] = np.nan
+          dat[np.isinf(dat)] = np.nan
 
-             datm = np.ma.masked_invalid(dat)
-             del dat
+          datm = np.ma.masked_invalid(dat)
+          del dat
 
-             glon, glat = trans(grid_x, grid_y, inverse=True)
-             del grid_x, grid_y
+          glon, glat = trans(grid_x, grid_y, inverse=True)
+          del grid_x, grid_y
              
-          else:
-             glon = None
-             glat = None
-             datm = None
+          #else:
+          #   glon = None
+          #   glat = None
+          #   datm = None
 
-          print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
+          #print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
+          print_map(cs2cs_args, glon, glat, datm, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
 
-          make_kml(p, sonpath, humlat, humlon)
+          #make_kml(p, sonpath, humlat, humlon)
 
        ## draw concatenated
        X = []; Y = []; S = [];
@@ -340,21 +340,22 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           S.append(dat[:,2])
           del dat
 
-       # merge flatten and stack
+       # X flatten and stack
        X = np.asarray(np.hstack(X),'float')
        X = X.flatten()
 
-       # merge flatten and stack
+       # Y flatten and stack
        Y = np.asarray(np.hstack(Y),'float')
        Y = Y.flatten()
 
-       # merge flatten and stack
+       # S flatten and stack
        S = np.asarray(np.hstack(S),'float')
        S = S.flatten()
 
        humlon, humlat = trans(X, Y, inverse=True)
 
-       if dogrid==1:
+       if 2>1:
+       #if dogrid==1:
 
           orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
 
@@ -372,7 +373,8 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           eps = 2             
           dat, res = get_grid(mode, orig_def, targ_def, S, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
             
-       if dogrid==1:
+       #if dogrid==1:
+       if 2>1:
           dat[dat==0] = np.nan
           dat[np.isinf(dat)] = np.nan
           dat[dist>res*2] = np.nan
@@ -383,7 +385,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           glon, glat = trans(grid_x, grid_y, inverse=True)
           del grid_x, grid_y
 
-       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, S, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
+       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, S, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1) #dogrid, 
 
     else: #just 1 chunk   
     
@@ -431,7 +433,8 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
 
        humlon, humlat = trans(X, Y, inverse=True)
 
-       if dogrid==1:
+       #if dogrid==1:
+       if 2>1:
 
           orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
 
@@ -449,8 +452,11 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           sigmas = 1 #m
           eps = 2
           dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
+          
+          del merge
 
-       if dogrid==1:
+       #if dogrid==1:
+       if 2>1:
           dat[dat==0] = np.nan
           dat[np.isinf(dat)] = np.nan
           dat[dist>res*2] = np.nan
@@ -461,34 +467,35 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0
           glon, glat = trans(grid_x, grid_y, inverse=True)
           del grid_x, grid_y
 
-       else:
-          glon = None
-          glat = None
-          datm = None
+       #else:
+       #   glon = None
+       #   glat = None
+       #   datm = None
 
-       print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
+       #print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
+       print_map(cs2cs_args, glon, glat, datm, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
 
-       make_kml(0, sonpath, humlat, humlon)
+       #make_kml(0, sonpath, humlat, humlon)
 
-       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
+       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1) #merge, dogrid, 
 
 
-# =========================================================
-def make_kml(p, sonpath, humlat, humlon):
+## =========================================================
+#def make_kml(p, sonpath, humlat, humlon):
 
-    kml = simplekml.Kml()
-    ground = kml.newgroundoverlay(name='GroundOverlay', altitude=1)
-    ground.icon.href = 'class_map'+str(p)+'.png'
-    ground.latlonbox.north = np.min(humlat)-0.00001
-    ground.latlonbox.south = np.max(humlat)+0.00001
-    ground.latlonbox.east =  np.max(humlon)+0.00001
-    ground.latlonbox.west =  np.min(humlon)-0.00001
-    ground.latlonbox.rotation = 0
+#    kml = simplekml.Kml()
+#    ground = kml.newgroundoverlay(name='GroundOverlay', altitude=1)
+#    ground.icon.href = 'class_map'+str(p)+'.png'
+#    ground.latlonbox.north = np.min(humlat)-0.00001
+#    ground.latlonbox.south = np.max(humlat)+0.00001
+#    ground.latlonbox.east =  np.max(humlon)+0.00001
+#    ground.latlonbox.west =  np.min(humlon)-0.00001
+#    ground.latlonbox.rotation = 0
 
-    kml.save(os.path.normpath(os.path.join(sonpath,'class_GroundOverlay'+str(p)+'.kml')))
+#    kml.save(os.path.normpath(os.path.join(sonpath,'class_GroundOverlay'+str(p)+'.kml')))
           
 # =========================================================
-def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p, vmin, vmax):
+def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, vmin, vmax): #merge, 
 
     #levels = [0,0.25,0.5,0.75,1.25,1.5,1.75,2,3,5]
           
@@ -500,8 +507,8 @@ def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merg
      llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
      urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
 
-    if dogrid==1:
-       gx,gy = map.projtran(glon, glat)
+    #if dogrid==1:
+    gx,gy = map.projtran(glon, glat)
 
     ax = plt.Axes(fig, [0., 0., 1., 1.], )
     ax.set_axis_off()
@@ -514,7 +521,8 @@ def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merg
     #finally:
     #   print "error: map could not be created..."
              
-    if dogrid==1:
+    #if dogrid==1:
+    if 2>1:
        if datm.size > 25000000:
           print "matrix size > 25,000,000 - decimating by factor of 5 for display"
           #map.contourf(gx[::5,::5], gy[::5,::5], datm[::5,::5], levels, cmap='YlOrRd')
@@ -523,50 +531,83 @@ def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merg
           #map.contourf(gx, gy, datm, levels, cmap='YlOrRd')
           map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='pink', vmin=vmin, vmax=vmax)
              
-    else: 
-       ## draw point cloud
-       x,y = map.projtran(humlon, humlat)
-       map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='pink', linewidth = '0')
+    #else: 
+    #   ## draw point cloud
+    #   x,y = map.projtran(humlon, humlat)
+    #   map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='pink', linewidth = '0')
              
     custom_save2(sonpath,'class_map_imagery'+str(p))
     del fig 
 
 
 # =========================================================
-def print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p, vmin, vmax):
+def print_map(cs2cs_args, glon, glat, datm, sonpath, p, vmin, vmax): #humlon, humlat, merge, 
 
     try:
-       print "drawing and printing map ..."
-       fig = plt.figure(frameon=False)
-       map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
-        resolution = 'i', #h #f
-        llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
-        urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
+      # =========================================================
+      print "creating kmz file ..."
+      ## new way to create kml file  
+      pixels = 1024 * 10
+ 
+      fig, ax = humutils.gearth_fig(llcrnrlon=glon.min(),
+                     llcrnrlat=glat.min(),
+                     urcrnrlon=glon.max(),
+                     urcrnrlat=glat.max(),
+                     pixels=pixels)
+      cs = ax.pcolormesh(glon, glat, datm, cmap='pink', vmin=vmin, vmax=vmax)
+      ax.set_axis_off()
+      fig.savefig(os.path.normpath(os.path.join(sonpath,'class_map'+str(p)+'.png')), transparent=True, format='png')    
+    
+      # =========================================================
+      fig = plt.figure(figsize=(1.0, 4.0), facecolor=None, frameon=False)
+      ax = fig.add_axes([0.0, 0.05, 0.2, 0.9])
+      cb = fig.colorbar(cs, cax=ax)
+      cb.set_label('Texture Lengthscale [m]', rotation=-90, color='k', labelpad=20)
+      fig.savefig(os.path.normpath(os.path.join(sonpath,'class_legend'+str(p)+'.png')), transparent=False, format='png')  
 
-       if dogrid==1:
-          gx,gy = map.projtran(glon, glat)
-
-       ax = plt.Axes(fig, [0., 0., 1., 1.], )
-       ax.set_axis_off()
-       fig.add_axes(ax)
-
-       if dogrid==1:
-          if datm.size > 25000000:
-             print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-             map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='pink', vmin=vmin, vmax=vmax)
-          else:
-             map.pcolormesh(gx, gy, datm, cmap='pink', vmin=vmin, vmax=vmax)
-
-       else: 
-          ## draw point cloud
-          x,y = map.projtran(humlon, humlat)
-          map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='pink', linewidth = '0')
-
-       custom_save(sonpath,'class_map'+str(p))
-       del fig 
+      # =========================================================
+      humutils.make_kml(llcrnrlon=glon.min(), llcrnrlat=glat.min(),
+         urcrnrlon=glon.max(), urcrnrlat=glat.max(),
+         figs=[os.path.normpath(os.path.join(sonpath,'class_map'+str(p)+'.png'))], 
+         colorbar=os.path.normpath(os.path.join(sonpath,'class_legend'+str(p)+'.png')),
+         kmzfile=os.path.normpath(os.path.join(sonpath,'class_GroundOverlay'+str(p)+'.kmz')), 
+         name='Texture Lengthscale')
 
     except:
        print "error: map could not be created..."
+
+    #try:
+    #   print "drawing and printing map ..."
+    #   fig = plt.figure(frameon=False)
+    #   map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
+    #    resolution = 'i', #h #f
+    #    llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
+    #    urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
+
+    #   if dogrid==1:
+    #      gx,gy = map.projtran(glon, glat)
+
+    #   ax = plt.Axes(fig, [0., 0., 1., 1.], )
+    #   ax.set_axis_off()
+    #   fig.add_axes(ax)
+
+    #   if dogrid==1:
+    #      if datm.size > 25000000:
+    #         print "matrix size > 25,000,000 - decimating by factor of 5 for display"
+    #         map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='pink', vmin=vmin, vmax=vmax)
+    #      else:
+    #         map.pcolormesh(gx, gy, datm, cmap='pink', vmin=vmin, vmax=vmax)
+
+    #   else: 
+    #      ## draw point cloud
+    #      x,y = map.projtran(humlon, humlat)
+    #      map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='pink', linewidth = '0')
+
+    #   custom_save(sonpath,'class_map'+str(p))
+    #   del fig 
+
+    #except:
+    #   print "error: map could not be created..."
 
 # =========================================================
 def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY, res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat):
@@ -747,11 +788,11 @@ def getXY(e,n,yvec,d,t,extent):
 
    X, Y = zip(*o)
 
-   # merge flatten and stack
+   # X flatten and stack
    X = np.asarray(X,'float')
    X = X.flatten()
 
-   # merge flatten and stack
+   # Y flatten and stack
    Y = np.asarray(Y,'float')
    Y = Y.flatten()
 
@@ -776,5 +817,8 @@ def calc_beam_pos(dist, bearing, x, y):
 # =========================================================
 if __name__ == '__main__':
 
-   map_texture(humfile, sonpath, cs2cs_args, dogrid, res, mode, nn, influence, numstdevs)
+   map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, influence, numstdevs)
 
+#    dogrid : float, *optional* [Default=1]
+#       if 1, textures will be gridded with resolution 'res'. 
+#       Otherwise, point cloud will be plotted
