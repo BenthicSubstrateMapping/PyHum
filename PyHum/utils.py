@@ -321,14 +321,14 @@ def sliding_window(a,ws,ss = None,flatten = True):
    ss = np.array(ss)
    
    import PyHum.io as io
-   shape_tmp = io.set_mmap_data('', '', '_tmp.dat', 'float32', a)
+   shape_tmp = io.set_mmap_data('', '', 'tmp.dat', 'float32', a)
    del a
-   a = io.get_mmap_data('', '', '_tmp.dat', 'float32', shape_tmp)
+   a = io.get_mmap_data('', '', 'tmp.dat', 'float32', shape_tmp)
    
    shap = np.array(a.shape)
    
    try:
-      os.remove('_tmp.dat')
+      os.remove('tmp.dat')
    except:
       pass   
    

@@ -282,7 +282,6 @@ which carries out the following operations:
    notes = 4 # Notes per octave (for wavelet analysis)
 
    # for mapping
-   dogrid = 1 # yes
    res = 0.1 # grid resolution in metres
    mode = 1 # gridding mode (simple nearest neighbour)
    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
@@ -318,7 +317,7 @@ which carries out the following operations:
    numstdevs = 5
    
    # grid and map the texture lengthscale maps
-   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
+   PyHum.map_texture(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, influence, numstdevs)
 
    # calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
@@ -442,7 +441,6 @@ if __name__ == '__main__':
     shadowmask = 1 #manual shadow removal
 
     # for mapping
-    dogrid = 1 # yes
     calc_bearing = 0 #no
     filt_bearing = 0 #no
     res = 0.05 # grid resolution in metres
@@ -454,7 +452,7 @@ if __name__ == '__main__':
 
     PyHum.rmshadows(humfile, sonpath, win, shadowmask, kvals, doplot)
 
-    PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
+    PyHum.map(humfile, sonpath, cs2cs_args, calc_bearing, filt_bearing, res, cog, dowrite)
 ```
 
 or from within ipython (with a GUI prompt to navigate to the files):

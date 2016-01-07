@@ -111,7 +111,6 @@ def dotest():
    notes = 4 # Notes per octave (for wavelet analysis)
 
    # for mapping
-   dogrid = 1 # yes
    res = 99 # grid resolution in metres
    # if res==99, the program will automatically calc res from the spatial res of the scans
    mode = 1 # gridding mode (simple nearest neighbour)
@@ -142,7 +141,7 @@ def dotest():
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
    ## grid and map the scans
-   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
+   PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, influence, numstdevs)
 
    res = 0.5 # grid resolution in metres
    numstdevs = 5

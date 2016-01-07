@@ -359,6 +359,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     glon, glat = trans(grid_x, grid_y, inverse=True)
     del grid_x, grid_y
     
+    # =========================================================
     print "creating kmz file ..."
     ## new way to create kml file  
     pixels = 1024 * 10
@@ -376,7 +377,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     fig = plt.figure(figsize=(1.0, 4.0), facecolor=None, frameon=False)
     ax = fig.add_axes([0.0, 0.05, 0.2, 0.9])
     cb = fig.colorbar(cs, cax=ax)
-    cb.set_label('Intensity [db W]', rotation=-90, color='k', labelpad=20)
+    cb.set_label('Intensity [dB W]', rotation=-90, color='k', labelpad=20)
     fig.savefig(os.path.normpath(os.path.join(sonpath,'legend.png')), transparent=False, format='png')  
 
 
@@ -388,50 +389,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
          name='Sidescan Intensity')
 
 
-#    try:
-#       print "drawing and printing map ..."
-#       fig = plt.figure(frameon=False)
-#       map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
-#        resolution = 'i', #h #f
-#        llcrnrlon=np.min(humlon)-0.00001, llcrnrlat=np.min(humlat)-0.00001,
-#        urcrnrlon=np.max(humlon)+0.00001, urcrnrlat=np.max(humlat)+0.00001)
-
-#       gx,gy = map.projtran(glon, glat)
-#       #del glon, glat   
-
-#       ax = plt.Axes(fig, [0., 0., 1., 1.], )
-#       ax.set_axis_off()      
-#       fig.add_axes(ax)
-
-#       if Sdat_gm.size > 25000000:
-#          print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-#          map.pcolormesh(gx[::5,::5], gy[::5,::5], Sdat_gm[::5,::5], cmap='gray')
-#       else:
-#          map.pcolormesh(gx, gy, Sdat_gm, cmap='gray')
-#       plt.axis('tight')
-
-#       custom_save(sonpath,'map')#+str(p))
-#       del fig 
-
-#    except:
-#       print "error: map could not be created..."
-
-
-#    kml = simplekml.Kml()
-#    ground = kml.newgroundoverlay(name='GroundOverlay', altitude=1)
-#    ground.icon.href = 'map.png'
-#   
-#    #ground.gxlatlonquad.coords = [(np.max(humlon)+0.00001,np.max(humlat)-0.00001), (np.max(humlon)+0.00001,np.min(humlat)-0.00001), (np.min(humlon)+0.00001,np.min(humlat)-0.00001), (np.min(humlon)+0.00001,np.max(humlat)-0.00001)]   
-
-#    ground.latlonbox.north = np.min(humlat)-0.00001
-#    ground.latlonbox.south = np.max(humlat)+0.00001
-#    ground.latlonbox.east =  np.max(humlon)+0.00001
-#    ground.latlonbox.west =  np.min(humlon)-0.00001
-#    ground.latlonbox.rotation = 0
-
-#    kml.save(os.path.normpath(os.path.join(sonpath,'GroundOverlay.kml')))
-
-
+    # =========================================================
     print "drawing and printing map ..."
     fig = plt.figure(frameon=False)
     map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
@@ -638,4 +596,52 @@ def getXY(e,n,yvec,d,t,extent):
 if __name__ == '__main__':
 
    mosaic(humfile, sonpath, cs2cs_args, res, nn)
+
+
+
+#    try:
+#       print "drawing and printing map ..."
+#       fig = plt.figure(frameon=False)
+#       map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
+#        resolution = 'i', #h #f
+#        llcrnrlon=np.min(humlon)-0.00001, llcrnrlat=np.min(humlat)-0.00001,
+#        urcrnrlon=np.max(humlon)+0.00001, urcrnrlat=np.max(humlat)+0.00001)
+
+#       gx,gy = map.projtran(glon, glat)
+#       #del glon, glat   
+
+#       ax = plt.Axes(fig, [0., 0., 1., 1.], )
+#       ax.set_axis_off()      
+#       fig.add_axes(ax)
+
+#       if Sdat_gm.size > 25000000:
+#          print "matrix size > 25,000,000 - decimating by factor of 5 for display"
+#          map.pcolormesh(gx[::5,::5], gy[::5,::5], Sdat_gm[::5,::5], cmap='gray')
+#       else:
+#          map.pcolormesh(gx, gy, Sdat_gm, cmap='gray')
+#       plt.axis('tight')
+
+#       custom_save(sonpath,'map')#+str(p))
+#       del fig 
+
+#    except:
+#       print "error: map could not be created..."
+
+
+#    kml = simplekml.Kml()
+#    ground = kml.newgroundoverlay(name='GroundOverlay', altitude=1)
+#    ground.icon.href = 'map.png'
+#   
+#    #ground.gxlatlonquad.coords = [(np.max(humlon)+0.00001,np.max(humlat)-0.00001), (np.max(humlon)+0.00001,np.min(humlat)-0.00001), (np.min(humlon)+0.00001,np.min(humlat)-0.00001), (np.min(humlon)+0.00001,np.max(humlat)-0.00001)]   
+
+#    ground.latlonbox.north = np.min(humlat)-0.00001
+#    ground.latlonbox.south = np.max(humlat)+0.00001
+#    ground.latlonbox.east =  np.max(humlon)+0.00001
+#    ground.latlonbox.west =  np.min(humlon)-0.00001
+#    ground.latlonbox.rotation = 0
+
+#    kml.save(os.path.normpath(os.path.join(sonpath,'GroundOverlay.kml')))
+
+
+
 

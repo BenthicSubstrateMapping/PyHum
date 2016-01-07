@@ -75,7 +75,7 @@ import PyHum.io as io
 import numpy as np
 import PyHum.utils as humutils
 import pyresample
-from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
+#from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
 from scipy.spatial import cKDTree as KDTree
 
 # plotting
@@ -85,7 +85,7 @@ try:
 except:
    print "Error: Basemap could not be imported"
    pass
-import simplekml
+#import simplekml
 
 # suppress divide and invalid warnings
 np.seterr(divide='ignore')
@@ -95,14 +95,14 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 99, dowrite = 0, mode=3, nn = 128, influence = 1, numstdevs=5):
+def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode=3, nn = 128, influence = 1, numstdevs=5): #dogrid = 1, 
          
     '''
     Create plots of the spatially referenced sidescan echograms
 
     Syntax
     ----------
-    [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
+    [] = PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, influence, numstdevs)
 
     Parameters
     ----------
@@ -114,9 +114,6 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 99, dowri
        arguments to create coordinates in a projected coordinate system
        this argument gets given to pyproj to turn wgs84 (lat/lon) coordinates
        into any projection supported by the proj.4 libraries
-    dogrid : float, *optional* [Default=1]
-       if 1, textures will be gridded with resolution 'res'. 
-       Otherwise, point cloud will be plotted
     res : float, *optional* [Default=0]
        grid resolution of output gridded texture map
        if res=0, res will be determined automatically from the spatial resolution of 1 pixel
@@ -172,10 +169,10 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 99, dowri
     if cs2cs_args:
        print 'cs2cs arguments are %s' % (cs2cs_args)
 
-    if dogrid:
-       dogrid = int(dogrid)
-       if dogrid==1:
-          print "Data will be gridded"      
+    #if dogrid:
+    #   dogrid = int(dogrid)
+    #   if dogrid==1:
+    #      print "Data will be gridded"      
 
     if res:
        res = np.asarray(res,float)
@@ -269,10 +266,10 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 99, dowri
 
     if len(shape_star)>2:    
        for p in xrange(len(star_fp)):
-          res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], meta['pix_m'], res, cs2cs_args, sonpath, p, dogrid, dowrite, mode, nn, influence, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f'])))
+          res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], meta['pix_m'], res, cs2cs_args, sonpath, p, dowrite, mode, nn, influence, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f']))) #dogrid, 
           print "grid resolution is %s" % (str(res))
     else:
-       res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, dogrid, dowrite, mode, nn, influence, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f'])))
+       res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, dowrite, mode, nn, influence, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f']))) #dogrid, 
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
@@ -284,7 +281,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 99, dowri
 
 
 # =========================================================
-def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, dogrid, dowrite, mode, nn, influence, numstdevs, c, dx):
+def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, dowrite, mode, nn, influence, numstdevs, c, dx): #dogrid, 
    
    trans =  pyproj.Proj(init=cs2cs_args)   
 
@@ -364,7 +361,8 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
   
    humlon, humlat = trans(X, Y, inverse=True)
 
-   if dogrid==1:
+   #if dogrid==1:
+   if 2>1:
 
       if res==99:
          resg = np.min(res_grid[res_grid>0])
@@ -479,77 +477,92 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
          dat[(stdev>numstdevs) & (mask!=0)] = np.nan
          dat[(counts<nn) & (counts>0)] = np.nan
 
-      #dat2 = replace_nans.RN(dat.astype('float64'),1000,0.01,2,'localmean').getdata()
-      #dat2[dat==0] = np.nan
 
-      # get a new mask
-      #mask = np.isnan(dat2)
+   #if dogrid==1:
 
-      #mask = ~binary_dilation(binary_erosion(~mask,structure=np.ones((15,15))), structure=np.ones((15,15)))
-      
-      #dat2[mask==1] = np.nan
-      #dat2[dat2<1] = np.nan
+   dat[dat==0] = np.nan
+   dat[np.isinf(dat)] = np.nan
+   datm = np.ma.masked_invalid(dat)
 
-      #del dat
-      #dat = dat2
-      #del dat2
-
-
-   if dogrid==1:
-
-      dat[dat==0] = np.nan
-      dat[np.isinf(dat)] = np.nan
-      datm = np.ma.masked_invalid(dat)
-
-      glon, glat = trans(grid_x, grid_y, inverse=True)
-      del grid_x, grid_y
+   glon, glat = trans(grid_x, grid_y, inverse=True)
+   del grid_x, grid_y
 
    try:
-      print "drawing and printing map ..."
-      fig = plt.figure(frameon=False)
-      map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
-       resolution = 'i', #h #f
-       llcrnrlon=np.min(humlon)-0.00001, llcrnrlat=np.min(humlat)-0.00001,
-       urcrnrlon=np.max(humlon)+0.00001, urcrnrlat=np.max(humlat)+0.00001)
 
-      if dogrid==1:
-         gx,gy = map.projtran(glon, glat)
-
-      ax = plt.Axes(fig, [0., 0., 1., 1.], )
+      # =========================================================
+      print "creating kmz file ..."
+      ## new way to create kml file  
+      pixels = 1024 * 10
+ 
+      fig, ax = humutils.gearth_fig(llcrnrlon=glon.min(),
+                     llcrnrlat=glat.min(),
+                     urcrnrlon=glon.max(),
+                     urcrnrlat=glat.max(),
+                     pixels=pixels)
+      cs = ax.pcolormesh(glon, glat, datm, cmap='gray')
       ax.set_axis_off()
-      fig.add_axes(ax)
+      fig.savefig(os.path.normpath(os.path.join(sonpath,'map'+str(p)+'.png')), transparent=True, format='png')    
+    
+      # =========================================================
+      fig = plt.figure(figsize=(1.0, 4.0), facecolor=None, frameon=False)
+      ax = fig.add_axes([0.0, 0.05, 0.2, 0.9])
+      cb = fig.colorbar(cs, cax=ax)
+      cb.set_label('Intensity [dB W]', rotation=-90, color='k', labelpad=20)
+      fig.savefig(os.path.normpath(os.path.join(sonpath,'legend'+str(p)+'.png')), transparent=False, format='png')  
 
-      if dogrid==1:
-         if datm.size > 25000000:
-            print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-            map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='gray')#, vmin=np.nanmin(datm), vmax=np.nanmax(datm))
-         else:
-            map.pcolormesh(gx, gy, datm, cmap='gray')#@, vmin=np.nanmin(datm), vmax=np.nanmax(datm))
-         #del datm, dat
-      else: 
-         ## draw point cloud
-         x,y = map.projtran(humlon, humlat)
-         map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='gray', linewidth = '0')
+      # =========================================================
+      humutils.make_kml(llcrnrlon=glon.min(), llcrnrlat=glat.min(),
+         urcrnrlon=glon.max(), urcrnrlat=glat.max(),
+         figs=[os.path.normpath(os.path.join(sonpath,'map'+str(p)+'.png'))], 
+         colorbar=os.path.normpath(os.path.join(sonpath,'legend'+str(p)+'.png')),
+         kmzfile=os.path.normpath(os.path.join(sonpath,'GroundOverlay'+str(p)+'.kmz')), 
+         name='Sidescan Intensity')
+      
+      #print "drawing and printing map ..."
+      #fig = plt.figure(frameon=False)
+      #map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
+      # resolution = 'i', #h #f
+      # llcrnrlon=np.min(humlon)-0.00001, llcrnrlat=np.min(humlat)-0.00001,
+      # urcrnrlon=np.max(humlon)+0.00001, urcrnrlat=np.max(humlat)+0.00001)
 
-      custom_save(sonpath,'map'+str(p))
-      del fig 
+      #if dogrid==1:
+      #   gx,gy = map.projtran(glon, glat)
+
+      #ax = plt.Axes(fig, [0., 0., 1., 1.], )
+      #ax.set_axis_off()
+      #fig.add_axes(ax)
+
+      #if dogrid==1:
+      #   if datm.size > 25000000:
+      #      print "matrix size > 25,000,000 - decimating by factor of 5 for display"
+      #      map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='gray')#, vmin=np.nanmin(datm), vmax=np.nanmax(datm))
+      #   else:
+      #      map.pcolormesh(gx, gy, datm, cmap='gray')#@, vmin=np.nanmin(datm), vmax=np.nanmax(datm))
+      #   #del datm, dat
+      #else: 
+      #   ## draw point cloud
+      #   x,y = map.projtran(humlon, humlat)
+      #   map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='gray', linewidth = '0')
+
+      #custom_save(sonpath,'map'+str(p))
+      #del fig 
 
    except:
       print "error: map could not be created..."
 
-   kml = simplekml.Kml()
-   ground = kml.newgroundoverlay(name='GroundOverlay', altitude=1)
-   ground.icon.href = 'map'+str(p)+'.png'
+   #kml = simplekml.Kml()
+   #ground = kml.newgroundoverlay(name='GroundOverlay', altitude=1)
+   #ground.icon.href = 'map'+str(p)+'.png'
    
    #ground.gxlatlonquad.coords = [(np.max(humlon)+0.00001,np.max(humlat)-0.00001), (np.max(humlon)+0.00001,np.min(humlat)-0.00001), (np.min(humlon)+0.00001,np.min(humlat)-0.00001), (np.min(humlon)+0.00001,np.max(humlat)-0.00001)]   
 
-   ground.latlonbox.north = np.min(humlat)-0.00001
-   ground.latlonbox.south = np.max(humlat)+0.00001
-   ground.latlonbox.east =  np.max(humlon)+0.00001
-   ground.latlonbox.west =  np.min(humlon)-0.00001
-   ground.latlonbox.rotation = 0
+   #ground.latlonbox.north = np.min(humlat)-0.00001
+   #ground.latlonbox.south = np.max(humlat)+0.00001
+   #ground.latlonbox.east =  np.max(humlon)+0.00001
+   #ground.latlonbox.west =  np.min(humlon)-0.00001
+   #ground.latlonbox.rotation = 0
 
-   kml.save(os.path.normpath(os.path.join(sonpath,'GroundOverlay'+str(p)+'.kml')))
+   #kml.save(os.path.normpath(os.path.join(sonpath,'GroundOverlay'+str(p)+'.kml')))
 
    print "drawing and printing map ..."
    fig = plt.figure(frameon=False)
@@ -565,14 +578,15 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    #finally:
    #   print "error: map could not be created..."
       
-   if dogrid==1:
-      gx,gy = map.projtran(glon, glat)
+   #if dogrid==1:
+   gx,gy = map.projtran(glon, glat)
 
    ax = plt.Axes(fig, [0., 0., 1., 1.], )
    ax.set_axis_off()
    fig.add_axes(ax)
 
-   if dogrid==1:
+   #if dogrid==1:
+   if 2>1:
       if datm.size > 25000000:
          print "matrix size > 25,000,000 - decimating by factor of 5 for display"
          map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='gray', vmin=np.nanmin(datm), vmax=np.nanmax(datm))
@@ -702,7 +716,7 @@ def getXY(e,n,yvec,d,t,extent):
 # =========================================================
 if __name__ == '__main__':
 
-   map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
+   map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, influence, numstdevs) #dogrid, 
 
    #kml.save(sonpath+'GroundOverlay'+str(p)+'.kml')
    
@@ -720,3 +734,28 @@ if __name__ == '__main__':
       #   dat[dist> np.sqrt(1/res) ] = np.nan #np.floor(np.sqrt(1/res))-1 ] = np.nan
 
       #del dist, tree
+      
+#    dogrid : float, *optional* [Default=1]
+#       if 1, textures will be gridded with resolution 'res'. 
+#       Otherwise, point cloud will be plotted      
+#      
+      
+      #dat2 = replace_nans.RN(dat.astype('float64'),1000,0.01,2,'localmean').getdata()
+      #dat2[dat==0] = np.nan
+
+      # get a new mask
+      #mask = np.isnan(dat2)
+
+      #mask = ~binary_dilation(binary_erosion(~mask,structure=np.ones((15,15))), structure=np.ones((15,15)))
+      
+      #dat2[mask==1] = np.nan
+      #dat2[dat2<1] = np.nan
+
+      #del dat
+      #dat = dat2
+      #del dat2
+      
+      
+      
+      
+      
