@@ -17,7 +17,7 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
 The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) and works on both sidescan and downward-looking echosounder data, where available.
 
 Some aspects of the program are detailed in:
-Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, in press.
+Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
 
 Full documentation of the program is forthcoming
 
