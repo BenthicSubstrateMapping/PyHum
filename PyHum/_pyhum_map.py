@@ -66,14 +66,15 @@ except:
 from joblib import Parallel, delayed, cpu_count
 import pyproj
 
+import replace_nans
 import write
+
 import PyHum.io as io
 
 # numerical
 import numpy as np
 import PyHum.utils as humutils
 import pyresample
-import replace_nans
 from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
 from scipy.spatial import cKDTree as KDTree
 
@@ -251,7 +252,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", dogrid = 1, res = 0, dowrit
     R_fp = io.get_mmap_data(sonpath, base, '_data_range.dat', 'float32', tuple(shape_star))
 
     ## for debugging/testing
-    #p=0
+    #p=2
 #    e = esi[shape_port[-1]*p:shape_port[-1]*(p+1)]
 #    n = nsi[shape_port[-1]*p:shape_port[-1]*(p+1)]
 #    t = theta[shape_port[-1]*p:shape_port[-1]*(p+1)]
@@ -536,6 +537,9 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    kml = simplekml.Kml()
    ground = kml.newgroundoverlay(name='GroundOverlay', altitude=1)
    ground.icon.href = 'map'+str(p)+'.png'
+   
+   #ground.gxlatlonquad.coords = [(np.max(humlon)+0.00001,np.max(humlat)-0.00001), (np.max(humlon)+0.00001,np.min(humlat)-0.00001), (np.min(humlon)+0.00001,np.min(humlat)-0.00001), (np.min(humlon)+0.00001,np.max(humlat)-0.00001)]   
+
    ground.latlonbox.north = np.min(humlat)-0.00001
    ground.latlonbox.south = np.max(humlat)+0.00001
    ground.latlonbox.east =  np.max(humlon)+0.00001
@@ -548,15 +552,15 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    fig = plt.figure(frameon=False)
    map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
     resolution = 'i', #h #f
-    llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
-    urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
+    llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
+    urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
 
    try:
       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
    except:
       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
-   finally:
-      print "error: map could not be created..."
+   #finally:
+   #   print "error: map could not be created..."
       
    if dogrid==1:
       gx,gy = map.projtran(glon, glat)

@@ -486,8 +486,8 @@ def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merg
     fig = plt.figure(frameon=False)
     map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
      resolution = 'i', #h #f
-     llcrnrlon=np.min(humlon)-0.0001, llcrnrlat=np.min(humlat)-0.0001,
-     urcrnrlon=np.max(humlon)+0.0001, urcrnrlat=np.max(humlat)+0.0001)
+     llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
+     urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
 
     if dogrid==1:
        gx,gy = map.projtran(glon, glat)
@@ -500,8 +500,8 @@ def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merg
        map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
     except:
        map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
-    finally:
-       print "error: map could not be created..."
+    #finally:
+    #   print "error: map could not be created..."
              
     if dogrid==1:
        if datm.size > 25000000:
