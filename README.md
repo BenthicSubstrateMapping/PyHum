@@ -493,7 +493,11 @@ or using os, e.g.::
 
 This is a new project written and maintained by Daniel Buscombe. Bugs are expected - please report them, I will fix them quickly. Feedback and suggestions for improvements are *very* welcome
 
-Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please address all suggestions, comments and queries to: dbuscombe@usgs.gov. Thanks for stopping by! 
+Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please use the 'Issues' tab in github
+
+https://github.com/dbuscombe-usgs/PyHum
+
+for all bug reports, suggestions, comments and queries. Thanks for stopping by! 
 
 
 

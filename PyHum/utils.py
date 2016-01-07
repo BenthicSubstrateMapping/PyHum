@@ -323,7 +323,6 @@ def sliding_window(a,ws,ss = None,flatten = True):
    shap = np.array(a.shape)
    
    try:
-      del a
       os.remove('_tmp.dat')
    except:
       pass   
