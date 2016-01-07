@@ -169,7 +169,9 @@ else:
 install_requires = [
     'numpy','scipy>=0.16','Pillow','matplotlib', 'cython', 'pyproj', 'scikit-image', 'simplekml', 'joblib==0.7.1', 'basemap', 'scikit-learn', 'pyresample', 'dask', 'toolz'
 ]
-#'scikit-learn',
+#'pandas'
+#'cPickle'
+
 #long_description = open('README.md').read()
 
 def setupPackage():
