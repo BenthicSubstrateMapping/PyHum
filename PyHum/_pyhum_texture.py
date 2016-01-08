@@ -260,7 +260,11 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
          #SRT = []
          for p in xrange(len(port_fp)):
             
-            Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))                
+            try:
+               Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))              
+            except:
+               print "memory-mapping failed in sliding window - trying memory intensive version"
+               Z,ind = humutils.sliding_window_nomm(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))
 
             Snn = get_srt(Z,ind,maxscale, notes, win, density)
 
@@ -307,7 +311,11 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
       else: 
 
-            Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))   
+            try:
+               Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))   
+            except:
+               print "memory-mapping failed in sliding window - trying memory intensive version"
+               Z,ind = humutils.sliding_window_nomm(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))   
             
             Snn = get_srt(Z,ind,maxscale, notes, win, density)
             
