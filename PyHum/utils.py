@@ -319,9 +319,9 @@ def sliding_window_nomm(a,ws,ss = None,flatten = True):
     ws = norm_shape(ws)
     ss = norm_shape(ss)
     # convert ws, ss, and a.shape to numpy arrays
-    ws = array(ws)
-    ss = array(ss)
-    shap = array(a.shape)
+    ws = np.array(ws)
+    ss = np.array(ss)
+    shap = np.array(a.shape)
     # ensure that ws, ss, and a.shape all have the same number of dimensions
     ls = [len(shap),len(ws),len(ss)]
     if 1 != len(set(ls)):
@@ -329,7 +329,7 @@ def sliding_window_nomm(a,ws,ss = None,flatten = True):
         'a.shape, ws and ss must all have the same length. They were %s' % str(ls))
      
     # ensure that ws is smaller than a in every dimension
-    if any(ws > shap):
+    if np.any(ws > shap):
         raise ValueError(\
         'ws cannot be larger than a in any dimension.\
  a.shape was %s and ws was %s' % (str(a.shape),str(ws)))
@@ -340,14 +340,14 @@ def sliding_window_nomm(a,ws,ss = None,flatten = True):
     newshape += norm_shape(ws)
     # the strides tuple will be the array's strides multiplied by step size, plus
     # the array's strides (tuple addition)
-    newstrides = norm_shape(array(a.strides) * ss) + a.strides
+    newstrides = norm_shape(np.array(a.strides) * ss) + a.strides
     a = ast(a,shape = newshape,strides = newstrides)
     if not flatten:
         return a
     # Collapse strided so that it has one more dimension than the window.  I.e.,
     # the new array is a flat list of slices.
     meat = len(ws) if ws.shape else 0
-    firstdim = (product(newshape[:-meat]),) if ws.shape else ()
+    firstdim = (np.product(newshape[:-meat]),) if ws.shape else ()
     dim = firstdim + (newshape[-meat:])
     # remove any dimensions with size 1
     dim = filter(lambda i : i != 1,dim) 
