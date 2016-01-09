@@ -132,32 +132,32 @@ def dotest():
    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
 
    ## correct scans and remove water column
-   #PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
+   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
 
    ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
-   #PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
+   PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
    ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
-   #PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+   PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
    ## grid and map the scans
-   #PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, influence, numstdevs)
+   PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, influence, numstdevs)
 
    res = 0.5 # grid resolution in metres
    numstdevs = 5
    
    ## grid and map the texture lengthscale maps
-   #PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, influence, numstdevs)
+   PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, influence, numstdevs)
 
    ## calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
-   #PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
+   PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
    
    #res = 0
    #nn = 5
    #noisefloor = 10
    
-   # create mosaic out of all chunks with weighting according to distance from nadir, grazing angle, or both
-   #PyHum.mosaic(humfile, sonpath, cs2cs_args, res, nn, noisefloor)
+   ## create mosaic out of all chunks with weighting according to distance from nadir, grazing angle, or both
+   PyHum.mosaic(humfile, sonpath, cs2cs_args, res, nn, noisefloor)
 
 if __name__ == '__main__':
    dotest()
