@@ -600,7 +600,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              ind_low[-1] = np.shape(dwnhi_fp[0])[1]
              ind_low = tuple(ind_low)
 
-    del data
+    if old_pyread == 1: #older pyread version
+       del data
 
     if ('shape_port' in locals()) and (chunkmode!=4):
        metadat['shape_port'] = shape_port
