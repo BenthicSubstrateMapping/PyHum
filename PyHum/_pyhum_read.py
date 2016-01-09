@@ -61,7 +61,7 @@ import os, time
 try:
    from Tkinter import Tk
    from tkFileDialog import askopenfilename, askdirectory
-   #import tkMessageBox
+
 except:
    pass
 import csv
@@ -78,10 +78,6 @@ import pyproj
 
 #plotting
 import matplotlib.pyplot as plt
-#import matplotlib.colors as colors
-#import simplekml
-
-#import dask.array as da
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -247,10 +243,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     if t:
       t = np.asarray(t,float)
       print 'Transducer length is %s m' % (str(t))
-      
-    #if f:
-    #  f = np.asarray(f,int)
-    #  print 'Frequency is %s kHz' % (str(f))
       
     if bedpick:
       bedpick = np.asarray(bedpick,int)
@@ -1058,6 +1050,12 @@ if __name__ == '__main__':
 #       frequency of sidescan transducer in kHz
 #        f : frequency of sidescan sound (kHz)          
 #       
+#import matplotlib.colors as colors
+#import simplekml
+
+#import dask.array as da
+   #import tkMessageBox    
        
-       
-                    
+    #if f:
+    #  f = np.asarray(f,int)
+    #  print 'Frequency is %s kHz' % (str(f))                    
