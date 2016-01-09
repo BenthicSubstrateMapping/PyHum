@@ -23,7 +23,7 @@ cdef class Cwt:
     cdef object currentscale
     cdef object win
     #cdef object density
-    cdef object r
+    #cdef object r
             
     # =========================================================
     @cython.boundscheck(False)
