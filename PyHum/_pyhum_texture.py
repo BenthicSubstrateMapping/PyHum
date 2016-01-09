@@ -137,7 +137,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       References
       ----------
       .. [1] Buscombe, D., Grams, P.E., and Smith, S.M.C., 2015, Automated riverbed sediment
-       classification using low-cost sidescan sonar. Journal of Hydraulic Engineering
+       classification using low-cost sidescan sonar. Journal of Hydraulic Engineering 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
       '''
 
       # prompt user to supply file if no input file given
@@ -260,14 +260,16 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
          #SRT = []
          for p in xrange(len(port_fp)):
             
-            try:
-               Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))              
-            except:
-               print "memory-mapping failed in sliding window - trying memory intensive version"
-               Z,ind = humutils.sliding_window_nomm(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))
+            Z,ind = humutils.sliding_window_sliced(np.vstack((np.flipud(port_fp[p]), star_fp[p])), density, (win,win),(shift,shift))
+            
+            #try:
+            #   Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))              
+            #except:
+            #   print "memory-mapping failed in sliding window - trying memory intensive version"
+            #   Z,ind = humutils.sliding_window_nomm(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))
 
-            Snn = get_srt(Z,ind,maxscale, notes, win, density)
-
+            Snn = get_srt(Z,ind,maxscale, notes, win) #, density)
+ 
             # replace nans using infilling algorithm
             rn = replace_nans.RN(Snn.astype('float64'),1000,0.01,2,'localmean')
             Snn = rn.getdata()
@@ -311,13 +313,14 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
       else: 
 
-            try:
-               Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))   
-            except:
-               print "memory-mapping failed in sliding window - trying memory intensive version"
-               Z,ind = humutils.sliding_window_nomm(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))   
+            Z,ind = humutils.sliding_window_sliced(np.vstack((np.flipud(port_fp), star_fp)), density, (win,win),(shift,shift))
+            #try:
+            #   Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))   
+            #except:
+            #   print "memory-mapping failed in sliding window - trying memory intensive version"
+            #   Z,ind = humutils.sliding_window_nomm(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))   
             
-            Snn = get_srt(Z,ind,maxscale, notes, win, density)
+            Snn = get_srt(Z,ind,maxscale, notes, win) #, density)
             
             # replace nans using infilling algorithm
             rn = replace_nans.RN(Snn.astype('float64'),1000,0.01,2,'localmean')
@@ -424,25 +427,27 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
     
     
 # =========================================================
-def get_srt(Z,ind,maxscale, notes, win, density):    
+def get_srt(Z,ind,maxscale, notes, win): #, density):    
             try:
-               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+               #print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+               print "%s windows to process" % (str(len(Z)))                              
             # do the wavelet clacs and get the stats
-               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win) for k in xrange(len(Z))) #density
             except:
                print "memory error: trying serial"
-               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win) for k in xrange(len(Z))) #density
 
             srt = np.reshape(d , ( ind[0], ind[1] ) )
             del d
 
             try:
-               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+               #print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+               print "%s windows to process" % (str(len(Z)))               
             # do the wavelet clacs and get the stats
-               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in xrange(len(Z))) #density
             except:
                print "memory error: trying serial"
-               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in xrange(len(Z))) #density
 
             srt2 = np.reshape(d , ( ind[0], ind[1] ) )
             del d
@@ -465,8 +470,8 @@ def custom_save(figdirec,root):
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=400)
 
 # =========================================================
-def parallel_me(x, maxscale, notes, win, density):
-   dat = cwt.Cwt(x, maxscale, notes, win, density)
+def parallel_me(x, maxscale, notes, win): #, density):
+   dat = cwt.Cwt(x, maxscale, notes, win) #, density)
    return dat.getvar()
 
 # =========================================================

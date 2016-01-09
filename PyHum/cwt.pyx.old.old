@@ -1,10 +1,34 @@
-# cython module for wavelet computations
-# Daniel Buscombe, June-Aug 2014
+# cython: boundscheck=False
+# cython: cdivision=True
+# cython: wraparound=False
+# cython: nonecheck=False
+"""
+Part of PyHum software 
+
+INFO:
+
+
+Author:    Daniel Buscombe
+           Grand Canyon Monitoring and Research Center
+           United States Geological Survey
+           Flagstaff, AZ 86001
+           dbuscombe@usgs.gov
+Version: 1.2.3      Revision: Apr, 2015
+
+For latest code version please visit:
+https://github.com/dbuscombe-usgs
+
+This function is part of 'PyHum' software
+This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
+For more information, see the official USGS copyright policy at 
+http://www.usgs.gov/visual-id/credit_usgs.html#copyright
+"""
+
 from __future__ import division
 import numpy as np
 cimport numpy as np
 cimport cython
-from libc.math cimport sqrt,log,abs
+from libc.math cimport sqrt,log,abs, exp
 
 # =========================================================
 cdef class Cwt:
@@ -26,10 +50,6 @@ cdef class Cwt:
     cdef object r
             
     # =========================================================
-    @cython.boundscheck(False)
-    @cython.cdivision(True)
-    @cython.wraparound(False)
-    @cython.nonecheck(False)
     def __init__(self, np.ndarray[np.float32_t, ndim=2] matrix, int largestscale, int notes, int win, int density):
         """
         Continuous Morlet wavelet transform of data
@@ -89,10 +109,6 @@ cdef class Cwt:
         return
 
     # =========================================================
-    @cython.boundscheck(False)   
-    @cython.cdivision(True)
-    @cython.wraparound(False)
-    @cython.nonecheck(False)
     cpdef int _log2(self, double x):
         '''
         utility function to return (integer) log2
@@ -100,10 +116,6 @@ cdef class Cwt:
         return int(log(x+0.0001)/ log(2.0)+0.0001)
         
     # =========================================================
-    @cython.boundscheck(False)   
-    @cython.cdivision(True)
-    @cython.wraparound(False)
-    @cython.nonecheck(False)
     cpdef int _setscales(self, int ndata, int largestscale, int notes):
         """
         returns a log scale based on notes per ocave
@@ -117,22 +129,14 @@ cdef class Cwt:
         return 0
         
     # =========================================================
-    @cython.boundscheck(False)   
-    @cython.cdivision(True)
-    @cython.wraparound(False)
-    @cython.nonecheck(False)
     cpdef np.ndarray _wf(self, np.ndarray s_omega):
        """
        Morlet mother wavelet
        """    
        cdef np.ndarray[np.int64_t, ndim=1] H = np.ones(np.shape(s_omega), np.int64)
-       return 0.75112554*( np.exp(-(s_omega-6.0)**2/2.0))*H
+       return 0.75112554*( exp(-(s_omega-6.0)**2/2.0))*H
       
     # =========================================================
-    @cython.boundscheck(False)   
-    @cython.cdivision(True)
-    @cython.wraparound(False)
-    @cython.nonecheck(False)
     cpdef np.ndarray _pad2nxtpow2(self, np.ndarray data, double base2):
        """
        zero pad numpy array up to next power 2
@@ -142,10 +146,6 @@ cdef class Cwt:
        return np.squeeze(Y)
       
     # =========================================================
-    @cython.boundscheck(False)   
-    @cython.cdivision(True)
-    @cython.wraparound(False)
-    @cython.nonecheck(False)
     cpdef list _column(self, np.ndarray matrix, int i):
        """
        return a column from a matrix
@@ -153,10 +153,6 @@ cdef class Cwt:
        return [row[i] for row in matrix]          
 
     # =========================================================
-    @cython.boundscheck(False)   
-    @cython.cdivision(True)
-    @cython.wraparound(False)
-    @cython.nonecheck(False)
     cpdef np.ndarray _getwave(self):
         """
         return power spectra
@@ -167,10 +163,6 @@ cdef class Cwt:
         return wave
         
     # =========================================================
-    @cython.boundscheck(False)   
-    @cython.cdivision(True)
-    @cython.wraparound(False)
-    @cython.nonecheck(False)
     cpdef double getvar(self):
         """
         return variance of wave
@@ -183,12 +175,13 @@ cdef class Cwt:
         cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64)
         dat = np.var(np.var(wave.T,axis=1),axis=0)
 
-        dat = dat/np.sum(dat) * np.exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
+        dat = dat/np.sum(dat) * exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
         dat = dat/np.sum(dat)
-
-        dat = dat/(self.scales**2)
-        dat = dat/np.sum(dat)
+        
+        dat = dat/(self.scales**0.5)
+        dat = dat/np.sum(dat)      
            
         #return sqrt(np.sum(dat*((self.scales- np.sum(dat*self.scales) )**2)))
         return np.sum(dat*self.scales)
+        
         
