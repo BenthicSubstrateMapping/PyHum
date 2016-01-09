@@ -68,10 +68,7 @@ import csv
 import PyHum.io as io
 
 #numerical
-#import pyread
-import pyread_single
-from joblib import Parallel, delayed, cpu_count
-
+import pyread
 import PyHum.utils as humutils
 import numpy as np
 import pyproj
@@ -348,62 +345,10 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     print "WARNING: Because files have to be read in byte by byte,"
     print "this could take a very long time ..."
 
-    #reading each sonfile in parallel should be faster ...
-    try:
-       o = Parallel(n_jobs = np.min([len(sonfiles), cpu_count()]), verbose=0)(delayed(getscans)(sonfiles[k], humfile, c, model, cs2cs_args) for k in xrange(len(sonfiles)))
-       X, Y, A, B = zip(*o) 
+    data = pyread.pyread(sonfiles, humfile, c, model, cs2cs_args)
 
-       for k in xrange(len(Y)):
-          if Y[k] == 'sidescan_port':  
-             dat = A[k] #data.gethumdat() 
-             metadat = B[k] #data.getmetadata() 
-             if flip_lr==0: 
-                data_port = X[k].astype('int16')
-             else:
-                data_star = X[k].astype('int16')
-                  
-          elif Y[k] == 'sidescan_starboard':  
-             if flip_lr==0: 
-                data_star = X[k].astype('int16')
-             else:
-                data_port = X[k].astype('int16')  
-            
-          elif Y[k] == 'down_lowfreq':  
-             data_dwnlow = X[k].astype('int16')
-         
-          elif Y[k] == 'down_highfreq':  
-             data_dwnhi = X[k].astype('int16')
-                      
-       del X, Y, A, B, o
-       old_pyread = 0
-
-       if 'data_port' not in locals():
-          data_port = ''
-          print "portside scan not available"
-       
-       if 'data_star' not in locals():
-          data_star = ''
-          print "starboardside scan not available"
-
-       if 'data_dwnhi' not in locals():
-          data_dwnlow = ''
-          print "high-frq. downward scan not available"
-          
-       if 'data_dwnlow' not in locals():
-          data_dwnlow = ''
-          print "low-frq. downward scan not available"
-                    
-    except: # revert back to older version if paralleleised version fails
-    
-       print "something went wrong with the parallelised version of pyread ..."
-    
-       import pyread
-       data = pyread.pyread(sonfiles, humfile, c, model, cs2cs_args)
-
-       dat = data.gethumdat() 
-       metadat = data.getmetadata()
-
-       old_pyread = 1
+    dat = data.gethumdat() 
+    metadat = data.getmetadata()
 
     nrec = len(metadat['n'])   
 
@@ -445,17 +390,15 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     dep_m = humutils.get_depth(metadat['dep_m'][:nrec])
 
-    if old_pyread == 1: #older pyread version
-    
-       # port scan
-       try:
-          if flip_lr==0:
-             data_port = data.getportscans().astype('int16')
-          else:
-             data_port = data.getstarscans().astype('int16')
-       except:
-          data_port = ''
-          print "portside scan not available"
+    # port scan
+    try:
+       if flip_lr==0:
+          data_port = data.getportscans().astype('int16')
+       else:
+          data_port = data.getstarscans().astype('int16')
+    except:
+       data_port = ''
+       print "portside scan not available"
 
     if data_port!='':
     
@@ -467,17 +410,16 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
        ##we are only going to access the portion of memory required       
        port_fp = io.get_mmap_data(sonpath, base, '_data_port.dat', 'int16', shape_port)
-
-    if old_pyread == 1: #older pyread version   
-       # starboard scan          
-       try:
-          if flip_lr==0:
-             data_star = data.getstarscans().astype('int16')
-          else:
-             data_star = data.getportscans().astype('int16')
-       except:
-          data_star = ''
-          print "starboardside scan not available"
+   
+    # starboard scan          
+    try:
+       if flip_lr==0:
+          data_star = data.getstarscans().astype('int16')
+       else:
+          data_star = data.getportscans().astype('int16')
+    except:
+       data_star = ''
+       print "starboardside scan not available"
 
     if data_star!='':
 
@@ -530,13 +472,12 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              ind_star[-1] = np.shape(port_fp[0])[1]
              ind_star = tuple(ind_star)
 
-    if old_pyread == 1: #older pyread version
-       # low-freq. sonar
-       try:
-          data_dwnlow = data.getlowscans().astype('int16')
-       except:
-          data_dwnlow = ''
-          print "low-freq. scan not available"
+    # low-freq. sonar
+    try:
+       data_dwnlow = data.getlowscans().astype('int16')
+    except:
+       data_dwnlow = ''
+       print "low-freq. scan not available"
    
     if data_dwnlow!='':
     
@@ -548,14 +489,13 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
        ##we are only going to access the portion of memory required             
        dwnlow_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow.dat', 'int16', shape_low)
-
-    if old_pyread == 1: #older pyread version 
-       # hi-freq. sonar
-       try:
-          data_dwnhi = data.gethiscans().astype('int16')
-       except:
-          data_dwnhi = ''
-          print "high-freq. scan not available"
+ 
+    # hi-freq. sonar
+    try:
+       data_dwnhi = data.gethiscans().astype('int16')
+    except:
+       data_dwnhi = ''
+       print "high-freq. scan not available"
 
     if data_dwnhi!='':
             
@@ -819,22 +759,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     print "Done!"
 
 
-# =========================================================
-def getscans(sonfile, humfile, c, model, cs2cs_args):
-
-   data = pyread_single.pyread(sonfile, humfile, c, model, cs2cs_args)
-   
-   a, b = data.getscan()
-   
-   if b == 'sidescan_port':
-      dat = data.gethumdat() 
-      metadat = data.getmetadata()   
-   else:
-      dat = None
-      metadat = None  
-   
-   return a, b, dat, metadat
-   
 # =========================================================
 def plot_dwnhi(dwnhi_fp, chunkmode, sonpath):
 
