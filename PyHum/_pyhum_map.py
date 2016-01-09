@@ -57,7 +57,7 @@
 # operational
 from __future__ import division
 from scipy.io import loadmat
-import os, time, sys, getopt
+import os, time #, sys, getopt
 try:
    from Tkinter import Tk
    from tkFileDialog import askopenfilename, askdirectory
@@ -66,7 +66,7 @@ except:
 from joblib import Parallel, delayed, cpu_count
 import pyproj
 
-import replace_nans
+#import replace_nans
 import write
 
 import PyHum.io as io
@@ -151,7 +151,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode
     if not humfile:
        print 'An input file is required!!!!!!'
        Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
-       inputfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
+       humfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
 
     # prompt user to supply directory if no input sonpath is given
     if not sonpath:
@@ -200,7 +200,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode
     else: # windows
        start = time.clock()
 
-    trans =  pyproj.Proj(init=cs2cs_args)
+    #trans =  pyproj.Proj(init=cs2cs_args)
 
     # if son path name supplied has no separator at end, put one on
     if sonpath[-1]!=os.sep:
@@ -356,6 +356,9 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
   
    humlon, humlat = trans(X, Y, inverse=True)
 
+   sigmas = 0.1 #m
+   eps = 2
+         
    #if dogrid==1:
    if 2>1:
 
@@ -406,8 +409,11 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
                   complete=1 
             except:
                del grid_x, grid_y, targ_def, orig_def
-               dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, influence, min(X), max(X), min(Y), max(Y), resg*2, mode)         
-               r_dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, influence, min(X), max(X), min(Y), max(Y), resg*2, mode)   
+               
+               wf = None
+               
+               dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, influence, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)         
+               r_dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, influence, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)   
 
       elif mode==2:
 
@@ -425,14 +431,13 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
                   complete=1 
             except:
                del grid_x, grid_y, targ_def, orig_def
-               dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, influence, min(X), max(X), min(Y), max(Y), resg*2, mode)
-               r_dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, influence, min(X), max(X), min(Y), max(Y), resg*2, mode)
+               dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, influence, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
+               r_dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, influence, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
                del stdev_null, counts_null
 
       elif mode==3:
-         sigmas = 0.1 #m
-         eps = 2
-
+         wf = None
+         
          complete=0
          while complete==0:
             try:
@@ -444,8 +449,8 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
                   complete=1 
             except:
                del grid_x, grid_y, targ_def, orig_def
-               dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, influence, min(X), max(X), min(Y), max(Y), resg*2, mode)
-               r_dat, stdev_null, counts_null, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, influence, min(X), max(X), min(Y), max(Y), resg*2, mode)
+               dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, influence, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
+               r_dat, stdev_null, counts_null, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, influence, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
                del stdev_null, counts_null
 
       del X, Y
@@ -590,7 +595,7 @@ def getmesh(minX, maxX, minY, maxY, res):
 
 
 # =========================================================
-def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mode):
+def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mode, trans, nn, wf, sigmas, eps):
 
    complete=0
    while complete==0:

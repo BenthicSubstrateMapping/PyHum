@@ -57,7 +57,7 @@
 #operational
 from __future__ import division
 from scipy.io import savemat, loadmat
-import os, time, sys, getopt
+import os, time #, sys, getopt
 try:
    from Tkinter import Tk
    from tkFileDialog import askopenfilename, askdirectory
@@ -73,7 +73,7 @@ import ppdrc
 
 #plotting
 import matplotlib.pyplot as plt
-import matplotlib.colors as colors
+#import matplotlib.colors as colors
 
 # suppress divide and invalid warnings
 np.seterr(divide='ignore')
@@ -403,7 +403,8 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     # load memory mapped scans
     shape_low = np.squeeze(meta['shape_low'])
-
+    shape_hi = np.squeeze(meta['shape_hi'])
+    
     if shape_low!='':
        if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_dwnlow2.dat'))):
           try:

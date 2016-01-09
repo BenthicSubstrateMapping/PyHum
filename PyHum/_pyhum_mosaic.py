@@ -56,7 +56,7 @@
 # operational
 from __future__ import division
 from scipy.io import loadmat
-import os, time, sys, getopt
+import os, time #, sys, getopt
 try:
    from Tkinter import Tk
    from tkFileDialog import askopenfilename, askdirectory
@@ -89,7 +89,7 @@ try:
 except:
    print "Error: Basemap could not be imported"
    pass
-import simplekml
+#import simplekml
 
 # suppress divide and invalid warnings
 np.seterr(divide='ignore')
@@ -148,7 +148,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     if not humfile:
        print 'An input file is required!!!!!!'
        Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
-       inputfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
+       humfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
 
     # prompt user to supply directory if no input sonpath is given
     if not sonpath:
@@ -259,7 +259,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
           write_points(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, c, dx)
           inputfiles.append(os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc')))         
           
-       trans =  pyproj.Proj(init=cs2cs_args)
+       #trans =  pyproj.Proj(init=cs2cs_args)
 
        # D, R, h, t
        print "reading points from %s files" % (str(len(inputfiles)))
@@ -319,7 +319,12 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
 
     print "mosaicking ..."   
     #k nearest neighbour
-    dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = nn)
+    try:
+       dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = nn, n_jobs=-1)
+    except:
+       print ".... update your scipy installation to use faster kd-tree    
+       dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = nn)    
+    
     #del grid_x, grid_y
     
     if weight==1:
@@ -466,7 +471,7 @@ def getxys(inputfiles):
 # =========================================================
 def write_points(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, c, dx):
  
-   trans =  pyproj.Proj(init=cs2cs_args)   
+   #trans =  pyproj.Proj(init=cs2cs_args)   
 
    merge = np.vstack((dat_port,dat_star))
    

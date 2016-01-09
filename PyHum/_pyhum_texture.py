@@ -55,8 +55,8 @@
 # =========================================================
 
 # operational
-import sys, getopt, os, time
-from scipy.io import loadmat, savemat
+import os, time #sys, getopt, 
+from scipy.io import loadmat #, savemat
 from joblib import Parallel, delayed, cpu_count
 try:
    from Tkinter import Tk
@@ -76,13 +76,13 @@ from scipy.ndimage.filters import median_filter
 
 # plotting
 import matplotlib.pyplot as plt
-import matplotlib.colors as colors
+#import matplotlib.colors as colors
 try:
    from mpl_toolkits.axes_grid1 import make_axes_locatable
 except:
    pass
    
-import dask.array as da
+#import dask.array as da
    
 # suppress divide and invalid warnings
 np.seterr(divide='ignore')
@@ -144,7 +144,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       if not humfile:
          print 'An input file is required!!!!!!'
          Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
-         inputfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
+         humfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
 
       # prompt user to supply directory if no input sonpath is given
       if not sonpath:
@@ -213,8 +213,8 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       meta = loadmat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')))
 
       ft = 1/loadmat(sonpath+base+'meta.mat')['pix_m']
-      pix_m = np.squeeze(meta['pix_m'])
-      dep_m = np.squeeze(meta['dep_m'])
+      #pix_m = np.squeeze(meta['pix_m'])
+      #dep_m = np.squeeze(meta['dep_m'])
       dist_m = np.squeeze(meta['dist_m'])
 
       ### port
@@ -283,10 +283,10 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             Sp[np.isnan(np.vstack((np.flipud(port_fp[p]), star_fp[p])))] = np.nan
             Sp[np.isnan(np.vstack((np.flipud(port_fp2[p]), star_fp2[p])))] = np.nan
 
-            extent = shape_port[1]
-            Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
-            yvec = np.linspace(pix_m,extent*pix_m,extent)
-            d = dep_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
+            #extent = shape_port[1]
+            #Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
+            #yvec = np.linspace(pix_m,extent*pix_m,extent)
+            #d = dep_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
 
             R_fp = io.get_mmap_data(sonpath, base, '_data_range.dat', 'float32', tuple(shape_star))
 
@@ -334,10 +334,10 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             Sp[np.isnan(np.vstack((np.flipud(port_fp), star_fp)))] = np.nan
             Sp[np.isnan(np.vstack((np.flipud(port_fp2), star_fp2)))] = np.nan
 
-            extent = shape_port[0]
-            Zdist = dist_m
-            yvec = np.linspace(pix_m,extent*pix_m,extent)
-            d = dep_m
+            #extent = shape_port[0]
+            #Zdist = dist_m
+            #yvec = np.linspace(pix_m,extent*pix_m,extent)
+            #d = dep_m
 
             R_fp = io.get_mmap_data(sonpath, base, '_data_range.dat', 'float32', tuple(shape_star))
 

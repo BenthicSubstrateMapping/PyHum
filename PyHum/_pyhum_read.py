@@ -55,13 +55,13 @@
 # =========================================================
 
 #operational
-import glob, sys, getopt
+import glob, sys #, getopt
 from scipy.io import savemat
 import os, time
 try:
    from Tkinter import Tk
    from tkFileDialog import askopenfilename, askdirectory
-   import tkMessageBox
+   #import tkMessageBox
 except:
    pass
 import csv
@@ -75,10 +75,10 @@ import pyproj
 
 #plotting
 import matplotlib.pyplot as plt
-import matplotlib.colors as colors
-import simplekml
+#import matplotlib.colors as colors
+#import simplekml
 
-import dask.array as da
+#import dask.array as da
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -917,13 +917,13 @@ def plot_2bedpicks(dat_port, dat_star, Zbed, Zdist, Zx, ft, shape_port, sonpath,
    fig.subplots_adjust(wspace = 0.1, hspace=0.1)
    plt.subplot(2,2,1)
    ax = plt.gca()
-   im = ax.imshow(np.flipud(dat_port),cmap='gray',extent=[min(Zdist), max(Zdist), 0, extent*(1/ft)],origin='upper')
+   ax.imshow(np.flipud(dat_port),cmap='gray',extent=[min(Zdist), max(Zdist), 0, extent*(1/ft)],origin='upper') #im = 
    plt.ylabel('Range (m)'); #plt.xlabel('Distance along track (m)')  
    plt.axis('normal'); plt.axis('tight')
 
    plt.subplot(2,2,3)
    ax = plt.gca()
-   im = ax.imshow(dat_star,cmap='gray',extent=[min(Zdist), max(Zdist), extent*(1/ft), 0],origin='upper')
+   ax.imshow(dat_star,cmap='gray',extent=[min(Zdist), max(Zdist), extent*(1/ft), 0],origin='upper') #im = 
    plt.ylabel('Range (m)'); plt.xlabel('Distance along track (m)')
    plt.axis('normal'); plt.axis('tight')
 

@@ -56,22 +56,22 @@
 # operational
 from __future__ import division
 from scipy.io import loadmat
-import os, time, sys, getopt
+import os #, time, sys, getopt
 try:
    from Tkinter import Tk
    from tkFileDialog import askopenfilename, askdirectory
 except:
    pass
-from joblib import Parallel, delayed, cpu_count
-import pyproj
+from joblib import Parallel, delayed #, cpu_count
+#import pyproj
 
 # numerical
 import numpy as np
-import pyproj
+#import pyproj
 import csv
-from math import sqrt as sqrt
+#from math import sqrt as sqrt
 from numpy import power as pow
-from math import sin as sin
+#from math import sin as sin
 from math import pi as pi
 from math import log10 as log10
 from sklearn.cluster import MiniBatchKMeans

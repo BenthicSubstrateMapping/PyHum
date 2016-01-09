@@ -25,8 +25,8 @@
 
 
 from Tkinter import Tk
-from tkFileDialog import askopenfilename, askdirectory
-import tkMessageBox
+from tkFileDialog import askopenfilename#, askdirectory
+#import tkMessageBox
 import os
 from scipy.io import loadmat, savemat
 import numpy as np
@@ -46,7 +46,7 @@ humfile = askopenfilename(title="Select the .DAT file?", filetypes=[("DAT file:"
 
 datfiles = askopenfilename(title="Which file do you wish to convert?", filetypes=[("dat file:","*.dat")], multiple=True) 
 
-sonpath = os.path.dirname(datfile)
+sonpath = os.path.dirname(datfiles[0])
 
 # if son path name supplied has no separator at end, put one on
 if sonpath[-1]!=os.sep:

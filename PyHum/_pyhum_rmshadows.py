@@ -56,8 +56,8 @@
 
 #operational
 from __future__ import division
-from scipy.io import savemat, loadmat
-import os, time, sys, getopt
+from scipy.io import loadmat #savemat, 
+import os, time #, sys, getopt
 #import shutil
 try:
    from Tkinter import Tk
@@ -70,7 +70,7 @@ except:
 import numpy as np
 import PyHum.utils as humutils
 #from pyhum_utils import sliding_window, im_resize, cut_kmeans
-from joblib import Parallel, delayed, cpu_count
+from joblib import Parallel, delayed #, cpu_count
 from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
 
 #import stdev
@@ -78,7 +78,7 @@ from skimage.feature import greycomatrix, greycoprops
 
 #plotting
 import matplotlib.pyplot as plt
-import matplotlib.colors as colors
+#import matplotlib.colors as colors
 
 # suppress divide and invalid warnings
 #np.seterr(divide='ignore')
@@ -92,12 +92,12 @@ warnings.filterwarnings("ignore")
 # =============== begin program ======================
 # ========================================================
 
-__all__ = [
-    'correct',
-    'custom_save',
-    'get_stats',
-    'correct_scans',
-    ]
+#__all__ = [
+#    'correct',
+#    'custom_save',
+#    'get_stats',
+#    'correct_scans',
+#    ]
 
 #################################################
 def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
@@ -139,7 +139,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
     if not humfile:
       print 'An input file is required!!!!!!'
       Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
-      inputfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
+      humfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
 
     # prompt user to supply directory if no input sonpath is given
     if not sonpath:
@@ -214,7 +214,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
              shoreline_star={}
              fig = plt.figure()
              ax = plt.gca()
-             im = ax.imshow(star_fp[p], cmap = 'gray') #, origin = 'upper')
+             ax.imshow(star_fp[p], cmap = 'gray') #, origin = 'upper') #im = 
              plt.axis('normal'); plt.axis('tight')
              pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
              x1=map(lambda x: x[0],pts1) # map applies the function passed as 
@@ -240,7 +240,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
           shoreline_star={}
           fig = plt.figure()
           ax = plt.gca()
-          im = ax.imshow(star_fp, cmap = 'gray') #, origin = 'upper')
+          ax.imshow(star_fp, cmap = 'gray') #, origin = 'upper') #im = 
           plt.axis('normal'); plt.axis('tight')
           pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
           x1=map(lambda x: x[0],pts1) # map applies the function passed as 
@@ -286,7 +286,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
              shoreline_port={}
              fig = plt.figure()
              ax = plt.gca()
-             im = ax.imshow(port_fp[p], cmap = 'gray') #, origin = 'upper')
+             ax.imshow(port_fp[p], cmap = 'gray') #, origin = 'upper') #im = 
              plt.axis('normal'); plt.axis('tight')
              pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
              x1=map(lambda x: x[0],pts1) # map applies the function passed as 
@@ -312,7 +312,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
           shoreline_port={}
           fig = plt.figure()
           ax = plt.gca()
-          im = ax.imshow(port_fp, cmap = 'gray') #, origin = 'upper')
+          ax.imshow(port_fp, cmap = 'gray') #, origin = 'upper') #im = 
           plt.axis('normal'); plt.axis('tight')
           pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
           x1=map(lambda x: x[0],pts1) # map applies the function passed as 

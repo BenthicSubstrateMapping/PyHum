@@ -57,7 +57,7 @@
 # operational
 from __future__ import division
 from scipy.io import loadmat
-import os, time, sys, getopt
+import os #, time, sys, getopt
 try:
    from Tkinter import Tk
    from tkFileDialog import askopenfilename, askdirectory
@@ -73,7 +73,7 @@ import PyHum.utils as humutils
 
 import pyresample
 import replace_nans
-from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
+from scipy.ndimage import binary_dilation, binary_erosion #, binary_fill_holes
 from scipy.spatial import cKDTree as KDTree
 
 # plotting
@@ -83,7 +83,6 @@ try:
 except:
    print "Error: Basemap could not be imported"
    pass
-#import simplekml
 
 # suppress divide and invalid warnings
 np.seterr(divide='ignore')
@@ -157,7 +156,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
     if not humfile:
        print 'An input file is required!!!!!!'
        Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
-       inputfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
+       humfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
 
     # prompt user to supply directory if no input sonpath is given
     if not sonpath:
@@ -216,7 +215,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
     pix_m = np.squeeze(meta['pix_m'])
     dep_m = np.squeeze(meta['dep_m'])
     c = np.squeeze(meta['c'])
-    dist_m = np.squeeze(meta['dist_m'])
+    #dist_m = np.squeeze(meta['dist_m'])
 
     theta = np.squeeze(meta['heading'])/(180/np.pi)
 
@@ -306,7 +305,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
           
           del merge
              
-          #if dogrid==1:
           dat[dat==0] = np.nan
           dat[np.isinf(dat)] = np.nan
 
@@ -315,16 +313,14 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
 
           glon, glat = trans(grid_x, grid_y, inverse=True)
           del grid_x, grid_y
-             
-          #else:
-          #   glon = None
-          #   glat = None
-          #   datm = None
-
-          #print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
-          print_map(cs2cs_args, glon, glat, datm, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
-
-          #make_kml(p, sonpath, humlat, humlon)
+          
+          vmin=np.nanmin(datm)+0.1
+          vmax=np.nanmax(datm)-0.1
+          if vmin > vmax:
+             vmin=np.nanmin(datm)
+             vmax=np.nanmax(datm)            
+          
+          print_map(cs2cs_args, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax)
 
        ## draw concatenated
        X = []; Y = []; S = [];
@@ -380,7 +376,13 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
           glon, glat = trans(grid_x, grid_y, inverse=True)
           del grid_x, grid_y
 
-       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1) #dogrid, 
+       vmin=np.nanmin(datm)+0.1
+       vmax=np.nanmax(datm)-0.1
+       if vmin > vmax:
+         vmin=np.nanmin(datm)
+         vmax=np.nanmax(datm)
+
+       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax) #dogrid, 
 
     else: #just 1 chunk   
     
@@ -462,24 +464,21 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
           glon, glat = trans(grid_x, grid_y, inverse=True)
           del grid_x, grid_y
 
-       #else:
-       #   glon = None
-       #   glat = None
-       #   datm = None
+       vmin=np.nanmin(datm)+0.1
+       vmax=np.nanmax(datm)-0.1
+       if vmin > vmax:
+         vmin=np.nanmin(datm)
+         vmax=np.nanmax(datm)
+         
+       print_map(cs2cs_args, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax)
 
-       #print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
-       print_map(cs2cs_args, glon, glat, datm, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
-
-       #make_kml(0, sonpath, humlat, humlon)
-
-       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1) #merge, dogrid, 
+       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax) #merge, dogrid, 
     
 # =========================================================
 def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, vmin, vmax): #merge, 
 
     #levels = [0,0.25,0.5,0.75,1.25,1.5,1.75,2,3,5]
           
-
     print "drawing and printing map ..."
     fig = plt.figure(frameon=False)
     map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
@@ -556,6 +555,8 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
 
     if mode==1:
 
+       wf = None
+       
        complete=0
        while complete==0:
           try:
@@ -564,7 +565,7 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
                 complete=1 
           except:
              #del grid_x, grid_y, targ_def, orig_def
-             dat, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans)
+             dat, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans, nn, wf, sigmas, eps)
 
     elif mode==2:
        # custom inverse distance 
@@ -578,10 +579,12 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
                 complete=1 
           except:
              #del grid_x, grid_y, targ_def, orig_def
-             dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans)
+             dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans, nn, wf, sigmas, eps)
 
     elif mode==3:
 
+       wf = None
+       
        complete=0
        while complete==0:
           try:
@@ -590,7 +593,7 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
                 complete=1 
           except:
              #del grid_x, grid_y, targ_def, orig_def
-             dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans)
+             dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans, nn, wf, sigmas, eps)
 
     dat = dat.reshape(shape)
     if mode>1:
@@ -665,7 +668,7 @@ def trim_xys(X, Y, merge, index):
     
           
 # =========================================================
-def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mode, trans):
+def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mode, trans, nn, wf, sigmas, eps):
    
    complete=0
    while complete==0:
@@ -761,6 +764,23 @@ if __name__ == '__main__':
 
    map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, influence, numstdevs)
 
+
+       #print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
+          #if dogrid==1:
+#import simplekml             
+          #else:
+          #   glon = None
+          #   glat = None
+          #   datm = None
+
+          #print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, p, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
+          #make_kml(p, sonpath, humlat, humlon)
+       #else:
+       #   glon = None
+       #   glat = None
+       #   datm = None
+       #make_kml(0, sonpath, humlat, humlon)
+       
 #    dogrid : float, *optional* [Default=1]
 #       if 1, textures will be gridded with resolution 'res'. 
 #       Otherwise, point cloud will be plotted

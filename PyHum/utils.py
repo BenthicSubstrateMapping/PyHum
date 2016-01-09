@@ -161,7 +161,7 @@ def get_bearing(calc_bearing, cog, filt_bearing, lat, lon, heading):
        k_means.fit(data) 
        del data
        
-       values = k_means.cluster_centers_.squeeze()
+       #values = k_means.cluster_centers_.squeeze()
        labels = k_means.labels_
 
        if np.sum(labels==0) > np.sum(labels==1):
@@ -471,7 +471,7 @@ def dpboundary(imu):
    p = p+1
 
    x = np.zeros((m,1))
-   cost = np.min(c[-1,:])
+   #cost = np.min(c[-1,:])
    xpos = np.argmin( c[-1,:] )
    for i in reversed(range(1,m)):
       x[i] = xpos
