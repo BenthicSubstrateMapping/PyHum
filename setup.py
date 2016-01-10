@@ -147,6 +147,8 @@ if USE_CYTHON:
         include_dirs=[np.get_include()]),
         Extension("PyHum.write", [ "PyHum/write.pyx" ],
         include_dirs=[np.get_include()]),
+        Extension("PyHum.getxy", [ "PyHum/getxy.pyx" ],
+        include_dirs=[np.get_include()]),
         Extension('_RunningStats',sources=['PyHum/RunningStats_wrap.cxx', 'PyHum/RunningStats.cpp']),
     ]
     cmdclass.update({ 'build_ext': build_ext })
@@ -168,6 +170,8 @@ else:
         include_dirs=[np.get_include()]),
         Extension("PyHum.write", [ "PyHum/write.c" ],
         include_dirs=[np.get_include()]),
+        Extension("PyHum.getxy", [ "PyHum/getxy.c" ],
+        include_dirs=[np.get_include()]),        
         Extension('_RunningStats',sources=['PyHum/RunningStats_wrap.cxx', 'PyHum/RunningStats.cpp']),
     ]
 install_requires = [

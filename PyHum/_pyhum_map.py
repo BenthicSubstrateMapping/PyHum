@@ -71,6 +71,8 @@ import write
 
 import PyHum.io as io
 
+import getxy
+
 # numerical
 import numpy as np
 import PyHum.utils as humutils
@@ -95,7 +97,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode=3, nn = 128, influence = 1, numstdevs=5): #dogrid = 1, 
+def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode=3, nn = 64, influence = 1, numstdevs=5): #dogrid = 1, 
          
     '''
     Create plots of the spatially referenced sidescan echograms
