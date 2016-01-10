@@ -640,13 +640,19 @@ def getxy(e, n, yvec, d, t,extent):
    #x, y, eucl. dist, depth, theta 
    return xx, yy, np.sqrt((xx-e)**2 + (yy-n)**2), np.ones(len(xx))*d, np.ones(len(xx))*t
 
+def
+
+# =========================================================
+def xyfunc(e,n,yvec,d,t,extent):
+   return getxy.GetXY.getdat()
+   
 # =========================================================
 def getXY(e,n,yvec,d,t,extent):
    print "getting point cloud ..." 
 
    #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
  
-   o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy.GetXY.getdat)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
+   o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
 
    #eating, northing, distance to sonar, depth, heading
    X, Y, D, h, t = zip(*o)
