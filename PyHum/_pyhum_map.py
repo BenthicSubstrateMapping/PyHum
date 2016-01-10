@@ -642,7 +642,7 @@ def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mo
 
 # =========================================================
 def xyfunc(e,n,yvec,d,t,extent):
-   return getxy.GetXY(e,n,yvec,d,t,extent).getdat()
+   return getxy.GetXY(e, n, yvec, d, t, extent).getdat()
  
 # =========================================================
 def getXY(e,n,yvec,d,t,extent):

@@ -12,7 +12,7 @@ cdef class GetXY:
     @cython.cdivision(True)
     @cython.wraparound(False)
     @cython.nonecheck(False)
-    def __init__(self, e, n, d, yvec, t, extent):
+    def __init__(self, e, n, yvec, d, t, extent):
 
        self.e = e
        self.n = n
