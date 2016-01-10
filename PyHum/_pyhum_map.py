@@ -643,7 +643,7 @@ def getxy(e, n, yvec, d, t,extent):
 
 # =========================================================
 def xyfunc(e,n,yvec,d,t,extent):
-   return getxy.GetXY.getdat()
+   return getxy.GetXY(e,n,yvec,d,t,extent).getdat()
    
 # =========================================================
 def getXY(e,n,yvec,d,t,extent):
