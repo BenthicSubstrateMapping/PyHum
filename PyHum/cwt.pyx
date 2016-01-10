@@ -6,6 +6,8 @@ cimport numpy as np
 cimport cython
 from libc.math cimport sqrt,log,abs
 
+from cython.view cimport array as cvarray
+
 # =========================================================
 cdef class Cwt:
     """
@@ -117,6 +119,23 @@ cdef class Cwt:
         with nogil:
            return int(log(x+0.0001)/ log(2.0)+0.0001)
         
+#    # =========================================================
+#    @cython.boundscheck(False)   
+#    @cython.cdivision(True)
+#    @cython.wraparound(False)
+#    @cython.nonecheck(False)
+#    cpdef int _setscales(self, int ndata, int largestscale, int notes):
+#        """
+#        returns a log scale based on notes per ocave
+#        """
+#        cdef int noctave = self._log2( ndata/largestscale/2 )
+#        self.nscale = notes*noctave
+#        cdef np.ndarray[np.float64_t, ndim=1] scales = np.empty(self.nscale,np.float64)
+#        self.scales = scales
+#        for j from 0 <= j < self.nscale:
+#             self.scales[j] = ndata/(self.scale*(2.0**(self.nscale-1-j)/notes))
+#        return 0
+    
     # =========================================================
     @cython.boundscheck(False)   
     @cython.cdivision(True)
@@ -128,11 +147,15 @@ cdef class Cwt:
         """
         cdef int noctave = self._log2( ndata/largestscale/2 )
         self.nscale = notes*noctave
-        cdef np.ndarray[np.float64_t, ndim=1] scales = np.empty(self.nscale,np.float64)
+        #cdef np.ndarray[np.float64_t, ndim=1] scales = np.empty(self.nscale,np.float64)
+        
+        cyarr = cvarray(shape=(1,self.nscale), itemsize=sizeof(float), format="f")
+        cdef int [:, :, :] scales = cyarr        
+        
         self.scales = scales
         for j from 0 <= j < self.nscale:
              self.scales[j] = ndata/(self.scale*(2.0**(self.nscale-1-j)/notes))
-        return 0
+        return 0            
         
     # =========================================================
     @cython.boundscheck(False)   
