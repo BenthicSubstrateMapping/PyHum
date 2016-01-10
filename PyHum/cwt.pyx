@@ -53,9 +53,8 @@ cdef class Cwt:
         
         cdef int lr = np.shape(matrix)[1]
         self.r = lr
-        
         print lr
-        
+         
         cdef int i, scaleindex
         
         cdef np.ndarray[np.float64_t, ndim=0] currentscale 
@@ -78,23 +77,31 @@ cdef class Cwt:
         cdef np.ndarray[np.float64_t,ndim=1] data2 = np.empty(ndata, dtype=np.float64)
         cdef np.ndarray[np.complex128_t,ndim=1] datahat = np.empty(ndata, dtype=np.complex128)
         cdef np.ndarray[np.float64_t,ndim=1] s_omega = np.empty(ndata, dtype=np.float64)
-        cdef np.ndarray[np.float64_t,ndim=1] psihat = np.empty(ndata, dtype=np.float64)
+        cdef np.ndarray[np.float64_t,ndim=1] psihat = np.empty(ndata, dtype=np.float64) 
+        
+        if np.sum(matrix)>0:
+           self.docalc = 1
 
-        for i from 0 <= i < lr:  
-           #data = np.asarray( self._column(matrix, np.int(self.r[i]) ) )
-           data = np.asarray( self._column(matrix, i ) )           
-           data2 = self._pad2nxtpow2(data - np.mean(data), base2) 
+           for i from 0 <= i < lr:  
+              #data = np.asarray( self._column(matrix, np.int(self.r[i]) ) )
+              data = np.asarray( self._column(matrix, i ) )           
+              data2 = self._pad2nxtpow2(data - np.mean(data), base2) 
                       
-           datahat = np.fft.fft(data2)
-           self.fftdata = datahat
+              datahat = np.fft.fft(data2)
+              self.fftdata = datahat
       
-           for scaleindex from 0 <= scaleindex < self.nscale:
-              currentscale = np.asarray(self.scales[scaleindex])
-              self.currentscale = currentscale  # for internal use
-              s_omega = omega*currentscale
-              psihat = self._wf(s_omega) * sqrt(2.0*pi*currentscale)
-              self.cwt[scaleindex,0:ndata,i] = np.fft.ifft(psihat * datahat)        
-        return
+              for scaleindex from 0 <= scaleindex < self.nscale:
+                 currentscale = np.asarray(self.scales[scaleindex])
+                 self.currentscale = currentscale  # for internal use
+                 s_omega = omega*currentscale
+                 psihat = self._wf(s_omega) * sqrt(2.0*pi*currentscale)
+                 self.cwt[scaleindex,0:ndata,i] = np.fft.ifft(psihat * datahat)        
+           return
+        
+        else:
+           self.docalc = 0
+           return        
+        
 
     # =========================================================
     @cython.boundscheck(False)   
@@ -187,18 +194,23 @@ cdef class Cwt:
         """
         cdef float pi = 3.14159265
         cdef np.ndarray n
-        n = np.r_[0:len(self.scales)]-(len(self.scales)-1)/2
-        wave = self._getwave()
+        cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64)  
+                         
+        if self.docalc == 1:
+
+           n = np.r_[0:len(self.scales)]-(len(self.scales)-1)/2
+           wave = self._getwave()
         
-        cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64)
-        dat = np.var(np.var(wave.T,axis=1),axis=0)
+           dat = np.var(np.var(wave.T,axis=1),axis=0)
 
-        dat = dat/np.sum(dat) * np.exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
-        dat = dat/np.sum(dat)
+           dat = dat/np.sum(dat) * np.exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
+           dat = dat/np.sum(dat)
 
-        dat = dat/(self.scales**2)
-        dat = dat/np.sum(dat)
+           dat = dat/(self.scales**2)
+           dat = dat/np.sum(dat)
            
-        #return sqrt(np.sum(dat*((self.scales- np.sum(dat*self.scales) )**2)))
-        return np.sum(dat*self.scales)
+           #return sqrt(np.sum(dat*((self.scales- np.sum(dat*self.scales) )**2)))
+           return np.sum(dat*self.scales)
+        else:
+           return np.nan
         
