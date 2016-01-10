@@ -70,11 +70,11 @@ import PyHum.io as io
 import numpy as np
 import pyproj
 import PyHum.utils as humutils
-
 import pyresample
-import replace_nans
 from scipy.ndimage import binary_dilation, binary_erosion #, binary_fill_holes
 from scipy.spatial import cKDTree as KDTree
+
+import replace_nans
 
 # plotting
 import matplotlib.pyplot as plt
