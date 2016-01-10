@@ -92,7 +92,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasses=4, maxscale=20, notes=4):
+def texture(humfile, sonpath, win=100, shift=5, doplot=1, density=50, numclasses=4, maxscale=20, notes=4):
           
       '''
       Create a texture lengthscale map using the algorithm detailed by Buscombe et al. (forthcoming)
@@ -440,20 +440,20 @@ def get_srt(Z,ind,maxscale, notes, win): #, density):
             srt = np.reshape(d , ( ind[0], ind[1] ) )
             del d
 
-            try:
-               #print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
-               print "%s windows to process" % (str(len(Z)))               
-            # do the wavelet clacs and get the stats
-               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in xrange(len(Z))) #density
-            except:
-               print "memory error: trying serial"
-               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in xrange(len(Z))) #density
+            #try:
+            #   #print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+            #   print "%s windows to process" % (str(len(Z)))               
+            ## do the wavelet clacs and get the stats
+            #   d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in xrange(len(Z))) #density
+            #except:
+            #   print "memory error: trying serial"
+            #   d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in xrange(len(Z))) #density
 
-            srt2 = np.reshape(d , ( ind[0], ind[1] ) )
-            del d
-            Z = None
+            #srt2 = np.reshape(d , ( ind[0], ind[1] ) )
+            #del d
+            #Z = None
 
-            return srt+srt2
+            return srt #srt+srt2
             
 # =========================================================
 def get_kclass(Sk, numclasses):   
