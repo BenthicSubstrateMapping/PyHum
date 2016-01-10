@@ -427,10 +427,10 @@ def get_srt(Z,ind,maxscale, notes, win): #, density):
        print "memory error: trying serial"
        d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win) for k in xrange(len(Z))) #density
 
-       srt = np.reshape(d , ( ind[0], ind[1] ) )
-       del d
+    srt = np.reshape(d , ( ind[0], ind[1] ) )
+    del d
 
-       return srt #srt+srt2
+    return srt #srt+srt2
             
 # =========================================================
 def get_kclass(Sk, numclasses):   
