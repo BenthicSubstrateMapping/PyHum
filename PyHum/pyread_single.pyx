@@ -1,6 +1,5 @@
 # cython: boundscheck=False
 # cython: cdivision=True
-# cython: wraparound=False
 # cython: nonecheck=False
 """
 Part of PyHum software 
@@ -150,7 +149,8 @@ cdef class pyread:
     cpdef tuple _calc_beam_pos(self, float dist, float bearing, tuple point):
     #def _calc_beam_pos(self, float dist, float bearing, tuple point):
        cdef float dist_x, dist_y, x_final, y_final
-       dist_x, dist_y = (dist*sin(bearing), dist*cos(bearing))
+       with nogil:
+          dist_x, dist_y = (dist*sin(bearing), dist*cos(bearing))
        xfinal, yfinal = (point[0] + dist_x, point[1] + dist_y)
        return (xfinal, yfinal)
 
