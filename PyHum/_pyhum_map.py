@@ -640,7 +640,6 @@ def getxy(e, n, yvec, d, t,extent):
    #x, y, eucl. dist, depth, theta 
    return xx, yy, np.sqrt((xx-e)**2 + (yy-n)**2), np.ones(len(xx))*d, np.ones(len(xx))*t
 
-def
 
 # =========================================================
 def xyfunc(e,n,yvec,d,t,extent):
