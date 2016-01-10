@@ -4,29 +4,7 @@ from __future__ import division
 import numpy as np
 cimport numpy as np
 cimport cython
-from libc.math cimport sqrt,log,abs,exp
-
-#ctypedef double (*metric_ptr)(double[::1], double[::1])
-
-def sum_np64(np.float64_t[::1] A):
-    cdef:
-        double s = 0
-        size_t k
-
-    for k in range(A.shape[0]):
-        s += A[k]
-
-    return s
-    
-def sum_np32(np.float32_t[::1] A):
-    cdef:
-        float s = 0
-        size_t k
-
-    for k in range(A.shape[0]):
-        s += A[k]
-
-    return s    
+from libc.math cimport sqrt,log,abs   
 
 # =========================================================
 cdef class Cwt:
@@ -224,9 +202,7 @@ cdef class Cwt:
         """
         cdef float pi = 3.14159265
         cdef np.ndarray n
-        #cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64, )  
-        
-        cdef double[::1] dat = np.empty(len(self.scales))
+        cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64, )  
                          
         if self.docalc == 1:
 
