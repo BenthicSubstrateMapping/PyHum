@@ -22,15 +22,15 @@ cdef class Cwt:
     cdef object scales
     cdef object currentscale
     cdef object win
-    #cdef object density
-    #cdef object r
+    cdef object density
+    cdef object r
             
     # =========================================================
     @cython.boundscheck(False)
     @cython.cdivision(True)
     @cython.wraparound(False)
     @cython.nonecheck(False)
-    def __init__(self, np.ndarray[np.float32_t, ndim=2] matrix, int largestscale, int notes, int win): #int density
+    def __init__(self, np.ndarray[np.float32_t, ndim=2] matrix, int largestscale, int notes, int win, int density):
         """
         Continuous Morlet wavelet transform of data
 
@@ -42,17 +42,14 @@ cdef class Cwt:
                  smallest scale should be >= 2 for meaningful data
         """
         self.win = win
-        #self.density = density
+        self.density = density
         
         cdef float pi = 3.14159265
         
-        #cdef np.ndarray r
-        #r = np.arange(1,self.win-1,self.density, dtype=np.int)
-        #self.r = r
-        #cdef int lr = len(self.r)
-        
-        cdef int lr = np.shape(matrix)[1]
-        
+        cdef np.ndarray r
+        r = np.arange(1,self.win-1,self.density, dtype=np.int)
+        self.r = r
+        cdef int lr = len(self.r)
         cdef int i, scaleindex
         
         cdef np.ndarray[np.float64_t, ndim=0] currentscale 
@@ -65,8 +62,7 @@ cdef class Cwt:
         self.nscale = tmp
         self.scale = largestscale
         self._setscales(ndata,largestscale,notes)
-        #cdef np.ndarray[np.complex64_t, ndim=3] cwt = np.zeros((self.nscale,ndata,len(self.r)),dtype=np.complex64)
-        cdef np.ndarray[np.complex64_t, ndim=3] cwt = np.zeros((self.nscale,ndata,lr),dtype=np.complex64)        
+        cdef np.ndarray[np.complex64_t, ndim=3] cwt = np.zeros((self.nscale,ndata,len(self.r)),dtype=np.complex64)
         self.cwt = cwt
         cdef np.ndarray[np.float64_t, ndim=1] omega = np.empty(ndata, dtype=np.float64)
         omega = np.array(range(0,np.int(ndata/2))+range(-np.int(ndata/2),0))*(2.0*pi/ndata)
@@ -78,8 +74,7 @@ cdef class Cwt:
         cdef np.ndarray[np.float64_t,ndim=1] psihat = np.empty(ndata, dtype=np.float64)
 
         for i from 0 <= i < lr:  
-           #data = np.asarray( self._column(matrix, np.int(self.r[i]) ) )
-           data = np.asarray( self._column(matrix, i ) )           
+           data = np.asarray( self._column(matrix, np.int(self.r[i]) ) )
            data2 = self._pad2nxtpow2(data - np.mean(data), base2) 
                       
            datahat = np.fft.fft(data2)
