@@ -628,30 +628,29 @@ def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mo
    return dat, stdev, counts, res, complete, shape
 
 
-## =========================================================
-#def getxy(e, n, yvec, d, t,extent):
-#   x = np.concatenate((np.tile(e,extent) , np.tile(e,extent)))
-#   rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d, 2.0))
-#   y = np.concatenate((n+rangedist, n-rangedist))
-#   # Rotate line around center point
-#   xx = e - ((x - e) * np.cos(t)) - ((y - n) * np.sin(t))
-#   yy = n - ((x - e) * np.sin(t)) + ((y - n) * np.cos(t))
-#   xx, yy = calc_beam_pos(d, t, xx, yy)
-#   #x, y, eucl. dist, depth, theta 
-#   return xx, yy, np.sqrt((xx-e)**2 + (yy-n)**2), np.ones(len(xx))*d, np.ones(len(xx))*t
-
-
 # =========================================================
-def xyfunc(e,n,yvec,d,t,extent):
-   return getxy.GetXY(e,n,yvec,d,t,extent).getdat()
-   
+def getxy(e, n, yvec, d, t,extent):
+   x = np.concatenate((np.tile(e,extent) , np.tile(e,extent)))
+   rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d, 2.0))
+   y = np.concatenate((n+rangedist, n-rangedist))
+   # Rotate line around center point
+   xx = e - ((x - e) * np.cos(t)) - ((y - n) * np.sin(t))
+   yy = n - ((x - e) * np.sin(t)) + ((y - n) * np.cos(t))
+   xx, yy = calc_beam_pos(d, t, xx, yy)
+   #x, y, eucl. dist, depth, theta 
+   return xx, yy, np.sqrt((xx-e)**2 + (yy-n)**2), np.ones(len(xx))*d, np.ones(len(xx))*t
+
+## =========================================================
+#def xyfunc(e,n,yvec,d,t,extent):
+#   return getxy.GetXY(e,n,yvec,d,t,extent).getdat()
+ 
 # =========================================================
 def getXY(e,n,yvec,d,t,extent):
    print "getting point cloud ..." 
 
-   #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
+   o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
  
-   o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
+   #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
 
    #eating, northing, distance to sonar, depth, heading
    X, Y, D, h, t = zip(*o)
