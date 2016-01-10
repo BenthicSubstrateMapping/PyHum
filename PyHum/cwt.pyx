@@ -53,7 +53,7 @@ cdef class Cwt:
     @cython.cdivision(True)
     @cython.wraparound(False)
     @cython.nonecheck(False)
-    def __init__(self, np.ndarray[np.float32_t, ndim=2, mode='c'] matrix, int largestscale, int notes, int win):
+    def __init__(self, np.ndarray[np.float32_t, ndim=2] matrix, int largestscale, int notes, int win):
     
         """
         Continuous Morlet wavelet transform of data
@@ -104,7 +104,7 @@ cdef class Cwt:
         
         self.docalc = 0
         
-        if sum_np32(matrix)>0: #np.sum(matrix)>0:
+        if np.sum(matrix)>0:
            self.docalc = 1
 
            for i from 0 <= i < lr:  
@@ -224,7 +224,7 @@ cdef class Cwt:
         """
         cdef float pi = 3.14159265
         cdef np.ndarray n
-        cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64)  
+        cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64, mode='c')  
                          
         if self.docalc == 1:
 
@@ -234,8 +234,8 @@ cdef class Cwt:
            dat = np.var(np.var(wave.T,axis=1),axis=0)
            
            #dat = dat/np.sum(dat) * np.exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
-           dat = dat/np.sum(dat) * exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)                     
-           dat = dat/np.sum(dat)
+           dat = dat/sum_np64(dat) * exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)                     
+           dat = dat/sum_np64(dat) #np.sum(dat)
 
            dat = dat/(self.scales**2)
            dat = dat/np.sum(dat)
