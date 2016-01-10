@@ -14,6 +14,11 @@ cdef class GetXY:
     @cython.nonecheck(False)
     def __init__(self, np.ndarray[np.float64_t, ndim=1] e, np.ndarray[np.float32_t, ndim=1] n, np.ndarray[np.float32_t, ndim=1] d, np.ndarray[np.float32_t, ndim=1] yvec, np.ndarray[np.float64_t, ndim=1] t, int extent):
 
+       self.e = e
+       self.n = n
+       self.d = d
+       self.t = t
+                     
        x = np.concatenate((np.tile(e,extent) , np.tile(e,extent)))
        rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d, 2.0))
        y = np.concatenate((n+rangedist, n-rangedist))
@@ -42,7 +47,7 @@ cdef class GetXY:
         """
         returns data in .DAT file
         """  
-        return self.xx, self.yy      
+        return self.xx, self.yy, np.sqrt((self.xx-self.e)**2 + (self.yy-self.n)**2), np.ones(len(self.xx))*self.d, np.ones(len(self.xx))*self.t
         
         
         
