@@ -157,7 +157,7 @@ def dotest():
    #noisefloor = 10
    
    ## create mosaic out of all chunks with weighting according to distance from nadir, grazing angle, or both
-   PyHum.mosaic(humfile, sonpath, cs2cs_args, res, nn, noisefloor)
+   #PyHum.mosaic(humfile, sonpath, cs2cs_args, res, nn, noisefloor)
 
 if __name__ == '__main__':
    dotest()

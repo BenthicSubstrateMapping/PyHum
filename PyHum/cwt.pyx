@@ -54,6 +54,8 @@ cdef class Cwt:
         cdef int lr = np.shape(matrix)[1]
         self.r = lr
         
+        print lr
+        
         cdef int i, scaleindex
         
         cdef np.ndarray[np.float64_t, ndim=0] currentscale 
