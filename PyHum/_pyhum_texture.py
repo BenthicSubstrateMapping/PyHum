@@ -69,10 +69,11 @@ import PyHum.io as io
 
 # numerical
 import numpy as np
-import cwt
-import replace_nans
 import PyHum.utils as humutils
 from scipy.ndimage.filters import median_filter
+
+import cwt
+import replace_nans
 
 # plotting
 import matplotlib.pyplot as plt
@@ -92,7 +93,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def texture(humfile, sonpath, win=100, shift=5, doplot=1, density=50, numclasses=4, maxscale=20, notes=4):
+def texture(humfile, sonpath, win=100, shift=5, doplot=1, density=25, numclasses=4, maxscale=20, notes=4):
           
       '''
       Create a texture lengthscale map using the algorithm detailed by Buscombe et al. (forthcoming)
@@ -262,12 +263,6 @@ def texture(humfile, sonpath, win=100, shift=5, doplot=1, density=50, numclasses
             
             Z,ind = humutils.sliding_window_sliced(np.vstack((np.flipud(port_fp[p]), star_fp[p])), density, (win,win),(shift,shift))
             
-            #try:
-            #   Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))              
-            #except:
-            #   print "memory-mapping failed in sliding window - trying memory intensive version"
-            #   Z,ind = humutils.sliding_window_nomm(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))
-
             Snn = get_srt(Z,ind,maxscale, notes, win) #, density)
  
             # replace nans using infilling algorithm
@@ -313,12 +308,7 @@ def texture(humfile, sonpath, win=100, shift=5, doplot=1, density=50, numclasses
 
       else: 
 
-            Z,ind = humutils.sliding_window_sliced(np.vstack((np.flipud(port_fp), star_fp)), density, (win,win),(shift,shift))
-            #try:
-            #   Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))   
-            #except:
-            #   print "memory-mapping failed in sliding window - trying memory intensive version"
-            #   Z,ind = humutils.sliding_window_nomm(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))   
+            Z,ind = humutils.sliding_window_sliced(np.vstack((np.flipud(port_fp), star_fp)), density, (win,win),(shift,shift))  
             
             Snn = get_srt(Z,ind,maxscale, notes, win) #, density)
             
@@ -428,32 +418,19 @@ def texture(humfile, sonpath, win=100, shift=5, doplot=1, density=50, numclasses
     
 # =========================================================
 def get_srt(Z,ind,maxscale, notes, win): #, density):    
-            try:
-               #print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
-               print "%s windows to process" % (str(len(Z)))                              
-            # do the wavelet clacs and get the stats
-               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win) for k in xrange(len(Z))) #density
-            except:
-               print "memory error: trying serial"
-               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win) for k in xrange(len(Z))) #density
+    try:
+       #print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+       print "%s windows to process" % (str(len(Z)))                              
+       # do the wavelet clacs and get the stats
+       d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win) for k in xrange(len(Z))) #density
+    except:
+       print "memory error: trying serial"
+       d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win) for k in xrange(len(Z))) #density
 
-            srt = np.reshape(d , ( ind[0], ind[1] ) )
-            del d
+       srt = np.reshape(d , ( ind[0], ind[1] ) )
+       del d
 
-            #try:
-            #   #print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
-            #   print "%s windows to process" % (str(len(Z)))               
-            ## do the wavelet clacs and get the stats
-            #   d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in xrange(len(Z))) #density
-            #except:
-            #   print "memory error: trying serial"
-            #   d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in xrange(len(Z))) #density
-
-            #srt2 = np.reshape(d , ( ind[0], ind[1] ) )
-            #del d
-            #Z = None
-
-            return srt #srt+srt2
+       return srt #srt+srt2
             
 # =========================================================
 def get_kclass(Sk, numclasses):   
@@ -689,3 +666,28 @@ if __name__ == '__main__':
 #            Snn = SRT.copy() 
 #            del SRT
 
+            #try:
+            #   Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))              
+            #except:
+            #   print "memory-mapping failed in sliding window - trying memory intensive version"
+            #   Z,ind = humutils.sliding_window_nomm(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))
+
+           #try:
+            #   #print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
+            #   print "%s windows to process" % (str(len(Z)))               
+            ## do the wavelet clacs and get the stats
+            #   d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in xrange(len(Z))) #density
+            #except:
+            #   print "memory error: trying serial"
+            #   d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in xrange(len(Z))) #density
+
+            #srt2 = np.reshape(d , ( ind[0], ind[1] ) )
+            #del d
+            #Z = None
+            
+            #try:
+            #   Z,ind = humutils.sliding_window(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))   
+            #except:
+            #   print "memory-mapping failed in sliding window - trying memory intensive version"
+            #   Z,ind = humutils.sliding_window_nomm(np.vstack((np.flipud(port_fp[p]), star_fp[p])),(win,win),(shift,shift))             
+            
