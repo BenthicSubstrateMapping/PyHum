@@ -4,7 +4,7 @@ from __future__ import division
 import numpy as np
 cimport numpy as np
 cimport cython
-from libc.math cimport sqrt,log,abs
+from libc.math cimport sqrt,log,abs,floor
 
 # =========================================================
 cdef class Cwt:
@@ -61,8 +61,9 @@ cdef class Cwt:
         cdef np.ndarray[np.float64_t, ndim=0] currentscale 
         
         cdef double base2 
-        base2 = np.floor(log(self.win)/log(2) + 0.4999)
-                   
+        #base2 = np.floor(log(self.win)/log(2) + 0.4999)
+        base2 = floor(log(self.win)/log(2) + 0.4999)
+                           
         cdef int ndata = int(2**(base2+1)) #len(data)
         cdef int tmp = 0
         self.nscale = tmp
