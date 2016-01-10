@@ -147,10 +147,7 @@ cdef class Cwt:
         """
         cdef int noctave = self._log2( ndata/largestscale/2 )
         self.nscale = notes*noctave
-        #cdef np.ndarray[np.float64_t, ndim=1] scales = np.empty(self.nscale,np.float64)
-        
-        cyarr = cvarray(shape=(1,self.nscale), itemsize=sizeof(float), format="f")
-        cdef int [:, :, :] scales = cyarr        
+        cdef np.ndarray[np.float64_t, ndim=1] scales = np.empty(self.nscale,np.float64)        
         
         self.scales = scales
         for j from 0 <= j < self.nscale:
@@ -178,7 +175,11 @@ cdef class Cwt:
        """
        zero pad numpy array up to next power 2
        """
-       cdef np.ndarray[np.float64_t, ndim=2] Y = np.zeros((1, np.int(2**(base2+1)) ), np.float64)
+       #cdef np.ndarray[np.float64_t, ndim=2] Y = np.zeros((1, np.int(2**(base2+1)) ), np.float64)
+       
+       cyarr = cvarray(shape=(1, np.int(2**(base2+1)) ), itemsize=sizeof(np.float64), format="d")
+       cdef int [:, :, :] Y = cyarr       
+       
        Y.flat[np.arange(self.win)] = data
        return np.squeeze(Y)
       
