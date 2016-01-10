@@ -235,9 +235,8 @@ cdef class Cwt:
         
            dat = np.var(np.var(wave.T,axis=1),axis=0)
            
-           #dat = dat/np.sum(dat) * np.exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
-           dat = dat/sum_np64(dat) * exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)                     
-           dat = dat/sum_np64(dat) #np.sum(dat)
+           dat = dat/np.sum(dat) * np.exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
+           dat = np.sum(dat)
 
            dat = dat/(self.scales**2)
            dat = dat/np.sum(dat)
