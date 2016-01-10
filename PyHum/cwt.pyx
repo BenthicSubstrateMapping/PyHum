@@ -23,7 +23,7 @@ cdef class Cwt:
     cdef object currentscale
     cdef object win
     #cdef object density
-    #cdef object r
+    cdef object r
             
     # =========================================================
     @cython.boundscheck(False)
@@ -52,6 +52,7 @@ cdef class Cwt:
         #cdef int lr = len(self.r)
         
         cdef int lr = np.shape(matrix)[1]
+        self.r = lr
         
         cdef int i, scaleindex
         
@@ -166,8 +167,10 @@ cdef class Cwt:
         """
         return power spectra
         """
-        cdef np.ndarray[np.float64_t, ndim=3] wave = np.empty((self.nscale,self.win,len(self.r)), np.float64)
-        for i from 0 <= i < len(self.r):  
+        #cdef np.ndarray[np.float64_t, ndim=3] wave = np.empty((self.nscale,self.win,len(self.r)), np.float64)
+        cdef np.ndarray[np.float64_t, ndim=3] wave = np.empty((self.nscale,self.win,self.r), np.float64)        
+        #for i from 0 <= i < len(self.r):
+        for i from 0 <= i < self.r:            
            wave[:,:,i] = np.tile(self.scales**-1, (self.win,1)).T*(abs(self.cwt[:,0:self.win,i])**2)
         return wave
         
