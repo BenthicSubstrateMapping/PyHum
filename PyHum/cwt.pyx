@@ -4,7 +4,7 @@ from __future__ import division
 import numpy as np
 cimport numpy as np
 cimport cython
-from libc.math cimport sqrt,log,abs   
+from libc.math cimport sqrt,log,abs
 
 # =========================================================
 cdef class Cwt:
@@ -202,7 +202,7 @@ cdef class Cwt:
         """
         cdef float pi = 3.14159265
         cdef np.ndarray n
-        cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64, )  
+        cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64)  
                          
         if self.docalc == 1:
 
@@ -212,7 +212,7 @@ cdef class Cwt:
            dat = np.var(np.var(wave.T,axis=1),axis=0)
            
            dat = dat/np.sum(dat) * np.exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
-           dat = np.sum(dat)
+           dat = dat/np.sum(dat)
 
            dat = dat/(self.scales**2)
            dat = dat/np.sum(dat)
