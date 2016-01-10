@@ -224,7 +224,9 @@ cdef class Cwt:
         """
         cdef float pi = 3.14159265
         cdef np.ndarray n
-        cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64, mode='c')  
+        #cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64, )  
+        
+        cdef double[::1] dat = np.empty(len(self.scales), mode='c')
                          
         if self.docalc == 1:
 
