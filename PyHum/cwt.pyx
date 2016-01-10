@@ -24,6 +24,7 @@ cdef class Cwt:
     cdef object win
     #cdef object density
     cdef object r
+    cdef object docalc
             
     # =========================================================
     @cython.boundscheck(False)
@@ -79,6 +80,8 @@ cdef class Cwt:
         cdef np.ndarray[np.float64_t,ndim=1] s_omega = np.empty(ndata, dtype=np.float64)
         cdef np.ndarray[np.float64_t,ndim=1] psihat = np.empty(ndata, dtype=np.float64) 
         
+        self.docalc = 0
+        
         if np.sum(matrix)>0:
            self.docalc = 1
 
@@ -99,7 +102,6 @@ cdef class Cwt:
            return
         
         else:
-           self.docalc = 0
            return        
         
 
