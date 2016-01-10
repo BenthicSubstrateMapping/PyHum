@@ -28,7 +28,7 @@ from __future__ import division
 import numpy as np
 cimport numpy as np
 
-#from cython.parallel cimport prange
+from cython.parallel cimport prange
 
 # =========================================================
 cdef class RN:
@@ -124,7 +124,8 @@ cdef class RN:
             
             # loop over the kernel
             #for I in xrange(2*kernel_size+1):
-            for I from 0 <= I < 2*kernel_size+1:
+            #for I from 0 <= I < 2*kernel_size+1:
+            for I in prange(2*kernel_size+1, nogil=True):
                 #for J in xrange(2*kernel_size+1):
                 for J from 0 <= J < 2*kernel_size+1:                     
                     # if we are not out of the boundaries
