@@ -105,7 +105,7 @@ def dotest():
    # for texture calcs
    win = 100 # pixel window
    shift = 5 # pixel shift
-   density =win/4 # win/2 
+   density =win/2 # win/2 
    numclasses = 4 # number of discrete classes for contouring and k-means
    maxscale = 20 # Max scale as inverse fraction of data length (for wavelet analysis)
    notes = 4 # Notes per octave (for wavelet analysis)
