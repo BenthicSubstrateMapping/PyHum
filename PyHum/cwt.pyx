@@ -6,7 +6,7 @@ cimport numpy as np
 cimport cython
 from libc.math cimport sqrt,log,abs
 
-from cython.view cimport array as cvarray
+ctypedef double (*metric_ptr)(double[::1], double[::1])
 
 # =========================================================
 cdef class Cwt:
@@ -119,22 +119,6 @@ cdef class Cwt:
         with nogil:
            return int(log(x+0.0001)/ log(2.0)+0.0001)
         
-#    # =========================================================
-#    @cython.boundscheck(False)   
-#    @cython.cdivision(True)
-#    @cython.wraparound(False)
-#    @cython.nonecheck(False)
-#    cpdef int _setscales(self, int ndata, int largestscale, int notes):
-#        """
-#        returns a log scale based on notes per ocave
-#        """
-#        cdef int noctave = self._log2( ndata/largestscale/2 )
-#        self.nscale = notes*noctave
-#        cdef np.ndarray[np.float64_t, ndim=1] scales = np.empty(self.nscale,np.float64)
-#        self.scales = scales
-#        for j from 0 <= j < self.nscale:
-#             self.scales[j] = ndata/(self.scale*(2.0**(self.nscale-1-j)/notes))
-#        return 0
     
     # =========================================================
     @cython.boundscheck(False)   
@@ -153,6 +137,7 @@ cdef class Cwt:
         for j from 0 <= j < self.nscale:
              self.scales[j] = ndata/(self.scale*(2.0**(self.nscale-1-j)/notes))
         return 0            
+ 
         
     # =========================================================
     @cython.boundscheck(False)   
@@ -164,6 +149,7 @@ cdef class Cwt:
        Morlet mother wavelet
        """    
        cdef np.ndarray[np.int64_t, ndim=1] H = np.ones(np.shape(s_omega), np.int64)
+               
        return 0.75112554*( np.exp(-(s_omega-6.0)**2/2.0))*H
       
     # =========================================================
@@ -175,10 +161,7 @@ cdef class Cwt:
        """
        zero pad numpy array up to next power 2
        """
-       #cdef np.ndarray[np.float64_t, ndim=2] Y = np.zeros((1, np.int(2**(base2+1)) ), np.float64)
-       
-       cyarr = cvarray(shape=(1, np.int(2**(base2+1)) ), itemsize=sizeof(np.float64), format="d")
-       cdef int [:, :, :] Y = cyarr       
+       cdef np.ndarray[np.float64_t, ndim=2] Y = np.zeros((1, np.int(2**(base2+1)) ), np.float64)
        
        Y.flat[np.arange(self.win)] = data
        return np.squeeze(Y)
@@ -229,7 +212,7 @@ cdef class Cwt:
            wave = self._getwave()
         
            dat = np.var(np.var(wave.T,axis=1),axis=0)
-
+           
            dat = dat/np.sum(dat) * np.exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
            dat = dat/np.sum(dat)
 
