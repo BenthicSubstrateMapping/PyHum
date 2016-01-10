@@ -6,6 +6,8 @@ cimport numpy as np
 cimport cython
 from libc.math cimport sqrt,log,abs
 
+ctypedef double (*metric_ptr)(double[::1], double[::1])
+
 # =========================================================
 cdef class Cwt:
     """
@@ -31,7 +33,9 @@ cdef class Cwt:
     @cython.cdivision(True)
     @cython.wraparound(False)
     @cython.nonecheck(False)
-    def __init__(self, np.ndarray[np.float32_t, ndim=2] matrix, int largestscale, int notes, int win): #int density
+    #def __init__(self, np.ndarray[np.float32_t, ndim=2] matrix, int largestscale, int notes, int win):
+    def __init__(self, double[::1] matrix, int largestscale, int notes, int win): 
+    
         """
         Continuous Morlet wavelet transform of data
 
