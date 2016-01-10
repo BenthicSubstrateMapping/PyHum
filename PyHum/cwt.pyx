@@ -53,7 +53,7 @@ cdef class Cwt:
     @cython.cdivision(True)
     @cython.wraparound(False)
     @cython.nonecheck(False)
-    def __init__(self, np.ndarray[np.float32_t, ndim=2] matrix, int largestscale, int notes, int win):
+    def __init__(self, np.ndarray[np.float32_t, ndim=2, mode='c'] matrix, int largestscale, int notes, int win):
     
         """
         Continuous Morlet wavelet transform of data
