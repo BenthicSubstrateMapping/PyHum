@@ -4,9 +4,29 @@ from __future__ import division
 import numpy as np
 cimport numpy as np
 cimport cython
-from libc.math cimport sqrt,log,abs
+from libc.math cimport sqrt,log,abs,exp
 
-ctypedef double (*metric_ptr)(double[::1], double[::1])
+#ctypedef double (*metric_ptr)(double[::1], double[::1])
+
+def sum_np64(np.float64_t[::1] A):
+    cdef:
+        double s = 0
+        size_t k
+
+    for k in range(A.shape[0]):
+        s += A[k]
+
+    return s
+    
+def sum_np32(np.float32_t[::1] A):
+    cdef:
+        float s = 0
+        size_t k
+
+    for k in range(A.shape[0]):
+        s += A[k]
+
+    return s    
 
 # =========================================================
 cdef class Cwt:
@@ -84,7 +104,7 @@ cdef class Cwt:
         
         self.docalc = 0
         
-        if np.sum(matrix)>0:
+        if sum_np32(matrix)>0: #np.sum(matrix)>0:
            self.docalc = 1
 
            for i from 0 <= i < lr:  
@@ -213,7 +233,8 @@ cdef class Cwt:
         
            dat = np.var(np.var(wave.T,axis=1),axis=0)
            
-           dat = dat/np.sum(dat) * np.exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
+           #dat = dat/np.sum(dat) * np.exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)
+           dat = dat/np.sum(dat) * exp(-(0.5)*((pi/2)*n/((len(self.scales)-1)/2))**2)                     
            dat = dat/np.sum(dat)
 
            dat = dat/(self.scales**2)
