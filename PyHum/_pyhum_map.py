@@ -644,7 +644,9 @@ def getxy(e, n, yvec, d, t,extent):
 def getXY(e,n,yvec,d,t,extent):
    print "getting point cloud ..." 
 
-   o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
+   #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
+ 
+   o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy.GetXY.getdat)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
 
    #eating, northing, distance to sonar, depth, heading
    X, Y, D, h, t = zip(*o)
