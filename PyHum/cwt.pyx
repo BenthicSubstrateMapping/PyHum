@@ -226,7 +226,7 @@ cdef class Cwt:
         cdef np.ndarray n
         #cdef np.ndarray[np.float64_t, ndim=1] dat= np.empty(len(self.scales), np.float64, )  
         
-        cdef double[::1] dat = np.empty(len(self.scales), mode='c')
+        cdef double[::1] dat = np.empty(len(self.scales))
                          
         if self.docalc == 1:
 
