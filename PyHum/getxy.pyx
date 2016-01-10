@@ -12,7 +12,7 @@ cdef class GetXY:
     @cython.cdivision(True)
     @cython.wraparound(False)
     @cython.nonecheck(False)
-    def __init__(self, float e, float n, float d, np.ndarray yvec, float t, int extent):
+    def __init__(self, e, n, d, yvec, t, extent):
 
        self.e = e
        self.n = n
@@ -33,7 +33,7 @@ cdef class GetXY:
     @cython.cdivision(True)
     @cython.wraparound(False)
     @cython.nonecheck(False)    
-    def _calc_beam_pos(self, float dist, float bearing, np.ndarray x, np.ndarray y):
+    def _calc_beam_pos(self, dist, bearing, x, y):
 
        dist_x, dist_y = (dist*np.sin(bearing), dist*np.cos(bearing))
        xfinal, yfinal = (x + dist_x, y + dist_y)
