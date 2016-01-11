@@ -495,7 +495,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
      
              # create memory mapped file for Z
              shape_port = io.set_mmap_data(sonpath, base, '_data_port2.dat', 'int16', tmp2)
-             shape_star = shape_port.copy()
+             #shape_star = shape_port.copy()
+             shape_star = tuple(np.asarray(shape_port).copy())
 
              ##we are only going to access the portion of memory required             
              port_fp = io.get_mmap_data(sonpath, base, '_data_port2.dat', 'int16', shape_port)
@@ -513,7 +514,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     
              # create memory mapped file for Z
              shape_port = io.set_mmap_data(sonpath, base, '_data_star2.dat', 'int16', tmp2)
-             shape_star = shape_port.copy()             
+             #shape_star = shape_port.copy()             
+             shape_star = tuple(np.asarray(shape_port).copy())
 
              #we are only going to access the portion of memory required 
              star_fp = io.get_mmap_data(sonpath, base, '_data_star2.dat', 'int16', shape_star)
@@ -573,7 +575,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
   
              # create memory mapped file for Z
              shape_low = io.set_mmap_data(sonpath, base, '_data_dwnhi2.dat', 'int16', tmp2)             
-             shape_hi = shape_low.copy() 
+             #shape_hi = shape_low.copy() 
+             shape_hi = tuple(np.asarray(shape_low).copy())
 
              ##we are only going to access the portion of memory required             
              dwnhi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi2.dat', 'int16', shape_hi)             
@@ -591,7 +594,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
  
              # create memory mapped file for Z
              shape_low = io.set_mmap_data(sonpath, base, '_data_dwnlow2.dat', 'int16', tmp2)             
-             shape_hi = shape_low.copy()         
+             #shape_hi = shape_low.copy()         
+             shape_hi = tuple(np.asarray(shape_low).copy())
 
              ##we are only going to access the portion of memory required             
              dwnlow_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow2.dat', 'int16', shape_low)             
