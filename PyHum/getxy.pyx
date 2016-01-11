@@ -2,52 +2,68 @@ from __future__ import division
 import numpy as np
 cimport numpy as np
 cimport cython
-from libc.math cimport sqrt,sin,cos
+from libc.math cimport sin,cos
 
 # =========================================================
 cdef class GetXY:
 
+    cdef object e
+    cdef object n
+    cdef object d
+    cdef object t
+    cdef object xx
+    cdef object yy
+                        
     # =========================================================
     @cython.boundscheck(False)
     @cython.cdivision(True)
     @cython.wraparound(False)
     @cython.nonecheck(False)
-    def __init__(self, e, n, yvec, d, t, extent):
+    def __init__(self, float e, float n, np.ndarray yvec, float d, float t, int extent):
 
+       cdef float sint
+       cdef float cost
+       cdef float dsq
+       cdef float dist_y
+       cdef float dist_x
+                            
        self.e = e
        self.n = n
        self.d = d
-       self.t = t
-                     
+       self.t = t                 
+
+       with nogil:
+          sint = sin(t)
+          cost = cos(t)
+          dsq = d*d
+          dist_y = d*cost
+          dist_x = d*sint 
+                                
+       rangedist = np.sqrt(yvec*yvec - dsq)               
        x = np.concatenate((np.tile(e,extent) , np.tile(e,extent)))
-       rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d, 2.0))
        y = np.concatenate((n+rangedist, n-rangedist))
+       
        # Rotate line around center point
-       xx = e - ((x - e) * np.cos(t)) - ((y - n) * np.sin(t))
-       yy = n - ((x - e) * np.sin(t)) + ((y - n) * np.cos(t))
-       self.xx, self.yy = self._calc_beam_pos(d, t, xx, yy)
-       return #xx, yy 
-
-    # =========================================================
-    @cython.boundscheck(False)
-    @cython.cdivision(True)
-    @cython.wraparound(False)
-    @cython.nonecheck(False)    
-    def _calc_beam_pos(self, dist, bearing, x, y):
-
-       dist_x, dist_y = (dist*np.sin(bearing), dist*np.cos(bearing))
-       xfinal, yfinal = (x + dist_x, y + dist_y)
-       return (xfinal, yfinal)
+       xx = e - ((x - e) * cost) - ((y - n) * sint)
+       yy = n - ((x - e) * sint) + ((y - n) * cost)
+       
+       self.xx = xx + dist_x
+       self.yy = yy + dist_y
+       return
   
        
-    # external functions ======================================                        
     # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
     def getdat(self):
-    #def gethumdat(self):    
         """
-        returns data in .DAT file
+        returns data
         """  
-        return self.xx, self.yy, np.sqrt((self.xx-self.e)**2 + (self.yy-self.n)**2), np.ones(len(self.xx))*self.d, np.ones(len(self.xx))*self.t
+        xxe = (self.xx-self.e)
+        yyn = (self.yy-self.n)
+        return self.xx, self.yy, np.sqrt((xxe*xxe) + (yyn*yyn)), np.ones(len(self.xx))*self.d, np.ones(len(self.xx))*self.t
         
         
         
