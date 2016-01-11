@@ -477,7 +477,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
          vmin=np.nanmin(datm)
          vmax=np.nanmax(datm)
        
-       Parallel(n_jobs = 2, verbose=0)(delayed(doplots)(k, cs2cs_args, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax, humlon, humlat) for k in xrange(2)) 
+       Parallel(n_jobs = 2, verbose=0)(delayed(doplots)(k, humlon, humlat, cs2cs_args, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax) for k in xrange(2)) 
        
        #print_map(cs2cs_args, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax)
 
@@ -489,7 +489,7 @@ def getclass_asc(sonpath, p):
    return np.genfromtxt(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')), delimiter=' ')
           
 # =========================================================
-def doplots(k, cs2cs_args, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax, humlon, humlat):
+def doplots(k, humlon, humlat, cs2cs_args, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax):
 
    if k==0:
       del humlon, humlat
