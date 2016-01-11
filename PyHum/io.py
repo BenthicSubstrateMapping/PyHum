@@ -21,4 +21,4 @@ def set_mmap_data(sonpath, base, string, dtype, Zt):
     del fp
     shape = np.shape(Zt)
     del Zt
-    return shape      
+    return np.asarray(shape)      
