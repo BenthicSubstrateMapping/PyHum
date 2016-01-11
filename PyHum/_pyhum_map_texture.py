@@ -489,7 +489,7 @@ def getclass_asc(sonpath, p):
    return np.genfromtxt(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')), delimiter=' ')
           
 # =========================================================
-def doplots(k, humlon, humlat, cs2cs_args, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax):
+def doplots(k, humlon, humlat, cs2cs_args, glon, glat, datm, sonpath, p, vmin, vmax):
 
    if k==0:
       del humlon, humlat
