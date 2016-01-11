@@ -65,5 +65,14 @@ cdef class GetXY:
         yyn = (self.yy-self.n)
         return self.xx, self.yy, np.sqrt((xxe*xxe) + (yyn*yyn)), np.ones(len(self.xx))*self.d, np.ones(len(self.xx))*self.t
         
-        
-        
+    # =========================================================
+    @cython.boundscheck(False)   
+    @cython.cdivision(True)
+    @cython.wraparound(False)
+    @cython.nonecheck(False)
+    def getdat2(self):
+        """
+        returns data
+        """  
+        return self.xx, self.yy
+                

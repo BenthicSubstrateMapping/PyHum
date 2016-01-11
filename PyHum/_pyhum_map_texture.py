@@ -76,6 +76,8 @@ from scipy.spatial import cKDTree as KDTree
 
 import replace_nans
 
+import getxy
+
 # plotting
 import matplotlib.pyplot as plt
 try:
@@ -322,67 +324,72 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
           
           print_map(cs2cs_args, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax)
 
-       ## draw concatenated
-       X = []; Y = []; S = [];
-       for p in xrange(len(class_fp)):
-          dat = np.genfromtxt(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')), delimiter=' ')
-          X.append(dat[:,0])
-          Y.append(dat[:,1])
-          S.append(dat[:,2])
-          del dat
+#       ## draw concatenated
+#       try:
+#          o = Parallel(n_jobs = 3, verbose=0)(delayed(getclass_asc)(sonpath, p) for p in xrange(len(class_fp)))
+#          X, Y, S = zip(*o)
+#       except:
+#          print "parallel read ascii failed"
+#          X = []; Y = []; S = [];
+#          for p in xrange(len(class_fp)):
+#             dat = np.genfromtxt(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')), delimiter=' ')
+#             X.append(dat[:,0])
+#             Y.append(dat[:,1])
+#             S.append(dat[:,2])
+#             del dat       
 
-       # X flatten and stack
-       X = np.asarray(np.hstack(X),'float')
-       X = X.flatten()
+#       # X flatten and stack
+#       X = np.asarray(np.hstack(X),'float')
+#       X = X.flatten()
 
-       # Y flatten and stack
-       Y = np.asarray(np.hstack(Y),'float')
-       Y = Y.flatten()
+#       # Y flatten and stack
+#       Y = np.asarray(np.hstack(Y),'float')
+#       Y = Y.flatten()
 
-       # S flatten and stack
-       S = np.asarray(np.hstack(S),'float')
-       S = S.flatten()
+#       # S flatten and stack
+#       S = np.asarray(np.hstack(S),'float')
+#       S = S.flatten()
 
-       humlon, humlat = trans(X, Y, inverse=True)
+#       humlon, humlat = trans(X, Y, inverse=True)
 
-       if 2>1:
-       #if dogrid==1:
+#       if 2>1:
+#       #if dogrid==1:
 
-          orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
+#          orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
 
-          ## create mask for where the data is not
-          tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-          try:
-             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=cpu_count())
-          except:
-             print ".... update your scipy installation to use faster kd-tree queries"
-             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+#          ## create mask for where the data is not
+#          tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+#          try:
+#             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=cpu_count())
+#          except:
+#             print ".... update your scipy installation to use faster kd-tree queries"
+#             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
 
-          dist = dist.reshape(grid_x.shape)
+#          dist = dist.reshape(grid_x.shape)
 
-          sigmas = 1 #m
-          eps = 2             
-          dat, res = get_grid(mode, orig_def, targ_def, S, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
-            
-       #if dogrid==1:
-       if 2>1:
-          dat[dat==0] = np.nan
-          dat[np.isinf(dat)] = np.nan
-          dat[dist>res*2] = np.nan
-          del dist
+#          sigmas = 1 #m
+#          eps = 2             
+#          dat, res = get_grid(mode, orig_def, targ_def, S, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
+#            
+#       #if dogrid==1:
+#       if 2>1:
+#          dat[dat==0] = np.nan
+#          dat[np.isinf(dat)] = np.nan
+#          dat[dist>res*2] = np.nan
+#          del dist
 
-          datm = np.ma.masked_invalid(dat)
+#          datm = np.ma.masked_invalid(dat)
 
-          glon, glat = trans(grid_x, grid_y, inverse=True)
-          del grid_x, grid_y
+#          glon, glat = trans(grid_x, grid_y, inverse=True)
+#          del grid_x, grid_y
 
-       vmin=np.nanmin(datm)+0.1
-       vmax=np.nanmax(datm)-0.1
-       if vmin > vmax:
-         vmin=np.nanmin(datm)
-         vmax=np.nanmax(datm)
+#       vmin=np.nanmin(datm)+0.1
+#       vmax=np.nanmax(datm)-0.1
+#       if vmin > vmax:
+#         vmin=np.nanmin(datm)
+#         vmax=np.nanmax(datm)
 
-       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax) #dogrid, 
+#       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax)
 
     else: #just 1 chunk   
     
@@ -469,11 +476,27 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
        if vmin > vmax:
          vmin=np.nanmin(datm)
          vmax=np.nanmax(datm)
-         
-       print_map(cs2cs_args, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax)
+       
+       Parallel(n_jobs = 2, verbose=0)(delayed(doplots)(k, cs2cs_args, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax, humlon, humlat) for k in xrange(2)) 
+       
+       #print_map(cs2cs_args, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax)
 
-       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax) #merge, dogrid, 
-    
+       #print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax) 
+
+# =========================================================
+def getclass_asc(sonpath, p):
+
+   return np.genfromtxt(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')), delimiter=' ')
+          
+# =========================================================
+def doplots(k, cs2cs_args, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax, humlon, humlat):
+
+   if k==0:
+      del humlon, humlat
+      print_map(cs2cs_args, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax)
+   elif k==1:
+      print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax)
+
 # =========================================================
 def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, vmin, vmax): #merge, 
 
@@ -648,7 +671,7 @@ def get_griddefs(minX, maxX, minY, maxY, res, humlon, humlat, trans):
 
 # =========================================================
 def trim_xys(X, Y, merge, index):
-
+   
     X = X.flatten()[index]
     Y = Y.flatten()[index]
     merge = merge.flatten()[index]
@@ -713,24 +736,26 @@ def getmesh(minX, maxX, minY, maxY, res):
          
    return grid_x, grid_y, res
 
-# =========================================================
-def getxy(e, n, yvec, d, t,extent):
-   x = np.concatenate((np.tile(e,extent) , np.tile(e,extent)))
-   rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d, 2.0))
-   y = np.concatenate((n+rangedist, n-rangedist))
-   # Rotate line around center point
-   xx = e - ((x - e) * np.cos(t)) - ((y - n) * np.sin(t))
-   yy = n - ((x - e) * np.sin(t)) + ((y - n) * np.cos(t))
-   xx, yy = calc_beam_pos(d, t, xx, yy)
-   return xx, yy 
+## =========================================================
+#def getxy(e, n, yvec, d, t,extent):
+#   x = np.concatenate((np.tile(e,extent) , np.tile(e,extent)))
+#   rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d, 2.0))
+#   y = np.concatenate((n+rangedist, n-rangedist))
+#   # Rotate line around center point
+#   xx = e - ((x - e) * np.cos(t)) - ((y - n) * np.sin(t))
+#   yy = n - ((x - e) * np.sin(t)) + ((y - n) * np.cos(t))
+#   xx, yy = calc_beam_pos(d, t, xx, yy)
+#   return xx, yy 
 
 
 # =========================================================
 def getXY(e,n,yvec,d,t,extent):
    print "getting point cloud ..." 
 
-   o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
+   #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
 
+   o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
+   
    X, Y = zip(*o)
 
    # X flatten and stack
@@ -751,13 +776,17 @@ def custom_save(figdirec,root):
 def custom_save2(figdirec,root):
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=600)
 
+## =========================================================
+#def calc_beam_pos(dist, bearing, x, y):
+
+#   dist_x, dist_y = (dist*np.sin(bearing), dist*np.cos(bearing))
+#   xfinal, yfinal = (x + dist_x, y + dist_y)
+#   return (xfinal, yfinal)
+
 # =========================================================
-def calc_beam_pos(dist, bearing, x, y):
-
-   dist_x, dist_y = (dist*np.sin(bearing), dist*np.cos(bearing))
-   xfinal, yfinal = (x + dist_x, y + dist_y)
-   return (xfinal, yfinal)
-
+def xyfunc(e,n,yvec,d,t,extent):
+   return getxy.GetXY(e, n, yvec, d, t, extent).getdat2()
+   
 # =========================================================
 # =========================================================
 if __name__ == '__main__':
