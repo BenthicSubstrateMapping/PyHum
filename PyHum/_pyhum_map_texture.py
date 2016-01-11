@@ -57,7 +57,7 @@
 # operational
 from __future__ import division
 from scipy.io import loadmat
-import os #, time, sys, getopt
+import os, time #, sys, getopt
 try:
    from Tkinter import Tk
    from tkFileDialog import askopenfilename, askdirectory
@@ -196,7 +196,12 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
        numstdevs = int(numstdevs)
        print 'Threshold number of standard deviations in texture lengthscale per grid cell up to which to accept: %s' % (str(numstdevs))             
 
-
+    # start timer
+    if os.name=='posix': # true if linux/mac or cygwin on windows
+       start = time.time()
+    else: # windows
+       start = time.clock()
+       
     trans =  pyproj.Proj(init=cs2cs_args)
 
     # if son path name supplied has no separator at end, put one on
@@ -324,73 +329,6 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
           
           print_map(cs2cs_args, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax)
 
-#       ## draw concatenated
-#       try:
-#          o = Parallel(n_jobs = 3, verbose=0)(delayed(getclass_asc)(sonpath, p) for p in xrange(len(class_fp)))
-#          X, Y, S = zip(*o)
-#       except:
-#          print "parallel read ascii failed"
-#          X = []; Y = []; S = [];
-#          for p in xrange(len(class_fp)):
-#             dat = np.genfromtxt(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')), delimiter=' ')
-#             X.append(dat[:,0])
-#             Y.append(dat[:,1])
-#             S.append(dat[:,2])
-#             del dat       
-
-#       # X flatten and stack
-#       X = np.asarray(np.hstack(X),'float')
-#       X = X.flatten()
-
-#       # Y flatten and stack
-#       Y = np.asarray(np.hstack(Y),'float')
-#       Y = Y.flatten()
-
-#       # S flatten and stack
-#       S = np.asarray(np.hstack(S),'float')
-#       S = S.flatten()
-
-#       humlon, humlat = trans(X, Y, inverse=True)
-
-#       if 2>1:
-#       #if dogrid==1:
-
-#          orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
-
-#          ## create mask for where the data is not
-#          tree = KDTree(np.c_[X.flatten(),Y.flatten()])
-#          try:
-#             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=cpu_count())
-#          except:
-#             print ".... update your scipy installation to use faster kd-tree queries"
-#             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
-
-#          dist = dist.reshape(grid_x.shape)
-
-#          sigmas = 1 #m
-#          eps = 2             
-#          dat, res = get_grid(mode, orig_def, targ_def, S, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
-#            
-#       #if dogrid==1:
-#       if 2>1:
-#          dat[dat==0] = np.nan
-#          dat[np.isinf(dat)] = np.nan
-#          dat[dist>res*2] = np.nan
-#          del dist
-
-#          datm = np.ma.masked_invalid(dat)
-
-#          glon, glat = trans(grid_x, grid_y, inverse=True)
-#          del grid_x, grid_y
-
-#       vmin=np.nanmin(datm)+0.1
-#       vmax=np.nanmax(datm)-0.1
-#       if vmin > vmax:
-#         vmin=np.nanmin(datm)
-#         vmax=np.nanmax(datm)
-
-#       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax)
-
     else: #just 1 chunk   
     
        e = esi
@@ -482,6 +420,14 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
        #print_map(cs2cs_args, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax)
 
        #print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax) 
+
+    if os.name=='posix': # true if linux/mac
+       elapsed = (time.time() - start)
+    else: # windows
+       elapsed = (time.clock() - start)
+    print "Processing took ", elapsed , "seconds to analyse"
+
+    print "Done!"
 
 # =========================================================
 def getclass_asc(sonpath, p):
@@ -736,18 +682,6 @@ def getmesh(minX, maxX, minY, maxY, res):
          
    return grid_x, grid_y, res
 
-## =========================================================
-#def getxy(e, n, yvec, d, t,extent):
-#   x = np.concatenate((np.tile(e,extent) , np.tile(e,extent)))
-#   rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d, 2.0))
-#   y = np.concatenate((n+rangedist, n-rangedist))
-#   # Rotate line around center point
-#   xx = e - ((x - e) * np.cos(t)) - ((y - n) * np.sin(t))
-#   yy = n - ((x - e) * np.sin(t)) + ((y - n) * np.cos(t))
-#   xx, yy = calc_beam_pos(d, t, xx, yy)
-#   return xx, yy 
-
-
 # =========================================================
 def getXY(e,n,yvec,d,t,extent):
    print "getting point cloud ..." 
@@ -776,13 +710,6 @@ def custom_save(figdirec,root):
 def custom_save2(figdirec,root):
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=600)
 
-## =========================================================
-#def calc_beam_pos(dist, bearing, x, y):
-
-#   dist_x, dist_y = (dist*np.sin(bearing), dist*np.cos(bearing))
-#   xfinal, yfinal = (x + dist_x, y + dist_y)
-#   return (xfinal, yfinal)
-
 # =========================================================
 def xyfunc(e,n,yvec,d,t,extent):
    return getxy.GetXY(e, n, yvec, d, t, extent).getdat2()
@@ -792,6 +719,24 @@ def xyfunc(e,n,yvec,d,t,extent):
 if __name__ == '__main__':
 
    map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, influence, numstdevs)
+
+## =========================================================
+#def getxy(e, n, yvec, d, t,extent):
+#   x = np.concatenate((np.tile(e,extent) , np.tile(e,extent)))
+#   rangedist = np.sqrt(np.power(yvec, 2.0) - np.power(d, 2.0))
+#   y = np.concatenate((n+rangedist, n-rangedist))
+#   # Rotate line around center point
+#   xx = e - ((x - e) * np.cos(t)) - ((y - n) * np.sin(t))
+#   yy = n - ((x - e) * np.sin(t)) + ((y - n) * np.cos(t))
+#   xx, yy = calc_beam_pos(d, t, xx, yy)
+#   return xx, yy 
+
+## =========================================================
+#def calc_beam_pos(dist, bearing, x, y):
+
+#   dist_x, dist_y = (dist*np.sin(bearing), dist*np.cos(bearing))
+#   xfinal, yfinal = (x + dist_x, y + dist_y)
+#   return (xfinal, yfinal)
 
 
        #print_map(cs2cs_args, humlon, humlat, glon, glat, dogrid, datm, merge, sonpath, 0, vmin=np.nanmin(datm)+0.1, vmax=np.nanmax(datm)-0.1)
@@ -870,4 +815,71 @@ if __name__ == '__main__':
 #    ground.latlonbox.rotation = 0
 
 #    kml.save(os.path.normpath(os.path.join(sonpath,'class_GroundOverlay'+str(p)+'.kml')))
+      
+#       ## draw concatenated
+#       try:
+#          o = Parallel(n_jobs = 3, verbose=0)(delayed(getclass_asc)(sonpath, p) for p in xrange(len(class_fp)))
+#          X, Y, S = zip(*o)
+#       except:
+#          print "parallel read ascii failed"
+#          X = []; Y = []; S = [];
+#          for p in xrange(len(class_fp)):
+#             dat = np.genfromtxt(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')), delimiter=' ')
+#             X.append(dat[:,0])
+#             Y.append(dat[:,1])
+#             S.append(dat[:,2])
+#             del dat       
+
+#       # X flatten and stack
+#       X = np.asarray(np.hstack(X),'float')
+#       X = X.flatten()
+
+#       # Y flatten and stack
+#       Y = np.asarray(np.hstack(Y),'float')
+#       Y = Y.flatten()
+
+#       # S flatten and stack
+#       S = np.asarray(np.hstack(S),'float')
+#       S = S.flatten()
+
+#       humlon, humlat = trans(X, Y, inverse=True)
+
+#       if 2>1:
+#       #if dogrid==1:
+
+#          orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
+
+#          ## create mask for where the data is not
+#          tree = KDTree(np.c_[X.flatten(),Y.flatten()])
+#          try:
+#             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=cpu_count())
+#          except:
+#             print ".... update your scipy installation to use faster kd-tree queries"
+#             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+
+#          dist = dist.reshape(grid_x.shape)
+
+#          sigmas = 1 #m
+#          eps = 2             
+#          dat, res = get_grid(mode, orig_def, targ_def, S, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
+#            
+#       #if dogrid==1:
+#       if 2>1:
+#          dat[dat==0] = np.nan
+#          dat[np.isinf(dat)] = np.nan
+#          dat[dist>res*2] = np.nan
+#          del dist
+
+#          datm = np.ma.masked_invalid(dat)
+
+#          glon, glat = trans(grid_x, grid_y, inverse=True)
+#          del grid_x, grid_y
+
+#       vmin=np.nanmin(datm)+0.1
+#       vmax=np.nanmax(datm)-0.1
+#       if vmin > vmax:
+#         vmin=np.nanmin(datm)
+#         vmax=np.nanmax(datm)
+
+#       print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, vmin=vmin, vmax=vmax)      
       
