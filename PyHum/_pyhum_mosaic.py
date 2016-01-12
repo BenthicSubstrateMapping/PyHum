@@ -120,7 +120,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
        into any projection supported by the proj.4 libraries
     res : float, *optional* [Default=0]
        grid resolution of output gridded texture map
-       if res=0, res will be determined automatically from the spatial resolution of 1 pixel
+       if res=99, res will be determined automatically from the spatial resolution of 1 pixel
     nn: int, *optional* [Default=5]
        number of nearest neighbours for gridding
     noisefloor: float, *optional* [Default=10]
@@ -292,14 +292,19 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
        pickle.dump( g, open( os.path.normpath(os.path.join(sonpath,base+"g.p")), "wb" ) ); del g, R, h
    
     print "creating grids ..."   
-    #### prepare grids
-    R = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"R.p")), "rb" ) )
 
-    ## actual along-track resolution is this: dx times dy = Af
-    tmp = R * dx * (c*0.007 / 2)
-    del R
+    if res==0:
+       res=99
 
     if res==99:
+
+       #### prepare grids
+       R = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"R.p")), "rb" ) )
+
+       ## actual along-track resolution is this: dx times dy = Af
+       tmp = R * dx * (c*0.007 / 2)
+       del R
+
        resg = np.min(tmp[tmp>0])
        del tmp
     else:
@@ -344,10 +349,11 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     #w = g[inds] + 1.0 / dist**2
     #del g
 
-    w[np.isinf(w)]=1
-    w[np.isnan(w)]=1
-    w[w>10000]=10000
-    w[w<=0]=1
+    if weight < 4:
+       w[np.isinf(w)]=1
+       w[np.isnan(w)]=1
+       w[w>10000]=10000
+       w[w<=0]=1
     
     # load in sidescan intensity
     S = pickle.load( open( os.path.normpath(os.path.join(sonpath,base+"S.p")), "rb" ) )
