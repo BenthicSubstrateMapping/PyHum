@@ -368,7 +368,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
        if weight < 4:
           Sdat_g = (np.nansum(w * S.flatten()[inds], axis=1) / np.nansum(w, axis=1)).reshape(shape)
        else:
-          Sdat_g = (np.nansum(S.flatten()[inds], axis=1).reshape(shape)
+          Sdat_g = (np.nansum(S.flatten()[inds], axis=1)).reshape(shape)
        del w
        dist = np.nanmean(dist,axis=1).reshape(shape)
 
