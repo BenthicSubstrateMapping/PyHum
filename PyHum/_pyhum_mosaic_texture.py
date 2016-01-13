@@ -100,14 +100,14 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisefloor = 10, weight = 1):
+def mosaic_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, weight = 1):
          
     '''
     Create mosaics of the spatially referenced sidescan echograms
 
     Syntax
     ----------
-    [] = PyHum.mosaic(humfile, sonpath, cs2cs_args, res, nn, noisefloor, weight)
+    [] = PyHum.mosaic_texture(humfile, sonpath, cs2cs_args, res, nn, weight)
 
     Parameters
     ----------
@@ -124,8 +124,6 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
        if res=99, res will be determined automatically from the spatial resolution of 1 pixel
     nn: int, *optional* [Default=5]
        number of nearest neighbours for gridding
-    noisefloor: float, *optional* [Default=10]
-       noisefloor of sidescan pixel intensity, in dB W (values lower than this will be removed)     
     weight: int, *optional* [Default=1]
        specifies the type of pixel weighting in the gridding process
        weight = 1, based on grazing angle and inverse distance weighting
@@ -175,10 +173,6 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
        nn = int(nn)
        print 'Number of nearest neighbours for gridding: %s' % (str(nn))
                     
-    if noisefloor:
-       noisefloor = np.asarray(noisefloor,float)
-       print 'Noise floor: %s dBW' % (str(noisefloor))      
-
     if weight:
        weight = int(weight)
        print 'Weighting for gridding: %s' % (str(weight))                   
@@ -254,12 +248,12 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
              data_R = R_fp[p]
              print "writing chunk %s " % (str(p))
              write_points(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, c, dx)
-             inputfiles.append(os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc')))
+             inputfiles.append(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')))
        else:
           p=0
           print "writing chunk %s " % (str(p))
           write_points(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, c, dx)
-          inputfiles.append(os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc')))         
+          inputfiles.append(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')))         
           
        #trans =  pyproj.Proj(init=cs2cs_args)
 
@@ -408,23 +402,23 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
                      urcrnrlon=glon.max(),
                      urcrnrlat=glat.max(),
                      pixels=pixels)
-    cs = ax.pcolormesh(glon, glat, Sdat_gm, cmap='gray')
+    cs = ax.pcolormesh(glon, glat, Sdat_gm)
     ax.set_axis_off()
-    fig.savefig(os.path.normpath(os.path.join(sonpath,'overlay1.png')), transparent=True, format='png')    
+    fig.savefig(os.path.normpath(os.path.join(sonpath,'class_overlay1.png')), transparent=True, format='png')    
     
 
     fig = plt.figure(figsize=(1.0, 4.0), facecolor=None, frameon=False)
     ax = fig.add_axes([0.0, 0.05, 0.2, 0.9])
     cb = fig.colorbar(cs, cax=ax)
-    cb.set_label('Intensity [dB W]', rotation=-90, color='k', labelpad=20)
-    fig.savefig(os.path.normpath(os.path.join(sonpath,'legend.png')), transparent=False, format='png')  
+    cb.set_label('Texture lengthscale [m]', rotation=-90, color='k', labelpad=20)
+    fig.savefig(os.path.normpath(os.path.join(sonpath,'class_legend.png')), transparent=False, format='png')  
 
 
     humutils.make_kml(llcrnrlon=glon.min(), llcrnrlat=glat.min(),
          urcrnrlon=glon.max(), urcrnrlat=glat.max(),
-         figs=[os.path.normpath(os.path.join(sonpath,'overlay1.png'))], 
-         colorbar=os.path.normpath(os.path.join(sonpath,'legend.png')),
-         kmzfile=os.path.normpath(os.path.join(sonpath,'GroundOverlay.kmz')), 
+         figs=[os.path.normpath(os.path.join(sonpath,'class_overlay1.png'))], 
+         colorbar=os.path.normpath(os.path.join(sonpath,'class_legend.png')),
+         kmzfile=os.path.normpath(os.path.join(sonpath,'class_GroundOverlay.kmz')), 
          name='Sidescan Intensity')
 
 
@@ -451,11 +445,11 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
 
     if Sdat_gm.size > 25000000:
        print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-       map.pcolormesh(gx[::5,::5], gy[::5,::5], Sdat_gm[::5,::5], cmap='gray', vmin=np.nanmin(Sdat_gm), vmax=np.nanmax(Sdat_gm))
+       map.pcolormesh(gx[::5,::5], gy[::5,::5], Sdat_gm[::5,::5], vmin=np.nanmin(Sdat_gm), vmax=np.nanmax(Sdat_gm))
     else:
-       map.pcolormesh(gx, gy, Sdat_gm, cmap='gray', vmin=np.nanmin(Sdat_gm), vmax=np.nanmax(Sdat_gm))
+       map.pcolormesh(gx, gy, Sdat_gm, vmin=np.nanmin(Sdat_gm), vmax=np.nanmax(Sdat_gm))
 
-    custom_save2(sonpath,'map_imagery')
+    custom_save2(sonpath,'class_map_imagery')
     del fig 
 
    
@@ -640,53 +634,7 @@ def getXY(e,n,yvec,d,t,extent):
 # =========================================================
 if __name__ == '__main__':
 
-   mosaic(humfile, sonpath, cs2cs_args, res, nn)
-
-
-
-#    try:
-#       print "drawing and printing map ..."
-#       fig = plt.figure(frameon=False)
-#       map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
-#        resolution = 'i', #h #f
-#        llcrnrlon=np.min(humlon)-0.00001, llcrnrlat=np.min(humlat)-0.00001,
-#        urcrnrlon=np.max(humlon)+0.00001, urcrnrlat=np.max(humlat)+0.00001)
-
-#       gx,gy = map.projtran(glon, glat)
-#       #del glon, glat   
-
-#       ax = plt.Axes(fig, [0., 0., 1., 1.], )
-#       ax.set_axis_off()      
-#       fig.add_axes(ax)
-
-#       if Sdat_gm.size > 25000000:
-#          print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-#          map.pcolormesh(gx[::5,::5], gy[::5,::5], Sdat_gm[::5,::5], cmap='gray')
-#       else:
-#          map.pcolormesh(gx, gy, Sdat_gm, cmap='gray')
-#       plt.axis('tight')
-
-#       custom_save(sonpath,'map')#+str(p))
-#       del fig 
-
-#    except:
-#       print "error: map could not be created..."
-
-
-#    kml = simplekml.Kml()
-#    ground = kml.newgroundoverlay(name='GroundOverlay', altitude=1)
-#    ground.icon.href = 'map.png'
-#   
-#    #ground.gxlatlonquad.coords = [(np.max(humlon)+0.00001,np.max(humlat)-0.00001), (np.max(humlon)+0.00001,np.min(humlat)-0.00001), (np.min(humlon)+0.00001,np.min(humlat)-0.00001), (np.min(humlon)+0.00001,np.max(humlat)-0.00001)]   
-
-#    ground.latlonbox.north = np.min(humlat)-0.00001
-#    ground.latlonbox.south = np.max(humlat)+0.00001
-#    ground.latlonbox.east =  np.max(humlon)+0.00001
-#    ground.latlonbox.west =  np.min(humlon)-0.00001
-#    ground.latlonbox.rotation = 0
-
-#    kml.save(os.path.normpath(os.path.join(sonpath,'GroundOverlay.kml')))
-
+   mosaic_texture(humfile, sonpath, cs2cs_args, res, nn)
 
 
 

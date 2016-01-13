@@ -67,11 +67,11 @@ from joblib import Parallel, delayed, cpu_count
 import pyproj
 
 #import replace_nans
-import write
+import PyHum.write as write
 
 import PyHum.io as io
 
-import getxy
+import PyHum.getxy as getxy
 
 # numerical
 import numpy as np
