@@ -65,8 +65,8 @@ except:
 from joblib import Parallel, delayed, cpu_count
 import pyproj
 
-import replace_nans
-import write
+import PyHum.replace_nans as replace_nans
+import PyHum.write as write
 
 import PyHum.io as io
 
