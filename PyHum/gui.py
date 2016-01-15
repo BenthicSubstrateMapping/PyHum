@@ -62,6 +62,8 @@ from PIL import Image, ImageTk
 import tkMessageBox
 from ScrolledText import ScrolledText
 
+import os
+
 #=======================
 # NOTE: Frame will make a top-level window if one doesn't already exist which
 # can then be accessed via the frame's master attribute
@@ -163,7 +165,7 @@ image_panel = Tkinter.Canvas(frame, width = 250, height =232)#, cursor = "cross"
 image_panel.grid(column = 0, row = 2)
 image_panel.configure(background='black')
  
-show_image = ImageTk.PhotoImage(Image.open("pyhum_logo_white_sm.png"))
+show_image = ImageTk.PhotoImage(Image.open(PyHum.__path__[0]+os.sep+"pyhum_logo_white_sm.png"))
 # show the panel
 image_panel.create_image(0, 0, anchor=Tkinter.NW, image=show_image) 
         
