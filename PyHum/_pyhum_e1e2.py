@@ -139,7 +139,7 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
        number of pings over which to integrate
 
     numclusters : int, *optional* [Default=3]
-       transducer frequency in kHz
+       number of acoustic classes to classify all the data into
 
     doplot : int, *optional* [Default=1]
        1 = make plots, otherwise do not

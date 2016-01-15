@@ -234,11 +234,14 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
        print 'Temperature is %s' % (str(temp))
 
     if dconcfile is not None:
-       print 'Suspended sediment size/conc. file is %s' % (dconcfile)
-       dconc = np.genfromtxt(dconcfile).T
-       conc = dconc[1]
-       dens = dconc[2]
-       d = dconc[0]
+       try:
+          print 'Suspended sediment size/conc. file is %s' % (dconcfile)
+          dconc = np.genfromtxt(dconcfile).T
+          conc = dconc[1]
+          dens = dconc[2]
+          d = dconc[0]
+       except:
+          pass
 
     #================================
     # start timer
