@@ -273,10 +273,13 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     ft = 1/(meta['pix_m'])
     dist_m = np.squeeze(meta['dist_m'])
 
-    if dconcfile is not None:
-       # sediment attenuation
-       alpha = sed_atten(meta['f'],conc,dens,d,meta['c'])
-    else:
+    try:
+       if dconcfile is not None:
+          # sediment attenuation
+          alpha = sed_atten(meta['f'],conc,dens,d,meta['c'])
+       else:
+          alpha = 0
+    except:
        alpha = 0
 
     # load memory mapped scans
