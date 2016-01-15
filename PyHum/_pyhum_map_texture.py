@@ -98,7 +98,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
          
     '''
     Create plots of the texture lengthscale maps made in PyHum.texture module 
-    using the algorithm detailed by Buscombe et al. (forthcoming)
+    using the algorithm detailed by Buscombe et al. (2015)
     This textural lengthscale is not a direct measure of grain size. Rather, it is a statistical 
     representation that integrates over many attributes of bed texture, of which grain size is the most important. 
     The technique is a physically based means to identify regions of texture within a sidescan echogram, 

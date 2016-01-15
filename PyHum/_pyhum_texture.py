@@ -96,7 +96,7 @@ warnings.filterwarnings("ignore")
 def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasses=4, maxscale=20, notes=4):
           
       '''
-      Create a texture lengthscale map using the algorithm detailed by Buscombe et al. (forthcoming)
+      Create a texture lengthscale map using the algorithm detailed by Buscombe et al. (2015)
       This textural lengthscale is not a direct measure of grain size. Rather, it is a statistical 
       representation that integrates over many attributes of bed texture, of which grain size is the most important. 
       The technique is a physically based means to identify regions of texture within a sidescan echogram, 
