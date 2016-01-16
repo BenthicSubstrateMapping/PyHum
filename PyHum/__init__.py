@@ -32,7 +32,14 @@
 #|_|    \__, |_| |_|\__,_|_| |_| |_| (_) (_)
 #       |___/                               
 #
-##+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
+#                _       _ __          
+#               (_)___  (_) /_         
+#              / / __ \/ / __/         
+#             / / / / / / /_           
+# ___________/_/_/ /_/_/\__/___________
+#/_____/_____/            /_____/_____/
+#
+#+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
 #|b|y| |D|a|n|i|e|l| |B|u|s|c|o|m|b|e|
 #+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -63,7 +70,7 @@ from PyHum.test import *
 from PyHum.io import *
 from PyHum._pyhum_mosaic import mosaic
 from PyHum._pyhum_mosaic_texture import mosaic_texture
-import PyHum.gui as PyHum.gui
+import PyHum.gui as pyhum_gui
 
 
 
