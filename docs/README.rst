@@ -58,6 +58,11 @@ This software is issued under the `GNU Lesser General Public License, Version 3 
 
 Thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info, Dan Hamill (Utah State University) and Paul Anderson (Quest Geophysical Asia) for debugging and suggestions for improvements
 
+Some aspects of the program are detailed in:
+Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
+
+Full documentation of the program is forthcoming
+
 .. _setup:
 
 
@@ -153,6 +158,9 @@ You could try before you install, using a virtual environment::
   pip install matplotlib
   pip install basemap --allow-external basemap --allow-unverified basemap
   pip install pyresample
+  pip install toolz
+  pip install dask
+  pip install pandas
   pip install PyHum
   python -c "import PyHum; PyHum.test()"
   deactivate #(or source venv/bin/deactivate)
@@ -178,6 +186,11 @@ Python libraries you need to have installed to use PyHum:
 9. `simplekml <http://simplekml.readthedocs.org/en/latest/index.html>`_
 10. `pyproj <https://pypi.python.org/pypi/pyproj>`_
 11. `basemap <http://matplotlib.org/basemap/>`_
+10. `pyresample <http://pyresample.readthedocs.org/en/latest/index.html#>`_
+11. `toolz <https://toolz.readthedocs.org/en/latest/>`_
+12. `dask <http://dask.pydata.org/en/latest/>`_
+13. `pandas <http://pandas.pydata.org/>`_
+
 
 All of the above are available through `pip <https://pypi.python.org/pypi/pip>`_ and `easy_install <https://pythonhosted.org/setuptools/easy_install.html>`_
 
@@ -228,16 +241,17 @@ which carries out the following operations::
    cog = 1 # GPS course-over-ground used for heading
    calc_bearing = 0 #no
    filt_bearing = 0 #no
-   #chunk_size = 1000 # chunk size = 1000 pings
-   #chunk_size = 0 # auto chunk size
    chunk = 'd100' # distance, 100m
    #chunk = 'p1000' # pings, 1000
    #chunk = 'h10' # heading deviation, 10 deg
           
    # correction specific settings
    maxW = 1000 # rms output wattage
-   dofilt = 0 # 1=apply a phase preserving filter (WARNING!! takes a very long time for large scans)
+   dofilt = 0 # 1 = apply a phase preserving filter (WARNING!! takes a very long time for large scans)
    correct_withwater = 0 # don't retain water column in radiometric correction (1 = retains water column for radiomatric corrections)
+   ph = 7.0 # acidity on the pH scale
+   temp = 10.0 # water temperature in degrees Celsius
+   salinity = 0.0
 
    # for shadow removal
    shadowmask = 0 #automatic shadow removal
@@ -245,14 +259,14 @@ which carries out the following operations::
    # for texture calcs
    win = 100 # pixel window
    shift = 10 # pixel shift
-   density = win/2 
+   density =win/2 # win/2 
    numclasses = 4 # number of discrete classes for contouring and k-means
    maxscale = 20 # Max scale as inverse fraction of data length (for wavelet analysis)
    notes = 4 # Notes per octave (for wavelet analysis)
 
    # for mapping
-   dogrid = 1 # yes
-   res = 0.1 # grid resolution in metres
+   res = 99 # grid resolution in metres
+   # if res==99, the program will automatically calc res from the spatial res of the scans
    mode = 1 # gridding mode (simple nearest neighbour)
    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
    #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
@@ -260,39 +274,36 @@ which carries out the following operations::
 
    nn = 64 #number of nearest neighbours for gridding (used if mode > 1)
    influence = 1 #Radius of influence used in gridding. Cut off distance in meters 
-   numstdevs = 4 #Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept 
+   numstdevs = 5 #Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept 
 
    # for downward-looking echosounder echogram (e1-e2) analysis
-   ph = 7.0 # acidity on the pH scale
-   temp = 10.0 # water temperature in degrees Celsius
-   salinity = 0.0
    beam = 20.0
    transfreq = 200.0 # frequency (kHz) of downward looking echosounder
    integ = 5
    numclusters = 3 # number of acoustic classes to group observations
 
-   # read data in SON files into PyHum memory mapped format (.dat)
-   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
+   ## read data in SON files into PyHum memory mapped format (.dat)
+   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
 
-   # correct scans and remove water column
-   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater)
+   ## correct scans and remove water column
+   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
 
-   # remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
+   ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
-   # Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
+   ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
-   # grid and map the scans
-   PyHum.map(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
+   ## grid and map the scans
+   PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, influence, numstdevs)
 
-   res = 0.5 # grid resolution in metres
+   res = 1 # grid resolution in metres
    numstdevs = 5
    
-   # grid and map the texture lengthscale maps
-   PyHum.map_texture(humfile, sonpath, cs2cs_args, dogrid, res, dowrite, mode, nn, influence, numstdevs)
+   ## grid and map the texture lengthscale maps
+   PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, influence, numstdevs)
 
-   # calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
+   ## calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
 
 
@@ -392,7 +403,7 @@ The following example script::
 
        PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
-       PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
+       PyHum.map(humfile, sonpath, cs2cs_args, calc_bearing, filt_bearing, res, cog, dowrite)
 
 
 could be saved as, for example "proc_mysidescandata.py" and run from the command line using::
@@ -419,7 +430,9 @@ Support
 
 This is a new project written and maintained by Daniel Buscombe. Bugs are expected - please report them, I will fix them quickly. Feedback and suggestions for improvements are *very* welcome
 
-Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please address all suggestions, comments and queries to: dbuscombe@usgs.gov. Thanks for stopping by! 
+Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please use the 'Issues' tab in github `here <https://github.com/dbuscombe-usgs/PyHum>`_
+
+Thanks for stopping by! 
 
 
 .. _troubleshooting:
@@ -452,6 +465,12 @@ Try this: remove a system installed file e.g.::
 
    sudo apt-get remove python-scipy ##(Debian based)
    yum remove scipy ##(Fedora based)
+
+4. Problem: do I have the latest version of PyHum installed? Check your version using this::
+
+   python -c 'import PyHum;print(PyHum.__version__)'
+
+Check this against the latest `bleeding-edge' version `here <https://github.com/dbuscombe-usgs/PyHum/blob/master/PyHum/__init__.py>`_ (line 47)
 
 
 .. image:: _static/pyhum_logo_colour_sm.png

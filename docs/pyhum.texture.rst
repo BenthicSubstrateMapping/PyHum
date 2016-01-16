@@ -55,8 +55,8 @@ References
 -----------
 
      [1] Buscombe, D., Grams, P.E., and Smith, S.M.C., Automated riverbed sediment
-     classification using low-cost sidescan sonar. submitted to
-     Journal of Hydraulic Engineering
+     classification using low-cost sidescan sonar. 
+     Journal of Hydraulic Engineering,  10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
 
   .. image:: _static/pyhum_logo_colour_sm.png
 

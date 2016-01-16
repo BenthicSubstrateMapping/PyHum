@@ -199,6 +199,9 @@ pip install Pillow
 pip install matplotlib
 pip install basemap --allow-external basemap --allow-unverified basemap
 pip install pyresample
+pip install toolz
+pip install dask
+pip install pandas
 pip install PyHum
 python -c "import PyHum; PyHum.test.dotest()"
 deactivate (or source venv/bin/deactivate)
@@ -223,6 +226,10 @@ PYTHON LIBRARIES YOU MAY NEED TO INSTALL TO USE PyHum:
 8. pyproj (https://pypi.python.org/pypi/pyproj)
 9. basemap (http://matplotlib.org/basemap/)
 10. pyresample (http://pyresample.readthedocs.org/en/latest/index.html#)
+11. toolz (https://toolz.readthedocs.org/en/latest/)
+12. dask (http://dask.pydata.org/en/latest/)
+13. pandas (http://pandas.pydata.org/)
+14. joblib (https://pythonhosted.org/joblib/index.html)
 
 All of the above are available through pip (https://pypi.python.org/pypi/pip) and easy_install (https://pythonhosted.org/setuptools/easy_install.html)
 

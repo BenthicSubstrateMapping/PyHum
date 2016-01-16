@@ -18,7 +18,7 @@ Syntax
 
 You call the function like this::
 
-   [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunksize, model, calc_bearing, filt_bearing, cog, chunk)
+   [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, chunksize, model, calc_bearing, filt_bearing, cog, chunk)
 
 Parameters
 ------------
