@@ -176,20 +176,34 @@ Manual installation
 Python libraries you need to have installed to use PyHum:
 
 1. `SciPy <http://www.scipy.org/scipylib/download.html>`_
+
 2. `Numpy <http://www.scipy.org/scipylib/download.html>`_
+
 3. `pyresample <http://pyresample.readthedocs.org/en/latest/index.html#>`_
+
 4. `Matplotlib <http://matplotlib.org/downloads.html>`_
+
 5. `cython <http://cython.org/>`_
+
 6. `joblib <https://pythonhosted.org/joblib/>`_
+
 7. `Scikit-learn <http://scikit-learn.org/stable/>`_
+
 8. `Python Image LIbrary (PIL) <http://www.pythonware.com/products/pil/>`_
+
 9. `simplekml <http://simplekml.readthedocs.org/en/latest/index.html>`_
+
 10. `pyproj <https://pypi.python.org/pypi/pyproj>`_
+
 11. `basemap <http://matplotlib.org/basemap/>`_
-10. `pyresample <http://pyresample.readthedocs.org/en/latest/index.html#>`_
-11. `toolz <https://toolz.readthedocs.org/en/latest/>`_
-12. `dask <http://dask.pydata.org/en/latest/>`_
-13. `pandas <http://pandas.pydata.org/>`_
+
+12. `pyresample <http://pyresample.readthedocs.org/en/latest/index.html#>`_
+
+13. `toolz <https://toolz.readthedocs.org/en/latest/>`_
+
+14. `dask <http://dask.pydata.org/en/latest/>`_
+
+15. `pandas <http://pandas.pydata.org/>`_
 
 
 All of the above are available through `pip <https://pypi.python.org/pypi/pip>`_ and `easy_install <https://pythonhosted.org/setuptools/easy_install.html>`_

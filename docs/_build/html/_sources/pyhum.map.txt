@@ -9,7 +9,7 @@ Syntax
 ----------
 You call the function like this::
 
-  [] = PyHum.map(humfile, sonpath, cs2cs_args, dogrid, calc_bearing, filt_bearing, res, cog, dowrite)
+  [] = PyHum.map(humfile, sonpath, cs2cs_args, calc_bearing, filt_bearing, res, cog, dowrite)
 
 
 Parameters
@@ -22,9 +22,6 @@ Parameters
        arguments to create coordinates in a projected coordinate system
        this argument gets given to pyproj to turn wgs84 (lat/lon) coordinates
        into any projection supported by the proj.4 libraries
-    dogrid : float, *optional* [Default=1]
-       if 1, textures will be gridded with resolution 'res'. 
-       Otherwise, point cloud will be plotted
     calc_bearing : float, *optional* [Default=0]
        if 1, bearing will be calculated from coordinates
     filt_bearing : float, *optional* [Default=0]

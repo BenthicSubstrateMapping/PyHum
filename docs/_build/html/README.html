@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Getting started &mdash; PyHum 1.3.3 documentation</title>
+    <title>Getting started &mdash; PyHum 1.3.7 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.3.3',
+        VERSION:     '1.3.7',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyHum 1.3.3 documentation" href="index.html" />
+    <link rel="top" title="PyHum 1.3.7 documentation" href="index.html" />
     <link rel="next" title="Modules" href="modules.html" />
     <link rel="prev" title="PyHum: Python program for reading and processing low-cost sidescan sonar data" href="index.html" /> 
   </head>
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="index.html" title="PyHum: Python program for reading and processing low-cost sidescan sonar data"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.3 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.7 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -59,7 +59,7 @@ for reading and exporting data from Humminbird(R) instruments, carrying out rudi
 classify bed texture, and produce some maps on aerial photos and kml files for google-earth</p>
 <p>The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) and works on both sidescan and downward-looking echosounder data, where available.</p>
 <p>Some aspects of the program are detailed in:
-Buscombe, D., Grams, P.E., and Smith, S. (2015) &#8220;Automated riverbed sediment classification using low-cost sidescan sonar&#8221;, Journal of Hydraulic Engineering, in press.</p>
+Buscombe, D., Grams, P.E., and Smith, S. (2015) &#8220;Automated riverbed sediment classification using low-cost sidescan sonar&#8221;, Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019. <a class="reference external" href="http://dbuscombe-usgs.github.io/docs/10-2-2015_Automated%20.pdf">Download here</a></p>
 <p>Full documentation of the program is forthcoming</p>
 <p>For the source code visit <a class="reference external" href="https://github.com/dbuscombe-usgs/PyHum/">the project github site</a></p>
 <blockquote>
@@ -95,6 +95,9 @@ see <a class="reference external" href="http://www.usgs.gov/visual-id/credit_usg
 and does not imply endorsement by the U.S. government.</p>
 <p>This software is issued under the <a class="reference external" href="http://www.gnu.org/copyleft/lesser.html">GNU Lesser General Public License, Version 3</a></p>
 <p>Thanks to Barb Fagetter (<a class="reference external" href="mailto:blueseas&#37;&#52;&#48;oceanecology&#46;ca">blueseas<span>&#64;</span>oceanecology<span>&#46;</span>ca</a>) for some format info, Dan Hamill (Utah State University) and Paul Anderson (Quest Geophysical Asia) for debugging and suggestions for improvements</p>
+<p>Some aspects of the program are detailed in:
+Buscombe, D., Grams, P.E., and Smith, S. (2015) &#8220;Automated riverbed sediment classification using low-cost sidescan sonar&#8221;, Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.</p>
+<p>Full documentation of the program is forthcoming</p>
 </div>
 <div class="section" id="setup-on-anaconda-for-windows">
 <span id="setup"></span><h2>Setup on Anaconda for Windows<a class="headerlink" href="#setup-on-anaconda-for-windows" title="Permalink to this headline">¶</a></h2>
@@ -169,6 +172,9 @@ pip install Pillow
 pip install matplotlib
 pip install basemap --allow-external basemap --allow-unverified basemap
 pip install pyresample
+pip install toolz
+pip install dask
+pip install pandas
 pip install PyHum
 python -c &quot;import PyHum; PyHum.test()&quot;
 deactivate #(or source venv/bin/deactivate)
@@ -191,6 +197,10 @@ deactivate #(or source venv/bin/deactivate)
 <li><a class="reference external" href="http://simplekml.readthedocs.org/en/latest/index.html">simplekml</a></li>
 <li><a class="reference external" href="https://pypi.python.org/pypi/pyproj">pyproj</a></li>
 <li><a class="reference external" href="http://matplotlib.org/basemap/">basemap</a></li>
+<li><a class="reference external" href="http://pyresample.readthedocs.org/en/latest/index.html#">pyresample</a></li>
+<li><a class="reference external" href="https://toolz.readthedocs.org/en/latest/">toolz</a></li>
+<li><a class="reference external" href="http://dask.pydata.org/en/latest/">dask</a></li>
+<li><a class="reference external" href="http://pandas.pydata.org/">pandas</a></li>
 </ol>
 <p>All of the above are available through <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> and <a class="reference external" href="https://pythonhosted.org/setuptools/easy_install.html">easy_install</a></p>
 </div>
@@ -212,7 +222,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 </div>
 </div>
 <div class="section" id="test">
-<span id="id7"></span><h2>Test<a class="headerlink" href="#test" title="Permalink to this headline">¶</a></h2>
+<span id="id8"></span><h2>Test<a class="headerlink" href="#test" title="Permalink to this headline">¶</a></h2>
 <p>A test can be carried out by running the supplied script:</p>
 <div class="highlight-python"><div class="highlight"><pre>python -c &quot;import PyHum; PyHum.dotest()&quot;
 </pre></div>
@@ -229,23 +239,23 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <span class="n">bedpick</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># auto bed pick</span>
 <span class="n">c</span> <span class="o">=</span> <span class="mi">1450</span> <span class="c"># speed of sound fresh water</span>
 <span class="n">t</span> <span class="o">=</span> <span class="mf">0.108</span> <span class="c"># length of transducer</span>
-<span class="n">f</span> <span class="o">=</span> <span class="mi">455</span> <span class="c"># frequency kHz of sidescan sonar</span>
 <span class="n">draft</span> <span class="o">=</span> <span class="mf">0.3</span> <span class="c"># draft in metres</span>
 <span class="n">flip_lr</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># flip port and starboard</span>
 <span class="n">model</span> <span class="o">=</span> <span class="mi">998</span> <span class="c"># humminbird model</span>
 <span class="n">cog</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># GPS course-over-ground used for heading</span>
 <span class="n">calc_bearing</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#no</span>
 <span class="n">filt_bearing</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#no</span>
-<span class="c">#chunk_size = 1000 # chunk size = 1000 pings</span>
-<span class="c">#chunk_size = 0 # auto chunk size</span>
 <span class="n">chunk</span> <span class="o">=</span> <span class="s">&#39;d100&#39;</span> <span class="c"># distance, 100m</span>
 <span class="c">#chunk = &#39;p1000&#39; # pings, 1000</span>
 <span class="c">#chunk = &#39;h10&#39; # heading deviation, 10 deg</span>
 
 <span class="c"># correction specific settings</span>
 <span class="n">maxW</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c"># rms output wattage</span>
-<span class="n">dofilt</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># 1=apply a phase preserving filter (WARNING!! takes a very long time for large scans)</span>
+<span class="n">dofilt</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># 1 = apply a phase preserving filter (WARNING!! takes a very long time for large scans)</span>
 <span class="n">correct_withwater</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># don&#39;t retain water column in radiometric correction (1 = retains water column for radiomatric corrections)</span>
+<span class="n">ph</span> <span class="o">=</span> <span class="mf">7.0</span> <span class="c"># acidity on the pH scale</span>
+<span class="n">temp</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="c"># water temperature in degrees Celsius</span>
+<span class="n">salinity</span> <span class="o">=</span> <span class="mf">0.0</span>
 
 <span class="c"># for shadow removal</span>
 <span class="n">shadowmask</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#automatic shadow removal</span>
@@ -253,14 +263,14 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <span class="c"># for texture calcs</span>
 <span class="n">win</span> <span class="o">=</span> <span class="mi">100</span> <span class="c"># pixel window</span>
 <span class="n">shift</span> <span class="o">=</span> <span class="mi">10</span> <span class="c"># pixel shift</span>
-<span class="n">density</span> <span class="o">=</span> <span class="n">win</span><span class="o">/</span><span class="mi">2</span>
+<span class="n">density</span> <span class="o">=</span><span class="n">win</span><span class="o">/</span><span class="mi">2</span> <span class="c"># win/2</span>
 <span class="n">numclasses</span> <span class="o">=</span> <span class="mi">4</span> <span class="c"># number of discrete classes for contouring and k-means</span>
 <span class="n">maxscale</span> <span class="o">=</span> <span class="mi">20</span> <span class="c"># Max scale as inverse fraction of data length (for wavelet analysis)</span>
 <span class="n">notes</span> <span class="o">=</span> <span class="mi">4</span> <span class="c"># Notes per octave (for wavelet analysis)</span>
 
 <span class="c"># for mapping</span>
-<span class="n">dogrid</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># yes</span>
-<span class="n">res</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="c"># grid resolution in metres</span>
+<span class="n">res</span> <span class="o">=</span> <span class="mi">99</span> <span class="c"># grid resolution in metres</span>
+<span class="c"># if res==99, the program will automatically calc res from the spatial res of the scans</span>
 <span class="n">mode</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># gridding mode (simple nearest neighbour)</span>
 <span class="c">#mode = 2 # gridding mode (inverse distance weighted nearest neighbour)</span>
 <span class="c">#mode = 3 # gridding mode (gaussian weighted nearest neighbour)</span>
@@ -268,45 +278,42 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 
 <span class="n">nn</span> <span class="o">=</span> <span class="mi">64</span> <span class="c">#number of nearest neighbours for gridding (used if mode &gt; 1)</span>
 <span class="n">influence</span> <span class="o">=</span> <span class="mi">1</span> <span class="c">#Radius of influence used in gridding. Cut off distance in meters</span>
-<span class="n">numstdevs</span> <span class="o">=</span> <span class="mi">4</span> <span class="c">#Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept</span>
+<span class="n">numstdevs</span> <span class="o">=</span> <span class="mi">5</span> <span class="c">#Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept</span>
 
 <span class="c"># for downward-looking echosounder echogram (e1-e2) analysis</span>
-<span class="n">ph</span> <span class="o">=</span> <span class="mf">7.0</span> <span class="c"># acidity on the pH scale</span>
-<span class="n">temp</span> <span class="o">=</span> <span class="mf">10.0</span> <span class="c"># water temperature in degrees Celsius</span>
-<span class="n">salinity</span> <span class="o">=</span> <span class="mf">0.0</span>
 <span class="n">beam</span> <span class="o">=</span> <span class="mf">20.0</span>
 <span class="n">transfreq</span> <span class="o">=</span> <span class="mf">200.0</span> <span class="c"># frequency (kHz) of downward looking echosounder</span>
 <span class="n">integ</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="n">numclusters</span> <span class="o">=</span> <span class="mi">3</span> <span class="c"># number of acoustic classes to group observations</span>
 
-<span class="c"># read data in SON files into PyHum memory mapped format (.dat)</span>
-<span class="n">PyHum</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">draft</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">bedpick</span><span class="p">,</span> <span class="n">flip_lr</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">chunk</span><span class="p">)</span>
+<span class="c">## read data in SON files into PyHum memory mapped format (.dat)</span>
+<span class="n">PyHum</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">draft</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">bedpick</span><span class="p">,</span> <span class="n">flip_lr</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">chunk</span><span class="p">)</span>
 
-<span class="c"># correct scans and remove water column</span>
-<span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">dofilt</span><span class="p">,</span> <span class="n">correct_withwater</span><span class="p">)</span>
+<span class="c">## correct scans and remove water column</span>
+<span class="n">PyHum</span><span class="o">.</span><span class="n">correct</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">maxW</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">dofilt</span><span class="p">,</span> <span class="n">correct_withwater</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">salinity</span><span class="p">)</span>
 
-<span class="c"># remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)</span>
+<span class="c">## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)</span>
 <span class="n">PyHum</span><span class="o">.</span><span class="n">rmshadows</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shadowmask</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
 
-<span class="c"># Calculate texture lengthscale maps using the method of Buscombe et al. (2015)</span>
+<span class="c">## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)</span>
 <span class="n">PyHum</span><span class="o">.</span><span class="n">texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">numclasses</span><span class="p">,</span> <span class="n">maxscale</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span>
 
-<span class="c"># grid and map the scans</span>
-<span class="n">PyHum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">dowrite</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">nn</span><span class="p">,</span> <span class="n">influence</span><span class="p">,</span> <span class="n">numstdevs</span><span class="p">)</span>
+<span class="c">## grid and map the scans</span>
+<span class="n">PyHum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">dowrite</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">nn</span><span class="p">,</span> <span class="n">influence</span><span class="p">,</span> <span class="n">numstdevs</span><span class="p">)</span>
 
-<span class="n">res</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="c"># grid resolution in metres</span>
+<span class="n">res</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># grid resolution in metres</span>
 <span class="n">numstdevs</span> <span class="o">=</span> <span class="mi">5</span>
 
-<span class="c"># grid and map the texture lengthscale maps</span>
-<span class="n">PyHum</span><span class="o">.</span><span class="n">map_texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">dowrite</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">nn</span><span class="p">,</span> <span class="n">influence</span><span class="p">,</span> <span class="n">numstdevs</span><span class="p">)</span>
+<span class="c">## grid and map the texture lengthscale maps</span>
+<span class="n">PyHum</span><span class="o">.</span><span class="n">map_texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">nn</span><span class="p">,</span> <span class="n">influence</span><span class="p">,</span> <span class="n">numstdevs</span><span class="p">)</span>
 
-<span class="c"># calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar</span>
+<span class="c">## calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar</span>
 <span class="n">PyHum</span><span class="o">.</span><span class="n">e1e2</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">ph</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">salinity</span><span class="p">,</span> <span class="n">beam</span><span class="p">,</span> <span class="n">transfreq</span><span class="p">,</span> <span class="n">integ</span><span class="p">,</span> <span class="n">numclusters</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="gettingstarted">
-<span id="id8"></span><h2>Getting Started<a class="headerlink" href="#gettingstarted" title="Permalink to this headline">¶</a></h2>
+<span id="id9"></span><h2>Getting Started<a class="headerlink" href="#gettingstarted" title="Permalink to this headline">¶</a></h2>
 <p>Inputs to the program are a .DAT file (e.g. R0089.DAT) and a folder of .SON and .IDX files (e.g. /my/folder/R0089). The program will read the .SON files with or without the accompanying .IDX files, but will be faster if the .IDX files are present.</p>
 <p>PyHum is modular so can be called from within a python or ipython console, from an IDE (such as IDLE or Spyder), or by running a script.</p>
 <p>The following example script:</p>
@@ -365,13 +372,13 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
     <span class="n">bedpick</span> <span class="o">=</span> <span class="mi">2</span> <span class="c"># manual bed pick</span>
     <span class="n">c</span> <span class="o">=</span> <span class="mi">1450</span> <span class="c"># speed of sound fresh water</span>
     <span class="n">t</span> <span class="o">=</span> <span class="mf">0.108</span> <span class="c"># length of transducer</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="mi">455</span> <span class="c"># frequency kHz</span>
     <span class="n">draft</span> <span class="o">=</span> <span class="mf">0.3</span> <span class="c"># draft in metres</span>
     <span class="n">flip_lr</span> <span class="o">=</span> <span class="mi">1</span> <span class="c"># flip port and starboard</span>
     <span class="n">model</span> <span class="o">=</span> <span class="mi">1199</span> <span class="c"># humminbird model</span>
-    <span class="c">#chunk_size = 1000 # chunk size = 1000 pings</span>
-    <span class="n">chunk_size</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># auto chunk size</span>
     <span class="n">dowrite</span> <span class="o">=</span> <span class="mi">0</span> <span class="c">#disable writing of point cloud data to file</span>
+    <span class="n">chunk</span> <span class="o">=</span> <span class="s">&#39;d100&#39;</span> <span class="c"># distance, 100m</span>
+    <span class="c">#chunk = &#39;p1000&#39; # pings, 1000</span>
+    <span class="c">#chunk = &#39;h10&#39; # heading deviation, 10 deg</span>
 
     <span class="c"># correction specific settings</span>
     <span class="n">maxW</span> <span class="o">=</span> <span class="mi">1000</span> <span class="c"># rms output wattage</span>
@@ -395,7 +402,7 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 
     <span class="n">PyHum</span><span class="o">.</span><span class="n">rmshadows</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shadowmask</span><span class="p">,</span> <span class="n">doplot</span><span class="p">)</span>
 
-    <span class="n">PyHum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">dogrid</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">dowrite</span><span class="p">)</span>
+    <span class="n">PyHum</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">,</span> <span class="n">calc_bearing</span><span class="p">,</span> <span class="n">filt_bearing</span><span class="p">,</span> <span class="n">res</span><span class="p">,</span> <span class="n">cog</span><span class="p">,</span> <span class="n">dowrite</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>could be saved as, for example &#8220;proc_mysidescandata.py&#8221; and run from the command line using:</p>
@@ -413,9 +420,10 @@ sudo pip install basemap --allow-external basemap --allow-unverified basemap
 <p>which assumes the .DAT file is in the folder with the same root (such as a folder called R00123 which contains SON and IDX files as well as a file called R00123.DAT)</p>
 </div>
 <div class="section" id="support">
-<span id="id9"></span><h2>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h2>
+<span id="id10"></span><h2>Support<a class="headerlink" href="#support" title="Permalink to this headline">¶</a></h2>
 <p>This is a new project written and maintained by Daniel Buscombe. Bugs are expected - please report them, I will fix them quickly. Feedback and suggestions for improvements are <em>very</em> welcome</p>
-<p>Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please address all suggestions, comments and queries to: <a class="reference external" href="mailto:dbuscombe&#37;&#52;&#48;usgs&#46;gov">dbuscombe<span>&#64;</span>usgs<span>&#46;</span>gov</a>. Thanks for stopping by!</p>
+<p>Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please use the &#8216;Issues&#8217; tab in github <a class="reference external" href="https://github.com/dbuscombe-usgs/PyHum">here</a></p>
+<p>Thanks for stopping by!</p>
 </div>
 <div class="section" id="trouble-shooting">
 <span id="troubleshooting"></span><h2>Trouble Shooting<a class="headerlink" href="#trouble-shooting" title="Permalink to this headline">¶</a></h2>
@@ -435,6 +443,22 @@ Try this: construct file paths using raw strings e.g.:</p>
 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;C:\Users&#39;</span><span class="p">,</span><span class="s">&#39;me&#39;</span><span class="p">,</span><span class="s">&#39;mydata&#39;</span><span class="p">,</span><span class="s">&#39;R0089&#39;</span><span class="p">))</span>
 </pre></div>
 </div>
+<ol class="arabic" start="3">
+<li><p class="first">Problem: on Linux, PyHum is using an older version of scipy than 0.16, as revealed by:</p>
+<p>python -c &#8216;import scipy;print(scipy.__version__)&#8217;</p>
+</li>
+</ol>
+<p>Try this: remove a system installed file e.g.:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo apt-get remove python-scipy ##(Debian based)
+yum remove scipy ##(Fedora based)
+</pre></div>
+</div>
+<ol class="arabic" start="4">
+<li><p class="first">Problem: do I have the latest version of PyHum installed? Check your version using this:</p>
+<p>python -c &#8216;import PyHum;print(PyHum.__version__)&#8217;</p>
+</li>
+</ol>
+<p>Check this against the latest <a class="reference external" href="https://github.com/dbuscombe-usgs/PyHum/blob/master/PyHum/__init__.py">bleeding-edge&#8217; version `here</a> (line 47)</p>
 <img alt="_images/pyhum_logo_colour_sm.png" src="_images/pyhum_logo_colour_sm.png" />
 </div>
 </div>
@@ -516,7 +540,7 @@ Try this: construct file paths using raw strings e.g.:</p>
         <li class="right" >
           <a href="index.html" title="PyHum: Python program for reading and processing low-cost sidescan sonar data"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.3 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.7 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
