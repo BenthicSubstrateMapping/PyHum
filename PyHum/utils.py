@@ -59,11 +59,13 @@ __all__ = [
 #################################################
 
 # =========================================================
-def auto_bedpick(ft, dep_m, chunkmode, port_fp):
+def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
     buff = 10#10
 
     # get bed from depth trace
-    bed = ft*dep_m
+    #bed = ft*dep_m
+    tvg = ((8.5*10**-5)+(3/76923)+((8.5*10**-5)/4))*c
+    bed = ft*((np.tan(np.radians(25) *dep_m) - tvg)
 
     imu = []
 

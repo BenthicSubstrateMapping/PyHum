@@ -650,7 +650,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        if 2>1:
           if bedpick == 1: # auto
 
-             x, bed = humutils.auto_bedpick(ft, dep_m, chunkmode, port_fp)
+             x, bed = humutils.auto_bedpick(ft, dep_m, chunkmode, port_fp, c)
 
              if len(dist_m)<len(bed):
                 dist_m = np.append(dist_m,dist_m[-1]*np.ones(len(bed)-len(dist_m)))
@@ -668,7 +668,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
           elif bedpick>1: # user prompt
   
-             x, bed = humutils.auto_bedpick(ft, dep_m, chunkmode, port_fp)
+             x, bed = humutils.auto_bedpick(ft, dep_m, chunkmode, port_fp, c)
 
              if len(dist_m)<len(bed):
                 dist_m = np.append(dist_m,dist_m[-1]*np.ones(len(bed)-len(dist_m)))
