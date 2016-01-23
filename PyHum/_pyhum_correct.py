@@ -352,6 +352,12 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     Zt = np.squeeze(Zt)
 
+    avg = np.nanmean(Zt,axis=1)
+    
+    for kk in xrange(len(Zt)):
+       Zt[kk] = Zt[kk] - np.nanmean(avg,axis=0) + np.nanmean(avg)
+    Zt[Zt<=0] = np.nan
+    
     # create memory mapped file for Z
     shape_star = io.set_mmap_data(sonpath, base, '_data_star_la.dat', 'float32', Zt)    
     
@@ -368,7 +374,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     Zt = remove_water(port_fp, bed, shape_port, dep_m, pix_m, 0,  maxW)
 
     Zt = np.squeeze(Zt)
-
+    
     # create memory mapped file for Z
     shape_port = io.set_mmap_data(sonpath, base, '_data_port_l.dat', 'float32', Zt)       
 
@@ -377,6 +383,12 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     
     Zt = correct_scans(port_fp, A_fp, TL, dofilt)
 
+    Zt = np.squeeze(Zt)
+    
+    for kk in xrange(len(Zt)):
+       Zt[kk] = Zt[kk] - np.nanmean(avg,axis=0) + np.nanmean(avg)
+    Zt[Zt<=0] = np.nan
+        
     # create memory mapped file for Z
     shape_port = io.set_mmap_data(sonpath, base, '_data_port_la.dat', 'float32', Zt)       
 
@@ -664,12 +676,14 @@ def correct_scans(fp, a_fp, TL, dofilt):
 
 # =========================================================
 def c_scans(fp, a_fp, TL, dofilt):
+   nodata = fp==0
    if dofilt==1:
       fp = do_ppdrc(fp, np.shape(fp)[-1]/2)
    #mg = 10**np.log10(np.asarray(fp*np.cos(a_fp),'float32')+0.001)
-   mg = 10**np.log10(np.asarray(fp * 1-np.cos(a_fp),'float32')+0.001 + TL)
+   mg = 10**np.log10(np.asarray(fp * 1-np.cos(a_fp)**2,'float32')+0.001 + TL)
    mg[fp==0] = np.nan
    mg[mg<0] = np.nan
+   mg[nodata] = np.nan
    return mg
 
 # =========================================================
@@ -678,6 +692,7 @@ def correct_scans2(fp, TL):
 
 # =========================================================
 def c_scans2(fp, TL):
+   #nodata = fp==0
    try:
       mg = 10**np.log10(np.asarray(fp,'float32')+0.001 + TL[:,::2] )
    except:
@@ -685,6 +700,7 @@ def c_scans2(fp, TL):
 
    mg[fp==0] = np.nan
    mg[mg<0] = np.nan
+   #mg[nodata] = np.nan   
    return mg
 
 # =========================================================
@@ -695,7 +711,6 @@ def do_ppdrc(fp, filtsize):
    dat1 = humutils.rescale(dat1.getdata(),np.min(dat),np.max(dat))
    dat1[np.isnan(fp)] = np.nan
    return dat1
-
 # =========================================================
 def plot_merged_scans(dat_port, dat_star, dist_m, shape_port, ft, sonpath, p):
 

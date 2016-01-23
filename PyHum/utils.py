@@ -60,7 +60,7 @@ __all__ = [
 
 # =========================================================
 def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
-    buff = 50#10
+    #buff = 50#10
 
     # get bed from depth trace
     #bed = ft*dep_m
@@ -70,6 +70,7 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
     bed = rm_spikes(bed,3)
     bed = runningMeanFast(bed, 100)
 
+    buff = min(bed)
     imu = []
 
     if chunkmode!=4:
@@ -84,14 +85,22 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
     
     imu = da.from_array(imu, chunks=1000)   #dask implementation
        
-    imu = median_filter(imu,(20,20))
+    #imu = median_filter(imu,(20,20))
+    imu = median_filter(imu,(np.shape(imu)[0]/100,np.shape(imu)[1]/100))
+    
+    #autobed = dpboundary(-imu[buff:,:].T)+buff
 
-    autobed = dpboundary(-imu[buff:,:].T)+buff
-
+    dx,dy = np.gradient(imu)
+    lap = np.sqrt(dx**2 + dy**2) 
+    del dx, dy   
+    autobed = dpboundary(-lap[buff:,:].T)+buff
+    del lap
+    
     ## narrow image to within range of estimated bed
     # use dynamic boundary tracing to get 2nd estimate of bed  
     #x = np.squeeze(int(np.min(bed))+dpboundary(-imu.T)) 
-    x = np.squeeze(int(np.min(bed))+autobed) 
+    #x = np.squeeze(int(np.min(bed))+autobed)
+    x = np.min(np.vstack((np.squeeze(bed),np.squeeze(autobed))), axis=0)     
     del imu
 
     if len(x)<len(bed):
