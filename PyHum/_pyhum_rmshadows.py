@@ -100,7 +100,7 @@ warnings.filterwarnings("ignore")
 #    ]
 
 #################################################
-def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
+def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
     '''
     Remove dark shadows in scans caused by shallows, shorelines, and attenuation of acoustics with distance
     Manual or automated processing options available
@@ -350,7 +350,7 @@ def rmshadows(humfile, sonpath, win=100, shadowmask=0, doplot=1):
 
     else:
 
-       win = 31
+       #win = 31
 
        Zs = []; Zp = []
        if len(np.shape(star_fp))>2:

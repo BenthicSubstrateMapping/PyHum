@@ -101,9 +101,9 @@ def dotest():
 
    # for shadow removal
    shadowmask = 0 #automatic shadow removal
+   win = 31
 
    # for texture calcs
-   win = 100 # pixel window
    shift = 10 # pixel shift
    density =win/2 # win/2 
    numclasses = 4 # number of discrete classes for contouring and k-means
@@ -137,6 +137,8 @@ def dotest():
    ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
+   win = 100 # pixel window
+   
    ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 

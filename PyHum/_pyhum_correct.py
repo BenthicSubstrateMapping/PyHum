@@ -678,7 +678,7 @@ def correct_scans(fp, a_fp, TL, dofilt):
 def c_scans(fp, a_fp, TL, dofilt):
    nodata = fp==0
    if dofilt==1:
-      fp = do_ppdrc(fp, np.shape(fp)[-1]/2)
+      fp = do_ppdrc(fp, np.shape(fp)[-1]/4)
    #mg = 10**np.log10(np.asarray(fp*np.cos(a_fp),'float32')+0.001)
    mg = 10**np.log10(np.asarray(fp * 1-np.cos(a_fp)**2,'float32')+0.001 + TL)
    mg[fp==0] = np.nan
