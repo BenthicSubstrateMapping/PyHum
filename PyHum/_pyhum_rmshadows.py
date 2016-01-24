@@ -524,7 +524,7 @@ def custom_save(figdirec,root):
 def parallel_me(Z):
     try:
        glcm = greycomatrix(Z, [5], [0], 256, symmetric=True, normed=True)
-       if (greycoprops(glcm, 'dissimilarity')[0, 0] < 3) and (greycoprops(glcm, 'correlation')[0, 0] < 0.2) and (greycoprops(glcm, 'contrast')[0, 0] < 8) and (greycoprops(glcm, 'energy')[0, 0] > 0.15) and (np.mean(Z)<8):
+       if (greycoprops(glcm, 'dissimilarity')[0, 0] < 3) and (greycoprops(glcm, 'correlation')[0, 0] < 0.2) and (greycoprops(glcm, 'contrast')[0, 0] < 6) and (greycoprops(glcm, 'energy')[0, 0] > 0.15) and (np.mean(Z)<8):
           return 1
        else:
           return 0
