@@ -71,7 +71,7 @@ import numpy as np
 import PyHum.utils as humutils
 #from pyhum_utils import sliding_window, im_resize, cut_kmeans
 from joblib import Parallel, delayed #, cpu_count
-from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
+from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes, grey_erosion
 
 #import stdev
 from skimage.feature import greycomatrix, greycoprops
@@ -389,15 +389,20 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
              bw = M>0.5  
 
              # erode and dilate to remove splotches of no data
-             #bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))
-             bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((win,win)))
-             
+             #bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))             
+             bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((win,win))), structure=np.ones((win,win)))
+             #bw2 = binary_erosion(bw,structure=np.ones((win*2,win*2)))
+                         
              # fill holes
-             bw2 = binary_fill_holes(bw2, structure=np.ones((3,3))).astype(int)
+             bw2 = binary_fill_holes(bw2, structure=np.ones((win,win))).astype(int)
+             merge2 = grey_erosion(merge,structure=np.ones((win,win)))
+                
              del bw
              bw2 = np.asarray(bw2!=0,'int8') # we only need 8 bit precision
 
              merge[bw2==1] = 0 #blank out bad data
+             merge[merge2==np.min(merge2)] = 0 #blank out bad data
+             del merge2
          
              ## do plots of merged scans
              if doplot==1:
@@ -453,8 +458,9 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
 
           # erode and dilate to remove splotches of no data
           #bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))
-          bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((win,win)))
-             
+          bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((win,win))), structure=np.ones((win*2,win*2)))
+          #bw2 = binary_erosion(bw,structure=np.ones((win,win)))
+                       
           # fill holes
           bw2 = binary_fill_holes(bw2, structure=np.ones((3,3))).astype(int)
           del bw
