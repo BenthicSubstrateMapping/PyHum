@@ -369,6 +369,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       else:
          resg = res
 
+      tree = KDTree(np.c_[X.flatten(),Y.flatten()])
       complete=0
       while complete==0:
          try:
@@ -377,7 +378,6 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
             shape = np.shape(grid_x)
 
             ## create mask for where the data is not
-            tree = KDTree(np.c_[X.flatten(),Y.flatten()])
             try:
                dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=cpu_count())
             except:

@@ -390,12 +390,12 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
 
              # erode and dilate to remove splotches of no data
              #bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))             
-             bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((win,win))), structure=np.ones((win,win)))
+             bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((win*2,win*2))), structure=np.ones((win,win)))
              #bw2 = binary_erosion(bw,structure=np.ones((win*2,win*2)))
                          
              # fill holes
              bw2 = binary_fill_holes(bw2, structure=np.ones((win,win))).astype(int)
-             merge2 = grey_erosion(merge,structure=np.ones((win,win)))
+             merge2 = grey_erosion(merge,structure=np.ones((win*2,win*2)))
                 
              del bw
              bw2 = np.asarray(bw2!=0,'int8') # we only need 8 bit precision
