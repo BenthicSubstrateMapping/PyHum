@@ -463,9 +463,9 @@ def print_contour_map(cs2cs_args, humlon, humlat, glon, glat, datm, sonpath, p, 
     fig.add_axes(ax)
 
     try:
-       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
-    except:
        map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
+    except:
+       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='ESRI_Imagery_World_2D', xpixels=1000, ypixels=None, dpi=300)
     #finally:
     #   print "error: map could not be created..."
              
