@@ -463,8 +463,8 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       del dist
 
       r_dat = r_dat.reshape(shape)
-      #dat = dat*np.sqrt(np.cos(np.deg2rad(r_dat))) #dat*np.sqrt(r_dat) + dat
-      dat = dat*(np.cos(r_dat)**2) #dat*np.sqrt(r_dat) + dat      
+      dat = dat*np.sqrt(np.cos(np.deg2rad(r_dat))) #dat*np.sqrt(r_dat) + dat
+      #dat = dat*(np.cos(r_dat)**2) #dat*np.sqrt(r_dat) + dat      
       del r_dat
 
       if mode>1:
