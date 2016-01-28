@@ -269,6 +269,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           print 'Chunks based on heading devation of %s degrees' % (str(chunkval))
        elif chunk[0]=='1':          
           chunkmode=4
+          chunkval = 1
           print 'Only 1 chunk will be produced'
        else:
           print "Chunk mode not understood - should be 'd', 'p', or 'h' - using defaults"
