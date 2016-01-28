@@ -69,7 +69,7 @@ import PyHum.io as io
 #numerical
 import numpy as np
 import PyHum.utils as humutils
-import ppdrc
+import PyHum.ppdrc as ppdrc
 
 #plotting
 import matplotlib.pyplot as plt
@@ -312,9 +312,17 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     Zt, R, A = remove_water(star_fp, bed, shape_star, dep_m, pix_m, 1,  maxW)
 
     Zt = np.squeeze(Zt)
-    R = np.squeeze(R)
+    
+    # create memory mapped file for Z)
+    shape_star = io.set_mmap_data(sonpath, base, '_data_star_l.dat', 'float32', Zt)    
+    del Zt
+    
     A = np.squeeze(A)
+    # create memory mapped file for A
+    shape_A = io.set_mmap_data(sonpath, base, '_data_incidentangle.dat', 'float32', A)         
+    del A
 
+    R = np.squeeze(R)
     R[np.isnan(R)] = 0
 
     try:
@@ -324,23 +332,22 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     # compute transmission losses
     TL = (40 * np.log10(R) + alpha_w + (2*alpha)*R/1000)/255
-
-    TL[np.isnan(TL)] = 0
-    TL[TL<0] = 0
-
-    # create memory mapped file for Z)
-    shape_star = io.set_mmap_data(sonpath, base, '_data_star_l.dat', 'float32', Zt)    
+    del alpha_w
 
     # create memory mapped file for R
-    shape_R = io.set_mmap_data(sonpath, base, '_data_range.dat', 'float32', R)     
-
-    # create memory mapped file for A
-    shape_A = io.set_mmap_data(sonpath, base, '_data_incidentangle.dat', 'float32', A)         
+    shape_R = io.set_mmap_data(sonpath, base, '_data_range.dat', 'float32', R)  
+    del R 
+    
+    TL[np.isnan(TL)] = 0
+    TL[TL<0] = 0
+    shape_TL = io.set_mmap_data(sonpath, base, '_data_TL.dat', 'float32', TL)     
+    del TL      
 
     A_fp = io.get_mmap_data(sonpath, base, '_data_incidentangle.dat', 'float32', shape_star)
-
+    TL_fp = io.get_mmap_data(sonpath, base, '_data_TL.dat', 'float32', shape_star)
+    
     if correct_withwater == 1:
-       Zt = correct_scans(star_fp, A_fp, TL, dofilt)
+       Zt = correct_scans(star_fp, A_fp, TL_fp, dofilt)
 
        # create memory mapped file for Z)
        shape_star = io.set_mmap_data(sonpath, base, '_data_star_lw.dat', 'float32', Zt)       
@@ -348,18 +355,23 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     #we are only going to access the portion of memory required
     star_fp = io.get_mmap_data(sonpath, base, '_data_star_l.dat', 'float32', shape_star)     
 
-    Zt = correct_scans(star_fp, A_fp, TL, dofilt)
+    Zt = correct_scans(star_fp, A_fp, TL_fp, dofilt)
 
     Zt = np.squeeze(Zt)
 
     avg = np.nanmean(Zt,axis=1)
     
-    for kk in xrange(len(Zt)):
-       Zt[kk] = Zt[kk] - np.nanmean(avg,axis=0) + np.nanmean(avg)
-    Zt[Zt<=0] = np.nan
+    Zt2 = np.empty(np.shape(Zt))
+    
+    for kk in xrange(np.shape(Zt)[1]):
+       Zt2[:,kk] = (Zt[:,kk] - avg) + np.nanmean(avg)
+    Zt2[Zt<=0] = np.nan
+    Zt2[Zt2<=0] = np.nan    
+    del Zt
     
     # create memory mapped file for Z
-    shape_star = io.set_mmap_data(sonpath, base, '_data_star_la.dat', 'float32', Zt)    
+    shape_star = io.set_mmap_data(sonpath, base, '_data_star_la.dat', 'float32', Zt2)
+    del Zt2    
     
     #we are only going to access the portion of memory required
     star_fp = io.get_mmap_data(sonpath, base, '_data_star_la.dat', 'float32', shape_star) 
@@ -381,17 +393,21 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     #we are only going to access the portion of memory required
     port_fp = io.get_mmap_data(sonpath, base, '_data_port_l.dat', 'float32', shape_port)     
     
-    Zt = correct_scans(port_fp, A_fp, TL, dofilt)
+    Zt = correct_scans(port_fp, A_fp, TL_fp, dofilt)
 
     Zt = np.squeeze(Zt)
     
-    for kk in xrange(len(Zt)):
-       Zt[kk] = Zt[kk] - np.nanmean(avg,axis=0) + np.nanmean(avg)
-    Zt[Zt<=0] = np.nan
+    Zt2 = np.empty(np.shape(Zt))
+    
+    for kk in xrange(np.shape(Zt)[1]):
+       Zt2[:,kk] = (Zt[:,kk] - avg) + np.nanmean(avg)
+    Zt2[Zt<=0] = np.nan
+    Zt2[Zt2<=0] = np.nan    
+    del Zt
         
     # create memory mapped file for Z
-    shape_port = io.set_mmap_data(sonpath, base, '_data_port_la.dat', 'float32', Zt)       
-
+    shape_port = io.set_mmap_data(sonpath, base, '_data_port_la.dat', 'float32', Zt2)       
+    del Zt2
 
     #we are only going to access the portion of memory required
     port_fp = io.get_mmap_data(sonpath, base, '_data_port_la.dat', 'float32', shape_port) 
@@ -467,14 +483,16 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
        Zt = np.squeeze(Zt)
 
        # create memory mapped file for Z
-       shape_low = io.set_mmap_data(sonpath, base, '_data_dwnlow_l.dat', 'float32', Zt)          
+       shape_low = io.set_mmap_data(sonpath, base, '_data_dwnlow_l.dat', 'float32', Zt)       
+       del Zt   
 
        #we are only going to access the portion of memory required
        low_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow_l.dat', 'float32', shape_low)         
-       Zt = correct_scans2(low_fp, TL)
+       Zt = correct_scans2(low_fp, TL_fp)
 
        # create memory mapped file for Z
-       shape_low = io.set_mmap_data(sonpath, base, '_data_dwnlow_la.dat', 'float32', Zt)        
+       shape_low = io.set_mmap_data(sonpath, base, '_data_dwnlow_la.dat', 'float32', Zt)    
+       del Zt    
 
        #we are only going to access the lowion of memory required
        low_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow_la.dat', 'float32', shape_low)        
@@ -492,15 +510,17 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
        Zt = np.squeeze(Zt)
 
        # create memory mapped file for Z
-       shape_hi = io.set_mmap_data(sonpath, base, '_data_dwnhi_l.dat', 'float32', Zt)        
+       shape_hi = io.set_mmap_data(sonpath, base, '_data_dwnhi_l.dat', 'float32', Zt) 
+       del Zt       
 
        #we are only going to access the portion of memory required
        hi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi_l.dat', 'float32', shape_hi)        
 
-       Zt = correct_scans2(hi_fp, TL)
+       Zt = correct_scans2(hi_fp, TL_fp)
 
        # create memory mapped file for Z
-       shape_hi = io.set_mmap_data(sonpath, base, '_data_dwnhi_la.dat', 'float32', Zt)       
+       shape_hi = io.set_mmap_data(sonpath, base, '_data_dwnhi_la.dat', 'float32', Zt)     
+       del Zt  
 
        #we are only going to access the hiion of memory required
        hi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi_la.dat', 'float32', shape_hi)        
@@ -694,7 +714,7 @@ def correct_scans2(fp, TL):
 def c_scans2(fp, TL):
    #nodata = fp==0
    try:
-      mg = 10**np.log10(np.asarray(fp,'float32')+0.001 + TL[:,::2] )
+      mg = 10**np.log10(np.asarray(fp,'float32')+0.001 + TL) #[:,::2] )
    except:
       mg = 10**np.log10(np.asarray(fp,'float32')+0.001 )
 
@@ -711,10 +731,11 @@ def do_ppdrc(fp, filtsize):
    dat1 = humutils.rescale(dat1.getdata(),np.min(dat),np.max(dat))
    dat1[np.isnan(fp)] = np.nan
    return dat1
+   
 # =========================================================
 def plot_merged_scans(dat_port, dat_star, dist_m, shape_port, ft, sonpath, p):
 
-   if ~os.path.isfile(os.path.normpath(os.path.join(sonpath,'merge_corrected_scan'+str(p)))):
+   if 2>1: #~os.path.isfile(os.path.normpath(os.path.join(sonpath,'merge_corrected_scan'+str(p)))):
       if len(shape_port)>2:
          Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
          extent = shape_port[1] #np.shape(merge)[0]
@@ -723,7 +744,7 @@ def plot_merged_scans(dat_port, dat_star, dist_m, shape_port, ft, sonpath, p):
          extent = shape_port[0] #np.shape(merge)[0]
 
       fig = plt.figure()
-      plt.imshow(np.vstack((np.flipud(dat_port), dat_star)), cmap='gray', extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)])
+      plt.imshow(np.vstack((np.flipud(np.uint8(dat_port)), np.uint8(dat_star))), cmap='gray', extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)])
       plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
 
       plt.axis('normal'); plt.axis('tight')
@@ -733,7 +754,7 @@ def plot_merged_scans(dat_port, dat_star, dist_m, shape_port, ft, sonpath, p):
 # =========================================================
 def plot_dwnlow_scans(dat_dwnlow, dist_m, shape_low, ft, sonpath, p):
 
-    if ~os.path.isfile(os.path.normpath(os.path.join(sonpath,'dwnlow_corrected_scan'+str(p)))):
+    if 2>1: #~os.path.isfile(os.path.normpath(os.path.join(sonpath,'dwnlow_corrected_scan'+str(p)))):
        if len(shape_low)>2:
           Zdist = dist_m[shape_low[-1]*p:shape_low[-1]*(p+1)]
           extent = shape_low[1] #np.shape(merge)[0]
@@ -742,7 +763,7 @@ def plot_dwnlow_scans(dat_dwnlow, dist_m, shape_low, ft, sonpath, p):
          extent = shape_low[0] #np.shape(merge)[0]  
  
        fig = plt.figure()
-       plt.imshow(dat_dwnlow, cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
+       plt.imshow(np.uint8(dat_dwnlow), cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
        plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
 
        plt.axis('normal'); plt.axis('tight')
@@ -752,7 +773,7 @@ def plot_dwnlow_scans(dat_dwnlow, dist_m, shape_low, ft, sonpath, p):
 # =========================================================
 def plot_dwnhi_scans(dat_dwnhi, dist_m, shape_hi, ft, sonpath, p):
 
-    if ~os.path.isfile(os.path.normpath(os.path.join(sonpath,'dwnhi_corrected_scan'+str(p)))):
+    if 2>1: #~os.path.isfile(os.path.normpath(os.path.join(sonpath,'dwnhi_corrected_scan'+str(p)))):
        if len(shape_hi)>2:
           Zdist = dist_m[shape_hi[-1]*p:shape_hi[-1]*(p+1)]
           extent = shape_hi[1] #np.shape(merge)[0]
@@ -761,7 +782,7 @@ def plot_dwnhi_scans(dat_dwnhi, dist_m, shape_hi, ft, sonpath, p):
           extent = shape_hi[0] #np.shape(merge)[0]  
     
        fig = plt.figure()
-       plt.imshow(dat_dwnhi, cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
+       plt.imshow(np.uint8(dat_dwnhi), cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
        plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
 
        plt.axis('normal'); plt.axis('tight')
