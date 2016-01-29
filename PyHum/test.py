@@ -119,7 +119,7 @@ def dotest():
    dowrite = 0 #disable writing of point cloud data to file
 
    nn = 64 #number of nearest neighbours for gridding (used if mode > 1)
-   influence = 1 #Radius of influence used in gridding. Cut off distance in meters 
+   ##influence = 1 #Radius of influence used in gridding. Cut off distance in meters 
    numstdevs = 5 #Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept 
 
    # for downward-looking echosounder echogram (e1-e2) analysis
@@ -143,13 +143,13 @@ def dotest():
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
    ## grid and map the scans
-   PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, influence, numstdevs)
+   PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, numstdevs)
 
    res = 1 # grid resolution in metres
    numstdevs = 5
    
    ## grid and map the texture lengthscale maps
-   PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, influence, numstdevs)
+   PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs)
 
    ## calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)

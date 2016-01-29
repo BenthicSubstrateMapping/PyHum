@@ -72,11 +72,18 @@ import pyproj
 import PyHum.utils as humutils
 import pyresample
 from scipy.ndimage import binary_dilation, binary_erosion #, binary_fill_holes
-from scipy.spatial import cKDTree as KDTree
 
-import replace_nans
+try:
+   from pykdtree.kdtree import KDTree
+   pykdtree=1   
+except:
+   print "install pykdtree for faster kd-tree operations: https://github.com/storpipfugl/pykdtree"
+   from scipy.spatial import cKDTree as KDTree
+   pykdtree=0   
+   
+import PyHum.replace_nans as replace_nans
 
-import getxy
+import PyHum.getxy as getxy
 
 # plotting
 import matplotlib.pyplot as plt
@@ -94,7 +101,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, nn = 64, influence = 10, numstdevs=5):
+def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, nn = 64, numstdevs=5): #influence = 10, 
          
     '''
     Create plots of the texture lengthscale maps made in PyHum.texture module 
@@ -106,7 +113,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
 
     Syntax
     ----------
-    [] = PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, influence, numstdevs)
+    [] = PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs)
 
     Parameters
     ----------
@@ -125,9 +132,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
                       2 = inverse weighted nearest neighbour
                       3 = Gaussian weighted nearest neighbour
     nn: int, *optional* [Default=64]
-       number of nearest neighbours for gridding (used if mode > 1)
-    influence: float, *optional* [Default=1]
-       Radius of influence used in gridding. Cut off distance in meters   
+       number of nearest neighbours for gridding (used if mode > 1) 
     numstdevs: int, *optional* [Default = 4]
        Threshold number of standard deviations in texture lengthscale per grid cell up to which to accept 
            
@@ -188,9 +193,9 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
        nn = int(nn)
        print 'Number of nearest neighbours for gridding: %s' % (str(nn))             
 
-    if influence:
-       influence = int(influence)
-       print 'Radius of influence for gridding: %s (m)' % (str(influence))             
+    #if influence:
+    #   influence = int(influence)
+    #   print 'Radius of influence for gridding: %s (m)' % (str(influence))             
 
     if numstdevs:
        numstdevs = int(numstdevs)
@@ -295,6 +300,10 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
 
           X, Y, merge = trim_xys(X, Y, merge, index)
 
+          X = X.astype('float32')
+          Y = Y.astype('float32')
+          merge = merge.astype('float32')
+          
           # write raw bs to file
           outfile = os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc'))
           with open(outfile, 'w') as f:
@@ -305,10 +314,13 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
           #if dogrid==1:
 
           orig_def, targ_def, grid_x, grid_y, res, shape = get_griddefs(np.min(X), np.max(X), np.min(Y), np.max(Y), res, humlon, humlat, trans)
-                          
+
+          grid_x = grid_x.astype('float32')
+          grid_y = grid_y.astype('float32')
+                                      
           sigmas = 1 #m
           eps = 2
-          dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
+          dat, res = get_grid(mode, orig_def, targ_def, merge, res*10, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
           
           del merge
              
@@ -383,17 +395,20 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
           ## create mask for where the data is not
           tree = KDTree(np.c_[X.flatten(),Y.flatten()])
 
-          try:
-             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=cpu_count())
-          except:
-             print ".... update your scipy installation to use faster kd-tree queries"
-             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
+          if pykdtree==1:
+             dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)                      
+          else:
+             try:
+                dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=cpu_count())
+             except:
+                print ".... update your scipy installation to use faster kd-tree queries"
+                dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
 
           dist = dist.reshape(grid_x.shape)
              
           sigmas = 1 #m
           eps = 2
-          dat, res = get_grid(mode, orig_def, targ_def, merge, influence, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
+          dat, res = get_grid(mode, orig_def, targ_def, merge, res*10, np.min(X), np.max(X), np.min(Y), np.max(Y), res, nn, sigmas, eps, shape, numstdevs, trans, humlon, humlat)
           
           del merge
 
@@ -529,12 +544,12 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
        complete=0
        while complete==0:
           try:
-             dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count()) 
+             dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=res*10, fill_value=None, nprocs = cpu_count()) 
              if 'dat' in locals(): 
                 complete=1 
           except:
              #del grid_x, grid_y, targ_def, orig_def
-             dat, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans, nn, wf, sigmas, eps)
+             dat, res, complete = getgrid_lm(humlon, humlat, merge, res*10, minX, maxX, minY, maxY, res*2, mode, trans, nn, wf, sigmas, eps)
 
     elif mode==2:
        # custom inverse distance 
@@ -543,12 +558,12 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
        complete=0
        while complete==0:
           try:
-             dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+             dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=res*10, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
              if 'dat' in locals(): 
                 complete=1 
           except:
              #del grid_x, grid_y, targ_def, orig_def
-             dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans, nn, wf, sigmas, eps)
+             dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, res*10, minX, maxX, minY, maxY, res*2, mode, trans, nn, wf, sigmas, eps)
 
     elif mode==3:
 
@@ -557,12 +572,12 @@ def get_grid(mode, orig_def, targ_def, merge, influence, minX, maxX, minY, maxY,
        complete=0
        while complete==0:
           try:
-             dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+             dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
              if 'dat' in locals(): 
                 complete=1 
           except:
              #del grid_x, grid_y, targ_def, orig_def
-             dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res*2, mode, trans, nn, wf, sigmas, eps)
+             dat, stdev, counts, res, complete = getgrid_lm(humlon, humlat, merge, res*10, minX, maxX, minY, maxY, res*2, mode, trans, nn, wf, sigmas, eps)
 
     dat = dat.reshape(shape)
     if mode>1:
@@ -651,13 +666,13 @@ def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mo
          orig_def = pyresample.geometry.SwathDefinition(lons=humlon.flatten(), lats=humlat.flatten())
 
          if mode==1:
-            dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, fill_value=None, nprocs = cpu_count())
+            dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=res*10, fill_value=None, nprocs = cpu_count())
             stdev = None
             counts = None
          elif mode==2:
-            dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=influence, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+            dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=res*10, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
          else:
-            dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=influence, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
+            dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = np.nan, nprocs = cpu_count(), epsilon = eps)
  
          if 'dat' in locals(): 
             complete=1 
@@ -718,7 +733,7 @@ def xyfunc(e,n,yvec,d,t,extent):
 # =========================================================
 if __name__ == '__main__':
 
-   map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, influence, numstdevs)
+   map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs) #influence,
 
 ## =========================================================
 #def getxy(e, n, yvec, d, t,extent):

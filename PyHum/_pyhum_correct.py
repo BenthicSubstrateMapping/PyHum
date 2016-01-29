@@ -692,7 +692,10 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
  
 # =========================================================
 def correct_scans(fp, a_fp, TL, dofilt):
-    return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans)(fp[p], a_fp[p], TL[p], dofilt) for p in xrange(len(fp)))
+    if np.ndim(fp)==2:
+       return c_scans(fp, a_fp, TL, dofilt)
+    else:
+       return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans)(fp[p], a_fp[p], TL[p], dofilt) for p in xrange(len(fp)))
 
 # =========================================================
 def c_scans(fp, a_fp, TL, dofilt):
@@ -708,7 +711,10 @@ def c_scans(fp, a_fp, TL, dofilt):
 
 # =========================================================
 def correct_scans2(fp, TL):
-    return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans2)(fp[p], TL) for p in xrange(len(fp)))
+    if np.ndim(fp)==2:
+       return c_scans2(fp, TL)
+    else:
+       return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans2)(fp[p], TL) for p in xrange(len(fp)))
 
 # =========================================================
 def c_scans2(fp, TL):

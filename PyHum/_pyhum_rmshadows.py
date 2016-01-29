@@ -205,7 +205,7 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
     ft = 1/(meta['pix_m'])
     extent = shape_star[1] 
 
-    if shadowmask==1:
+    if shadowmask==1: #manual
 
        Zt = []
        if len(np.shape(star_fp))>2:
@@ -348,7 +348,7 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
 
        #shutil.move(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat')), os.path.normpath(os.path.join(sonpath,base+'_data_port_la.dat')))
 
-    else:
+    else: #auto
 
        #win = 31
 
@@ -389,16 +389,19 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
              bw = M>0.5  
 
              # erode and dilate to remove splotches of no data
-             #bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))             
-             bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((win*2,win*2))), structure=np.ones((win,win)))
-             #bw2 = binary_erosion(bw,structure=np.ones((win*2,win*2)))
+             ##bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))             
+             #bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((win*2,win*2))), structure=np.ones((win,win)))
+             ##bw2 = binary_erosion(bw,structure=np.ones((win*2,win*2)))
                          
-             # fill holes
-             bw2 = binary_fill_holes(bw2, structure=np.ones((win,win))).astype(int)
+             ## fill holes
+             #bw2 = binary_fill_holes(bw2, structure=np.ones((win,win))).astype(int)
              merge2 = grey_erosion(merge,structure=np.ones((win*2,win*2)))
                 
+             #del bw
+             #bw2 = np.asarray(bw2!=0,'int8') # we only need 8 bit precision
+
+             bw2 = np.asarray(bw!=0,'int8') # we only need 8 bit precision
              del bw
-             bw2 = np.asarray(bw2!=0,'int8') # we only need 8 bit precision
 
              merge[bw2==1] = 0 #blank out bad data
              merge[merge2==np.min(merge2)] = 0 #blank out bad data
