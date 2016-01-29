@@ -565,17 +565,17 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       print "error: map could not be created..."
 
 
-   y1 = np.min(humlat)-0.001
-   x1 = np.min(humlon)-0.001
-   y2 = np.max(humlat)+0.001
-   x2 = np.max(humlon)+0.001
+   y1 = np.min(glat)-0.001
+   x1 = np.min(glon)-0.001
+   y2 = np.max(glat)+0.001
+   x2 = np.max(glon)+0.001
 
    print "drawing and printing map ..."
    fig = plt.figure(frameon=False)
    map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
     resolution = 'i', #h #f
-    llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(humlat)-0.001,
-    urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(humlat)+0.001)
+    llcrnrlon=np.min(humlon)-0.001, llcrnrlat=np.min(glat)-0.001,
+    urcrnrlon=np.max(humlon)+0.001, urcrnrlat=np.max(glat)+0.001)
 
    try:
       map.arcgisimage(server='http://server.arcgisonline.com/ArcGIS', service='World_Imagery', xpixels=1000, ypixels=None, dpi=300)
@@ -604,7 +604,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       x,y = map.projtran(humlon, humlat)
       map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='gray', linewidth = '0')
 
-   map.drawmapscale(x1+0.001, y1+0.001, x1, y1, 100., units='m', barstyle='fancy', labelstyle='simple', fontcolor='k') #'#F8F8FF')
+   map.drawmapscale(x1+0.001, y1+0.001, x1, y1, 200., units='m', barstyle='fancy', labelstyle='simple', fontcolor='k') #'#F8F8FF')
    map.drawparallels(np.arange(y1-0.001, y2+0.001, 0.005),labels=[1,0,0,1], linewidth=0.0, rotation=30, fontsize=8)
    map.drawmeridians(np.arange(x1, x2, 0.002),labels=[1,0,0,1], linewidth=0.0, rotation=30, fontsize=8)
 
