@@ -868,7 +868,7 @@ def gui():
 	lbl5.grid(row=0, column=0, columnspan=1, sticky='new', pady=5)
 
 	def hello4():
-	   tkMessageBox.showinfo("Map Sidescan Instructions", "DAT file: path to the .DAT file\n\n SON files: path to *.SON files\n\n cs2cs_args: argument given to pyproj to turn wgs84 coords. to projection supported by proj.4. Default='epsg:26949'\n\n res: grid resolution of the output gridded sidescan map. If 0, an appropriate grid resolution will be automatically found\n\n gridding mode: 1 = simple nearest neighbour; 2 = nearest neighbour, weighted using inverse distance metric; 3 = Gaussian-weighted nearest neighbour\n\n Nearest neighbours: the number of nearst neighbours to use in the gridding (larger number means more spatial smoothing of the data)\n\n Influence: radius of influence, in metres, used in the gridding (the upper bound on the search for k nearest neighbours)\n\n Number of standard deviationss: threshold number of standard deviations in sidescan intensity per grid cell up to which to accept\n\n")    
+	   tkMessageBox.showinfo("Map Sidescan Instructions", "DAT file: path to the .DAT file\n\n SON files: path to *.SON files\n\n cs2cs_args: argument given to pyproj to turn wgs84 coords. to projection supported by proj.4. Default='epsg:26949'\n\n res: grid resolution of the output gridded sidescan map. If 0, an appropriate grid resolution will be automatically found\n\n gridding mode: 1 = simple nearest neighbour; 2 = nearest neighbour, weighted using inverse distance metric; 3 = Gaussian-weighted nearest neighbour\n\n Nearest neighbours: the number of nearst neighbours to use in the gridding (larger number means more spatial smoothing of the data)\n\n Number of standard deviationss: threshold number of standard deviations in sidescan intensity per grid cell up to which to accept\n\n")    
 
 	def hello4_alt():
 	   try:
@@ -885,7 +885,7 @@ def gui():
 	      T.tag_configure('big', font=('Verdana', 20, 'bold'))
 	      T.tag_configure('color', foreground='#476042', font=('Tempus Sans ITC', 12, 'bold'))
 
-	      quote = """Map Sidescan Instructions", "DAT file: path to the .DAT file\n\n SON files: path to *.SON files\n\n cs2cs_args: argument given to pyproj to turn wgs84 coords. to projection supported by proj.4. Default='epsg:26949'\n\n res: grid resolution of the output gridded sidescan map. If 0, an appropriate grid resolution will be automatically found\n\n gridding mode: 1 = simple nearest neighbour; 2 = nearest neighbour, weighted using inverse distance metric; 3 = Gaussian-weighted nearest neighbour\n\n Nearest neighbours: the number of nearst neighbours to use in the gridding (larger number means more spatial smoothing of the data)\n\n Influence: radius of influence, in metres, used in the gridding (the upper bound on the search for k nearest neighbours)\n\n Number of standard deviationss: threshold number of standard deviations in sidescan intensity per grid cell up to which to accept\n\n"""
+	      quote = """Map Sidescan Instructions", "DAT file: path to the .DAT file\n\n SON files: path to *.SON files\n\n cs2cs_args: argument given to pyproj to turn wgs84 coords. to projection supported by proj.4. Default='epsg:26949'\n\n res: grid resolution of the output gridded sidescan map. If 0, an appropriate grid resolution will be automatically found\n\n gridding mode: 1 = simple nearest neighbour; 2 = nearest neighbour, weighted using inverse distance metric; 3 = Gaussian-weighted nearest neighbour\n\n Nearest neighbours: the number of nearst neighbours to use in the gridding (larger number means more spatial smoothing of the data)\n\n Number of standard deviationss: threshold number of standard deviations in sidescan intensity per grid cell up to which to accept\n\n"""
 	      T.insert(END, quote)
 	   except:
 	      hello4()    
@@ -953,12 +953,12 @@ def gui():
 	nnscale.configure(background='IndianRed1', fg="black")
 
 	#=======================
-	# influence
-	self.infvar = Tkinter.DoubleVar()
-	infscale = Tkinter.Scale( map_frame, variable = self.infvar, from_=0.1, to=10, resolution=0.1, tickinterval=1, label = 'Influence [m]' )
-	infscale.set(1)
-	infscale.grid(row=4, column=0,  pady=(2,4))
-	infscale.configure(background='IndianRed1', fg="black")
+	## influence
+	#self.infvar = Tkinter.DoubleVar()
+	#infscale = Tkinter.Scale( map_frame, variable = self.infvar, from_=0.1, to=10, resolution=0.1, tickinterval=1, label = 'Influence [m]' )
+	#infscale.set(1)
+	#infscale.grid(row=4, column=0,  pady=(2,4))
+	#infscale.configure(background='IndianRed1', fg="black")
 
 	#=======================
 	# numstdevs
@@ -1019,7 +1019,7 @@ def gui():
 	    if self.resvar.get()==0:
 	       self.resvar=99                 
 	    # do stuff here
-	    PyHum.map(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(), self.resvar.get(), self.dowritevar.get(), self.mode, self.nnvar.get(), self.infvar.get(), self.nstdvar.get())
+	    PyHum.map(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(), self.resvar.get(), self.dowritevar.get(), self.mode, self.nnvar.get(), self.nstdvar.get()) #self.infvar.get(),
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Map module finished") 
 	    
@@ -1235,7 +1235,7 @@ def gui():
 	lbl7.grid(row=0, column=0, columnspan=1, sticky='new', pady=5)
 
 	def hello6():
-	   tkMessageBox.showinfo("Map Texture Instructions", "DAT file: path to the .DAT file\n\n SON files: path to *.SON files\n\n cs2cs_args: argument given to pyproj to turn wgs84 coords. to projection supported by proj.4. Default='epsg:26949'\n\n res: grid resolution of the output gridded sidescan map. If 0, an appropriate grid resolution will be automatically found\n\n gridding mode: 1 = simple nearest neighbour; 2 = nearest neighbour, weighted using inverse distance metric; 3 = Gaussian-weighted nearest neighbour\n\n Nearest neighbours: the number of nearst neighbours to use in the gridding (larger number means more spatial smoothing of the data)\n\n Influence: radius of influence, in metres, used in the gridding (the upper bound on the search for k nearest neighbours)\n\n Number of standard deviationss: threshold number of standard deviations in texture lengthscale per grid cell up to which to accept\n\n")    
+	   tkMessageBox.showinfo("Map Texture Instructions", "DAT file: path to the .DAT file\n\n SON files: path to *.SON files\n\n cs2cs_args: argument given to pyproj to turn wgs84 coords. to projection supported by proj.4. Default='epsg:26949'\n\n res: grid resolution of the output gridded sidescan map. If 0, an appropriate grid resolution will be automatically found\n\n gridding mode: 1 = simple nearest neighbour; 2 = nearest neighbour, weighted using inverse distance metric; 3 = Gaussian-weighted nearest neighbour\n\n Nearest neighbours: the number of nearst neighbours to use in the gridding (larger number means more spatial smoothing of the data)\n\n Number of standard deviationss: threshold number of standard deviations in texture lengthscale per grid cell up to which to accept\n\n")    
 
 	def hello6_alt():
 	   try:
@@ -1252,7 +1252,7 @@ def gui():
 	      T.tag_configure('big', font=('Verdana', 20, 'bold'))
 	      T.tag_configure('color', foreground='#476042', font=('Tempus Sans ITC', 12, 'bold'))
 
-	      quote = """Map Texture Instructions", "DAT file: path to the .DAT file\n\n SON files: path to *.SON files\n\n cs2cs_args: argument given to pyproj to turn wgs84 coords. to projection supported by proj.4. Default='epsg:26949'\n\n res: grid resolution of the output gridded sidescan map. If 0, an appropriate grid resolution will be automatically found\n\n gridding mode: 1 = simple nearest neighbour; 2 = nearest neighbour, weighted using inverse distance metric; 3 = Gaussian-weighted nearest neighbour\n\n Nearest neighbours: the number of nearst neighbours to use in the gridding (larger number means more spatial smoothing of the data)\n\n Influence: radius of influence, in metres, used in the gridding (the upper bound on the search for k nearest neighbours)\n\n Number of standard deviationss: threshold number of standard deviations in texture lengthscale per grid cell up to which to accept"""
+	      quote = """Map Texture Instructions", "DAT file: path to the .DAT file\n\n SON files: path to *.SON files\n\n cs2cs_args: argument given to pyproj to turn wgs84 coords. to projection supported by proj.4. Default='epsg:26949'\n\n res: grid resolution of the output gridded sidescan map. If 0, an appropriate grid resolution will be automatically found\n\n gridding mode: 1 = simple nearest neighbour; 2 = nearest neighbour, weighted using inverse distance metric; 3 = Gaussian-weighted nearest neighbour\n\n Nearest neighbours: the number of nearst neighbours to use in the gridding (larger number means more spatial smoothing of the data)\n\n Number of standard deviationss: threshold number of standard deviations in texture lengthscale per grid cell up to which to accept"""
 	      T.insert(END, quote)
 	   except:
 	      hello6()
@@ -1323,11 +1323,11 @@ def gui():
 
 	#=======================
 	# influence
-	self.infvar = Tkinter.DoubleVar()
-	infscale = Tkinter.Scale( map_texture_frame, variable = self.infvar, from_=0.1, to=10, resolution=0.1, tickinterval=1, label = 'Influence [m]' )
-	infscale.set(1)
-	infscale.grid(row=4, column=0,  pady=(2,4))
-	infscale.configure(background='gold2', fg="black")
+	#self.infvar = Tkinter.DoubleVar()
+	#infscale = Tkinter.Scale( map_texture_frame, variable = self.infvar, from_=0.1, to=10, resolution=0.1, tickinterval=1, label = 'Influence [m]' )
+	#infscale.set(1)
+	#infscale.grid(row=4, column=0,  pady=(2,4))
+	#infscale.configure(background='gold2', fg="black")
 
 	#=======================
 	# numstdevs
@@ -1362,7 +1362,7 @@ def gui():
 	#    print "number std. dev. to accept: " + str(self.nstdvar.get())             
 		             
 	    # do stuff here
-	    PyHum.map_texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(),self.resvar.get(), self.mode, self.nnvar.get(), self.infvar.get(), self.nstdvar.get())    
+	    PyHum.map_texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(),self.resvar.get(), self.mode, self.nnvar.get(), self.nstdvar.get())  #self.infvar.get(),  
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Map texture module finished") 
 		
