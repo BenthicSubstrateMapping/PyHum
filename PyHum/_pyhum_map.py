@@ -296,10 +296,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    
    trans =  pyproj.Proj(init=cs2cs_args)   
 
-   if p>0:
-      merge = np.vstack((dat_port,dat_star))
-   else:
-      merge = np.vstack((np.flipud(dat_port),dat_star))      
+   merge = np.vstack((dat_port,dat_star))     
    del dat_port, dat_star
    
    merge[np.isnan(merge)] = 0
@@ -469,8 +466,10 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
                   complete=1 
             except:
                del grid_x, grid_y, targ_def, orig_def
+               humlon, humlat = trans(X, Y, inverse=True)        
                dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, res*10, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
                r_dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, res*10, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
+               del humlat, humlon
                del stdev_null, counts_null
 
       elif mode==3:
@@ -487,10 +486,13 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
                   complete=1 
             except:
                del grid_x, grid_y, targ_def, orig_def
+               humlon, humlat = trans(X, Y, inverse=True)                       
                dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, res*10, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
                r_dat, stdev_null, counts_null, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, res*10, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
+               del humlat, humlon
                del stdev_null, counts_null
 
+      humlon, humlat = trans(X, Y, inverse=True)        
       del X, Y, res_grid, merge
 
       dat = dat.reshape(shape)
@@ -563,10 +565,10 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       print "error: map could not be created..."
 
 
-   y1 = np.min(glat)-0.001
-   x1 = np.min(glon)-0.001
-   y2 = np.max(glat)+0.001
-   x2 = np.max(glon)+0.001
+   y1 = np.min(humlat)-0.001
+   x1 = np.min(humlon)-0.001
+   y2 = np.max(humlat)+0.001
+   x2 = np.max(humlon)+0.001
 
    print "drawing and printing map ..."
    fig = plt.figure(frameon=False)
