@@ -565,10 +565,10 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       print "error: map could not be created..."
 
 
-   y1 = np.min(glat)-0.001
-   x1 = np.min(glon)-0.001
-   y2 = np.max(glat)+0.001
-   x2 = np.max(glon)+0.001
+   #y1 = np.min(glat)-0.001
+   #x1 = np.min(glon)-0.001
+   #y2 = np.max(glat)+0.001
+   #x2 = np.max(glon)+0.001
 
    print "drawing and printing map ..."
    fig = plt.figure(frameon=False)
@@ -604,9 +604,9 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       x,y = map.projtran(humlon, humlat)
       map.scatter(x.flatten(), y.flatten(), 0.5, merge.flatten(), cmap='gray', linewidth = '0')
 
-   map.drawmapscale(x1+0.001, y1+0.001, x1, y1, 200., units='m', barstyle='fancy', labelstyle='simple', fontcolor='k') #'#F8F8FF')
-   map.drawparallels(np.arange(y1-0.001, y2+0.001, 0.005),labels=[1,0,0,1], linewidth=0.0, rotation=30, fontsize=8)
-   map.drawmeridians(np.arange(x1, x2, 0.002),labels=[1,0,0,1], linewidth=0.0, rotation=30, fontsize=8)
+   #map.drawmapscale(x1+0.001, y1+0.001, x1, y1, 200., units='m', barstyle='fancy', labelstyle='simple', fontcolor='k') #'#F8F8FF')
+   #map.drawparallels(np.arange(y1-0.001, y2+0.001, 0.005),labels=[1,0,0,1], linewidth=0.0, rotation=30, fontsize=8)
+   #map.drawmeridians(np.arange(x1, x2, 0.002),labels=[1,0,0,1], linewidth=0.0, rotation=30, fontsize=8)
 
    custom_save2(sonpath,'map_imagery'+str(p))
    del fig 
