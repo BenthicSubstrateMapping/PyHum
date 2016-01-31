@@ -83,7 +83,10 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
         
     imu = np.squeeze(np.asarray(imu, 'float64'))-buff
     
-    imu = da.from_array(imu, chunks=1000)   #dask implementation
+    try:
+       imu = da.from_array(imu, chunks=1000)   #dask implementation
+    except:
+       pass
        
     #imu = median_filter(imu,(20,20))
     imu = median_filter(imu,(np.shape(imu)[0]/100,np.shape(imu)[1]/100))
@@ -170,7 +173,10 @@ def get_bearing(calc_bearing, cog, filt_bearing, lat, lon, heading):
        # can have two modes
        data = np.column_stack([bearing, bearing])
        
-       data = da.from_array(data, chunks=1000)   #dask implementation
+       try:
+          data = da.from_array(data, chunks=1000)   #dask implementation
+       except:
+          pass
           
        k_means = MiniBatchKMeans(2)
        # fit the model
@@ -566,7 +572,10 @@ def cut_kmeans(w,numclusters):
    '''
    wc = w.reshape((-1, 1)) # We need an (n_sample, n_feature) array
    
-   wc = da.from_array(wc, chunks=1000)   #dask implementation
+   try:
+      wc = da.from_array(wc, chunks=1000)   #dask implementation
+   except:
+      pass
    
    k_means = MiniBatchKMeans(numclusters)
    # fit the model
@@ -588,7 +597,10 @@ def im_resize(im,Nx,Ny):
    xx = np.linspace(0,nx,Nx)
    yy = np.linspace(0,ny,Ny)
    
-   im = da.from_array(im, chunks=1000)   #dask implementation
+   try:
+      im = da.from_array(im, chunks=1000)   #dask implementation
+   except:
+      pass
    
    newKernel = RectBivariateSpline(np.r_[:ny],np.r_[:nx],im) 
    return newKernel(yy,xx)
