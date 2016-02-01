@@ -99,6 +99,14 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
     autobed = dpboundary(-lap[buff:,:].T)+buff
     del lap
     
+    autobed = np.squeeze(autobed)
+
+    if len(autobed) < len(bed):
+       autobed2 = bed.copy()
+       autobed2[:len(autobed)] = autobed
+       del autobed
+       autobed = autobed2
+
     ## narrow image to within range of estimated bed
     # use dynamic boundary tracing to get 2nd estimate of bed  
     #x = np.squeeze(int(np.min(bed))+dpboundary(-imu.T)) 

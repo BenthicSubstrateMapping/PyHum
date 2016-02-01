@@ -69,7 +69,7 @@ import PyHum.io as io
 
 #numerical
 #import pyread
-import pyread_single
+import PyHum.pyread_single as pyread_single
 from joblib import Parallel, delayed, cpu_count
 
 import PyHum.utils as humutils
