@@ -368,7 +368,7 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
              merge[np.isnan(merge)] = 0
 
              #Z,ind = humutils.sliding_window(merge,(win,win),(win/2,win/2))
-             Z,ind = humutils.sliding_window(merge,(win,win/2),(win,win/2))
+             Z,ind = humutils.sliding_window(merge,(win,win),(win,win))
 
              #zmean = np.reshape(zmean, ( ind[0], ind[1] ) )
              Ny, Nx = np.shape(merge)
@@ -387,15 +387,16 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
              del zmean
 
              bw = M>0.5  
+             del M
 
              # erode and dilate to remove splotches of no data
-             ##bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))             
-             #bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((win*2,win*2))), structure=np.ones((win,win)))
+             bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))             
+             #bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((win/4,win/4))), structure=np.ones((win/4,win/4)))
              ##bw2 = binary_erosion(bw,structure=np.ones((win*2,win*2)))
                          
              ## fill holes
-             #bw2 = binary_fill_holes(bw2, structure=np.ones((win,win))).astype(int)
-             merge2 = grey_erosion(merge,structure=np.ones((win*2,win*2)))
+             bw2 = binary_fill_holes(bw2, structure=np.ones((win,win))).astype(int)
+             merge2 = grey_erosion(merge,structure=np.ones((win,win)))
                 
              #del bw
              #bw2 = np.asarray(bw2!=0,'int8') # we only need 8 bit precision
@@ -439,7 +440,7 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
           merge[np.isnan(merge)] = 0
 
           #Z,ind = humutils.sliding_window(merge,(win,win),(win/2,win/2))
-          Z,ind = humutils.sliding_window(merge,(win,win/2),(win,win/2))
+          Z,ind = humutils.sliding_window(merge,(win,win),(winwin))
 
           #zmean = np.reshape(zmean, ( ind[0], ind[1] ) )
           Ny, Nx = np.shape(merge)
@@ -458,15 +459,26 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
           del zmean
 
           bw = M>0.5  
+          del M
 
-          bw2 = binary_erosion(bw,structure=np.ones((win,win)))
-          merge2 = grey_erosion(merge,structure=np.ones((win*2,win*2)))
+          # erode and dilate to remove splotches of no data
+          bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))             
+          #bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((win/4,win/4))), structure=np.ones((win/4,win/4)))
+          ##bw2 = binary_erosion(bw,structure=np.ones((win*2,win*2)))
+                         
+          ## fill holes
+          bw2 = binary_fill_holes(bw2, structure=np.ones((win,win))).astype(int)
+          merge2 = grey_erosion(merge,structure=np.ones((win,win)))
+                
+          #del bw
+          #bw2 = np.asarray(bw2!=0,'int8') # we only need 8 bit precision
+
           bw2 = np.asarray(bw!=0,'int8') # we only need 8 bit precision
           del bw
 
           merge[bw2==1] = 0 #blank out bad data
           merge[merge2==np.min(merge2)] = 0 #blank out bad data
-          del merge2, bw2
+          del merge2
 
           # erode and dilate to remove splotches of no data
           #bw2 = binary_dilation(binary_erosion(bw,structure=np.ones((3,3))), structure=np.ones((13,13)))
@@ -542,7 +554,7 @@ def custom_save(figdirec,root):
 def parallel_me(Z):
     try:
        glcm = greycomatrix(Z, [5], [0], 256, symmetric=True, normed=True)
-       if (greycoprops(glcm, 'dissimilarity')[0, 0] < 3) and (greycoprops(glcm, 'correlation')[0, 0] < 0.2) and (greycoprops(glcm, 'contrast')[0, 0] < 6) and (greycoprops(glcm, 'energy')[0, 0] > 0.15) and (np.mean(Z)<8):
+       if (greycoprops(glcm, 'dissimilarity')[0, 0] < 3) and (greycoprops(glcm, 'correlation')[0, 0] < 0.2) and (greycoprops(glcm, 'contrast')[0, 0] < 6) and (greycoprops(glcm, 'energy')[0, 0] > 0.15) and (np.mean(Z)<4):
           return 1
        else:
           return 0

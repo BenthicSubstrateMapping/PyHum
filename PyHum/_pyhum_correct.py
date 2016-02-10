@@ -714,7 +714,7 @@ def correct_scans2(fp, TL):
     if np.ndim(fp)==2:
        return c_scans2(fp, TL)
     else:
-       return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans2)(fp[p], TL) for p in xrange(len(fp)))
+       return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans2)(fp[p], TL[p]) for p in xrange(len(fp)))
 
 # =========================================================
 def c_scans2(fp, TL):

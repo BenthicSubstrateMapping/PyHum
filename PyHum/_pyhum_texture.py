@@ -72,8 +72,8 @@ import numpy as np
 import PyHum.utils as humutils
 from scipy.ndimage.filters import median_filter
 
-import cwt
-import replace_nans
+import PyHum.cwt as cwt
+import PyHum.replace_nans as replace_nans
 
 # plotting
 import matplotlib.pyplot as plt

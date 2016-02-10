@@ -440,6 +440,7 @@ cdef class pyread:
         cdef list c_scan = []
         for i in ind:
            c_scan.append(self._get_scans(scan[i], packet))
+
         return (np.asarray(c_scan,'float16').T, sonarstring)
 
     # =========================================================
