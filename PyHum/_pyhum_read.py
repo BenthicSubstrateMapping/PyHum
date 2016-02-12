@@ -400,9 +400,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     nrec = len(metadat['n'])   
 
-    metadat['heading'] = metadat['heading'][:nrec]
+    metadat['instr_heading'] = metadat['heading'][:nrec]
     
-    metadat['heading'] = humutils.get_bearing(calc_bearing, filt_bearing, cog, metadat['lat'], metadat['lon'], metadat['heading'])
+    metadat['heading'] = humutils.get_bearing(calc_bearing, filt_bearing, cog, metadat['lat'], metadat['lon'], metadat['instr_heading'])
     
     try:
        es = humutils.runningMeanFast(metadat['e'][:nrec],len(metadat['e'][:nrec])/100)

@@ -250,8 +250,8 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode
     # read in range data
     R_fp = io.get_mmap_data(sonpath, base, '_data_range.dat', 'float32', tuple(shape_star))
 
-#    # for debugging/testing
-#    p=2
+    # for debugging/testing
+#    p=0
 #    e = esi[shape_port[-1]*p:shape_port[-1]*(p+1)]
 #    n = nsi[shape_port[-1]*p:shape_port[-1]*(p+1)]
 #    t = theta[shape_port[-1]*p:shape_port[-1]*(p+1)]
@@ -268,9 +268,9 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode
 #    dat_star = star_fp; del star_fp
 #    data_R = R_fp; del R_fp
 
-#    dx = np.arcsin(meta['c']/(1000*meta['t']*meta['f']))
-#    pix_m = meta['pix_m']
-#    c = meta['c']
+    dx = np.arcsin(meta['c']/(1000*meta['t']*meta['f']))
+    pix_m = meta['pix_m']
+    c = meta['c']
 
     if res==0:
        res=99
