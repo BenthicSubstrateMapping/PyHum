@@ -205,7 +205,7 @@ def get_bearing(calc_bearing, cog, filt_bearing, lat, lon, heading):
        bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans]) 
 
     if filt_bearing ==1:
-       bearing = runningMeanFast(bearing, len(bearing)/100)
+       bearing = runningMeanFast(bearing, len(bearing)/1000)
        
     if cog==1:
        theta = np.asarray(bearing, 'float')/(180/np.pi)
