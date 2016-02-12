@@ -216,7 +216,7 @@ def get_bearing(calc_bearing, cog, filt_bearing, lat, lon, heading):
        theta = np.unwrap(-theta)
        bearing = theta * (180/np.pi)     
        
-    return bearing
+    return (bearing + 360) % 360
     
 
 # =========================================================
