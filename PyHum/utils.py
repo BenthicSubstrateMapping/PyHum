@@ -174,6 +174,8 @@ def get_bearing(calc_bearing, cog, filt_bearing, lat, lon, heading):
        # reported bearing by instrument (Kalman filtered?)
        bearing = np.squeeze(heading)
 
+    bearing = rm_spikes(bearing,3)
+
     # if stdev in heading is large, there's probably noise that needs to be filtered out
     if np.std(bearing)>180:
        print "WARNING: large heading stdev - attempting filtering"
