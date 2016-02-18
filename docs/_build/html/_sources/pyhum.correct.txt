@@ -11,7 +11,7 @@ Syntax
 
 You call the function like this::
 
-  [] = PyHum.correct(humfile, sonpath, maxW, doplot, correct_withwater, ph, temp, salinity, dconcfile)
+    [] = PyHum.correct(humfile, sonpath, maxW, doplot, correct_withwater, ph, temp, salinity, dconcfile)
 
 Parameters
 -------------

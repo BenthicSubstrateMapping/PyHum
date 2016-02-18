@@ -79,7 +79,7 @@ gcc -shared pyread.o -o pyread.so
 <li>&#8216;sonfiles&#8217; is a list of strings containing the paths to the <a href="#id15"><span class="problematic" id="id16">*</span></a>.SON files</li>
 <li>&#8216;humfile&#8217; is a string contining the filepath to the .DAT file</li>
 <li>&#8216;c&#8217; is the estimated speed of sound (typically 1500 m/s for salt water, 1450 m/s for freshwater)</li>
-<li>&#8216;model&#8217; is the Humminbird unit (units currently known to be supported by PyHum: 798, 998, 1198, and 1199) and &#8216;cs2cs_args&#8217; is a string projected coordinate system (for example, &#8220;epsg:26949&#8221; is Arizona Central State Plane). See the documentation for the module &#8216;pyproj&#8217; for more details.</li>
+<li>&#8216;model&#8217; is the Humminbird unit (units currently known to be supported by PyHum: 798, 898, 998, 1198, and 1199) and &#8216;cs2cs_args&#8217; is a string projected coordinate system (for example, &#8220;epsg:26949&#8221; is Arizona Central State Plane). See the documentation for the module &#8216;pyproj&#8217; for more details.</li>
 </ol>
 <p>The output variable, &#8216;data&#8217;, is a python class that returns sonar data.</p>
 <p>data.gethumdat() returns data in .DAT file. This is a python dictionary object containing the following keys.</p>
@@ -212,7 +212,7 @@ gcc -shared pyread.o -o pyread.so
 <li>bytes 64-67 = character, sentence length</li>
 <li>bytes 68-73 = spacer</li>
 </ol>
-<p>998 or 1198 models</p>
+<p>898, 998 or 1198 models</p>
 <ol class="arabic simple" start="23">
 <li>bytes 50-54 = spacer</li>
 <li>bytes 55-58 = character, spacer</li>

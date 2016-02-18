@@ -55,13 +55,6 @@ cdef class pyread:
        cs2cs_args1: blah blah blah
        """
 
-       if model==798:
-          headbytes=72
-       elif model==1199:
-          headbytes=68
-       else: #tested so far 998, 1198
-          headbytes=67
-
        try:
           trans =  pyproj.Proj(init=cs2cs_args1)
        except:
@@ -70,6 +63,16 @@ cdef class pyread:
        fid2 = open(humfile,'rb')
        humdat = self._decode_humdat(fid2, trans) #, transWGS84)
        self.humdat = humdat
+
+       if int(humdat['sonar_name'])==301:
+          model = 1199
+
+       if model==798:
+          headbytes=72
+       elif model==1199:
+          headbytes=68
+       else: #tested so far 998, 1198, 898
+          headbytes=67
 
        cdef list dat = []       
        cdef list data = [] 

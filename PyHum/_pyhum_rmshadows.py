@@ -440,7 +440,7 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
           merge[np.isnan(merge)] = 0
 
           #Z,ind = humutils.sliding_window(merge,(win,win),(win/2,win/2))
-          Z,ind = humutils.sliding_window(merge,(win,win),(winwin))
+          Z,ind = humutils.sliding_window(merge,(win,win),(win,win))
 
           #zmean = np.reshape(zmean, ( ind[0], ind[1] ) )
           Ny, Nx = np.shape(merge)

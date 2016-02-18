@@ -14,7 +14,7 @@ Syntax
 ----------
 You call the function like this::
 
-  [] = PyHum.map_texture(humfile, sonpath, cs2cs_args, calc_bearing, filt_bearing, res, cog, dowrite)
+    [] = PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs)
 
 Parameters
 ------------
@@ -26,19 +26,17 @@ Parameters
        arguments to create coordinates in a projected coordinate system
        this argument gets given to pyproj to turn wgs84 (lat/lon) coordinates
        into any projection supported by the proj.4 libraries
-    calc_bearing : float, *optional* [Default=0]
-       if 1, bearing will be calculated from coordinates
-    filt_bearing : float, *optional* [Default=0]
-       if 1, bearing will be filtered
-    res : float, *optional* [Default=0.1]
+    res : float, *optional* [Default=0.5]
        grid resolution of output gridded texture map
-    cog : int, *optional* [Default=1]
-       if 1, heading calculated assuming GPS course-over-ground rather than
-       using a compass
-    dowrite: int, *optional* [Default=1]
-       if 1, point cloud data from each chunk is written to ascii file
-       if 0, processing times are speeded up considerably but point clouds are not available for further analysis
-
+    mode: int, *optional* [Default=3]
+       gridding mode. 1 = nearest neighbour
+                      2 = inverse weighted nearest neighbour
+                      3 = Gaussian weighted nearest neighbour
+    nn: int, *optional* [Default=64]
+       number of nearest neighbours for gridding (used if mode > 1) 
+    numstdevs: int, *optional* [Default = 4]
+       Threshold number of standard deviations in texture lengthscale per grid cell up to which to accept 
+       
 Returns
 ---------
     sonpath+'x_y_class'+str(p)+'.asc' : text file

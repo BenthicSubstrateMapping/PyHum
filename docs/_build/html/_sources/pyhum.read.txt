@@ -18,7 +18,7 @@ Syntax
 
 You call the function like this::
 
-   [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, chunksize, model, calc_bearing, filt_bearing, cog, chunk)
+    [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, chunksize, model, calc_bearing, filt_bearing, cog, chunk)
 
 Parameters
 ------------
@@ -39,7 +39,7 @@ Parameters
        if 1, plots will be made
     t : float, *optional* [Default=0.108]
        length of transducer array (m).
-       Default value is that of the 998 series Humminbird(R)
+       Default value is that of the 998 series Humminbird(R)    
     bedpick : int, *optional* [Default=1]
        if 1, bedpicking with be carried out automatically
        if 0, user will be prompted to pick the bed location on screen
@@ -58,15 +58,12 @@ Parameters
        if 1, bearing will be filtered
     chunk : str, *optional* [Default='d100' (distance, 100 m)]
        letter, followed by a number.
-
        There are the following letter options:
-
        'd' - parse chunks based on distance, then number which is distance in m
-
        'p' - parse chunks based on number of pings, then number which is number of pings 
-
        'h' - parse chunks based on change in heading, then number which is the change in heading in degrees
        '1' - process just 1 chunk
+
 
 Returns
 ----------

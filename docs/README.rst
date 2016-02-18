@@ -21,7 +21,8 @@ The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) an
 Some aspects of the program are detailed in:
 Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019. `Download here <http://dbuscombe-usgs.github.io/docs/10-2-2015_Automated%20.pdf>`_
 
-Full documentation of the program is forthcoming
+Full documentation of the procedures behind the program is forthcoming in the following publication:
+Buscombe, D., submitted, Processing and georeferencing recreational-grade sidescan-sonar data to support the democratization of acoustic imaging in shallow water. LIMNOLOGY AND OCEANOGRAPHY: METHODS.
 
 
 For the source code visit `the project github site <https://github.com/dbuscombe-usgs/PyHum/>`_
@@ -59,7 +60,9 @@ This software is issued under the `GNU Lesser General Public License, Version 3 
 Thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info, Dan Hamill (Utah State University) and Paul Anderson (Quest Geophysical Asia) for debugging and suggestions for improvements
 
 Some aspects of the program are detailed in:
-Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
+1. Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
+
+2. Buscombe, D., submitted, Processing and georeferencing recreational-grade sidescan-sonar data to support the democratization of acoustic imaging in shallow water. LIMNOLOGY AND OCEANOGRAPHY: METHODS.
 
 Full documentation of the program is forthcoming
 
@@ -135,7 +138,7 @@ This software has been tested with Python 2.7 on
 2. Linux Fedora (16 & 20) 
 3. Linux Ubuntu (12.4 & 13.4 & 14.4) 
 
-This software has (so far) been used only with Humminbird 798, 998, 1198 and 1199 series instruments. 
+This software has (so far) been used only with Humminbird 798, 898, 998, 1198 and 1199 series instruments. 
 
 
 .. _virtualenv:
@@ -319,7 +322,6 @@ which carries out the following operations::
 
    ## calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
-
 
 .. _gettingstarted:
 

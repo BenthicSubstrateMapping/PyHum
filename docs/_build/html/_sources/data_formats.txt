@@ -38,7 +38,7 @@ where
 1. 'sonfiles' is a list of strings containing the paths to the *.SON files
 2. 'humfile' is a string contining the filepath to the .DAT file
 3. 'c' is the estimated speed of sound (typically 1500 m/s for salt water, 1450 m/s for freshwater)
-4. 'model' is the Humminbird unit (units currently known to be supported by PyHum: 798, 998, 1198, and 1199) and 'cs2cs_args' is a string projected coordinate system (for example, "epsg:26949" is Arizona Central State Plane). See the documentation for the module 'pyproj' for more details.
+4. 'model' is the Humminbird unit (units currently known to be supported by PyHum: 798, 898, 998, 1198, and 1199) and 'cs2cs_args' is a string projected coordinate system (for example, "epsg:26949" is Arizona Central State Plane). See the documentation for the module 'pyproj' for more details.
 
 The output variable, 'data', is a python class that returns sonar data.
 
@@ -185,7 +185,7 @@ Then, the data structure is different for different models.
 26. bytes 64-67 = character, sentence length
 27. bytes 68-73 = spacer
 
-998 or 1198 models
+898, 998 or 1198 models
 
 23. bytes 50-54 = spacer
 24. bytes 55-58 = character, spacer
