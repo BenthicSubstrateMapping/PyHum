@@ -19,9 +19,11 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
 The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) and works on both sidescan and downward-looking echosounder data, where available.
 
 Some aspects of the program are detailed in:
+
 Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019. `Download here <http://dbuscombe-usgs.github.io/docs/10-2-2015_Automated%20.pdf>`_
 
 Full documentation of the procedures behind the program is forthcoming in the following publication:
+
 Buscombe, D., submitted, Processing and georeferencing recreational-grade sidescan-sonar data to support the democratization of acoustic imaging in shallow water. LIMNOLOGY AND OCEANOGRAPHY: METHODS.
 
 
@@ -407,11 +409,12 @@ The following example script::
        win = 100
 
        # for mapping
-       dogrid = 1 # yes
-       calc_bearing = 0 #no
-       filt_bearing = 0 #no
-       res = 0.2 # grid resolution in metres
-       cog = 1 # GPS course-over-ground used for heading
+       res = 99 # grid resolution in metres
+       # if res==99, the program will automatically calc res from the spatial res of the scans
+       mode = 1 # gridding mode (simple nearest neighbour)
+       #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
+       #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
+       dowrite = 0 #disable writing of point cloud data to file
 
        PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
 
@@ -437,6 +440,17 @@ If you are in bash (or git bash) you might want to automate through a folder of 
    for k in $(find $PWD -type d -maxdepth 1 -mindepth 1); do python proc_mysidescandata.py -i "$k/${k##*/}.DAT" -s $k; done
 
 which assumes the .DAT file is in the folder with the same root (such as a folder called R00123 which contains SON and IDX files as well as a file called R00123.DAT)
+
+
+.. _gui:
+
+Using the GUI
+==============
+
+From the command line (terminal)::
+
+
+   python -c "import PyHum; PyHum.gui()"
 
 
 .. _support:

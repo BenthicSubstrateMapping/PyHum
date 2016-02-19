@@ -141,8 +141,8 @@ def gui():
 	    "Automated riverbed sediment classification using low-cost sidescan sonar. ",
 	    "JOURNAL OF HYDRAULIC ENGINEERING, 06015019\n",
 	    "\n",
-	    "2. Buscombe, D., (2016, in prep) ",
-	    "Benthic imaging in shallow water using recreational-grade sidescan sonar. ",
+	    "2. Buscombe, D., (2016, submitted) ",
+	    "Processing and georeferencing recreational-grade sidescan-sonar data to support the democratization of acoustic imaging in shallow water",
 	    "Intended for LIMNOLOGY AND OCEANOGRAPHY: METHODS\n",
 	    "\n",
 	    "The tabs are to be navigated in order (read, filter, etc)\n",
@@ -799,7 +799,7 @@ def gui():
 	# window size
 	self.Winvar = Tkinter.DoubleVar()
 	Winscale = Tkinter.Scale( rmshadows_frame, variable = self.Winvar, from_=5, to=500, resolution=1, tickinterval=50, label = 'Window Size [pixels]' )
-	Winscale.set(100)
+	Winscale.set(31)
 	Winscale.grid(row=2, column=0,  pady=(2,4))
 	Winscale.configure(background='LightBlue2', fg="black")
 

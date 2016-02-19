@@ -19,7 +19,9 @@ The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) an
 Some aspects of the program are detailed in:
 Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
 
-Full documentation of the program is forthcoming
+Full documentation of the procedures behind the program is forthcoming in the following publication:
+
+Buscombe, D., submitted, Processing and georeferencing recreational-grade sidescan-sonar data to support the democratization of acoustic imaging in shallow water. LIMNOLOGY AND OCEANOGRAPHY: METHODS.
 
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/class_R01560.png)
@@ -53,7 +55,7 @@ Full documentation of the program is forthcoming
           | Logan, UT 84322
           | dhamill@usgs.gov
 
-Version: 1.3.4    |  Revision: Jan, 2016
+Version: 1.3.8    |  Revision: Feb, 2016
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -72,7 +74,8 @@ Any use of trade, product, or firm names is for descriptive purposes only and do
 Thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info, Dan Hamill (Utah State University), Paul Anderson (Quest Geophysical Asia) and various others for debugging and suggestions for improvements
 
 This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4 & 14.4, Windows 7.
-This software has (so far) been used only with Humminbird 798, 998, 1198 and 1199 series instruments. 
+
+This software has (so far) been used only with Humminbird 798, 898, 998, 1198 and 1199 series instruments. 
 
 ### Contents
 
@@ -98,6 +101,9 @@ script to generate a point cloud (X,Y,texture lengthscale - calculated using pyh
 
 7. e1e2
 script to analyse the first (e1, 'roughness') and second (e2, 'hardness') echo returns from the high-frequency downward looking echosounder, and generate generalised acoustic parameters for the purposes of point classification of submerged substrates/vegetation. The processing accounts for the absorption of sound in water, and does a basic k-means cluster of e1 and e2 coefficients into specified number of 'acoustic classes'. This code is based on code by Barb Fagetter (blueseas@oceanecology.ca). Georeferenced parameters are saved in csv form, and optionally plots and kml files are generated
+
+8. gui
+A graphical user interface which essentially serves as a 'wrapper' to the above functions, allowing graphical input of processing options and sequential analysis of the data using PyHum modules
 
 These are all command-line programs which take a number of input (some required, some optional). Please see the individual files for a comprehensive list of input options
 
@@ -252,6 +258,7 @@ which carries out the following operations:
    humfile = os.path.normpath(os.path.join(os.path.expanduser("~"),'pyhum_test','test.DAT'))
    sonpath = os.path.normpath(os.path.join(os.path.expanduser("~"),'pyhum_test'))
 
+
    doplot = 1 #yes
 
    # reading specific settings
@@ -283,13 +290,14 @@ which carries out the following operations:
    # for texture calcs
    win = 100 # pixel window
    shift = 10 # pixel shift
-   density = win/2 
+   density =win/2 # win/2 
    numclasses = 4 # number of discrete classes for contouring and k-means
    maxscale = 20 # Max scale as inverse fraction of data length (for wavelet analysis)
    notes = 4 # Notes per octave (for wavelet analysis)
 
    # for mapping
-   res = 0.1 # grid resolution in metres
+   res = 99 # grid resolution in metres
+   # if res==99, the program will automatically calc res from the spatial res of the scans
    mode = 1 # gridding mode (simple nearest neighbour)
    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
    #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
@@ -297,7 +305,7 @@ which carries out the following operations:
 
    nn = 64 #number of nearest neighbours for gridding (used if mode > 1)
    influence = 1 #Radius of influence used in gridding. Cut off distance in meters 
-   numstdevs = 4 #Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept 
+   numstdevs = 5 #Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept 
 
    # for downward-looking echosounder echogram (e1-e2) analysis
    beam = 20.0
@@ -305,29 +313,30 @@ which carries out the following operations:
    integ = 5
    numclusters = 3 # number of acoustic classes to group observations
 
-   # read data in SON files into PyHum memory mapped format (.dat)
+   ## read data in SON files into PyHum memory mapped format (.dat)
    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
 
-   # correct scans and remove water column
+   ## correct scans and remove water column
    PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
 
-   # remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
+   ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
-   # Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
+   ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
-   # grid and map the scans
+   ## grid and map the scans
    PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, influence, numstdevs)
 
-   res = 0.5 # grid resolution in metres
+   res = 1 # grid resolution in metres
    numstdevs = 5
    
-   # grid and map the texture lengthscale maps
-   PyHum.map_texture(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, influence, numstdevs)
+   ## grid and map the texture lengthscale maps
+   PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, influence, numstdevs)
 
-   # calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
+   ## calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
+
 
 ```
 
@@ -435,6 +444,8 @@ if __name__ == '__main__':
     calc_bearing = 0 #no
     filt_bearing = 0 #no
     chunk = 'd100' # distance, 100m
+    #chunk = 'p1000' # pings, 1000
+    #chunk = 'h10' # heading deviation, 10 deg
      
     # correction specific settings
     maxW = 1000 # rms output wattage
@@ -448,24 +459,34 @@ if __name__ == '__main__':
     shadowmask = 1 #manual shadow removal
 
     # for mapping
-    calc_bearing = 0 #no
-    filt_bearing = 0 #no
-    res = 0.05 # grid resolution in metres
-    cog = 1 # GPS course-over-ground used for heading
+    res = 99 # grid resolution in metres
+    # if res==99, the program will automatically calc res from the spatial res of the scans
+    mode = 1 # gridding mode (simple nearest neighbour)
+    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
+    #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
+    dowrite = 0 #disable writing of point cloud data to file
 
-    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, chunk_size, model)
+    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
 
     PyHum.correct(humfile, sonpath, maxW, doplot)
 
     PyHum.rmshadows(humfile, sonpath, win, shadowmask, kvals, doplot)
 
-    PyHum.map(humfile, sonpath, cs2cs_args, calc_bearing, filt_bearing, res, cog, dowrite)
+    PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, influence, numstdevs)
 ```
 
 or from within ipython (with a GUI prompt to navigate to the files):
 
 ```
    run proc_mysidescandata.py
+```
+
+
+### Using the GUI
+From the command line (terminal)::
+
+```
+python -c "import PyHum; PyHum.gui()"
 ```
 
 
