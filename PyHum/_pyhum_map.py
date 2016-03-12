@@ -411,7 +411,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
                try:
                   dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=cpu_count())
                except:
-                  print ".... update your scipy installation to use faster kd-tree queries"
+                  #print ".... update your scipy installation to use faster kd-tree queries"
                   dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
 
             dist = dist.reshape(grid_x.shape)

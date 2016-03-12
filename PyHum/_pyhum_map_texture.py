@@ -401,7 +401,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
              try:
                 dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1, n_jobs=cpu_count())
              except:
-                print ".... update your scipy installation to use faster kd-tree queries"
+                #print ".... update your scipy installation to use faster kd-tree queries"
                 dist, _ = tree.query(np.c_[grid_x.ravel(), grid_y.ravel()], k=1)
 
           dist = dist.reshape(grid_x.shape)
