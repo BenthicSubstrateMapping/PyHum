@@ -982,7 +982,7 @@ def makechunks_simple(dat, numchunks):
    Ny, Nx = np.shape(dat)
    # get windowed data
 #   try:
-      return humutils.sliding_window(dat,(Ny,Nx/int(numchunks)))    
+   return humutils.sliding_window(dat,(Ny,Nx/int(numchunks)))    
 #   except:
 #      print "memory-mapping failed in sliding window - trying memory intensive version"
 #      return humutils.sliding_window_nomm(dat,(Ny,Nx/int(numchunks)))                     
