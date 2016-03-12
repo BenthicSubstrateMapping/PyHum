@@ -76,6 +76,16 @@ import PyHum.utils as humutils
 import numpy as np
 import pyproj
 
+
+try:
+   from pykdtree.kdtree import KDTree
+   pykdtree=1   
+except:
+   print "install pykdtree for faster kd-tree operations: https://github.com/storpipfugl/pykdtree"
+   from scipy.spatial import cKDTree as KDTree
+   pykdtree=0   
+
+
 #plotting
 import matplotlib.pyplot as plt
 
@@ -695,12 +705,10 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              del fig
 
              if x1 != []: # if x1 is not empty
-                from scipy.spatial import cKDTree as KDTree
                 tree = KDTree(zip(np.arange(1,len(bed)), bed))
                 try:
                    dist, inds = tree.query(zip(x1, y1), k = 100, eps=5, n_jobs=-1)
                 except:
-                   print ".... update your scipy installation to use faster kd-tree queries"
                    dist, inds = tree.query(zip(x1, y1), k = 100, eps=5)
 
                 b = np.interp(inds,x1,y1)
@@ -973,11 +981,11 @@ def custom_save(figdirec,root):
 def makechunks_simple(dat, numchunks):
    Ny, Nx = np.shape(dat)
    # get windowed data
-   try:
+#   try:
       return humutils.sliding_window(dat,(Ny,Nx/int(numchunks)))    
-   except:
-      print "memory-mapping failed in sliding window - trying memory intensive version"
-      return humutils.sliding_window_nomm(dat,(Ny,Nx/int(numchunks)))                     
+#   except:
+#      print "memory-mapping failed in sliding window - trying memory intensive version"
+#      return humutils.sliding_window_nomm(dat,(Ny,Nx/int(numchunks)))                     
 
 # =========================================================
 def plot_2bedpicks(dat_port, dat_star, Zbed, Zdist, Zx, ft, shape_port, sonpath, k, chunkmode):

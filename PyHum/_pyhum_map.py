@@ -497,7 +497,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
       dat = dat.reshape(shape)
 
-      dat[dist>res*5] = np.nan
+      dat[dist>res*10] = np.nan
       del dist
 
       r_dat = r_dat.reshape(shape)
