@@ -201,6 +201,8 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode
        numstdevs = int(numstdevs)
        print 'Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept: %s' % (str(numstdevs))             
 
+
+   
     # start timer
     if os.name=='posix': # true if linux/mac or cygwin on windows
        start = time.time()
@@ -294,6 +296,8 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode
 # =========================================================
 def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, dowrite, mode, nn, numstdevs, c, dx): #dogrid, influence,
    
+   thres=5
+
    trans =  pyproj.Proj(init=cs2cs_args)   
 
    merge = np.vstack((dat_port,dat_star))     
@@ -527,6 +531,9 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
    dat[dat==0] = np.nan
    dat[np.isinf(dat)] = np.nan
+
+   dat[dat<thres] = np.nan
+
    datm = np.ma.masked_invalid(dat)
 
    glon, glat = trans(grid_x, grid_y, inverse=True)
