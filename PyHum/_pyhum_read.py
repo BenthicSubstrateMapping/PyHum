@@ -81,7 +81,7 @@ try:
    from pykdtree.kdtree import KDTree
    pykdtree=1   
 except:
-   print "install pykdtree for faster kd-tree operations: https://github.com/storpipfugl/pykdtree"
+   #print "install pykdtree for faster kd-tree operations: https://github.com/storpipfugl/pykdtree"
    from scipy.spatial import cKDTree as KDTree
    pykdtree=0   
 
@@ -981,11 +981,11 @@ def custom_save(figdirec,root):
 def makechunks_simple(dat, numchunks):
    Ny, Nx = np.shape(dat)
    # get windowed data
-#   try:
-   return humutils.sliding_window(dat,(Ny,Nx/int(numchunks)))    
-#   except:
-#      print "memory-mapping failed in sliding window - trying memory intensive version"
-#      return humutils.sliding_window_nomm(dat,(Ny,Nx/int(numchunks)))                     
+   try:
+      return humutils.sliding_window(dat,(Ny,Nx/int(numchunks)))    
+   except:
+      print "memory-mapping failed in sliding window - trying memory intensive version"
+      return humutils.sliding_window_nomm(dat,(Ny,Nx/int(numchunks)))                     
 
 # =========================================================
 def plot_2bedpicks(dat_port, dat_star, Zbed, Zdist, Zx, ft, shape_port, sonpath, k, chunkmode):
