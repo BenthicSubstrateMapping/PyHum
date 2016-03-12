@@ -17,9 +17,21 @@ def set_mmap_data(sonpath, base, string, dtype, Zt):
     # create memory mapped file for Z
     #with open(os.path.normpath(os.path.join(sonpath,base+string)), 'w+') as ff:
     #   fp = np.memmap(ff, dtype=dtype, mode='w+', shape=np.shape(Zt))
-    with open(os.path.normpath(os.path.join(sonpath,base+string)), 'w+') as ff:
-       fp = np.memmap(ff, dtype=dtype, mode='readwrite', shape=np.shape(Zt))
-    fp[:] = Zt[:]
+    try:
+       os.remove(os.path.normpath(os.path.join(sonpath,base+string)))
+    except:
+       pass
+
+    try:
+       with open(os.path.normpath(os.path.join(sonpath,base+string)), 'w+') as ff:
+          fp = np.memmap(ff, dtype=dtype, mode='readwrite', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+
+    except:
+       with open(os.path.normpath(os.path.join(sonpath,base+string)), 'w+b') as ff:
+          fp = np.memmap(ff, dtype=dtype, mode='readwrite', shape=np.shape(Zt))
+       fp[:] = Zt[:]
+
     del fp
     shape = np.shape(Zt)
     del Zt
