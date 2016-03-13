@@ -692,20 +692,20 @@ def getXY(e,n,yvec,d,t,extent):
 
    #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
  
-#   if os.name=='posix':
-#      o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
+   if os.name=='posix':
+      o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
 
-#      #eating, northing, distance to sonar, depth, heading
-#      X, Y, D, H, T = zip(*o)
+      #eating, northing, distance to sonar, depth, heading
+      X, Y, D, H, T = zip(*o)
 
-#   else:
+   else:
 
-   X = []; Y = []; 
-   D = []; H = []; T = []
-   for k in xrange(len(n)):
-      out1,out2,out3,out4,out5 = xyfunc(e[k], n[k], yvec, d[k], t[k], extent)
-      X.append(out1); Y.append(out2)
-      D.append(out3); H.append(out4); T.append(out5)
+      X = []; Y = []; 
+      D = []; H = []; T = []
+      for k in xrange(len(n)):
+        out1,out2,out3,out4,out5 = xyfunc(e[k], n[k], yvec, d[k], t[k], extent)
+         X. append(out1); Y.append(out2)
+         D.append(out3); H.append(out4); T.append(out5)
 
 
    # merge flatten and stack
