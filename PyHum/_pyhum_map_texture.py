@@ -724,7 +724,7 @@ def getXY(e,n,yvec,d,t,extent):
    try:
       o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
    except:
-      o = Parallel(n_jobs = 1), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
+      o = Parallel(n_jobs = 1, verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
       
    X, Y = zip(*o)
 
