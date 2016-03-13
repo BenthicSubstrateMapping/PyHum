@@ -704,7 +704,7 @@ def getXY(e,n,yvec,d,t,extent):
       D = []; H = []; T = []
       for k in xrange(len(n)):
         out1,out2,out3,out4,out5 = xyfunc(e[k], n[k], yvec, d[k], t[k], extent)
-         X. append(out1); Y.append(out2)
+         X.append(out1); Y.append(out2)
          D.append(out3); H.append(out4); T.append(out5)
 
 
