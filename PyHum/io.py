@@ -29,7 +29,7 @@ def set_mmap_data(sonpath, base, string, dtype, Zt):
 
     except:
        with open(os.path.normpath(os.path.join(sonpath,base+string)), 'w+') as ff:
-          fp = np.memmap(ff, dtype=dtype, mode='write', shape=np.shape(Zt))
+          fp = np.memmap(ff, dtype=dtype, mode='copyonwrite', shape=np.shape(Zt))
        fp[:] = Zt[:]
 
     del fp
