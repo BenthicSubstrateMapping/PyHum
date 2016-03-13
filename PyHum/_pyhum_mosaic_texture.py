@@ -323,7 +323,7 @@ def mosaic_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5
     try:
        dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = nn, n_jobs=-1)
     except:
-       print ".... update your scipy installation to use faster kd-tree"   
+       #print ".... update your scipy installation to use faster kd-tree"   
        dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = nn)    
     
     #del grid_x, grid_y

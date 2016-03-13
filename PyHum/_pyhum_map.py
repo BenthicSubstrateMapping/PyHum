@@ -83,7 +83,7 @@ try:
    from pykdtree.kdtree import KDTree
    pykdtree=1   
 except:
-   print "install pykdtree for faster kd-tree operations: https://github.com/storpipfugl/pykdtree"
+   #print "install pykdtree for faster kd-tree operations: https://github.com/storpipfugl/pykdtree"
    from scipy.spatial import cKDTree as KDTree
    pykdtree=0   
 
@@ -692,20 +692,20 @@ def getXY(e,n,yvec,d,t,extent):
 
    #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
  
-   if os.name=='posix':
-      o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
+#   if os.name=='posix':
+#      o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
 
-      #eating, northing, distance to sonar, depth, heading
-      X, Y, D, h, t = zip(*o)
+#      #eating, northing, distance to sonar, depth, heading
+#      X, Y, D, h, t = zip(*o)
 
-   else:
+#   else:
 
-      X = []; Y = []; 
-      D = []; h = []; t = []
-      for k in xrange(len(n)):
-         out1, out2, out3, out4, out5 = xyfunc(e[k], n[k], yvec, d[k], t[k], extent)
-         X.append(out1); Y.append(out2)
-         D.append(out3); h.append(out4); t.append(out5)
+   X = []; Y = []; 
+   D = []; h = []; t = []
+   for k in xrange(len(n)):
+      out = xyfunc(e[k], n[k], yvec, d[k], t[k], extent)
+      X.append(out[0]); Y.append(out[1])
+      D.append(out[2]); h.append(out[3]); t.append(out[4])
 
 
    # merge flatten and stack
