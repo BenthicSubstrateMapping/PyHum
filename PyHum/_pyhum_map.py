@@ -696,16 +696,16 @@ def getXY(e,n,yvec,d,t,extent):
 #      o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
 
 #      #eating, northing, distance to sonar, depth, heading
-#      X, Y, D, h, t = zip(*o)
+#      X, Y, D, H, T = zip(*o)
 
 #   else:
 
    X = []; Y = []; 
-   D = []; h = []; t = []
+   D = []; H = []; T = []
    for k in xrange(len(n)):
-      out = xyfunc(e[k], n[k], yvec, d[k], t[k], extent)
-      X.append(out[0]); Y.append(out[1])
-      D.append(out[2]); h.append(out[3]); t.append(out[4])
+      out1,out2,out3,out4,out5 = xyfunc(e[k], n[k], yvec, d[k], t[k], extent)
+      X.append(out1); Y.append(out2)
+      D.append(out3); H.append(out4); T.append(out5)
 
 
    # merge flatten and stack
@@ -721,14 +721,14 @@ def getXY(e,n,yvec,d,t,extent):
    D = D.flatten()
 
    # merge flatten and stack
-   h = np.asarray(h,'float').T
-   h = h.flatten()
+   H = np.asarray(H,'float').T
+   H = H.flatten()
    
    # merge flatten and stack
-   t = np.asarray(t,'float').T
-   t = t.flatten()
+   T = np.asarray(T,'float').T
+   T = T.flatten()
          
-   return X, Y, D, h, t
+   return X, Y, D, H, T
 
 # =========================================================
 # =========================================================

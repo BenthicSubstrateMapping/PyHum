@@ -75,6 +75,7 @@ from joblib import Parallel, delayed, cpu_count
 import PyHum.utils as humutils
 import numpy as np
 import pyproj
+from numpy.lib.stride_tricks import as_strided as ast
 
 
 try:
@@ -1060,7 +1061,7 @@ def sliding_window(a,ws,ss = None,flatten = True):
    ws = np.array(ws)
    ss = np.array(ss)
    
-   import PyHum.io as io
+   #import PyHum.io as io
 
    shape_tmp = io.set_mmap_data('', '', 'tmp.dat', 'float32', a)
    del a
