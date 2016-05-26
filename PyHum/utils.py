@@ -1,5 +1,5 @@
 '''
-Part of PyHum software 
+Part of PyHum software
 
 INFO:
 
@@ -14,8 +14,8 @@ For latest code version please visit:
 https://github.com/dbuscombe-usgs
 
 This function is part of 'PyHum' software
-This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior. 
-For more information, see the official USGS copyright policy at 
+This software is in the public domain because it contains materials that originally came from the United States Geological Survey, an agency of the United States Department of Interior.
+For more information, see the official USGS copyright policy at
 http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 '''
 
@@ -80,25 +80,25 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
       imu = np.hstack(imu)
     else:
       imu.append(port_fp[np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
-        
+
     imu = np.squeeze(np.asarray(imu, 'float64'))-buff
-    
+
     try:
        imu = da.from_array(imu, chunks=1000)   #dask implementation
     except:
        pass
-       
+
     #imu = median_filter(imu,(20,20))
     imu = median_filter(imu,(np.shape(imu)[0]/100,np.shape(imu)[1]/100))
-    
+
     #autobed = dpboundary(-imu[buff:,:].T)+buff
 
     dx,dy = np.gradient(imu)
-    lap = np.sqrt(dx**2 + dy**2) 
-    del dx, dy   
+    lap = np.sqrt(dx**2 + dy**2)
+    del dx, dy
     autobed = dpboundary(-lap[buff:,:].T)+buff
     del lap
-    
+
     autobed = np.squeeze(autobed)
 
     if len(autobed) < len(bed):
@@ -108,10 +108,10 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
        autobed = autobed2
 
     ## narrow image to within range of estimated bed
-    # use dynamic boundary tracing to get 2nd estimate of bed  
-    #x = np.squeeze(int(np.min(bed))+dpboundary(-imu.T)) 
+    # use dynamic boundary tracing to get 2nd estimate of bed
+    #x = np.squeeze(int(np.min(bed))+dpboundary(-imu.T))
     #x = np.squeeze(int(np.min(bed))+autobed)
-    x = np.min(np.vstack((np.squeeze(bed),np.squeeze(autobed))), axis=0)     
+    x = np.min(np.vstack((np.squeeze(bed),np.squeeze(autobed))), axis=0)
     del imu
 
     if len(x)<len(bed):
@@ -122,10 +122,10 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
     # if standard deviation of auto bed pick is too small, then use acoustic bed pick
     if np.std(x)<5:
        print "stdev of auto bed pick is low, using acoustic pick"
-       x = bed.copy()          
-          
+       x = bed.copy()
+
     return x, bed
-          
+
 # =========================================================
 def make_trackline(lon,lat, sonpath, base):
 
@@ -139,14 +139,14 @@ def make_trackline(lon,lat, sonpath, base):
     ls.style.linestyle.width = 5
     ls.style.linestyle.color = simplekml.Color.red
     kml.save(os.path.normpath(os.path.join(sonpath,base+'trackline.kml')))
-   
+
 # =========================================================
 def get_depth(dep_m):
 
-    dep_m = np.squeeze(dep_m) 
+    dep_m = np.squeeze(dep_m)
     dep_m = rm_spikes(dep_m,2)
-    return runningMeanFast(dep_m, 3) 
-    
+    return runningMeanFast(dep_m, 3)
+
 # =========================================================
 def get_dist(lat, lon):
 
@@ -155,14 +155,14 @@ def get_dist(lat, lon):
        dist[k] = distBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
 
     return np.cumsum(dist)
-    
+
 # =========================================================
 def get_bearing(calc_bearing, cog, filt_bearing, lat, lon, heading):
 
     # over-ride measured bearing and calc from positions
     if calc_bearing==1:
        lat = np.squeeze(lat)
-       lon = np.squeeze(lon) 
+       lon = np.squeeze(lon)
 
        #point-to-point bearing
        bearing = np.zeros(len(lat))
@@ -182,17 +182,17 @@ def get_bearing(calc_bearing, cog, filt_bearing, lat, lon, heading):
        from sklearn.cluster import MiniBatchKMeans
        # can have two modes
        data = np.column_stack([bearing, bearing])
-       
+
        try:
           data = da.from_array(data, chunks=1000)   #dask implementation
        except:
           pass
-          
+
        k_means = MiniBatchKMeans(2)
        # fit the model
-       k_means.fit(data) 
+       k_means.fit(data)
        del data
-       
+
        #values = k_means.cluster_centers_.squeeze()
        labels = k_means.labels_
 
@@ -202,24 +202,24 @@ def get_bearing(calc_bearing, cog, filt_bearing, lat, lon, heading):
           bearing[labels==0] = np.nan
 
        nans, y= nan_helper(bearing)
-       bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans]) 
+       bearing[nans]= np.interp(y(nans), y(~nans), bearing[~nans])
 
     if filt_bearing ==1:
        bearing = runningMeanFast(bearing, np.max((len(bearing)/1000, 3)))
-       
+
     if cog==1:
        theta = np.asarray(bearing, 'float')/(180/np.pi)
        #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
-       #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU 
-       # (East-North-Up) coordinate frame. 
+       #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU
+       # (East-North-Up) coordinate frame.
        #Subtract pi/2 from your heading
        theta = theta - np.pi/2
        # (re-wrap to Pi to -Pi)
        theta = np.unwrap(-theta)
-       bearing = theta * (180/np.pi)     
-       
+       bearing = theta * (180/np.pi)
+
     return (bearing + 360) % 360
-    
+
 
 # =========================================================
 def strip_base(base):
@@ -242,18 +242,28 @@ def distBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
    return 6378137.0 * 2.0 * np.arcsin(np.sqrt(np.power(np.sin((np.deg2rad(pos1_lat) - np.deg2rad(pos2_lat)) / 2.0), 2.0) + np.cos(np.deg2rad(pos1_lat)) * np.cos(np.deg2rad(pos2_lat)) * np.power(np.sin((np.deg2rad(pos1_lon) - np.deg2rad(pos2_lon)) / 2.0), 2.0)))
 
 
-# =========================================================
+# # =========================================================
+# def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
+#    lat1 = np.deg2rad(pos1_lat)
+#    lon1 = np.deg2rad(pos1_lon)
+#    lat2 = np.deg2rad(pos2_lat)
+#    lon2 = np.deg2rad(pos2_lon)
+#
+#    bearing = np.arctan2(np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(lon2 - lon1), np.sin(lon2 - lon1) * np.cos(lat2))
+#
+#    db = np.rad2deg(bearing)
+#    return (90.0 - db + 360.0) % 360.0
+
+# # =========================================================
 def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
    lat1 = np.deg2rad(pos1_lat)
-   lon1 = np.deg2rad(pos1_lon)
    lat2 = np.deg2rad(pos2_lat)
-   lon2 = np.deg2rad(pos2_lon)
 
-   bearing = np.arctan2(np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(lon2 - lon1), np.sin(lon2 - lon1) * np.cos(lat2))
+   diffLong = np.deg2rad(pos2_lon - pos1_lon)
+   bearing = np.arctan2(np.cos(lat1) * np.sin(lat2) - (np.sin(lat1) * np.cos(lat2) * np.cos(diffLong)), np.sin(diffLong) * np.cos(lat2))
 
    db = np.rad2deg(bearing)
    return (90.0 - db + 360.0) % 360.0
-
 
 # =========================================================
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
@@ -265,7 +275,7 @@ def ascol( arr ):
    reshapes row matrix to be a column matrix (N,1).
    '''
    if len( arr.shape ) == 1: arr = arr.reshape( ( arr.shape[0], 1 ) )
-   return arr 
+   return arr
 
 # =========================================================
 def rm_spikes(dat,numstds):
@@ -275,12 +285,12 @@ def rm_spikes(dat,numstds):
    ht = np.mean(dat) + numstds*np.std(dat)
    lt = np.argmax(np.mean(dat) - numstds*np.std(dat),0)
 
-   index = np.where(dat>ht); 
+   index = np.where(dat>ht);
    if index:
       dat[index] = np.nan
 
-   index = np.where(dat<lt); 
-   if index: 
+   index = np.where(dat<lt);
+   if index:
       dat[index] = np.nan
 
    # fill nans using linear interpolation
@@ -317,7 +327,7 @@ def nan_helper(y):
 # =========================================================
 def norm_shape(shap):
    '''
-   Normalize numpy array shapes so they're always expressed as a tuple, 
+   Normalize numpy array shapes so they're always expressed as a tuple,
    even for one-dimensional shapes.
    '''
    try:
@@ -326,14 +336,14 @@ def norm_shape(shap):
    except TypeError:
       # shape was not a number
       pass
- 
+
    try:
       t = tuple(shap)
       return t
    except TypeError:
       # shape was not iterable
       pass
-     
+
    raise TypeError('shape must be an int, or a tuple of ints')
 
 
@@ -359,7 +369,7 @@ def sliding_window_nomm(a,ws,ss = None,flatten = True):
     if 1 != len(set(ls)):
         raise ValueError(\
         'a.shape, ws and ss must all have the same length. They were %s' % str(ls))
-     
+
     # ensure that ws is smaller than a in every dimension
     if np.any(ws > shap):
         raise ValueError(\
@@ -382,8 +392,8 @@ def sliding_window_nomm(a,ws,ss = None,flatten = True):
     firstdim = (np.product(newshape[:-meat]),) if ws.shape else ()
     dim = firstdim + (newshape[-meat:])
     # remove any dimensions with size 1
-    dim = filter(lambda i : i != 1,dim) 
-    
+    dim = filter(lambda i : i != 1,dim)
+
     return a.reshape(dim), newshape
 
 
@@ -401,26 +411,26 @@ def sliding_window(a,ws,ss = None,flatten = True):
    # convert ws, ss, and a.shape to numpy arrays
    ws = np.array(ws)
    ss = np.array(ss)
-   
+
    import PyHum.io as io
 
    shape_tmp = io.set_mmap_data('', '', 'tmp.dat', 'float32', a)
    del a
-   a = io.get_mmap_data('', '', 'tmp.dat', 'float32', shape_tmp) 
+   a = io.get_mmap_data('', '', 'tmp.dat', 'float32', shape_tmp)
 
    shap = np.array(a.shape)
-   
+
    try:
       os.remove('tmp.dat')
    except:
-      pass   
-   
+      pass
+
    # ensure that ws, ss, and a.shape all have the same number of dimensions
    ls = [len(shap),len(ws),len(ss)]
    if 1 != len(set(ls)):
       raise ValueError(\
       'a.shape, ws and ss must all have the same length. They were %s' % str(ls))
-     
+
    # ensure that ws is smaller than a in every dimension
    if np.any(ws > shap):
       raise ValueError(\
@@ -433,7 +443,7 @@ def sliding_window(a,ws,ss = None,flatten = True):
    # plus the shape of the window (tuple addition)
    newshape += norm_shape(ws)
    # the strides tuple will be the array's strides multiplied by step size, plus
-    
+
    try:
       # the array's strides (tuple addition)
       newstrides = norm_shape(np.array(a.strides) * ss) + a.strides
@@ -446,13 +456,13 @@ def sliding_window(a,ws,ss = None,flatten = True):
       firstdim = (int(np.product(newshape[:-meat])),) if ws.shape else ()
       dim = firstdim + (newshape[-meat:])
       # remove any dimensions with size 1
-      dim = filter(lambda i : i != 1,dim) 
-    
+      dim = filter(lambda i : i != 1,dim)
+
       return a.reshape(dim), newshape
-   
+
    except:
-   
-      from itertools import product   
+
+      from itertools import product
       print "memory error, windowing using slower method"
       # For each dimension, create a list of all valid slices
       slices = [[] for i in range(len(ws))]
@@ -464,7 +474,7 @@ def sliding_window(a,ws,ss = None,flatten = True):
             slices[i].append(slice(start,stop))
       # Get an iterator over all valid n-dimensional slices of the input
       allslices = product(*slices)
-     
+
       # Allocate memory to hold all valid n-dimensional slices
       nslices = np.product([len(s) for s in slices])
       #out = np.ndarray((nslices,) + tuple(ws),dtype = a.dtype)
@@ -472,13 +482,13 @@ def sliding_window(a,ws,ss = None,flatten = True):
       for i,s in enumerate(allslices):
          #out[i] = a[s]
          out.append(a[s])
-         
+
       del a
       import dask.bag as db
       tmp = db.from_sequence(out, npartitions=1000)
       del out
-         
-      return tmp.compute(), newshape   
+
+      return tmp.compute(), newshape
 
 
 # =========================================================
@@ -495,17 +505,17 @@ def sliding_window_sliced(a,density, ws,ss = None,flatten = True):
    # convert ws, ss, and a.shape to numpy arrays
    ws = np.array(ws)
    ss = np.array(ss)
-   
+
    r = np.arange(1,ws[0]-1,density, dtype=np.int)
-   
-   shap = np.array(a.shape)  
-   
+
+   shap = np.array(a.shape)
+
    # ensure that ws, ss, and a.shape all have the same number of dimensions
    ls = [len(shap),len(ws),len(ss)]
    if 1 != len(set(ls)):
       raise ValueError(\
       'a.shape, ws and ss must all have the same length. They were %s' % str(ls))
-     
+
    # ensure that ws is smaller than a in every dimension
    if np.any(ws > shap):
       raise ValueError(\
@@ -518,7 +528,7 @@ def sliding_window_sliced(a,density, ws,ss = None,flatten = True):
    # plus the shape of the window (tuple addition)
    newshape += norm_shape(ws)
    # the strides tuple will be the array's strides multiplied by step size, plus
-    
+
    # the array's strides (tuple addition)
    newstrides = norm_shape(np.array(a.strides) * ss) + a.strides
    a = ast(a,shape = newshape,strides = newstrides)[:,:,:,r]
@@ -529,32 +539,32 @@ def sliding_window_sliced(a,density, ws,ss = None,flatten = True):
    meat = len(ws) if ws.shape else 0
    firstdim = (int(np.product(newshape[:-meat])),) if ws.shape else ()
    dim = firstdim + (newshape[-meat:])
-   
+
    dim = list(dim)
    dim[-1] = len(r)
    ## remove any dimensions with size 1
    dim = filter(lambda i : i != 1,dim)
-   dim = tuple(dim) 
-      
+   dim = tuple(dim)
+
    newshape = np.shape(a)
-    
+
    return a.reshape(dim), newshape
-   
+
 
 # =========================================================
 def dpboundary(imu):
    '''
-   dynamic boundary tracing in an image 
+   dynamic boundary tracing in an image
    (translated from matlab: CMP Vision Algorithms http://visionbook.felk.cvut.cz)
    '''
-   m,n = np.shape(imu)  
+   m,n = np.shape(imu)
    c = np.zeros((m,n))
    p = np.zeros((m,n))
-   c[0,:] = imu[0,:]  
-   
+   c[0,:] = imu[0,:]
+
    for i in xrange(1,m):
       c0 = c[i-1,:]
-      tmp1 = np.squeeze(ascol(np.hstack((c0[1:],c0[-1]))))  
+      tmp1 = np.squeeze(ascol(np.hstack((c0[1:],c0[-1]))))
       tmp2 = np.squeeze(ascol(np.hstack((c0[0], c0[0:len(c0)-1]))))
       d = repmat( imu[i,:], 3, 1 ) + np.vstack( (c0,tmp1,tmp2) )
       del tmp1, tmp2
@@ -577,20 +587,20 @@ def dpboundary(imu):
    return x
 
 ## =========================================================
-def cut_kmeans(w,numclusters): 
+def cut_kmeans(w,numclusters):
    '''
    perform a k-means segmentation of image
    '''
    wc = w.reshape((-1, 1)) # We need an (n_sample, n_feature) array
-   
+
    try:
       wc = da.from_array(wc, chunks=1000)   #dask implementation
    except:
       pass
-   
+
    k_means = MiniBatchKMeans(numclusters)
    # fit the model
-   k_means.fit(wc) 
+   k_means.fit(wc)
    del wc
    values = k_means.cluster_centers_.squeeze()
    labels = k_means.labels_
@@ -607,13 +617,13 @@ def im_resize(im,Nx,Ny):
    ny, nx = np.shape(im)
    xx = np.linspace(0,nx,Nx)
    yy = np.linspace(0,ny,Ny)
-   
+
    try:
       im = da.from_array(im, chunks=1000)   #dask implementation
    except:
       pass
-   
-   newKernel = RectBivariateSpline(np.r_[:ny],np.r_[:nx],im) 
+
+   newKernel = RectBivariateSpline(np.r_[:ny],np.r_[:nx],im)
    return newKernel(yy,xx)
 
 # =========================================================
@@ -631,7 +641,7 @@ def histeq(im,nbr_bins=256):
    return im2.reshape(im.shape), cdf
 
 ## http://nbviewer.ipython.org/url/ocefpaf.github.com/python4oceanographers/downloads/notebooks/2014-03-10-google-earth.ipynb
-# =========================================================    
+# =========================================================
 def gearth_fig(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat, pixels=1024):
     """Return a Matplotlib `fig` and `ax` handles for a Google-Earth Image."""
     aspect = np.cos(np.mean([llcrnrlat, urcrnrlat]) * np.pi/180.0)
@@ -653,10 +663,10 @@ def gearth_fig(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat, pixels=1024):
     ax = fig.add_axes([0, 0, 1, 1])
     ax.set_xlim(llcrnrlon, urcrnrlon)
     ax.set_ylim(llcrnrlat, urcrnrlat)
-    return fig, ax    
-        
+    return fig, ax
 
-# =========================================================    
+
+# =========================================================
 def make_kml(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat,
              figs, colorbar=None, **kw):
     """TODO: LatLon bbox, list of figs, optional colorbar figure,
@@ -711,5 +721,4 @@ def make_kml(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat,
         screen.visibility = 1
 
     kmzfile = kw.pop('kmzfile', 'overlay.kmz')
-    kml.savekmz(kmzfile)    
-    
+    kml.savekmz(kmzfile)
