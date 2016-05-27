@@ -328,7 +328,7 @@ cdef class pyread:
 #          theta = np.unwrap(-theta)
 #          bearing = theta * (180/pi)
 
-#          bearing = (bearing + 360) % 360
+          bearing = (bearing + 360) % 360
           
           x_utm, y_utm = self._calc_beam_pos(dist, bearing, (head[2],head[3]))
  
