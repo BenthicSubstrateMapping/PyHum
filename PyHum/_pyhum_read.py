@@ -405,6 +405,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        data = pyread.pyread(sonfiles, humfile, c, model, cs2cs_args)
 
        dat = data.gethumdat()
+
        metadat = data.getmetadata()
 
        old_pyread = 1

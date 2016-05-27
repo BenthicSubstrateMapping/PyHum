@@ -312,7 +312,7 @@ cdef class pyread:
        if head[9]==3 or head[9]==2: #starboard or port
           dist = ((tan(25*0.0174532925))*head[8])-(tvg) #depth
           bearing = 0.0174532925*head[5] - (pi/2) #heading_deg
-          #x_utm, y_utm = self._calc_beam_pos(dist, bearing, (head[2],head[3]))
+          x_utm, y_utm = self._calc_beam_pos(dist, bearing, (head[2],head[3]))
           x_utm = head[2]
           y_utm = head[3]
           lat = atan(tan(atan(exp(y_utm/ 6378388.0)) * 2.0 - 1.570796326794897) * 1.0067642927) * 57.295779513082302
