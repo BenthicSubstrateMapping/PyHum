@@ -135,7 +135,7 @@ def dotest():
    PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
 
    ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
-   PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
+   #PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
    win = 100 # pixel window
    
