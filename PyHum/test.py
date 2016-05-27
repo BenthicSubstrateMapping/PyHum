@@ -85,8 +85,8 @@ def dotest():
    flip_lr = 1 # flip port and starboard
    model = 998 # humminbird model
    cog = 1 # GPS course-over-ground used for heading
-   calc_bearing = 1 #no
-   filt_bearing = 1 #no
+   calc_bearing = 1 #1=yes
+   filt_bearing = 1 #1=yes
    chunk = 'd100' # distance, 100m
    #chunk = 'p1000' # pings, 1000
    #chunk = 'h10' # heading deviation, 10 deg

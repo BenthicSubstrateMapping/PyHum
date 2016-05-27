@@ -309,12 +309,12 @@ cdef class pyread:
        cdef float lon, lat
        cdef float dist, bearing, theta
 
-       #cdef float tvg = ((8.5*10**-5)+(3/76923)+((8.5*10**-5)/4))*c
+       cdef float tvg = ((8.5*10**-5)+(3/76923)+((8.5*10**-5)/4))*c
        
        cdef float pi = 3.14159265
         
        if head[9]==3 or head[9]==2: #starboard or port
-          dist = ((tan(25*0.0174532925))*head[8]) #-(tvg) #depth
+          dist = ((tan(25*0.0174532925))*head[8]) +(tvg) #depth
 
           bearing = 0.0174532925*head[5] - (pi/2) #heading_deg
 
