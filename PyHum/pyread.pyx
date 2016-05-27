@@ -312,18 +312,6 @@ cdef class pyread:
        if head[9]==3 or head[9]==2: #starboard or port
           dist = ((tan(25*0.0174532925))*head[8])-(tvg) #depth
           bearing = 0.0174532925*head[5] - (pi/2) #heading_deg
-
-#          theta = np.asarray(bearing, 'float')/(180/np.pi)
-#          #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
-#          #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU
-#          # (East-North-Up) coordinate frame.
-#          #Subtract pi/2 from your heading
-#          theta = theta - pi/2
-#          # (re-wrap to Pi to -Pi)
-#          theta = np.unwrap(-theta)
-#          bearing = theta * (180/pi)
-
-#          bearing = (bearing + 360) % 360
           
           x_utm, y_utm = self._calc_beam_pos(dist, bearing, (head[2],head[3]))
           
