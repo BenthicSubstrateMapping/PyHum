@@ -798,9 +798,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     f = open(os.path.normpath(os.path.join(sonpath,base+'rawdat.csv')), 'wt')
     writer = csv.writer(f)
-    writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth (m)', 'distance (m)', 'heading (deg.)' ) )
+    writer.writerow( ('longitude', 'latitude', 'easting', 'northing', 'depth (m)', 'distance (m)', 'instr. heading (deg)', 'heading (deg.)' ) )
     for i in range(0, nrec):
-       writer.writerow(( float(lon[i]),float(lat[i]),float(es[i]),float(ns[i]),float(dep_m[i]),float(dist_m[i]), float(metadat['heading'][i]) ))
+       writer.writerow(( float(lon[i]),float(lat[i]),float(es[i]),float(ns[i]),float(dep_m[i]),float(dist_m[i]), float(metadat['instr_heading'][i]), float(metadat['heading'][i]) ))
     f.close()
 
     del lat, lon, dep_m #, dist_m
