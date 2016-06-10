@@ -218,8 +218,8 @@ def get_bearing(calc_bearing, cog, filt_bearing, lat, lon, heading):
        theta = np.unwrap(-theta)
        bearing = theta * (180/np.pi)
 
-    return (bearing + 360) % 360
-
+    #return (bearing + 360) % 360
+    return bearing % 360
 
 # =========================================================
 def strip_base(base):
@@ -263,7 +263,8 @@ def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
    bearing = np.arctan2(np.cos(lat1) * np.sin(lat2) - (np.sin(lat1) * np.cos(lat2) * np.cos(diffLong)), np.sin(diffLong) * np.cos(lat2))
 
    db = np.rad2deg(bearing)
-   return (90.0 - db + 360.0) % 360.0
+   #return (90.0 - db + 360.0) % 360.0
+   return db % 360.0
 
 # =========================================================
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):

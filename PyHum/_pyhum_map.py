@@ -67,7 +67,7 @@ from joblib import Parallel, delayed, cpu_count
 import pyproj
 
 #import replace_nans
-import PyHum.write as write
+#import PyHum.write as write
 
 import PyHum.io as io
 
@@ -104,14 +104,14 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode=3, nn = 64, numstdevs=5): #dogrid = 1, influence = 1,
+def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, numstdevs=5): #dogrid = 1, influence = 1, dowrite = 0, 
 
     '''
     Create plots of the spatially referenced sidescan echograms
 
     Syntax
     ----------
-    [] = PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, numstdevs)
+    [] = PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs)
 
     Parameters
     ----------
@@ -126,9 +126,6 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode
     res : float, *optional* [Default=0]
        grid resolution of output gridded texture map
        if res=0, res will be determined automatically from the spatial resolution of 1 pixel
-    dowrite: int, *optional* [Default=0]
-       if 1, point cloud data from each chunk is written to ascii file
-       if 0, processing times are speeded up considerably but point clouds are not available for further analysis
     mode: int, *optional* [Default=3]
        gridding mode. 1 = nearest neighbour
                       2 = inverse weighted nearest neighbour
@@ -180,10 +177,10 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode
        res = np.asarray(res,float)
        print 'Gridding resolution: %s' % (str(res))
 
-    if dowrite:
-       dowrite = int(dowrite)
-       if dowrite==0:
-          print "Point cloud data will be written to ascii file"
+#    if dowrite:
+#       dowrite = int(dowrite)
+#       if dowrite==0:
+#          print "Point cloud data will be written to ascii file"
 
     if mode:
        mode = int(mode)
@@ -280,12 +277,12 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode
     if len(shape_star)>2:
        for p in xrange(len(star_fp)):
           try:
-             res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], meta['pix_m'], res, cs2cs_args, sonpath, p, dowrite, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f']))) #dogrid, influence
+             res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], meta['pix_m'], res, cs2cs_args, sonpath, p, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f']))) #dogrid, influence, dowrite,
              print "grid resolution is %s" % (str(res))
           except:
              pass
     else:
-       res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, dowrite, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f']))) #dogrid, influence,
+       res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f']))) #dogrid, influence,dowrite,
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
@@ -297,7 +294,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, dowrite = 0, mode
 
 
 # =========================================================
-def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, dowrite, mode, nn, numstdevs, c, dx): #dogrid, influence,
+def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, mode, nn, numstdevs, c, dx): #dogrid, influence,dowrite,
 
    thres=5
 
@@ -383,10 +380,11 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    h = h[np.where(np.logical_not(np.isinf(merge)))]
    t = t[np.where(np.logical_not(np.isinf(merge)))]
 
-   if dowrite==1:
-      ## write raw bs to file
-      outfile = os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc'))
-      write.txtwrite( outfile, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()), humutils.ascol(D.flatten()), humutils.ascol(R.flatten()), humutils.ascol(h.flatten()), humutils.ascol(t.flatten())  )) )
+   #if dowrite==1:
+   ## write raw bs to file
+   outfile = os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc'))
+   ##write.txtwrite( outfile, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()), humutils.ascol(D.flatten()), humutils.ascol(R.flatten()), humutils.ascol(h.flatten()), humutils.ascol(t.flatten())  )) )
+   np.savetxt(outfile, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()), humutils.ascol(D.flatten()), humutils.ascol(R.flatten()), humutils.ascol(h.flatten()), humutils.ascol(t.flatten())  )) , fmt="%8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f") 
 
    del D, R, h, t
 
@@ -764,7 +762,7 @@ def getXY(e,n,yvec,d,t,extent):
 # =========================================================
 if __name__ == '__main__':
 
-   map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, numstdevs) #dogrid, influence,
+   map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs) #dogrid, influence,dowrite,
 
 ## =========================================================
 #def calc_beam_pos(dist, bearing, x, y):

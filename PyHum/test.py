@@ -116,7 +116,6 @@ def dotest():
    mode = 1 # gridding mode (simple nearest neighbour)
    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
    #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
-   dowrite = 0 #disable writing of point cloud data to file
 
    nn = 64 #number of nearest neighbours for gridding (used if mode > 1)
    ##influence = 1 #Radius of influence used in gridding. Cut off distance in meters 
@@ -143,7 +142,7 @@ def dotest():
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
    ## grid and map the scans
-   PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, numstdevs)
+   PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs) #dowrite, 
 
    res = 1 # grid resolution in metres
    numstdevs = 5
