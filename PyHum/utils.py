@@ -218,8 +218,8 @@ def get_bearing(calc_bearing, filt_bearing, lat, lon, heading): #cog
     theta = np.unwrap(-theta)
     bearing = theta * (180/np.pi)
 
-    #return (bearing + 360) % 360
-    return bearing % 360
+    return (bearing + 360) % 360
+    #return bearing % 360
 
 # =========================================================
 def strip_base(base):
