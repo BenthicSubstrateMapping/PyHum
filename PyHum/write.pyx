@@ -7,7 +7,7 @@ cimport numpy as np
 cimport cython
 
 # =========================================================
-def txtwrite(str outfile, np.ndarray[np.float64_t, ndim=2] towrite):
+def txtwrite(str outfile, np.ndarray[np.float32_t, ndim=2] towrite):
    '''
    Custom fast numpy array to comma-delimited ASCII txt file
 
