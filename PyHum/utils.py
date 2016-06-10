@@ -207,19 +207,19 @@ def get_bearing(calc_bearing, filt_bearing, lat, lon, heading): #cog
     if filt_bearing ==1:
        bearing = runningMeanFast(bearing, np.max((len(bearing)/10, 3)))
 
-    #if cog==1:
-    theta = np.asarray(bearing, 'float')/(180/np.pi)
+    ##if cog==1:
+    #theta = np.asarray(bearing, 'float')/(180/np.pi)
     #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
     #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU
     # (East-North-Up) coordinate frame.
     #Subtract pi/2 from your heading
-    theta = theta - np.pi/2
-    # (re-wrap to Pi to -Pi)
-    theta = np.unwrap(-theta)
-    bearing = theta * (180/np.pi)
+    #theta = theta - np.pi/2
+    ## (re-wrap to Pi to -Pi)
+    #theta = np.unwrap(-theta)
+    #bearing = theta * (180/np.pi)
 
-    return (bearing + 360) % 360
-    #return bearing % 360
+    #return (bearing + 360) % 360
+    return bearing % 360
 
 # =========================================================
 def strip_base(base):
@@ -259,8 +259,10 @@ def bearingBetweenPoints(pos1_lat, pos2_lat, pos1_lon, pos2_lon):
    lat1 = np.deg2rad(pos1_lat)
    lat2 = np.deg2rad(pos2_lat)
 
-   diffLong = np.deg2rad(pos2_lon - pos1_lon)
-   bearing = np.arctan2(np.cos(lat1) * np.sin(lat2) - (np.sin(lat1) * np.cos(lat2) * np.cos(diffLong)), np.sin(diffLong) * np.cos(lat2))
+   diffLong = np.deg2rad(pos2_lon) - np.deg2rad(pos1_lon)
+   #orig #bearing = np.arctan2(np.cos(lat1) * np.sin(lat2) - (np.sin(lat1) * np.cos(lat2) * np.cos(diffLong)), np.sin(diffLong) * np.cos(lat2))
+
+   bearing = np.arctan2(np.sin(diffLong) * np.cos(lat2), np.cos(lat1) * np.sin(lat2) - np.sin(lat1) * np.cos(lat2) * np.cos(diffLong))
 
    db = np.rad2deg(bearing)
    #return (90.0 - db + 360.0) % 360.0
