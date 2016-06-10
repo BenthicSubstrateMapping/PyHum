@@ -94,7 +94,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=1, t=0.108, bedpick=1, flip_lr=0, model=998, calc_bearing = 0, filt_bearing = 0, cog = 1, chunk='d100'):
+def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=1, t=0.108, bedpick=1, flip_lr=0, model=998, calc_bearing = 0, filt_bearing = 0, chunk='d100'): #cog = 1,
 
     '''
     Read a .DAT and associated set of .SON files recorded by a Humminbird(R)
@@ -109,7 +109,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     Syntax
     ----------
-    [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, chunksize, model, calc_bearing, filt_bearing, cog, chunk)
+    [] = PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, chunksize, model, calc_bearing, filt_bearing, chunk)
 
     Parameters
     ------------
@@ -139,9 +139,6 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     model: int, *optional* [Default=998]
        A 3 or 4 number code indicating the model number
        Examples: 998, 997, 1198, 1199
-    cog : int, *optional* [Default=1]
-       if 1, heading calculated assuming GPS course-over-ground rather than
-       using a compass
     calc_bearing : float, *optional* [Default=0]
        if 1, bearing will be calculated from coordinates
     filt_bearing : float, *optional* [Default=0]
@@ -292,10 +289,10 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        model = int(model)
        print "Data is from the %s series"  % (str(model))
 
-    if cog:
-       cog = int(cog)
-       if cog==1:
-          print "Heading based on course-over-ground"
+#    if cog:
+#       cog = int(cog)
+#       if cog==1:
+#          print "Heading based on course-over-ground"
 
     if calc_bearing:
        calc_bearing = int(calc_bearing)
@@ -435,7 +432,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     metadat['lon'] = lon
     metadat['lat'] = lat
 
-    metadat['heading'] = humutils.get_bearing(calc_bearing, filt_bearing, cog, metadat['lat'], metadat['lon'], metadat['instr_heading'])
+    metadat['heading'] = humutils.get_bearing(calc_bearing, filt_bearing, metadat['lat'], metadat['lon'], metadat['instr_heading']) #cog
 
     dist_m = humutils.get_dist(lat, lon)
     metadat['dist_m'] = dist_m
@@ -1169,7 +1166,7 @@ def norm_shape(shap):
 # =========================================================
 if __name__ == '__main__':
 
-   read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
+   read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) #cog
 
        #try:
        #except:
