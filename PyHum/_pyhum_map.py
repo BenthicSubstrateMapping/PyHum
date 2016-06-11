@@ -275,7 +275,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
        res=99
 
     if len(shape_star)>2:
-       for p in xrange(len(star_fp)):
+       for p in range(len(star_fp)):
           try:
              res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], meta['pix_m'], res, cs2cs_args, sonpath, p, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f']))) #dogrid, influence, dowrite,
              print "grid resolution is %s" % (str(res))
