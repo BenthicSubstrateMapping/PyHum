@@ -208,15 +208,15 @@ def get_bearing(calc_bearing, filt_bearing, lat, lon, heading): #cog
        bearing = runningMeanFast(bearing, np.max((len(bearing)/10, 3)))
 
     ##if cog==1:
-    #theta = np.asarray(bearing, 'float')/(180/np.pi)
-    #course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
-    #To get this into NED (North-East-Down) coordinates, you need to rotate the ENU
-    # (East-North-Up) coordinate frame.
-    #Subtract pi/2 from your heading
-    #theta = theta - np.pi/2
-    ## (re-wrap to Pi to -Pi)
-    #theta = np.unwrap(-theta)
-    #bearing = theta * (180/np.pi)
+    theta = np.asarray(bearing, 'float')/(180/np.pi)
+    ##course over ground is given as a compass heading (ENU) from True north, or Magnetic north.
+    ##To get this into NED (North-East-Down) coordinates, you need to rotate the ENU
+    ## (East-North-Up) coordinate frame.
+    ##Subtract pi/2 from your heading
+    theta = theta - np.pi/2
+    # (re-wrap to Pi to -Pi)
+    theta = np.unwrap(-theta)
+    bearing = theta * (180/np.pi)
 
     #return (bearing + 360) % 360
     return bearing % 360
