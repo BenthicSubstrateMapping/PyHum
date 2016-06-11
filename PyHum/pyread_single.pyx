@@ -506,8 +506,11 @@ cdef class pyread:
         hdg2[gps_a==0] = np.nan
         hdg2[gps_b==0] = np.nan  
 
-        nans, y= humutils.nan_helper(hdg2)
-        hdg2[nans]= np.interp(y(nans), y(~nans), hdg2[~nans])
+        try:
+           nans, y= humutils.nan_helper(hdg2)
+           hdg2[nans]= np.interp(y(nans), y(~nans), hdg2[~nans])
+        except:
+           pass
 
         cdef np.ndarray starttime = np.asarray(self.humdat['unix_time'], 'float')
         cdef np.ndarray caltime = np.asarray(starttime + time_s, 'float')
