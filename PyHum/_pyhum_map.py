@@ -104,7 +104,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, numstdevs=5): #dogrid = 1, influence = 1, dowrite = 0, 
+def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, numstdevs=5, use_uncorrected=0): #dogrid = 1, influence = 1, dowrite = 0, 
 
     '''
     Create plots of the spatially referenced sidescan echograms
@@ -177,11 +177,6 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
        res = np.asarray(res,float)
        print 'Gridding resolution: %s' % (str(res))
 
-#    if dowrite:
-#       dowrite = int(dowrite)
-#       if dowrite==0:
-#          print "Point cloud data will be written to ascii file"
-
     if mode:
        mode = int(mode)
        print 'Mode for gridding: %s' % (str(mode))
@@ -190,14 +185,14 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
        nn = int(nn)
        print 'Number of nearest neighbours for gridding: %s' % (str(nn))
 
-    #if influence:
-    #   influence = int(influence)
-    #   print 'Radius of influence for gridding: %s (m)' % (str(influence))
-
     if numstdevs:
        numstdevs = int(numstdevs)
        print 'Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept: %s' % (str(numstdevs))
 
+    if use_uncorrected:
+       use_uncorrected = int(use_uncorrected)
+       if use_uncorrected==1:
+          print "Radiometrically uncorrected scans will be used"
 
 
     # start timer
@@ -227,18 +222,27 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
 
     # load memory mapped scans
     shape_port = np.squeeze(meta['shape_port'])
-    if shape_port!='':
-       if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat'))):
-          port_fp = io.get_mmap_data(sonpath, base, '_data_port_lar.dat', 'float32', tuple(shape_port))
-       else:
-          port_fp = io.get_mmap_data(sonpath, base, '_data_port_la.dat', 'float32', tuple(shape_port))
-
     shape_star = np.squeeze(meta['shape_star'])
-    if shape_star!='':
-       if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat'))):
+
+    if use_uncorrected == 1:
+       print "using uncorrected scans"
+       if shape_port!='':
+          port_fp = io.get_mmap_data(sonpath, base, '_data_port_l.dat', 'float32', tuple(shape_port))
+       if shape_port!='':
+          star_fp = io.get_mmap_data(sonpath, base, '_data_star_l.dat', 'float32', tuple(shape_star))
+
+    else:
+       if shape_port!='':
+          if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_port_lar.dat'))):
+             port_fp = io.get_mmap_data(sonpath, base, '_data_port_lar.dat', 'float32', tuple(shape_port))
+          else:
+             port_fp = io.get_mmap_data(sonpath, base, '_data_port_la.dat', 'float32', tuple(shape_port))
+
+       if shape_star!='':
+          if os.path.isfile(os.path.normpath(os.path.join(sonpath,base+'_data_star_lar.dat'))):
              star_fp = io.get_mmap_data(sonpath, base, '_data_star_lar.dat', 'float32', tuple(shape_star))
-       else:
-          star_fp = io.get_mmap_data(sonpath, base, '_data_star_la.dat', 'float32', tuple(shape_star))
+          else:
+             star_fp = io.get_mmap_data(sonpath, base, '_data_star_la.dat', 'float32', tuple(shape_star))
 
     # time varying gain
     tvg = ((8.5*10**-5)+(3/76923)+((8.5*10**-5)/4))*meta['c']
@@ -274,15 +278,17 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
     if res==0:
        res=99
 
+    print len(star_fp)
+
     if len(shape_star)>2:
        for p in range(len(star_fp)):
           try:
-             res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], meta['pix_m'], res, cs2cs_args, sonpath, p, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f']))) #dogrid, influence, dowrite,
+             res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], meta['pix_m'], res, cs2cs_args, sonpath, p, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f'])), use_uncorrected) #dogrid, influence, dowrite,
              print "grid resolution is %s" % (str(res))
           except:
-             pass
+             print "error on chunk "+str(p)             
     else:
-       res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f']))) #dogrid, influence,dowrite,
+       res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f'])), use_uncorrected) #dogrid, influence,dowrite,
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
@@ -294,7 +300,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
 
 
 # =========================================================
-def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, mode, nn, numstdevs, c, dx): #dogrid, influence,dowrite,
+def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, mode, nn, numstdevs, c, dx, use_uncorrected): #dogrid, influence,dowrite,
 
    thres=5
 
@@ -310,11 +316,11 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    tmp = data_R * dx * (c*0.007 / 2) #dx = np.arcsin(c/(1000*meta['t']*meta['f']))
    res_grid = np.sqrt(np.vstack((tmp, tmp)))
    del tmp
-
    res_grid = res_grid[:np.shape(merge)[0],:np.shape(merge)[1]]
-
-   merge = merge - 10*np.log10(res_grid)
-
+   
+   if use_uncorrected != 1:
+      merge = merge - 10*np.log10(res_grid)
+   
    res_grid = res_grid.astype('float32')
 
    merge[np.isnan(merge)] = 0
@@ -380,6 +386,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    h = h[np.where(np.logical_not(np.isinf(merge)))]
    t = t[np.where(np.logical_not(np.isinf(merge)))]
 
+   print "writing point cloud"
    #if dowrite==1:
    ## write raw bs to file
    outfile = os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc'))
@@ -762,7 +769,7 @@ def getXY(e,n,yvec,d,t,extent):
 # =========================================================
 if __name__ == '__main__':
 
-   map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs) #dogrid, influence,dowrite,
+   map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dogrid, influence,dowrite,
 
 ## =========================================================
 #def calc_beam_pos(dist, bearing, x, y):
