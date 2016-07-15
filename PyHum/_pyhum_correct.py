@@ -345,7 +345,9 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     A_fp = io.get_mmap_data(sonpath, base, '_data_incidentangle.dat', 'float32', shape_star)
     TL_fp = io.get_mmap_data(sonpath, base, '_data_TL.dat', 'float32', shape_star)
-    
+
+    R_fp = io.get_mmap_data(sonpath, base, '_data_range.dat', 'float32', shape_star)
+        
     if correct_withwater == 1:
        Zt = correct_scans(star_fp, A_fp, TL_fp, dofilt)
 
@@ -355,11 +357,17 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     #we are only going to access the portion of memory required
     star_fp = io.get_mmap_data(sonpath, base, '_data_star_l.dat', 'float32', shape_star)     
 
-    Zt = correct_scans(star_fp, A_fp, TL_fp, dofilt)
-
+    ##Zt = correct_scans(star_fp, A_fp, TL_fp, dofilt)
+ 
+    m=1
+    omega=69
+    alpha=1.69
+    # lambertian correction
+    Zt = correct_scans_lambertian(star_fp, A_fp, TL_fp, R_fp, meta['c'], meta['f'], m, omega, alpha)
+    
     Zt = np.squeeze(Zt)
 
-    avg = np.nanmean(Zt,axis=1)
+    avg = np.median(Zt,axis=1)
     
     Zt2 = np.empty(np.shape(Zt))
     
@@ -393,8 +401,14 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     #we are only going to access the portion of memory required
     port_fp = io.get_mmap_data(sonpath, base, '_data_port_l.dat', 'float32', shape_port)     
     
-    Zt = correct_scans(port_fp, A_fp, TL_fp, dofilt)
+    ##Zt = correct_scans(port_fp, A_fp, TL_fp, dofilt)
 
+    m=1
+    omega=69
+    alpha=1.69
+    # lambertian correction
+    Zt = correct_scans_lambertian(port_fp, A_fp, TL_fp, R_fp, meta['c'], meta['f'], m, omega, alpha)
+    
     Zt = np.squeeze(Zt)
     
     Zt2 = np.empty(np.shape(Zt))
@@ -708,6 +722,56 @@ def c_scans(fp, a_fp, TL, dofilt):
    mg[mg<0] = np.nan
    mg[nodata] = np.nan
    return mg
+   
+
+# =========================================================
+def correct_scans_lambertian(fp, a_fp, TL, R, c, f, m, omega, alpha):
+    if np.ndim(fp)==2:
+       return c_scans_lambertian(fp, a_fp, TL, R, c, f, m, omega, alpha)
+    else:
+       return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans_lambertian)(fp[p], a_fp[p], TL[p], R[p], c, f, m, omega, alpha) for p in xrange(len(fp)))
+       
+# =========================================================
+def c_scans_lambertian(fp, a_fp, TL, R, c, f, m, omega, alpha):
+
+   lam = c/(f*1000)
+   #omega = 60
+   #alpha = 1.69
+   
+   Rtmp = R.copy()
+   try:
+      Rtmp[np.where(Rtmp==0)] = Rtmp[np.where(Rtmp!=0)[0][-1]]
+   except:
+      pass
+      
+   #transducer radius
+   a = 0.61*lam / (np.sin(alpha/2))
+   
+   M = (f*1000)/(a**4)
+   
+   # no 'M' constant of proportionality
+   phi = ((M*(f*1000)*a**4) / Rtmp**2)*(2*jv(1,(2*np.pi/lam)*a*np.sin(np.deg2rad(omega))) / (2*np.pi/lam)*a*np.sin(np.deg2rad(omega)))**2  
+   
+   phi = np.squeeze(phi)
+   phi[phi==np.inf]=np.nan
+   
+   # fp is 1d (1 scan)
+   beta = np.cos(a_fp**m)
+   try:
+      beta[np.where(beta<10e-5)] = beta[np.where(beta>10e-5)[0][-1]]
+   except:
+      pass
+   mg = (fp / phi * beta)*(1/Rtmp)
+   mg[np.isinf(mg)] = np.nan
+   K = np.nansum(fp)/np.nansum(mg)
+   mg = mg*K
+   mg[mg<0] = np.nan
+   
+   mg = 10**np.log10(mg + TL)
+   mg[fp==0] = np.nan
+   mg[mg<0] = np.nan
+   
+   return mg   
 
 # =========================================================
 def correct_scans2(fp, TL):

@@ -318,8 +318,8 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    del tmp
    res_grid = res_grid[:np.shape(merge)[0],:np.shape(merge)[1]]
    
-   if use_uncorrected != 1:
-      merge = merge - 10*np.log10(res_grid)
+   #if use_uncorrected != 1:
+   #   merge = merge - 10*np.log10(res_grid)
    
    res_grid = res_grid.astype('float32')
 
