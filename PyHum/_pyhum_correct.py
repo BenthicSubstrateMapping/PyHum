@@ -754,7 +754,7 @@ def c_scans_lambertian(fp, a_fp, TL, R, c, f, theta, alpha):
    phi[phi==np.inf]=np.nan
    
    # fp is 1d (1 scan)
-   beta = np.cos(a_fp**m)
+   beta = np.cos(a_fp)
    try:
       beta[np.where(beta<10e-5)] = beta[np.where(beta>10e-5)[0][-1]]
    except:
