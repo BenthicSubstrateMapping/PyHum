@@ -71,6 +71,8 @@ import numpy as np
 import PyHum.utils as humutils
 import PyHum.ppdrc as ppdrc
 
+from scipy.special import jv
+
 #plotting
 import matplotlib.pyplot as plt
 #import matplotlib.colors as colors
