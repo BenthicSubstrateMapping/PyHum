@@ -359,7 +359,11 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     ##Zt = correct_scans(star_fp, A_fp, TL_fp, dofilt)
  
-
+    m=1
+    #phi=1.69
+    alpha=59 # vertical beam width at 3db
+    theta=35 #opening angle theta 
+    
     # lambertian correction
     Zt = correct_scans_lambertian(star_fp, A_fp, TL_fp, R_fp, meta['c'], meta['f'], m, theta, alpha)
     
@@ -400,12 +404,6 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     port_fp = io.get_mmap_data(sonpath, base, '_data_port_l.dat', 'float32', shape_port)     
     
     ##Zt = correct_scans(port_fp, A_fp, TL_fp, dofilt)
-
-    m=1
-    #omega=69
-    #alpha=1.69
-    alpha=69 # vertical beam width at 3db
-    theta=35 #opening angle theta 
     
     # lambertian correction
     Zt = correct_scans_lambertian(port_fp, A_fp, TL_fp, R_fp, meta['c'], meta['f'], m, theta, alpha)
