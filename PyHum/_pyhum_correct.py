@@ -359,13 +359,12 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     ##Zt = correct_scans(star_fp, A_fp, TL_fp, dofilt)
  
-    m=1
     #phi=1.69
     alpha=59 # vertical beam width at 3db
     theta=35 #opening angle theta 
     
     # lambertian correction
-    Zt = correct_scans_lambertian(star_fp, A_fp, TL_fp, R_fp, meta['c'], meta['f'], m, theta, alpha)
+    Zt = correct_scans_lambertian(star_fp, A_fp, TL_fp, R_fp, meta['c'], meta['f'], theta, alpha)
     
     Zt = np.squeeze(Zt)
 
@@ -406,7 +405,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     ##Zt = correct_scans(port_fp, A_fp, TL_fp, dofilt)
     
     # lambertian correction
-    Zt = correct_scans_lambertian(port_fp, A_fp, TL_fp, R_fp, meta['c'], meta['f'], m, theta, alpha)
+    Zt = correct_scans_lambertian(port_fp, A_fp, TL_fp, R_fp, meta['c'], meta['f'], theta, alpha)
     
     Zt = np.squeeze(Zt)
     
@@ -724,14 +723,14 @@ def c_scans(fp, a_fp, TL, dofilt):
    
 
 # =========================================================
-def correct_scans_lambertian(fp, a_fp, TL, R, c, f, m, theta, alpha):
+def correct_scans_lambertian(fp, a_fp, TL, R, c, f, theta, alpha):
     if np.ndim(fp)==2:
-       return c_scans_lambertian(fp, a_fp, TL, R, c, f, m, theta, alpha)
+       return c_scans_lambertian(fp, a_fp, TL, R, c, f, theta, alpha)
     else:
-       return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans_lambertian)(fp[p], a_fp[p], TL[p], R[p], c, f, m, theta, alpha) for p in xrange(len(fp)))
+       return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans_lambertian)(fp[p], a_fp[p], TL[p], R[p], c, f, theta, alpha) for p in xrange(len(fp)))
        
 # =========================================================
-def c_scans_lambertian(fp, a_fp, TL, R, c, f, m, theta, alpha):
+def c_scans_lambertian(fp, a_fp, TL, R, c, f, theta, alpha):
 
    lam = c/(f*1000)
    
