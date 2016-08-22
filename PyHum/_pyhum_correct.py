@@ -370,7 +370,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     
     Zt = np.squeeze(Zt)
 
-    avg = np.median(Zt,axis=1)
+    avg = np.nanmedian(Zt,axis=1)
     
     Zt2 = np.empty(np.shape(Zt))
     
@@ -459,8 +459,13 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
              low_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow2.dat', 'int16', tuple(shape_low))           
 
           except:
-             if 'shape_hi' in locals():
-                low_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow2.dat', 'int16', tuple(shape_hi))              
+             low_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow.dat', 'int16', tuple(shape_low)) 
+
+          finally:
+             low_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow.dat', 'int16', tuple(shape_hi))              
+
+             #if 'shape_hi' in locals():
+             #   low_fp = io.get_mmap_data(sonpath, base, '_data_dwnlow2.dat', 'int16', tuple(shape_hi))              
 
        else:
 
@@ -479,8 +484,14 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
              hi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi2.dat', 'int16', tuple(shape_hi))           
 
           except:
-             if 'shape_low' in locals():
-                hi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi2.dat', 'int16', tuple(shape_low))               
+             hi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi.dat', 'int16', tuple(shape_hi)) 
+
+          finally:
+             hi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi.dat', 'int16', tuple(shape_low))              
+
+
+             #if 'shape_low' in locals():
+             #   hi_fp = io.get_mmap_data(sonpath, base, '_data_dwnhi2.dat', 'int16', tuple(shape_low))               
 
        else:
           try:
