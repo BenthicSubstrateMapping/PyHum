@@ -89,7 +89,10 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
        pass
 
     #imu = median_filter(imu,(20,20))
-    imu = median_filter(imu,(np.shape(imu)[0]/100,np.shape(imu)[1]/100))
+    try:
+       imu = median_filter(imu,(np.shape(imu)[0]/100,np.shape(imu)[1]/100))
+    except:
+       imu = median_filter(imu,(np.shape(imu)[0]/2,np.shape(imu)[1]/100))
 
     #autobed = dpboundary(-imu[buff:,:].T)+buff
 
