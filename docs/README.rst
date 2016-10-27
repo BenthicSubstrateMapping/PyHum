@@ -167,7 +167,7 @@ You could try before you install, using a virtual environment::
   pip install dask
   pip install pandas
   pip install PyHum
-  python -c "import PyHum; PyHum.test()"
+  python -c "import PyHum; PyHum.dotest()"
   deactivate #(or source venv/bin/deactivate)
 
 The results will live in "venv/lib/python2.7/site-packages/PyHum"
