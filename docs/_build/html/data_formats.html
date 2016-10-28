@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Binary Sonar Data Formats &mdash; PyHum 1.3.7 documentation</title>
+    <title>Binary Sonar Data Formats &mdash; PyHum 1.3.14 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.3.7',
+        VERSION:     '1.3.14',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyHum 1.3.7 documentation" href="index.html" />
+    <link rel="top" title="PyHum 1.3.14 documentation" href="index.html" />
     <link rel="next" title="PyHum package" href="pyhum.html" />
     <link rel="prev" title="Modules" href="modules.html" /> 
   </head>
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="modules.html" title="Modules"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.7 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.14 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -64,13 +64,13 @@
 <div class="section" id="how-pyhum-reads-the-binary-data">
 <h2>How PyHum reads the binary data<a class="headerlink" href="#how-pyhum-reads-the-binary-data" title="Permalink to this headline">¶</a></h2>
 <p>The program that reads the data is &#8216;pyread&#8217; which is statically compiled from Cython source code (_pyread.pyx), for speed. You can compile this module independently using the &#8216;cython&#8217; command and a c-compiler. For example, using the gcc compiler on linux:</p>
-<div class="highlight-python"><div class="highlight"><pre>cython pyread.pyx
+<div class="highlight-python"><div class="highlight"><pre><span></span>cython pyread.pyx
 gcc -c -fPIC -I/usr/include/python2.7/ pyread.c
 gcc -shared pyread.o -o pyread.so
 </pre></div>
 </div>
 <p>The pyread module gets called by the read module in the following way:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">pyread</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pyread</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">pyread</span><span class="o">.</span><span class="n">pyread</span><span class="p">(</span><span class="n">sonfiles</span><span class="p">,</span> <span class="n">humfile</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">cs2cs_args</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -137,7 +137,7 @@ gcc -shared pyread.o -o pyread.so
 <div class="section" id="a-note-on-humminbird-positions">
 <h2>A note on Humminbird positions<a class="headerlink" href="#a-note-on-humminbird-positions" title="Permalink to this headline">¶</a></h2>
 <p>Humminbird records position in &#8216;World Mercator Meters&#8217; with no UTM zone (epsg code 3395). Where X = easting, Y = northing, the following formula is used to convert to WGS84:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">latitude</span> <span class="o">=</span> <span class="n">atan</span><span class="p">(</span><span class="n">tan</span><span class="p">(</span><span class="n">atan</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">X</span><span class="o">/</span> <span class="mf">6378388.0</span><span class="p">))</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">1.570796326794897</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0067642927</span><span class="p">)</span> <span class="o">*</span> <span class="mf">57.295779513082302</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">latitude</span> <span class="o">=</span> <span class="n">atan</span><span class="p">(</span><span class="n">tan</span><span class="p">(</span><span class="n">atan</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">X</span><span class="o">/</span> <span class="mf">6378388.0</span><span class="p">))</span> <span class="o">*</span> <span class="mf">2.0</span> <span class="o">-</span> <span class="mf">1.570796326794897</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.0067642927</span><span class="p">)</span> <span class="o">*</span> <span class="mf">57.295779513082302</span>
 
 <span class="n">longitude</span> <span class="o">=</span> <span class="n">Y</span> <span class="o">*</span> <span class="mf">57.295779513082302</span> <span class="o">/</span> <span class="mf">6378388.0</span>
 </pre></div>
@@ -147,11 +147,11 @@ gcc -shared pyread.o -o pyread.so
 <div class="section" id="a-note-on-humminbird-depths">
 <h2>A note on Humminbird depths<a class="headerlink" href="#a-note-on-humminbird-depths" title="Permalink to this headline">¶</a></h2>
 <p>PyHum applies a time-varying-gain to estimated depth soundings:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">tvg</span> <span class="o">=</span> <span class="p">((</span><span class="mf">8.5</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">5</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">76923</span><span class="p">)</span><span class="o">+</span><span class="p">((</span><span class="mf">8.5</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">5</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span><span class="p">))</span><span class="o">*</span><span class="n">c</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">tvg</span> <span class="o">=</span> <span class="p">((</span><span class="mf">8.5</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">5</span><span class="p">)</span><span class="o">+</span><span class="p">(</span><span class="mi">3</span><span class="o">/</span><span class="mi">76923</span><span class="p">)</span><span class="o">+</span><span class="p">((</span><span class="mf">8.5</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">5</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span><span class="p">))</span><span class="o">*</span><span class="n">c</span>
 </pre></div>
 </div>
 <p>where &#8216;c&#8217; is the speed of sound in water. Corrected depth then becomes:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">depth</span> <span class="o">=</span> <span class="n">tan</span><span class="p">(</span> <span class="mf">0.4363323</span> <span class="o">*</span> <span class="n">depth</span><span class="p">)</span><span class="o">-</span> <span class="n">tvg</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">depth</span> <span class="o">=</span> <span class="n">tan</span><span class="p">(</span> <span class="mf">0.4363323</span> <span class="o">*</span> <span class="n">depth</span><span class="p">)</span><span class="o">-</span> <span class="n">tvg</span>
 </pre></div>
 </div>
 </div>
@@ -160,11 +160,11 @@ gcc -shared pyread.o -o pyread.so
 <p>Record structure</p>
 <p>The fast way is to use byte indices in IDX files as the start and stop positions (in bytes) of each ping. PyHum will use this way by default. If the IDX files are absent or corrupted, then PyHum will revert to a slightly slower method that finds the start of each record according to the location of header codes. Records are always preceeded by the string of integers:  [192,222,171,33,128]. The program finds this header code using the Knuth-Morris-Pratt string-matching algorithm.</p>
 <p>Records are composed of &#8216;header&#8217; data (containing positions, etc) followed by &#8216;ping&#8217; data (composed of time-series of echo levels as 8-bit integers). In order to correctly parse out the two, you need to know how many bytes the header contains. Unfortunately, this length varies with instrument. So far, we have encountered data files with between 67 and 72 bytes per header packet. In the pyhum program, you pass it a variable saying what model of humminbird unit the data comes from. It uses this information in the following way:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="k">if</span> <span class="n">model</span><span class="o">==</span><span class="mi">798</span><span class="p">:</span>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">model</span><span class="o">==</span><span class="mi">798</span><span class="p">:</span>
   <span class="n">headbytes</span><span class="o">=</span><span class="mi">72</span>
 <span class="k">elif</span> <span class="n">model</span><span class="o">==</span><span class="mi">1199</span><span class="p">:</span>
   <span class="n">headbytes</span><span class="o">=</span><span class="mi">68</span>
-<span class="k">else</span><span class="p">:</span> <span class="c">#tested so far 998, 1198</span>
+<span class="k">else</span><span class="p">:</span> <span class="c1">#tested so far 998, 1198</span>
   <span class="n">headbytes</span><span class="o">=</span><span class="mi">67</span>
 </pre></div>
 </div>
@@ -304,7 +304,7 @@ gcc -shared pyread.o -o pyread.so
         <li class="right" >
           <a href="modules.html" title="Modules"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.7 documentation</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.14 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

@@ -416,7 +416,9 @@ def gui():
 	#    print "cs2cs arguments: " + str(self.epsg.get())                
 	#    print "chunk argument: " + str(self.chunk)                
 	    # do stuff here
-	    PyHum.read(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), str(self.epsg.get()), self.cvar.get(), self.dvar.get(), self.doplot, self.tvar.get(), self.bedpick, self.flipvar.get(), self.model, self.calcheadvar.get(), self.filtheadvar.get(), self.cog, self.chunk)
+	    PyHum.read(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), str(self.epsg.get()), self.cvar.get(), self.dvar.get(), self.doplot, self.tvar.get(), self.bedpick, self.flipvar.get(), self.model, self.calcheadvar.get(), self.filtheadvar.get(), self.chunk)
+
+
 	    self.update()
 	    tkMessageBox.showinfo("Done!", "Read module finished") 
 
@@ -700,6 +702,7 @@ def gui():
 	#    print "correct_withwater: " + str(self.watervar.get())                 
 	    # do stuff here
 	    PyHum.correct(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.Wvar.get(), self.doplot, self.dofiltvar.get(), self.watervar.get(), self.Pvar.get(), self.Tvar.get(), self.Svar.get(), self.sedfilename.get())    
+
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Correct module finished") 
 	    
@@ -1200,6 +1203,7 @@ def gui():
 		             
 	    # do stuff here
 	    PyHum.texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.Winvar.get(), self.shiftvar.get(), self.doplot, self.densvar.get(), self.ncvar.get(), self.maxscalevar.get(), self.notesvar.get())
+
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Texture module finished") 
 	    
@@ -1363,6 +1367,7 @@ def gui():
 		             
 	    # do stuff here
 	    PyHum.map_texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(),self.resvar.get(), self.mode, self.nnvar.get(), self.nstdvar.get())  #self.infvar.get(),  
+
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Map texture module finished") 
 		
@@ -1527,7 +1532,8 @@ def gui():
 	    print "beam angle: " + str(self.BAvar.get())            
 	    print "number of acoustic classes: " + str(self.Nvar.get())            
 	    # do stuff here
-	    PyHum.e1e2(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(), self.Pvar.get(), self.Tvar.get(), self.Svar.get(), self.BAvar.get(), self.BFvar.get(), self.integ, self.Nvar.get(), self.doplot)       
+	    PyHum.e1e2(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(), self.Pvar.get(), self.Tvar.get(), self.Svar.get(), self.BAvar.get(), self.BFvar.get(), self.integ, self.Nvar.get(), self.doplot)    
+   
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Bed class finished") 
 		

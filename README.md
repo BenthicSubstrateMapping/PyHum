@@ -269,9 +269,8 @@ which carries out the following operations:
    draft = 0.3 # draft in metres
    flip_lr = 1 # flip port and starboard
    model = 998 # humminbird model
-   cog = 1 # GPS course-over-ground used for heading
-   calc_bearing = 0 #no
-   filt_bearing = 0 #no
+   calc_bearing = 1 #1=yes
+   filt_bearing = 1 #1=yes
    chunk = 'd100' # distance, 100m
    #chunk = 'p1000' # pings, 1000
    #chunk = 'h10' # heading deviation, 10 deg
@@ -286,9 +285,9 @@ which carries out the following operations:
 
    # for shadow removal
    shadowmask = 0 #automatic shadow removal
+   win = 31
 
    # for texture calcs
-   win = 100 # pixel window
    shift = 10 # pixel shift
    density =win/2 # win/2 
    numclasses = 4 # number of discrete classes for contouring and k-means
@@ -296,15 +295,15 @@ which carries out the following operations:
    notes = 4 # Notes per octave (for wavelet analysis)
 
    # for mapping
-   res = 99 # grid resolution in metres
+   res = 0.25 #99 # grid resolution in metres
    # if res==99, the program will automatically calc res from the spatial res of the scans
    mode = 1 # gridding mode (simple nearest neighbour)
    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
    #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
-   dowrite = 0 #disable writing of point cloud data to file
+   use_uncorrected = 0
 
    nn = 64 #number of nearest neighbours for gridding (used if mode > 1)
-   influence = 1 #Radius of influence used in gridding. Cut off distance in meters 
+   ##influence = 1 #Radius of influence used in gridding. Cut off distance in meters 
    numstdevs = 5 #Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept 
 
    # for downward-looking echosounder echogram (e1-e2) analysis
@@ -314,7 +313,7 @@ which carries out the following operations:
    numclusters = 3 # number of acoustic classes to group observations
 
    ## read data in SON files into PyHum memory mapped format (.dat)
-   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
+   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) 
 
    ## correct scans and remove water column
    PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
@@ -322,17 +321,19 @@ which carries out the following operations:
    ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
+   win = 100 # pixel window
+   
    ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
    ## grid and map the scans
-   PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, influence, numstdevs)
+   PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
 
    res = 1 # grid resolution in metres
    numstdevs = 5
    
    ## grid and map the texture lengthscale maps
-   PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, influence, numstdevs)
+   PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs)
 
    ## calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
@@ -440,7 +441,6 @@ if __name__ == '__main__':
     draft = 0.3 # draft in metres
     flip_lr = 1 # flip port and starboard
     model = 998 # humminbird model
-    cog = 1 # GPS course-over-ground used for heading
     calc_bearing = 0 #no
     filt_bearing = 0 #no
     chunk = 'd100' # distance, 100m
@@ -466,13 +466,13 @@ if __name__ == '__main__':
     #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
     dowrite = 0 #disable writing of point cloud data to file
 
-    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, cog, chunk)
+    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk)
 
     PyHum.correct(humfile, sonpath, maxW, doplot)
 
-    PyHum.rmshadows(humfile, sonpath, win, shadowmask, kvals, doplot)
+    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
-    PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, influence, numstdevs)
+    PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
 ```
 
 or from within ipython (with a GUI prompt to navigate to the files):
