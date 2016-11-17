@@ -421,7 +421,7 @@ def gui():
 
 
 	    self.update()
-	    tkMessageBox.showinfo("Done!", "Read module finished") 
+	    #tkMessageBox.showinfo("Done!", "Read module finished") 
 
 	#=======================        
 	def _get_DAT(master, v):
@@ -935,12 +935,12 @@ def gui():
 
 	#=======================        
 	# epsg
-	self.epsg = Tkinter.StringVar()
-	self.epsg_entry = Tkinter.Entry(map_frame, width = 30, textvariable = self.epsg)
-	self.epsg_entry.grid(column = 1, row = 2, pady=(2,4)) #, columnspan = 2,sticky = 'EW')
-	self.epsg_entry.bind("<Return>", lambda epsg=self.epsg.get(): _OnPressEnter1(self))
-	self.epsg.set(u"epsg:26949")       
-	self.epsg_entry.configure(background='IndianRed1', fg="black")
+	self.epsg2 = Tkinter.StringVar()
+	self.epsg2_entry = Tkinter.Entry(map_frame, width = 30, textvariable = self.epsg2)
+	self.epsg2_entry.grid(column = 1, row = 2, pady=(2,4)) #, columnspan = 2,sticky = 'EW')
+	self.epsg2_entry.bind("<Return>", lambda epsg=self.epsg2.get(): _OnPressEnter1(self))
+	self.epsg2.set(u"epsg:26949")       
+	self.epsg2_entry.configure(background='IndianRed1', fg="black")
 
 	#=======================
 	# res
@@ -999,10 +999,10 @@ def gui():
 	    """
 	    sets epsg code on Enter press
 	    """
-	    self.epsg.set( self.epsg.get() )
-	    self.epsg_entry.focus_set()
-	    self.epsg_entry.selection_range(0, Tkinter.END)
-	    print 'epsg code set to %s ' % (str(self.epsg.get()))
+	    self.epsg2.set( self.epsg2.get() )
+	    self.epsg2_entry.focus_set()
+	    self.epsg2_entry.selection_range(0, Tkinter.END)
+	    print 'epsg code set to %s ' % (str(self.epsg2.get()))
 	#    if int(self.c.get())>1500:
 	#       tkMessageBox.showinfo("High value", "Consider 1450 for freshwater and 1500 for salt water")
 
@@ -1015,7 +1015,7 @@ def gui():
 	    print "humfile: " + self.DATfilename.get()
 	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
 	    print "mode: " + str(self.mode)        
-	    print "cs2cs arguments: " + str(self.epsg.get())   
+	    print "cs2cs arguments: " + str(self.epsg2.get())   
 	    print "resolution: " + str(self.resvar.get())
 	    print "max. number of nearest neighbours: " + str(self.nnvar.get()) 
 	    #print "gridding influence [m]: " + str(self.infvar.get()) 
@@ -1025,7 +1025,7 @@ def gui():
 	    if self.resvar.get()==0:
 	       self.resvar=99                 
 	    # do stuff here
-	    PyHum.map(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(), self.resvar.get(), self.mode, self.nnvar.get(), self.nstdvar.get()) #self.infvar.get(), self.dowritevar.get(), 
+	    PyHum.map(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg2.get(), self.resvar.get(), self.mode, self.nnvar.get(), self.nstdvar.get()) #self.infvar.get(), self.dowritevar.get(), 
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Map module finished") 
 	    
@@ -1304,12 +1304,12 @@ def gui():
 
 	#=======================        
 	# epsg
-	self.epsg = Tkinter.StringVar()
-	self.epsg_entry = Tkinter.Entry(map_texture_frame, width = 30, textvariable = self.epsg)
-	self.epsg_entry.grid(column = 1, row = 2, pady=(2,4)) #, columnspan = 2,sticky = 'EW')
-	self.epsg_entry.bind("<Return>", lambda epsg=self.epsg.get(): _OnPressEnter1(self))
-	self.epsg.set(u"epsg:26949")       
-	self.epsg_entry.configure(background='gold2', fg="black")
+	self.epsg3 = Tkinter.StringVar()
+	self.epsg3_entry = Tkinter.Entry(map_texture_frame, width = 30, textvariable = self.epsg3)
+	self.epsg3_entry.grid(column = 1, row = 2, pady=(2,4)) #, columnspan = 2,sticky = 'EW')
+	self.epsg3_entry.bind("<Return>", lambda epsg=self.epsg3.get(): _OnPressEnter1(self))
+	self.epsg3.set(u"epsg:26949")       
+	self.epsg3_entry.configure(background='gold2', fg="black")
 
 	#=======================
 	# res
@@ -1362,14 +1362,14 @@ def gui():
 	    print "humfile: " + self.DATfilename.get()
 	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
 	    print "mode: " + str(self.mode)        
-	    print "cs2cs arguments: " + str(self.epsg.get())   
+	    print "cs2cs arguments: " + str(self.epsg3.get())   
 	    print "resolution: " + str(self.resvar2.get())
 	    print "max. number of nearest neighbours: " + str(self.nnvar.get()) 
 	    #print "gridding influence [m]: " + str(self.infvar.get()) 
 	    print "number std. dev. to accept: " + str(self.nstdvar.get())             
 		             
 	    # do stuff here
-	    PyHum.map_texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(),self.resvar2.get(), self.mode, self.nnvar.get(), self.nstdvar.get())  #self.infvar.get(),  
+	    PyHum.map_texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg3.get(),self.resvar2.get(), self.mode, self.nnvar.get(), self.nstdvar.get())  #self.infvar.get(),  
 
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Map texture module finished") 
@@ -1504,12 +1504,12 @@ def gui():
 
 	#=======================        
 	# epsg
-	self.epsg = Tkinter.StringVar()
-	self.epsg_entry = Tkinter.Entry(e1e2_frame, width = 30, textvariable = self.epsg)
-	self.epsg_entry.grid(column = 0, row = 5, pady=(2,4)) #, columnspan = 2,sticky = 'EW')
-	self.epsg_entry.bind("<Return>", lambda epsg=self.epsg.get(): _OnPressEnter1(self))
-	self.epsg.set(u"epsg:26949")       
-	self.epsg_entry.configure(background='SlateGray1', fg="black")
+	self.epsg4 = Tkinter.StringVar()
+	self.epsg4_entry = Tkinter.Entry(e1e2_frame, width = 30, textvariable = self.epsg4)
+	self.epsg4_entry.grid(column = 0, row = 5, pady=(2,4)) #, columnspan = 2,sticky = 'EW')
+	self.epsg4_entry.bind("<Return>", lambda epsg=self.epsg4.get(): _OnPressEnter1(self))
+	self.epsg4.set(u"epsg:26949")       
+	self.epsg4_entry.configure(background='SlateGray1', fg="black")
 
 	#=======================
 	# process button
@@ -1535,7 +1535,7 @@ def gui():
 	    print "beam angle: " + str(self.BAvar.get())            
 	    print "number of acoustic classes: " + str(self.Nvar.get())            
 	    # do stuff here
-	    PyHum.e1e2(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(), self.Pvar.get(), self.Tvar.get(), self.Svar.get(), self.BAvar.get(), self.BFvar.get(), self.integ, self.Nvar.get(), self.doplot)    
+	    PyHum.e1e2(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg4.get(), self.Pvar.get(), self.Tvar.get(), self.Svar.get(), self.BAvar.get(), self.BFvar.get(), self.integ, self.Nvar.get(), self.doplot)    
 
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Bed class finished") 
