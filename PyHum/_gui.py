@@ -945,7 +945,7 @@ def gui():
 	#=======================
 	# res
 	self.resvar = Tkinter.DoubleVar()
-	resscale = Tkinter.Scale( map_frame, variable = self.resvar, from_=0, to=1, resolution=0.01, tickinterval=0.2, label = 'Resolution [m] 0 = auto' )
+	resscale = Tkinter.Scale( map_frame, variable = self.resvar, from_=0, to=2, resolution=0.01, tickinterval=0.2, label = 'Resolution [m] 0 = auto' )
 	resscale.set(0)
 	resscale.grid(row=3, column=0,  pady=(2,4))
 	resscale.configure(background='IndianRed1', fg="black")
@@ -1018,7 +1018,7 @@ def gui():
 	    print "cs2cs arguments: " + str(self.epsg.get())   
 	    print "resolution: " + str(self.resvar.get())
 	    print "max. number of nearest neighbours: " + str(self.nnvar.get()) 
-	    print "gridding influence [m]: " + str(self.infvar.get()) 
+	    #print "gridding influence [m]: " + str(self.infvar.get()) 
 	    print "number std. dev. to accept: " + str(self.nstdvar.get())             
 	    #print "Write point cloud to file: " + str(self.dowritevar.get())             
 		   
@@ -1313,12 +1313,12 @@ def gui():
 
 	#=======================
 	# res
-	self.resvar = Tkinter.DoubleVar()
+	self.resvar2 = Tkinter.DoubleVar()
 	#resscale = Tkinter.Scale( map_texture_frame, variable = self.resvar, from_=0.2, to=10, resolution=0.01, tickinterval=1, label = 'Resolution [m]' )
-	resscale = Tkinter.Scale( map_texture_frame, variable = self.resvar, from_=0, to=10, resolution=0.1, tickinterval=0.25, label = 'Resolution [m] 0 = auto' )
-	resscale.set(0.5)
-	resscale.grid(row=3, column=0,  pady=(2,4))
-	resscale.configure(background='gold2', fg="black")
+	resscale2 = Tkinter.Scale( map_texture_frame, variable = self.resvar2, from_=0, to=10, resolution=0.1, tickinterval=0.5, label = 'Resolution [m] 0 = auto' )
+	resscale2.set(0.25)
+	resscale2.grid(row=3, column=0,  pady=(2,4))
+	resscale2.configure(background='gold2', fg="black")
 
 	#=======================
 	# nn
@@ -1363,13 +1363,13 @@ def gui():
 	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
 	    print "mode: " + str(self.mode)        
 	    print "cs2cs arguments: " + str(self.epsg.get())   
-	    print "resolution: " + str(self.resvar.get())
+	    print "resolution: " + str(self.resvar2.get())
 	    print "max. number of nearest neighbours: " + str(self.nnvar.get()) 
 	    #print "gridding influence [m]: " + str(self.infvar.get()) 
 	    print "number std. dev. to accept: " + str(self.nstdvar.get())             
 		             
 	    # do stuff here
-	    PyHum.map_texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(),self.resvar.get(), self.mode, self.nnvar.get(), self.nstdvar.get())  #self.infvar.get(),  
+	    PyHum.map_texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(),self.resvar2.get(), self.mode, self.nnvar.get(), self.nstdvar.get())  #self.infvar.get(),  
 
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Map texture module finished") 
