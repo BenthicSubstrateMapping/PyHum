@@ -1134,11 +1134,11 @@ def gui():
 
 	#=======================
 	# window size
-	self.Winvar = Tkinter.DoubleVar()
-	Winscale = Tkinter.Scale( texture_frame, variable = self.Winvar, from_=5, to=500, resolution=1, tickinterval=50, label = 'Window Size [pixels]' )
-	Winscale.set(100)
-	Winscale.grid(row=2, column=0,  pady=(2,4))
-	Winscale.configure(background='SeaGreen1', fg="black")
+	self.Winvar2 = Tkinter.DoubleVar()
+	Winscale2 = Tkinter.Scale( texture_frame, variable = self.Winvar2, from_=5, to=500, resolution=1, tickinterval=50, label = 'Window Size [pixels]' )
+	Winscale2.set(100)
+	Winscale2.grid(row=2, column=0,  pady=(2,4))
+	Winscale2.configure(background='SeaGreen1', fg="black")
 
 	#=======================
 	# shift size
@@ -1197,7 +1197,7 @@ def gui():
 	    print 'Processing ...'   
 	    print "humfile: " + self.DATfilename.get()
 	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	    print "window size [pixels]: " + str(self.Winvar.get())        
+	    print "window size [pixels]: " + str(self.Winvar2.get())        
 	    print "shift size [pixels]: " + str(self.shiftvar.get())        
 	    print "density [pixels]: " + str(self.densvar.get())
 	    print "maxscale: " + str(self.maxscalevar.get())
@@ -1205,7 +1205,7 @@ def gui():
 	    print "number of texture classes: " + str(self.ncvar.get())
 		             
 	    # do stuff here
-	    PyHum.texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.Winvar.get(), self.shiftvar.get(), self.doplot, self.densvar.get(), self.ncvar.get(), self.maxscalevar.get(), self.notesvar.get())
+	    PyHum.texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.Winvar2.get(), self.shiftvar.get(), self.doplot, self.densvar.get(), self.ncvar.get(), self.maxscalevar.get(), self.notesvar.get())
 
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Texture module finished") 
