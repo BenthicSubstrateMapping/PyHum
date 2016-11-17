@@ -942,7 +942,7 @@ def gui():
 	#=======================
 	# res
 	self.resvar = Tkinter.DoubleVar()
-	resscale = Tkinter.Scale( map_frame, variable = self.resvar, from_=0, to=2, resolution=0.01, tickinterval=0.25, label = 'Resolution [m] 0 = auto' )
+	resscale = Tkinter.Scale( map_frame, variable = self.resvar, from_=0, to=1, resolution=0.01, tickinterval=0.2, label = 'Resolution [m] 0 = auto' )
 	resscale.set(0)
 	resscale.grid(row=3, column=0,  pady=(2,4))
 	resscale.configure(background='IndianRed1', fg="black")
@@ -973,11 +973,11 @@ def gui():
 
 	#=======================
 	# check button for dowrite       
-	self.dowritevar = Tkinter.IntVar()      
-	dowrite_entry = Tkinter.Checkbutton(map_frame, text='Write Point Cloud', variable=self.dowritevar)
-	dowrite_entry.config(indicatoron=1, bd=4, width=12) 
-	dowrite_entry.grid(column = 0, row = 5, pady=(2,4))
-	dowrite_entry.configure(background='IndianRed1', fg="black")
+#	self.dowritevar = Tkinter.IntVar()      
+#	dowrite_entry = Tkinter.Checkbutton(map_frame, text='Write Point Cloud', variable=self.dowritevar)
+#	dowrite_entry.config(indicatoron=1, bd=4, width=12) 
+#	dowrite_entry.grid(column = 0, row = 5, pady=(2,4))
+#	dowrite_entry.configure(background='IndianRed1', fg="black")
 
 	#=======================
 	# process button
@@ -1022,7 +1022,7 @@ def gui():
 	    if self.resvar.get()==0:
 	       self.resvar=99                 
 	    # do stuff here
-	    PyHum.map(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(), self.resvar.get(), self.dowritevar.get(), self.mode, self.nnvar.get(), self.nstdvar.get()) #self.infvar.get(),
+	    PyHum.map(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(), self.resvar.get(), self.mode, self.nnvar.get(), self.nstdvar.get()) #self.infvar.get(), self.dowritevar.get(), 
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Map module finished") 
 	    
@@ -1533,7 +1533,7 @@ def gui():
 	    print "number of acoustic classes: " + str(self.Nvar.get())            
 	    # do stuff here
 	    PyHum.e1e2(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(), self.Pvar.get(), self.Tvar.get(), self.Svar.get(), self.BAvar.get(), self.BFvar.get(), self.integ, self.Nvar.get(), self.doplot)    
-   
+
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Bed class finished") 
 		

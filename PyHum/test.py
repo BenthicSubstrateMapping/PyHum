@@ -154,11 +154,12 @@ def dotest():
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
    
    #res = 0
-   #nn = 5
-   #noisefloor = 10
+   #nn = 5 # noise threshold in dB W
+   #noisefloor = 10 # noise threshold in dB W
+   #weight = 1 ##based on grazing angle and inverse distance weighting
    
    ## create mosaic out of all chunks with weighting according to distance from nadir, grazing angle, or both
-   #PyHum.mosaic(humfile, sonpath, cs2cs_args, res, nn, noisefloor)
+   #PyHum.mosaic(humfile, sonpath, cs2cs_args, res, nn, noisefloor, weight)
 
 if __name__ == '__main__':
    dotest()
