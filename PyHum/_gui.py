@@ -402,19 +402,20 @@ def gui():
 	    
 	    # build error checking into here
 	    print 'Processing ...'
-	#    print "filt_head: " + str(self.filtheadvar.get())
-	#    print "calc_head: " + str(self.calcheadvar.get())    
-	#    print "humfile: " + self.DATfilename.get()
-	#    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	#    print "model: " + str(self.model)
-	#    print "bedpick: " + str(self.bedpick)
-	#    print "flip_lr: " + str(self.flipvar.get())
-	#    print "c: " + str(self.cvar.get())    
-	#    print "f: " + str(self.fvar.get())    
-	#    print "t: " + str(self.tvar.get())    
-	#    print "draft: " + str(self.dvar.get())                
-	#    print "cs2cs arguments: " + str(self.epsg.get())                
-	#    print "chunk argument: " + str(self.chunk)                
+	    print "filt_head: " + str(self.filtheadvar.get())
+	    print "calc_head: " + str(self.calcheadvar.get())    
+	    print "humfile: " + self.DATfilename.get()
+	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
+	    print "model: " + str(self.model)
+	    print "bedpick: " + str(self.bedpick)
+	    print "flip_lr: " + str(self.flipvar.get())
+	    print "c: " + str(self.cvar.get())    
+	    #print "f: " + str(self.fvar.get())    
+	    print "t: " + str(self.tvar.get())    
+	    print "draft: " + str(self.dvar.get())                
+	    print "cs2cs arguments: " + str(self.epsg.get())                
+	    print "chunk argument: " + str(self.chunk)     
+           
 	    # do stuff here
 	    PyHum.read(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), str(self.epsg.get()), self.cvar.get(), self.dvar.get(), self.doplot, self.tvar.get(), self.bedpick, self.flipvar.get(), self.model, self.calcheadvar.get(), self.filtheadvar.get(), self.chunk)
 
@@ -692,14 +693,15 @@ def gui():
 	    #dofilt = 0 # 1 = apply a phase preserving filter (WARNING!! takes a very long time for large scans)    
 	    # build error checking into here
 	    print 'Processing ...'   
-	#    print "humfile: " + self.DATfilename.get()
-	#    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	#    print "max wattage: " + str(self.Wvar.get())        
-	#    print "pH: " + str(self.Pvar.get())    
-	#    print "temperature: " + str(self.Tvar.get())    
-	#    print "salinity: " + str(self.Svar.get())    
-	#    print "dofilt: " + str(self.dofiltvar.get())
-	#    print "correct_withwater: " + str(self.watervar.get())                 
+	    print "humfile: " + self.DATfilename.get()
+	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
+	    print "max wattage: " + str(self.Wvar.get())        
+	    print "pH: " + str(self.Pvar.get())    
+	    print "temperature: " + str(self.Tvar.get())    
+	    print "salinity: " + str(self.Svar.get())    
+	    print "dofilt: " + str(self.dofiltvar.get())
+	    print "correct_withwater: " + str(self.watervar.get())   
+              
 	    # do stuff here
 	    PyHum.correct(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.Wvar.get(), self.doplot, self.dofiltvar.get(), self.watervar.get(), self.Pvar.get(), self.Tvar.get(), self.Svar.get(), self.sedfilename.get())    
 
@@ -831,10 +833,11 @@ def gui():
 
 	    # build error checking into here
 	    print 'Processing ...'   
-	#    print "humfile: " + self.DATfilename.get()
-	#    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	#    print "window size: " + str(self.Winvar.get())        
-	#    print "manually mask: " + str(self.manmaskvar.get())                    
+	    print "humfile: " + self.DATfilename.get()
+	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
+	    print "window size: " + str(self.Winvar.get())        
+	    print "manually mask: " + str(self.manmaskvar.get())   
+                 
 	    # do stuff here
 	    PyHum.rmshadows(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.Winvar.get(), self.manmaskvar.get(), self.doplot)  
 	    self.update() 
@@ -1009,15 +1012,15 @@ def gui():
 	    # function to invoke PyHum.map
 	    # build error checking into here
 	    print 'Processing ...'   
-	#    print "humfile: " + self.DATfilename.get()
-	#    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	#    print "mode: " + str(self.mode)        
-	#    print "cs2cs arguments: " + str(self.epsg.get())   
-	#    print "resolution: " + str(self.resvar.get())
-	#    print "max. number of nearest neighbours: " + str(self.nnvar.get()) 
-	#    print "gridding influence [m]: " + str(self.infvar.get()) 
-	#    print "number std. dev. to accept: " + str(self.nstdvar.get())             
-	#    print "Write point cloud to file: " + str(self.dowritevar.get())             
+	    print "humfile: " + self.DATfilename.get()
+	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
+	    print "mode: " + str(self.mode)        
+	    print "cs2cs arguments: " + str(self.epsg.get())   
+	    print "resolution: " + str(self.resvar.get())
+	    print "max. number of nearest neighbours: " + str(self.nnvar.get()) 
+	    print "gridding influence [m]: " + str(self.infvar.get()) 
+	    print "number std. dev. to accept: " + str(self.nstdvar.get())             
+	    #print "Write point cloud to file: " + str(self.dowritevar.get())             
 		   
 	    if self.resvar.get()==0:
 	       self.resvar=99                 
@@ -1192,14 +1195,14 @@ def gui():
 	    # function to invoke PyHum.texture
 	    # build error checking into here
 	    print 'Processing ...'   
-	#    print "humfile: " + self.DATfilename.get()
-	#    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	#    print "window size [pixels]: " + str(self.Winvar.get())        
-	#    print "shift size [pixels]: " + str(self.shiftvar.get())        
-	#    print "density [pixels]: " + str(self.densvar.get())
-	#    print "maxscale: " + str(self.maxscalevar.get())
-	#    print "notes: " + str(self.notesvar.get())
-	#    print "number of texture classes: " + str(self.ncvar.get())
+	    print "humfile: " + self.DATfilename.get()
+	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
+	    print "window size [pixels]: " + str(self.Winvar.get())        
+	    print "shift size [pixels]: " + str(self.shiftvar.get())        
+	    print "density [pixels]: " + str(self.densvar.get())
+	    print "maxscale: " + str(self.maxscalevar.get())
+	    print "notes: " + str(self.notesvar.get())
+	    print "number of texture classes: " + str(self.ncvar.get())
 		             
 	    # do stuff here
 	    PyHum.texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.Winvar.get(), self.shiftvar.get(), self.doplot, self.densvar.get(), self.ncvar.get(), self.maxscalevar.get(), self.notesvar.get())
@@ -1356,14 +1359,14 @@ def gui():
 	    # function to invoke PyHum.map_texture
 	    # build error checking into here
 	    print 'Processing ...'   
-	#    print "humfile: " + self.DATfilename.get()
-	#    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	#    print "mode: " + str(self.mode)        
-	#    print "cs2cs arguments: " + str(self.epsg.get())   
-	#    print "resolution: " + str(self.resvar.get())
-	#    print "max. number of nearest neighbours: " + str(self.nnvar.get()) 
-	#    print "gridding influence [m]: " + str(self.infvar.get()) 
-	#    print "number std. dev. to accept: " + str(self.nstdvar.get())             
+	    print "humfile: " + self.DATfilename.get()
+	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
+	    print "mode: " + str(self.mode)        
+	    print "cs2cs arguments: " + str(self.epsg.get())   
+	    print "resolution: " + str(self.resvar.get())
+	    print "max. number of nearest neighbours: " + str(self.nnvar.get()) 
+	    #print "gridding influence [m]: " + str(self.infvar.get()) 
+	    print "number std. dev. to accept: " + str(self.nstdvar.get())             
 		             
 	    # do stuff here
 	    PyHum.map_texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg.get(),self.resvar.get(), self.mode, self.nnvar.get(), self.nstdvar.get())  #self.infvar.get(),  

@@ -66,7 +66,7 @@ from joblib import Parallel, delayed, cpu_count
 import pyproj
 
 import PyHum.replace_nans as replace_nans
-import PyHum.write as write
+#import PyHum.write as write
 import PyHum.getxy as getxy
 
 import PyHum.io as io
@@ -553,8 +553,10 @@ def write_points(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args,
          
    ## write raw bs to file
    outfile = os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc'))
-   write.txtwrite( outfile, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()), humutils.ascol(D.flatten()), humutils.ascol(R.flatten()), humutils.ascol(h.flatten()), humutils.ascol(t.flatten())  )) )
+   ##write.txtwrite( outfile, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()), humutils.ascol(D.flatten()), humutils.ascol(R.flatten()), humutils.ascol(h.flatten()), humutils.ascol(t.flatten())  )) )
       
+   np.savetxt(outfile, np.hstack((humutils.ascol(X.flatten()),humutils.ascol(Y.flatten()), humutils.ascol(merge.flatten()), humutils.ascol(D.flatten()), humutils.ascol(R.flatten()), humutils.ascol(h.flatten()), humutils.ascol(t.flatten()) )) , fmt="%8.6f %8.6f %8.6f %8.6f %8.6f %8.6f %8.6f") 
+
    del D, R, h, t, X, Y, merge, res_grid
 
 # =========================================================
