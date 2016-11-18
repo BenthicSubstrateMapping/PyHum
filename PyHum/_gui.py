@@ -314,12 +314,12 @@ def gui():
 
 	#=======================        
 	# epsg
-	self.epsg = Tkinter.StringVar()
-	self.epsg_entry = Tkinter.Entry(read_frame, width = 30, textvariable = self.epsg)
-	self.epsg_entry.grid(column = 0, row = 5, pady=(2,4)) #, columnspan = 2,sticky = 'EW')
-	self.epsg_entry.bind("<Return>", lambda epsg=self.epsg.get(): _OnPressEnter1(self))
-	self.epsg.set(u"epsg:26949")       
-	self.epsg_entry.configure(background='thistle3', fg="black")
+	self.epsg1 = Tkinter.StringVar()
+	self.epsg1_entry = Tkinter.Entry(read_frame, width = 30, textvariable = self.epsg1)
+	self.epsg1_entry.grid(column = 0, row = 5, pady=(2,4)) #, columnspan = 2,sticky = 'EW')
+	self.epsg1_entry.bind("<Return>", lambda epsg=self.epsg1.get(): _OnPressEnter1(self))
+	self.epsg1.set(u"epsg:26949")       
+	self.epsg1_entry.configure(background='thistle3', fg="black")
 
 	#=======================
 	#menu for chunk
@@ -389,10 +389,10 @@ def gui():
 	    """
 	    sets epsg code on Enter press
 	    """
-	    self.epsg.set( self.epsg.get() )
-	    self.epsg_entry.focus_set()
-	    self.epsg_entry.selection_range(0, Tkinter.END)
-	    print 'epsg code set to %s ' % (str(self.epsg.get()))
+	    self.epsg1.set( self.epsg1.get() )
+	    self.epsg1_entry.focus_set()
+	    self.epsg1_entry.selection_range(0, Tkinter.END)
+	    print 'epsg code set to %s ' % (str(self.epsg1.get()))
 	#    if int(self.c.get())>1500:
 	#       tkMessageBox.showinfo("High value", "Consider 1450 for freshwater and 1500 for salt water")
 
@@ -413,11 +413,11 @@ def gui():
 	    #print "f: " + str(self.fvar.get())    
 	    print "t: " + str(self.tvar.get())    
 	    print "draft: " + str(self.dvar.get())                
-	    print "cs2cs arguments: " + str(self.epsg.get())                
+	    print "cs2cs arguments: " + str(self.epsg1.get())                
 	    print "chunk argument: " + str(self.chunk)     
            
 	    # do stuff here
-	    PyHum.read(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), str(self.epsg.get()), self.cvar.get(), self.dvar.get(), self.doplot, self.tvar.get(), self.bedpick, self.flipvar.get(), self.model, self.calcheadvar.get(), self.filtheadvar.get(), self.chunk)
+	    PyHum.read(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), str(self.epsg1.get()), self.cvar.get(), self.dvar.get(), self.doplot, self.tvar.get(), self.bedpick, self.flipvar.get(), self.model, self.calcheadvar.get(), self.filtheadvar.get(), self.chunk)
 
 
 	    self.update()
@@ -938,8 +938,8 @@ def gui():
 	self.epsg2 = Tkinter.StringVar()
 	self.epsg2_entry = Tkinter.Entry(map_frame, width = 30, textvariable = self.epsg2)
 	self.epsg2_entry.grid(column = 1, row = 2, pady=(2,4)) #, columnspan = 2,sticky = 'EW')
-	self.epsg2_entry.bind("<Return>", lambda epsg=self.epsg2.get(): _OnPressEnter1(self))
-	self.epsg2.set(u"epsg:26949")       
+	self.epsg2_entry.bind("<Return>", lambda epsg=self.epsg2.get(): _OnPressEnter2(self))
+	self.epsg2.set(self.epsg1.get())#u"epsg:26949")       
 	self.epsg2_entry.configure(background='IndianRed1', fg="black")
 
 	#=======================
@@ -995,7 +995,7 @@ def gui():
 
 	#=======================
 	# must press enter to set density
-	def _OnPressEnter1(self):
+	def _OnPressEnter2(self):
 	    """
 	    sets epsg code on Enter press
 	    """
@@ -1307,8 +1307,8 @@ def gui():
 	self.epsg3 = Tkinter.StringVar()
 	self.epsg3_entry = Tkinter.Entry(map_texture_frame, width = 30, textvariable = self.epsg3)
 	self.epsg3_entry.grid(column = 1, row = 2, pady=(2,4)) #, columnspan = 2,sticky = 'EW')
-	self.epsg3_entry.bind("<Return>", lambda epsg=self.epsg3.get(): _OnPressEnter1(self))
-	self.epsg3.set(u"epsg:26949")       
+	self.epsg3_entry.bind("<Return>", lambda epsg=self.epsg3.get(): _OnPressEnter3(self))
+	self.epsg3.set(self.epsg1.get())#u"epsg:26949")       
 	self.epsg3_entry.configure(background='gold2', fg="black")
 
 	#=======================
@@ -1353,6 +1353,15 @@ def gui():
 
 	#==============================================================
 	#========START functions for map_texture tab         
+
+	def _OnPressEnter3(self):
+	    """
+	    sets epsg code on Enter press
+	    """
+	    self.epsg3.set( self.epsg3.get() )
+	    self.epsg3_entry.focus_set()
+	    self.epsg3_entry.selection_range(0, Tkinter.END)
+	    print 'epsg code set to %s ' % (str(self.epsg3.get()))
 
 	#=======================
 	def _proc6(self):
@@ -1507,8 +1516,8 @@ def gui():
 	self.epsg4 = Tkinter.StringVar()
 	self.epsg4_entry = Tkinter.Entry(e1e2_frame, width = 30, textvariable = self.epsg4)
 	self.epsg4_entry.grid(column = 0, row = 5, pady=(2,4)) #, columnspan = 2,sticky = 'EW')
-	self.epsg4_entry.bind("<Return>", lambda epsg=self.epsg4.get(): _OnPressEnter1(self))
-	self.epsg4.set(u"epsg:26949")       
+	self.epsg4_entry.bind("<Return>", lambda epsg=self.epsg4.get(): _OnPressEnter4(self))
+	self.epsg4.set(self.epsg1.get()) #u"epsg:26949")       
 	self.epsg4_entry.configure(background='SlateGray1', fg="black")
 
 	#=======================
@@ -1520,6 +1529,15 @@ def gui():
 
 	#==============================================================
 	#========START functions for e1e2 tab         
+
+	def _OnPressEnter4(self):
+	    """
+	    sets epsg code on Enter press
+	    """
+	    self.epsg4.set( self.epsg4.get() )
+	    self.epsg4_entry.focus_set()
+	    self.epsg4_entry.selection_range(0, Tkinter.END)
+	    print 'epsg code set to %s ' % (str(self.epsg4.get()))
 
 	#=======================
 	def _proc7(self):
