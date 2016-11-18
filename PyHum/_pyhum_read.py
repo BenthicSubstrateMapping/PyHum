@@ -53,6 +53,8 @@
 # =========================================================
 # ====================== libraries ======================
 # =========================================================
+import matplotlib
+matplotlib.use('agg') 
 
 #operational
 import glob, sys #, getopt
@@ -88,8 +90,6 @@ except:
 
 
 #plotting
-import matplotlib
-matplotlib.use('agg') 
 import matplotlib.pyplot as plt
 
 import warnings
