@@ -89,6 +89,8 @@ except:
 
 #plotting
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('agg') 
 
 import warnings
 warnings.filterwarnings("ignore")

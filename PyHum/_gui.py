@@ -419,7 +419,6 @@ def gui():
 	    # do stuff here
 	    PyHum.read(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), str(self.epsg1.get()), self.cvar.get(), self.dvar.get(), self.doplot, self.tvar.get(), self.bedpick, self.flipvar.get(), self.model, self.calcheadvar.get(), self.filtheadvar.get(), self.chunk)
 
-
 	    self.update()
 	    tkMessageBox.showinfo("Done!", "Read module finished") 
 
