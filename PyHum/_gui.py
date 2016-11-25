@@ -417,7 +417,7 @@ def gui():
 	    print "chunk argument: " + str(self.chunk)     
            
 	    # do stuff here
-	    PyHum.read(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), str(self.epsg1.get()), self.cvar.get(), self.dvar.get(), self.doplot, self.tvar.get(), self.bedpick, self.flipvar.get(), self.model, self.calcheadvar.get(), self.filtheadvar.get(), self.chunk)
+	    PyHum.read(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), str(self.epsg1.get()), self.cvar.get(), self.dvar.get(), self.doplot, self.tvar.get(), self.bedpick, self.flipvar.get(), self.model, self.calcheadvar.get(), self.filtheadvar.get(), self.chunk)
 
 	    self.update()
 	    tkMessageBox.showinfo("Done!", "Read module finished") 
@@ -702,7 +702,7 @@ def gui():
 	    print "correct_withwater: " + str(self.watervar.get())   
               
 	    # do stuff here
-	    PyHum.correct(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.Wvar.get(), self.doplot, self.dofiltvar.get(), self.watervar.get(), self.Pvar.get(), self.Tvar.get(), self.Svar.get(), self.sedfilename.get())    
+	    PyHum.correct(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Wvar.get(), self.doplot, self.dofiltvar.get(), self.watervar.get(), self.Pvar.get(), self.Tvar.get(), self.Svar.get(), self.sedfilename.get())    
 
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Correct module finished") 
@@ -838,7 +838,7 @@ def gui():
 	    print "manually mask: " + str(self.manmaskvar.get())   
                  
 	    # do stuff here
-	    PyHum.rmshadows(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.Winvar.get(), self.manmaskvar.get(), self.doplot)  
+	    PyHum.rmshadows(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Winvar.get(), self.manmaskvar.get(), self.doplot)  
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Shadow removal module finished")     
 
@@ -1024,7 +1024,7 @@ def gui():
 	    if self.resvar.get()==0:
 	       self.resvar=99                 
 	    # do stuff here
-	    PyHum.map(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg2.get(), self.resvar.get(), self.mode, self.nnvar.get(), self.nstdvar.get()) #self.infvar.get(), self.dowritevar.get(), 
+	    PyHum.map(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.epsg2.get(), self.resvar.get(), self.mode, self.nnvar.get(), self.nstdvar.get()) #self.infvar.get(), self.dowritevar.get(), 
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Map module finished") 
 	    
@@ -1204,7 +1204,7 @@ def gui():
 	    print "number of texture classes: " + str(self.ncvar.get())
 		             
 	    # do stuff here
-	    PyHum.texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.Winvar2.get(), self.shiftvar.get(), self.doplot, self.densvar.get(), self.ncvar.get(), self.maxscalevar.get(), self.notesvar.get())
+	    PyHum.texture(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Winvar2.get(), self.shiftvar.get(), self.doplot, self.densvar.get(), self.ncvar.get(), self.maxscalevar.get(), self.notesvar.get())
 
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Texture module finished") 
@@ -1377,7 +1377,7 @@ def gui():
 	    print "number std. dev. to accept: " + str(self.nstdvar.get())             
 		             
 	    # do stuff here
-	    PyHum.map_texture(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg3.get(),self.resvar2.get(), self.mode, self.nnvar.get(), self.nstdvar.get())  #self.infvar.get(),  
+	    PyHum.map_texture(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.epsg3.get(),self.resvar2.get(), self.mode, self.nnvar.get(), self.nstdvar.get())  #self.infvar.get(),  
 
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Map texture module finished") 
