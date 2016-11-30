@@ -54,7 +54,7 @@
 # ====================== libraries ======================
 # =========================================================
 import matplotlib
-matplotlib.use('agg') 
+#matplotlib.use('agg') 
 
 #operational
 import glob, sys #, getopt
