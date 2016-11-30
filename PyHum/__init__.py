@@ -57,6 +57,9 @@ __version__ = '1.3.21'
 # Imports
 #-----------------------------------------------------------------------------
 
+import matplotlib
+matplotlib.use('wx')
+
 from PyHum._pyhum_read import read
 from PyHum._pyhum_correct import correct
 from PyHum._pyhum_rmshadows import rmshadows
