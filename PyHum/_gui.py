@@ -275,8 +275,8 @@ def gui():
 	self.bb.menu  =  Tkinter.Menu ( self.bb, tearoff = 0 , background='PaleVioletRed1', fg="black" )
 		
 	self.bb.menu.add_command(label="Auto", command = lambda v=1: _SetBedPick(master, v))
-	self.bb.menu.add_command(label="Manual", command = lambda v=2: _SetBedPick(master, v))
-	self.bb.menu.add_command(label="Hybrid", command = lambda v=3: _SetBedPick(master, v))
+	self.bb.menu.add_command(label="Manual", command = lambda v=0: _SetBedPick(master, v))
+	self.bb.menu.add_command(label="Hybrid", command = lambda v=2: _SetBedPick(master, v))
 	self.bb["menu"]  =  self.bb.menu
 	self.bb.configure(background='thistle3', fg="black")
 
@@ -484,11 +484,11 @@ def gui():
 	   if v==1:
 	      self.bedpick=1
 	      print "bed picking is auto"
+	   elif v==0:
+	      self.bedpick=0
+	      print "bed picking is manual"
 	   elif v==2:
 	      self.bedpick=2
-	      print "bed picking is manual"
-	   elif v==3:
-	      self.bedpick=3
 	      print "bed picking is hybrid"
 	      
 	   self.bb.configure(fg='thistle3', background="black")

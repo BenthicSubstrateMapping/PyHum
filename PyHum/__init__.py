@@ -51,14 +51,14 @@
 
 #"""
 
-__version__ = '1.3.21'
+__version__ = '1.3.22'
 
 #-----------------------------------------------------------------------------
 # Imports
 #-----------------------------------------------------------------------------
 
 import matplotlib
-matplotlib.use('wx')
+matplotlib.use('TKagg')
 
 from PyHum._pyhum_read import read
 from PyHum._pyhum_correct import correct
