@@ -51,7 +51,7 @@
 
 #"""
 
-__version__ = '1.3.22'
+__version__ = '1.3.23'
 
 #-----------------------------------------------------------------------------
 # Imports
@@ -74,6 +74,8 @@ from PyHum.io import *
 from PyHum._pyhum_mosaic import mosaic
 from PyHum._pyhum_mosaic_texture import mosaic_texture
 from PyHum._gui import gui
+
+from PyHum._pyhum_texture_slic import texture_slic
 
 
 
