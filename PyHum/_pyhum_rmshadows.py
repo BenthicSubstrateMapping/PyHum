@@ -92,13 +92,6 @@ warnings.filterwarnings("ignore")
 # =============== begin program ======================
 # ========================================================
 
-#__all__ = [
-#    'correct',
-#    'custom_save',
-#    'get_stats',
-#    'correct_scans',
-#    ]
-
 #################################################
 def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
     '''
@@ -350,8 +343,6 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
 
     else: #auto
 
-       #win = 31
-
        Zs = []; Zp = []
        if len(np.shape(star_fp))>2:
           for p in xrange(len(star_fp)):
@@ -568,50 +559,3 @@ if __name__ == '__main__':
    rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
 
-          #try: #parallel processing with all available cores
-          #   w = Parallel(n_jobs=-1, verbose=0)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z))) #backend="threading"
-          #except: #fall back to serial
-          #   w = Parallel(n_jobs=1, verbose=0)(delayed(get_stats)(Z[k].flatten()) for k in xrange(len(Z)))
-
-          #zmean,stdv= zip(*w)
-          #del w, stdv
-
-          ## get a k-value segmentation   
-          #wc, values = humutils.cut_kmeans(merge, kvals) #merge,kvals)
-          #del M, Ny, Nx
-   
-          ## the lowest value is zero, get the next lowest
-          #bw = wc==np.sort(values)[-(kvals-1)]
-          #del wc, values
-
-#    if not kvals:
-#       kvals = 8
-#       print '[Default] %s discrete values for shoreline removal' % (str(kvals))
-#      
-#    if not win:
-#       win = 100
-#       print '[Default] Window is %s square pixels' % (str(win))
-
-#    if not shadowmask:
-#       shadowmask = 0
-#       print '[Default] Shadow masking is auto'
-
-#    if not doplot:
-#       if doplot != 0:
-#          doplot = 1
-#          print "[Default] Plots will be made"
-
-#    kvals : int, *optional* [Default=8]
-#       if automatic shadowmask, this parameter sets the number of k-means to calculate 
-#       (the one with the lowest value will be the shadow which is removed)
-
-    #if kvals:
-    #   kvals = np.asarray(kvals,int)
-    #   print '%s discrete values for shadow removal' % (str(kvals))
-    
-##==================================================
-#def get_stats(pts):
-#   '''
-#   call the analysis routine. Gets called by the parallel processing queue
-#   '''
-#   return stdev.proc(pts).getdata()

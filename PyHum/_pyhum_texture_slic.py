@@ -235,10 +235,13 @@ def texture_slic(humfile, sonpath, doplot=1, numclasses=4, maxscale=20, notes=4)
          shape[1] = shape_port[0] + shape_star[0]
 
       #work on the entire scan
-      im = humutils.rescale(np.vstack((np.flipud(np.hstack(port_fp)), np.hstack(star_fp))),0,1)
+      #im = humutils.rescale(np.vstack((np.flipud(np.hstack(port_fp)), np.hstack(star_fp))),0,1)
+      im = np.vstack((np.flipud(np.hstack(port_fp)), np.hstack(star_fp)))
+      im[np.isnan(im)] = 0
+      im = humutils.rescale(im,0,1)
 
       #get SLIC superpixels
-      segments_slic = slic(im, n_segments=im.shape[0]/10, compactness=.1)
+      segments_slic = slic(im, n_segments=int(im.shape[0]/10), compactness=.1)
 
       #pre-allocate texture lengthscale array
       tl = np.zeros(im.shape, dtype = "float64")
