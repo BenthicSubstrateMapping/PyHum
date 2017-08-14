@@ -86,7 +86,7 @@ def dotest():
    model = 998 # humminbird model
    calc_bearing = 1 #1=yes
    filt_bearing = 1 #1=yes
-   chunk = 'd100' # distance, 100m
+   chunk = '1' ##'d100' # distance, 100m
    #chunk = 'p1000' # pings, 1000
    #chunk = 'h10' # heading deviation, 10 deg
           
@@ -99,13 +99,13 @@ def dotest():
    salinity = 0.0
 
    # for shadow removal
-   shadowmask = 0 #automatic shadow removal
+   shadowmask = 1 #0 = automatic shadow removal
    win = 31
 
    # for texture calcs
-   shift = 10 # pixel shift
+   shift = 50 ##10 # pixel shift
    density =win/2 # win/2 
-   numclasses = 4 # number of discrete classes for contouring and k-means
+   numclasses = 8 #4 # number of discrete classes for contouring and k-means
    maxscale = 20 # Max scale as inverse fraction of data length (for wavelet analysis)
    notes = 4 # Notes per octave (for wavelet analysis)
 
@@ -136,7 +136,7 @@ def dotest():
    ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
-   win = 100 # pixel window
+   win = 200 #100 # pixel window
    
    ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)

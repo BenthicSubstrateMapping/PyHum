@@ -72,6 +72,7 @@ import PyHum.utils as humutils
 import PyHum.ppdrc as ppdrc
 
 from scipy.special import jv
+from scipy.ndimage.filters import median_filter
 
 #plotting
 import matplotlib.pyplot as plt
@@ -371,6 +372,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     Zt = np.squeeze(Zt)
 
     avg = np.nanmedian(Zt,axis=1)
+    avg = median_filter(avg,int(len(avg)/10))
     
     Zt2 = np.empty(np.shape(Zt))
     
@@ -747,7 +749,7 @@ def c_scans_lambertian(fp, a_fp, TL, R, c, f, theta, alpha):
 
    lam = c/(f*1000)
    
-   Rtmp = R.copy()
+   Rtmp = np.deg2rad(R.copy()) ##/2
    try:
       Rtmp[np.where(Rtmp==0)] = Rtmp[np.where(Rtmp!=0)[0][-1]]
    except:
@@ -774,6 +776,7 @@ def c_scans_lambertian(fp, a_fp, TL, R, c, f, theta, alpha):
    mg[np.isinf(mg)] = np.nan
    K = np.nansum(fp)/np.nansum(mg)
    mg = mg*K
+
    mg[mg<0] = np.nan
    
    mg = 10**np.log10(mg + TL)
@@ -845,7 +848,8 @@ def plot_dwnlow_scans(dat_dwnlow, dist_m, shape_low, ft, sonpath, p):
        plt.imshow(np.uint8(dat_dwnlow), cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
        plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
 
-       plt.axis('normal'); plt.axis('tight')
+       #plt.axis('normal'); 
+       #plt.axis('tight')
        custom_save(sonpath,'dwnlow_corrected_scan'+str(p))
        del fig
 
@@ -864,9 +868,12 @@ def plot_dwnhi_scans(dat_dwnhi, dist_m, shape_hi, ft, sonpath, p):
        plt.imshow(np.uint8(dat_dwnhi), cmap='gray', extent=[min(Zdist), max(Zdist), extent*(1/ft), 0])
        plt.ylabel('Range (m)'), plt.xlabel('Distance along track (m)')
 
-       plt.axis('normal'); plt.axis('tight')
+       #plt.axis('normal'); 
+       #plt.axis('tight')
        custom_save(sonpath,'dwnhi_corrected_scan'+str(p))
        del fig
+
+
 
 
 # =========================================================

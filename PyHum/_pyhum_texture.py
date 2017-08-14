@@ -297,7 +297,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             R = rn.getdata()
             del rn   
 
-            Sp = (Sp**2) * np.cos(R) / shift**2
+            Sp = (Sp**2) * np.cos(np.deg2rad(R)) / shift ##**2
 
             fp[p] = Sp.astype('float32')
             del Sp
@@ -343,7 +343,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             R = rn.getdata()
             del rn   
 
-            Sp = (Sp**2) * np.cos(R) / shift**2
+            Sp = (Sp**2) * np.cos(np.deg2rad(R)) / shift ##**2
 
             with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'w+') as ff:
                np.save(ff, np.squeeze(Sp).astype('float32'))
