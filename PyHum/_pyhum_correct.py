@@ -371,15 +371,17 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     
     Zt = np.squeeze(Zt)
 
-    avg = np.nanmedian(Zt,axis=1)
-    avg = median_filter(avg,int(len(avg)/10))
+    avg = np.nanmedian(Zt,axis=0)
+    ##avg = median_filter(avg,int(len(avg)/10))
     
-    Zt2 = np.empty(np.shape(Zt))
-    
-    for kk in xrange(np.shape(Zt)[1]):
-       Zt2[:,kk] = (Zt[:,kk] - avg) + np.nanmean(avg)
-    Zt2[Zt<=0] = np.nan
-    Zt2[Zt2<=0] = np.nan    
+    Zt2 = Zt-avg + np.nanmean(avg)
+    Zt2 = Zt2 + np.abs(np.nanmin(Zt2))
+
+    ##Zt2 = np.empty(np.shape(Zt)) 
+    ##for kk in xrange(np.shape(Zt)[1]):
+    ##   Zt2[:,kk] = (Zt[:,kk] - avg) + np.nanmean(avg)
+    ##Zt2[Zt<=0] = np.nan
+    ##Zt2[Zt2<=0] = np.nan    
     del Zt
     
     # create memory mapped file for Z
@@ -413,12 +415,14 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     
     Zt = np.squeeze(Zt)
     
-    Zt2 = np.empty(np.shape(Zt))
-    
-    for kk in xrange(np.shape(Zt)[1]):
-       Zt2[:,kk] = (Zt[:,kk] - avg) + np.nanmean(avg)
-    Zt2[Zt<=0] = np.nan
-    Zt2[Zt2<=0] = np.nan    
+    Zt2 = Zt-avg + np.nanmean(avg)
+    Zt2 = Zt2 + np.abs(np.nanmin(Zt2))
+
+    ##Zt2 = np.empty(np.shape(Zt))
+    ##for kk in xrange(np.shape(Zt)[1]):
+    ##   Zt2[:,kk] = (Zt[:,kk] - avg) + np.nanmean(avg)
+    ##Zt2[Zt<=0] = np.nan
+    ##Zt2[Zt2<=0] = np.nan    
     del Zt
         
     # create memory mapped file for Z

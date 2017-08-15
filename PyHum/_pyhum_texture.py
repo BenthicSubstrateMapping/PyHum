@@ -297,7 +297,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
             R = rn.getdata()
             del rn   
 
-            Sp = (Sp**2) * np.cos(np.deg2rad(R)) / shift ##**2
+            Sp = (Sp**2) * np.cos(np.deg2rad(R)) /shift ##**2
 
             fp[p] = Sp.astype('float32')
             del Sp
@@ -495,9 +495,9 @@ def plot_class(dist_m, shape_port, dat_port, dat_star, dat_class, ft, humfile, s
    try:
       divider = make_axes_locatable(ax)
       cax = divider.append_axes("right", size="5%", pad=0.05)
-      plt.colorbar(im, cax=cax)
+      plt.colorbar(im, cax=cax, extend='max')
    except:
-      plt.colorbar()
+      plt.colorbar(extend='max')
 
    if len(shape_port)>2:
       custom_save(sonpath,base+'class'+str(p))
@@ -527,9 +527,9 @@ def plot_contours(dist_m, shape_port, dat_class, ft, humfile, sonpath, base, num
    try:
       divider = make_axes_locatable(ax)
       cax = divider.append_axes("right", size="5%", pad=0.05)
-      plt.colorbar(CS, cax=cax)
+      plt.colorbar(CS, cax=cax, extend='max')
    except:
-      plt.colorbar()
+      plt.colorbar(extend='max')
 
    custom_save(sonpath,base+'class_contours'+str(p))
    del fig
@@ -560,9 +560,9 @@ def plot_kmeans(dist_m, shape_port, dat_port, dat_star, dat_kclass, ft, humfile,
    try:
       divider = make_axes_locatable(ax)
       cax = divider.append_axes("right", size="5%", pad=0.05)
-      plt.colorbar(CS, cax=cax)
+      plt.colorbar(CS, cax=cax, extend='max')
    except:
-      plt.colorbar()
+      plt.colorbar(extend='max')
 
    custom_save(sonpath,base+'class_kmeans'+str(p))
    del fig
