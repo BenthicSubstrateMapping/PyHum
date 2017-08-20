@@ -101,6 +101,11 @@ def dotest():
    # for shadow removal
    shadowmask = 0 # 0= automatic shadow removal, 1=manual
    win = 31
+   dissim=3
+   correl=0.2
+   contrast=6
+   energy=0.15
+   mn=4
 
    # for texture calcs
    shift = 50 ##10 # pixel shift
@@ -110,7 +115,7 @@ def dotest():
    notes = 4 # Notes per octave (for wavelet analysis)
 
    # for mapping
-   res = 0.2 #99 # grid resolution in metres
+   res = 0.05 #99 # grid resolution in metres
    # if res==99, the program will automatically calc res from the spatial res of the scans
    mode = 1 # gridding mode (simple nearest neighbour)
    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
@@ -134,7 +139,7 @@ def dotest():
    PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
 
    ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
-   PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
+   PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot, dissim, correl, contrast, energy, mn)
 
    win = 10
    PyHum.texture2(humfile, sonpath, win, doplot, numclasses)

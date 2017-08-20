@@ -93,7 +93,7 @@ warnings.filterwarnings("ignore")
 # ========================================================
 
 #################################################
-def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
+def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl=0.2, contrast=6, energy=0.15, mn=4):
     '''
     Remove dark shadows in scans caused by shallows, shorelines, and attenuation of acoustics with distance
     Manual or automated processing options available
@@ -163,6 +163,25 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
        if doplot==0:
           print "Plots will not be made"
 
+    if dissim:
+       dissim = np.asarray(dissim,int)
+       print 'Threshold dissimilarity (shadow is <) is %s' % (str(dissim))
+
+    if correl:
+       correl = np.asarray(correl,int)
+       print 'Threshold correlation (shadow is <) is %s' % (str(correl))
+
+    if contrast:
+       contrast = np.asarray(contrast,int)
+       print 'Threshold contrast (shadow is <) is %s' % (str(contrast))
+
+    if energy:
+       energy = np.asarray(energy,int)
+       print 'Threshold energy (shadow is >) is %s' % (str(energy))
+
+    if mn:
+       mn = np.asarray(mn,int)
+       print 'Threshold mean intensity (shadow is <) is %s' % (str(mn))
 
     # start timer
     if os.name=='posix': # true if linux/mac or cygwin on windows
@@ -366,9 +385,9 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
              #zmean[np.isnan(zmean)] = 0
           
              try: #parallel processing with all available cores     
-                w = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k]) for k in xrange(len(Z)))
+                w = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], dissim, correl, contrast, energy, mn) for k in xrange(len(Z)))
              except: #fall back to serial
-                w = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k]) for k in xrange(len(Z)))          
+                w = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], dissim, correl, contrast, energy, mn) for k in xrange(len(Z)))          
           
              zmean = np.reshape(w , ( ind[0], ind[1] ) )
              del w
@@ -438,9 +457,9 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1):
           #zmean[np.isnan(zmean)] = 0
           
           try: #parallel processing with all available cores     
-             w = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k]) for k in xrange(len(Z)))
+             w = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me, dissim, correl, contrast, energy, mn)(Z[k]) for k in xrange(len(Z)))
           except: #fall back to serial
-             w = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k]) for k in xrange(len(Z)))          
+             w = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me, dissim, correl, contrast, energy, mn)(Z[k]) for k in xrange(len(Z)))          
           
           zmean = np.reshape(w , ( ind[0], ind[1] ) )
           del w
@@ -542,10 +561,10 @@ def custom_save(figdirec,root):
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=400)
 
 # =========================================================
-def parallel_me(Z):
+def parallel_me(Z, dissim=3, correl=0.2, contrast=6, energy=0.15, mn=4):
     try:
        glcm = greycomatrix(Z, [5], [0], 256, symmetric=True, normed=True)
-       if (greycoprops(glcm, 'dissimilarity')[0, 0] < 3) and (greycoprops(glcm, 'correlation')[0, 0] < 0.2) and (greycoprops(glcm, 'contrast')[0, 0] < 6) and (greycoprops(glcm, 'energy')[0, 0] > 0.15) and (np.mean(Z)<4):
+       if (greycoprops(glcm, 'dissimilarity')[0, 0] < dissim) and (greycoprops(glcm, 'correlation')[0, 0] < correl) and (greycoprops(glcm, 'contrast')[0, 0] < contrast) and (greycoprops(glcm, 'energy')[0, 0] > energy) and (np.mean(Z)<mn):
           return 1
        else:
           return 0
@@ -556,6 +575,6 @@ def parallel_me(Z):
 # =========================================================
 if __name__ == '__main__':
 
-   rmshadows(humfile, sonpath, win, shadowmask, doplot)
+   rmshadows(humfile, sonpath, win, shadowmask, doplot, dissim, correl, contrast, energy, mn)
 
 
