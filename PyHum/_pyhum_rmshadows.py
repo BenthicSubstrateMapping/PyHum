@@ -457,9 +457,9 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
           #zmean[np.isnan(zmean)] = 0
           
           try: #parallel processing with all available cores     
-             w = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me, dissim, correl, contrast, energy, mn)(Z[k]) for k in xrange(len(Z)))
+             w = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], dissim, correl, contrast, energy, mn) for k in xrange(len(Z)))
           except: #fall back to serial
-             w = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me, dissim, correl, contrast, energy, mn)(Z[k]) for k in xrange(len(Z)))          
+             w = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], dissim, correl, contrast, energy, mn) for k in xrange(len(Z)))          
           
           zmean = np.reshape(w , ( ind[0], ind[1] ) )
           del w
