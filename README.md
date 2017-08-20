@@ -19,9 +19,9 @@ The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) an
 Some aspects of the program are detailed in:
 Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
 
-Full documentation of the procedures behind the program is forthcoming in the following publication:
+Full documentation of the procedures behind the program is in the following publication:
 
-Buscombe, D., submitted, Processing and georeferencing recreational-grade sidescan-sonar data to support the democratization of acoustic imaging in shallow water. LIMNOLOGY AND OCEANOGRAPHY: METHODS.
+Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization using recreational-grade sidescan-sonar. ENVIRONMENTAL MODELLING & SOFTWARE 89, 1-18.
 
 
 ![alt tag](http://dbuscombe-usgs.github.io/figs/class_R01560.png)
@@ -43,10 +43,9 @@ Buscombe, D., submitted, Processing and georeferencing recreational-grade sidesc
 
  Primary Developer |    Daniel Buscombe 
  ------ | ---------------
-         |  Grand Canyon Monitoring and Research Center
-          | United States Geological Survey
+         |  Northern Arizona University
           | Flagstaff, AZ 86001
-          | dbuscombe@usgs.gov
+          | daniel.buscombe@nau.edu
 
  Co-Developer |    Daniel Hamill
  ------ | ---------------
@@ -55,7 +54,7 @@ Buscombe, D., submitted, Processing and georeferencing recreational-grade sidesc
           | Logan, UT 84322
           | dhamill@usgs.gov
 
-Version: 1.3.8    |  Revision: Feb, 2016
+Version: 1.4.0    |  Revision: Aug, 2017
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -107,8 +106,8 @@ A graphical user interface which essentially serves as a 'wrapper' to the above 
 
 These are all command-line programs which take a number of input (some required, some optional). Please see the individual files for a comprehensive list of input options
 
-![alt tag](http://dbuscombe-usgs.github.io/figs/PyHum_glencanyon_class.png)
-*Automated bed sediment measurement, Colorado River in Glen Canyon*
+<!--![alt tag](http://dbuscombe-usgs.github.io/figs/PyHum_glencanyon_class.png)-->
+<!--*Automated bed sediment measurement, Colorado River in Glen Canyon*-->
 
 ## Setup
 
@@ -258,7 +257,6 @@ which carries out the following operations:
    humfile = os.path.normpath(os.path.join(os.path.expanduser("~"),'pyhum_test','test.DAT'))
    sonpath = os.path.normpath(os.path.join(os.path.expanduser("~"),'pyhum_test'))
 
-
    doplot = 1 #yes
 
    # reading specific settings
@@ -271,7 +269,7 @@ which carries out the following operations:
    model = 998 # humminbird model
    calc_bearing = 1 #1=yes
    filt_bearing = 1 #1=yes
-   chunk = 'd100' # distance, 100m
+   chunk = '1' ##'d100' # distance, 100m
    #chunk = 'p1000' # pings, 1000
    #chunk = 'h10' # heading deviation, 10 deg
           
@@ -284,18 +282,18 @@ which carries out the following operations:
    salinity = 0.0
 
    # for shadow removal
-   shadowmask = 0 #automatic shadow removal
+   shadowmask = 1 #0 = automatic shadow removal
    win = 31
 
    # for texture calcs
-   shift = 10 # pixel shift
+   shift = 50 ##10 # pixel shift
    density =win/2 # win/2 
-   numclasses = 4 # number of discrete classes for contouring and k-means
+   numclasses = 8 #4 # number of discrete classes for contouring and k-means
    maxscale = 20 # Max scale as inverse fraction of data length (for wavelet analysis)
    notes = 4 # Notes per octave (for wavelet analysis)
 
    # for mapping
-   res = 0.25 #99 # grid resolution in metres
+   res = 0.2 #99 # grid resolution in metres
    # if res==99, the program will automatically calc res from the spatial res of the scans
    mode = 1 # gridding mode (simple nearest neighbour)
    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
@@ -313,7 +311,7 @@ which carries out the following operations:
    numclusters = 3 # number of acoustic classes to group observations
 
    ## read data in SON files into PyHum memory mapped format (.dat)
-   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) 
+   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) #cog
 
    ## correct scans and remove water column
    PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
@@ -321,7 +319,7 @@ which carries out the following operations:
    ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
-   win = 100 # pixel window
+   win = 200 # pixel window
    
    ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
@@ -337,7 +335,7 @@ which carries out the following operations:
 
    ## calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
-
+   
 
 ```
 
@@ -465,14 +463,24 @@ if __name__ == '__main__':
     #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
     #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
     dowrite = 0 #disable writing of point cloud data to file
+   ## read data in SON files into PyHum memory mapped format (.dat)
+   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) #cog
 
-    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk)
+   ## correct scans and remove water column
+   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
 
-    PyHum.correct(humfile, sonpath, maxW, doplot)
+   ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
+   PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
-    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
+   win = 200 # pixel window
+   
+   ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
+   PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
-    PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
+   ## grid and map the scans
+   PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
+
+
 ```
 
 or from within ipython (with a GUI prompt to navigate to the files):

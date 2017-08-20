@@ -143,7 +143,7 @@ def dotest():
 
    ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
    ## implemented using the superpixel approach
-   PyHum.texture_slic(humfile, sonpath, doplot, numclasses, maxscale, notes)
+   ##PyHum.texture_slic(humfile, sonpath, doplot, numclasses, maxscale, notes)
 
    ## grid and map the scans
    PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
