@@ -272,7 +272,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
 #    data_R = R_fp; del R_fp
 
     dx = np.arcsin(meta['c']/(1000*meta['t']*meta['f']))
-    pix_m = meta['pix_m']
+    pix_m = meta['pix_m']*1.1
     c = meta['c']
 
     if res==0:
@@ -446,14 +446,14 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
          while complete==0:
             try:
                try:
-                  dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=res*20, fill_value=None, nprocs = cpu_count())
+                  dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=res*10, fill_value=None, nprocs = cpu_count())
                except:
-                  dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=res*20, fill_value=None, nprocs = 1)
+                  dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=res*10, fill_value=None, nprocs = 1)
 
                try:
-                  r_dat = pyresample.kd_tree.resample_nearest(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*20, fill_value=None, nprocs = cpu_count())
+                  r_dat = pyresample.kd_tree.resample_nearest(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*10, fill_value=None, nprocs = cpu_count())
                except:
-                  r_dat = pyresample.kd_tree.resample_nearest(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*20, fill_value=None, nprocs = 1)
+                  r_dat = pyresample.kd_tree.resample_nearest(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*10, fill_value=None, nprocs = 1)
 
                stdev = None
                counts = None
@@ -464,8 +464,8 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
                wf = None
                humlon, humlat = trans(X, Y, inverse=True)
-               dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, res*20, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
-               r_dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, res*20, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
+               dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, res*10, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
+               r_dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, res*10, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
                del humlon, humlat
 
       elif mode==2:
@@ -477,14 +477,14 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
          while complete==0:
             try:
                try:
-                  dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=res*20, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+                  dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=res*10, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
                except:
-                  dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=res*20, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = 1)
+                  dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=res*10, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = 1)
 
                try:
-                  r_dat = pyresample.kd_tree.resample_custom(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*20, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = False, nprocs = cpu_count())
+                  r_dat = pyresample.kd_tree.resample_custom(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = False, nprocs = cpu_count())
                except:
-                  r_dat = pyresample.kd_tree.resample_custom(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*20, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = False, nprocs = 1)
+                  r_dat = pyresample.kd_tree.resample_custom(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = False, nprocs = 1)
 
                if 'dat' in locals():
                   complete=1
@@ -503,22 +503,22 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
          while complete==0:
             try:
                try:
-                  dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=res*20, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = True, nprocs = cpu_count(), epsilon = eps)
+                  dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = True, nprocs = cpu_count(), epsilon = eps)
                except:
-                  dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=res*20, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = True, nprocs = 1, epsilon = eps)
+                  dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = True, nprocs = 1, epsilon = eps)
 
                try:
-                  r_dat = pyresample.kd_tree.resample_gauss(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*20, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = False, nprocs = cpu_count(), epsilon = eps)
+                  r_dat = pyresample.kd_tree.resample_gauss(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = False, nprocs = cpu_count(), epsilon = eps)
                except:
-                  r_dat = pyresample.kd_tree.resample_gauss(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*20, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = False, nprocs = 1, epsilon = eps)
+                  r_dat = pyresample.kd_tree.resample_gauss(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = False, nprocs = 1, epsilon = eps)
 
                if 'dat' in locals():
                   complete=1
             except:
                del grid_x, grid_y, targ_def, orig_def
                humlon, humlat = trans(X, Y, inverse=True)
-               dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, res*20, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
-               r_dat, stdev_null, counts_null, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, res*20, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
+               dat, stdev, counts, resg, complete, shape = getgrid_lm(humlon, humlat, merge, res*10, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
+               r_dat, stdev_null, counts_null, resg, complete, shape = getgrid_lm(humlon, humlat, res_grid, res*10, min(X), max(X), min(Y), max(Y), resg*2, mode, trans, nn, wf, sigmas, eps)
                del humlat, humlon
                del stdev_null, counts_null
 
