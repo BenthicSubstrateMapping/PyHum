@@ -24,21 +24,6 @@ Full documentation of the procedures behind the program is in the following publ
 Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization using recreational-grade sidescan-sonar. ENVIRONMENTAL MODELLING & SOFTWARE 89, 1-18.
 
 
-![alt tag](http://dbuscombe-usgs.github.io/figs/class_R01560.png)
-*Sand dunes on the bed of the Colorado River in Grand Canyon, Arizona*
-
-![alt tag](http://dbuscombe-usgs.github.io/figs/Texas_reef_merged_cropped.png)
-*Submerged reef and a school of fish, in the Gulf of Mexico off the coast of Texas. Credit: Richard Kline and Michael Bollinger from the University of Texas Rio Grande Valley.  Funded by the Texas Parks and Wildlife Department, Artificial Reef Program.*
-
-![alt tag](http://dbuscombe-usgs.github.io/figs/DogRiver_AllenAven.png)
-*Boat marina in Dog River, Alabama. Credit: Allen Aven, Dauphin Island Sea Lab*
-
-![alt tag](http://dbuscombe-usgs.github.io/figs/PyHum_glencanyon.png)
-*Fine/coarse transition on the bed of the Colorado River in Glen Canyon, Arizona*
-
-![alt tag](http://dbuscombe-usgs.github.io/figs/SuwaneeRiver_Florida.png)
-*Lower Suwannee River, Florida. Credit: Florida Fish and Wildlife Commission: Information Science and Management. Funded by U.S. Fish and Wildlife Service State Wildlife Grant (SWG)*
-
 ### Contributing & Credits
 
  Primary Developer |    Daniel Buscombe 
@@ -463,22 +448,22 @@ if __name__ == '__main__':
     #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
     #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
     dowrite = 0 #disable writing of point cloud data to file
-   ## read data in SON files into PyHum memory mapped format (.dat)
-   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) #cog
 
-   ## correct scans and remove water column
-   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
+    ## read data in SON files into PyHum memory mapped format (.dat)
+    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) #cog
 
-   ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
-   PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
+    ## correct scans and remove water column
+    PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
 
-   win = 200 # pixel window
+    ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
+    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
    
-   ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
-   PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+    ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
+    win = 10
+    PyHum.texture2(humfile, sonpath, win, doplot, numclasses)
 
-   ## grid and map the scans
-   PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
+    ## grid and map the scans
+    PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
 
 
 ```

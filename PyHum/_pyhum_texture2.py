@@ -94,7 +94,7 @@ warnings.filterwarnings("ignore")
 
 
 #################################################
-def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4): ##shift=10, density=50, maxscale=20, notes=4):
+def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4): 
           
       '''
       Create a texture lengthscale map using the algorithm detailed by Buscombe et al. (2015)
@@ -105,7 +105,7 @@ def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4): ##shift=10, den
 
       Syntax
       ----------
-      [] = PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+      [] = PyHum.texture(humfile, sonpath, win, doplot, numclasses)
 
       Parameters
       ----------
@@ -113,20 +113,12 @@ def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4): ##shift=10, den
        path to the .DAT file
       sonpath : str
        path where the *.SON files are
-      win : int, *optional* [Default=100]
+      win : int, *optional* [Default=10]
        pixel in pixels of the moving window
-      shift : int, *optional* [Default=10]
-       shift in pixels for moving window operation
       doplot : int, *optional* [Default=1]
        if 1, make plots, otherwise do not make plots
-      density : int, *optional* [Default=win/2]
-       echogram will be sampled every 'density' pixels
       numclasses : int, *optional* [Default=4]
        number of 'k means' that the texture lengthscale will be segmented into
-      maxscale : int, *optional* [Default=20]
-       Max scale as inverse fraction of data length for wavelet analysis
-      notes : int, *optional* [Default=100]
-       notes per octave for wavelet analysis
 
       Returns
       -------

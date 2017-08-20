@@ -51,7 +51,7 @@
 
 #"""
 
-__version__ = '1.4.0'
+__version__ = '1.4.1'
 
 #-----------------------------------------------------------------------------
 # Imports
@@ -63,7 +63,6 @@ matplotlib.use('TKagg')
 from PyHum._pyhum_read import read
 from PyHum._pyhum_correct import correct
 from PyHum._pyhum_rmshadows import rmshadows
-from PyHum._pyhum_texture import texture
 from PyHum._pyhum_map import map
 from PyHum._pyhum_map_texture import map_texture
 from PyHum._pyhum_e1e2 import e1e2
@@ -75,6 +74,7 @@ from PyHum._pyhum_mosaic import mosaic
 from PyHum._pyhum_mosaic_texture import mosaic_texture
 from PyHum._gui import gui
 
+from PyHum._pyhum_texture import texture
 from PyHum._pyhum_texture_slic import texture_slic
 from PyHum._pyhum_texture2 import texture2
 

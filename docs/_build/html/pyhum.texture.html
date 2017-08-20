@@ -1,34 +1,32 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>pyhum.texture module &mdash; PyHum 1.3.14 documentation</title>
-    
+    <title>pyhum.texture module &#8212; PyHum 1.4.1 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.3.14',
+        VERSION:     '1.4.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyHum 1.3.14 documentation" href="index.html" />
-    <link rel="up" title="PyHum package" href="pyhum.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="pyhum.map module" href="pyhum.map.html" />
     <link rel="prev" title="pyhum.rmshadows module" href="pyhum.rmshadows.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -41,8 +39,8 @@
         <li class="right" >
           <a href="pyhum.rmshadows.html" title="pyhum.rmshadows module"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.14 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="pyhum.html" accesskey="U">PyHum package</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.4.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="pyhum.html" accesskey="U">PyHum package</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -54,7 +52,7 @@
   <div class="section" id="pyhum-texture-module">
 <h1>pyhum.texture module<a class="headerlink" href="#pyhum-texture-module" title="Permalink to this headline">¶</a></h1>
 <blockquote>
-<div><p>Create a texture lengthscale map using the algorithm detailed by Buscombe et al. (forthcoming)</p>
+<div><p>Create a texture lengthscale map using the algorithm detailed by Buscombe et al. (2015) Journal of Hydraulic Engineering</p>
 <p>This textural lengthscale is not a direct measure of grain size. Rather, it is a statistical</p>
 <p>representation that integrates over many attributes of bed texture, of which grain size is the most important.</p>
 <p>The technique is a physically based means to identify regions of texture within a sidescan echogram,</p>
@@ -63,7 +61,7 @@
 <div class="section" id="syntax">
 <h2>Syntax<a class="headerlink" href="#syntax" title="Permalink to this headline">¶</a></h2>
 <p>You call the function like this:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">texture</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">numclasses</span><span class="p">,</span> <span class="n">maxscale</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[]</span> <span class="o">=</span> <span class="n">PyHum</span><span class="o">.</span><span class="n">texture2</span><span class="p">(</span><span class="n">humfile</span><span class="p">,</span> <span class="n">sonpath</span><span class="p">,</span> <span class="n">win</span><span class="p">,</span> <span class="n">doplot</span><span class="p">,</span> <span class="n">numclasses</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -81,14 +79,8 @@
 <dd>shift in pixels for moving window operation</dd>
 <dt>doplot <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=1]</span></dt>
 <dd>if 1, make plots, otherwise do not make plots</dd>
-<dt>density <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=win/2]</span></dt>
-<dd>echogram will be sampled every &#8216;density&#8217; pixels</dd>
 <dt>numclasses <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=4]</span></dt>
-<dd>number of &#8216;k means&#8217; that the texture lengthscale will be segmented into</dd>
-<dt>maxscale <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=20]</span></dt>
-<dd>Max scale as inverse fraction of data length for wavelet analysis</dd>
-<dt>notes <span class="classifier-delimiter">:</span> <span class="classifier">int, <em>optional</em> [Default=100]</span></dt>
-<dd>notes per octave for wavelet analysis</dd>
+<dd>number of ‘k means’ that the texture lengthscale will be segmented into</dd>
 </dl>
 </div></blockquote>
 </div>
@@ -96,9 +88,9 @@
 <h2>Returns<a class="headerlink" href="#returns" title="Permalink to this headline">¶</a></h2>
 <blockquote>
 <div><dl class="docutils">
-<dt>sonpath+base+&#8217;_data_class.dat&#8217;: memory-mapped file</dt>
+<dt>sonpath+base+’_data_class.dat’: memory-mapped file</dt>
 <dd>contains the texture lengthscale map</dd>
-<dt>sonpath+base+&#8217;_data_kclass.dat&#8217;: memory-mapped file</dt>
+<dt>sonpath+base+’_data_kclass.dat’: memory-mapped file</dt>
 <dd>contains the k-means segmented texture lengthscale map</dd>
 </dl>
 </div></blockquote>
@@ -147,14 +139,11 @@ Journal of Hydraulic Engineering,  10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
     <hr/>
@@ -165,7 +154,7 @@ Journal of Hydraulic Engineering,  10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
     Send an email to subscribe</p>
     </div>
 <hr/>
-<small><a href="_sources/pyhum.texture.txt"
+<small><a href="_sources/pyhum.texture.rst.txt"
            rel="nofollow">Show this page source</a>
 </small>
 
@@ -185,13 +174,13 @@ Journal of Hydraulic Engineering,  10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
         <li class="right" >
           <a href="pyhum.rmshadows.html" title="pyhum.rmshadows module"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.3.14 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="pyhum.html" >PyHum package</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.4.1 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="pyhum.html" >PyHum package</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2015, Daniel Buscombe.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+        &#169; Copyright 2015 -- 3027, Daniel Buscombe.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>

@@ -61,6 +61,10 @@ References
      classification using low-cost sidescan sonar. 
      Journal of Hydraulic Engineering,  10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
 
+     [2] Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization using recreational-grade sidescan-sonar. 
+         ENVIRONMENTAL MODELLING & SOFTWARE 89, 1-18.
+
+
   .. image:: _static/pyhum_logo_colour_sm.png
 
 

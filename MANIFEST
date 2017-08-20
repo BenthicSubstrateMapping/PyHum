@@ -24,6 +24,8 @@ PyHum/_pyhum_mosaic_texture.py
 PyHum/_pyhum_read.py
 PyHum/_pyhum_rmshadows.py
 PyHum/_pyhum_texture.py
+PyHum/_pyhum_texture2.py
+PyHum/_pyhum_texture_slic.py
 PyHum/cwt.pyx
 PyHum/d_conc.txt
 PyHum/dat2mat.py

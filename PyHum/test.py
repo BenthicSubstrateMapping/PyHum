@@ -136,10 +136,12 @@ def dotest():
    ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
-   win = 200 #100 # pixel window
-   
+   win = 10
+   PyHum.texture2(humfile, sonpath, win, doplot, numclasses)
+
+   ##win = 200 #100 # pixel window 
    ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
-   PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+   ##PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
 
    ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
    ## implemented using the superpixel approach

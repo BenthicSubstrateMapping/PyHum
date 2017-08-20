@@ -3,7 +3,7 @@
 pyhum.texture module
 ======================
 
-     Create a texture lengthscale map using the algorithm detailed by Buscombe et al. (forthcoming)
+     Create a texture lengthscale map using the algorithm detailed by Buscombe et al. (2015) Journal of Hydraulic Engineering
 
      This textural lengthscale is not a direct measure of grain size. Rather, it is a statistical 
 
@@ -18,7 +18,7 @@ Syntax
 
 You call the function like this::
 
-  [] = PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
+  [] = PyHum.texture2(humfile, sonpath, win, doplot, numclasses)
 
 Parameters
 ------------
@@ -33,14 +33,8 @@ Parameters
        shift in pixels for moving window operation
      doplot : int, *optional* [Default=1]
        if 1, make plots, otherwise do not make plots
-     density : int, *optional* [Default=win/2]
-       echogram will be sampled every 'density' pixels
      numclasses : int, *optional* [Default=4]
        number of 'k means' that the texture lengthscale will be segmented into
-     maxscale : int, *optional* [Default=20]
-       Max scale as inverse fraction of data length for wavelet analysis
-     notes : int, *optional* [Default=100]
-       notes per octave for wavelet analysis
 
 Returns
 ----------

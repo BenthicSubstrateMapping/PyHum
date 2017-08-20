@@ -98,6 +98,12 @@ Returns
     sonpath,'Hard'+str(p).kml : kml file
         kml overlay for showing harness scatter plot (sonpath,'Hard'+str(p).png)
 
+References
+-----------
+
+     [1] Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization using recreational-grade sidescan-sonar. 
+         ENVIRONMENTAL MODELLING & SOFTWARE 89, 1-18.
+
 
   .. image:: _static/pyhum_logo_colour_sm.png
 

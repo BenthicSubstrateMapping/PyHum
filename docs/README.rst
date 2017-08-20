@@ -20,21 +20,18 @@ The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) an
 
 Some aspects of the program are detailed in:
 
-Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019. `Download here <http://dbuscombe-usgs.github.io/docs/10-2-2015_Automated%20.pdf>`_
+Full documentation of the procedures behind the program is in the following publication:
 
-Full documentation of the procedures behind the program is forthcoming in the following publication:
-
-Buscombe, D., submitted, Processing and georeferencing recreational-grade sidescan-sonar data to support the democratization of acoustic imaging in shallow water. LIMNOLOGY AND OCEANOGRAPHY: METHODS.
-
+Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization using recreational-grade sidescan-sonar. ENVIRONMENTAL MODELLING & SOFTWARE 89, 1-18.
 
 For the source code visit `the project github site <https://github.com/dbuscombe-usgs/PyHum/>`_
 
+
  Primary Developer |    Daniel Buscombe 
  ------ | ---------------
-         |  Grand Canyon Monitoring and Research Center
-          | United States Geological Survey
+         |  Northern Arizona University
           | Flagstaff, AZ 86001
-          | dbuscombe@usgs.gov
+          | daniel.buscombe@nau.edu
 
  Co-Developer |    Daniel Hamill
  ------ | ---------------
@@ -42,6 +39,8 @@ For the source code visit `the project github site <https://github.com/dbuscombe
           | Utah State University
           | Logan, UT 84322
           | dhamill@usgs.gov
+
+Version: 1.4.0    |  Revision: Aug, 2017
 
 
 .. _license:
@@ -243,6 +242,10 @@ A test can be carried out by running the supplied script::
 
 which carries out the following operations::
 
+   # copy files over to somewhere read/writeable
+   dircopy(PyHum.__path__[0], os.path.expanduser("~")+os.sep+'pyhum_test')
+   shutil.copy(PyHum.__path__[0]+os.sep+'test.DAT', os.path.expanduser("~")+os.sep+'pyhum_test'+os.sep+'test.DAT')
+
    # general settings   
    humfile = os.path.normpath(os.path.join(os.path.expanduser("~"),'pyhum_test','test.DAT'))
    sonpath = os.path.normpath(os.path.join(os.path.expanduser("~"),'pyhum_test'))
@@ -259,7 +262,7 @@ which carries out the following operations::
    model = 998 # humminbird model
    calc_bearing = 1 #1=yes
    filt_bearing = 1 #1=yes
-   chunk = 'd100' # distance, 100m
+   chunk = '1' ##'d100' # distance, 100m
    #chunk = 'p1000' # pings, 1000
    #chunk = 'h10' # heading deviation, 10 deg
           
@@ -272,18 +275,18 @@ which carries out the following operations::
    salinity = 0.0
 
    # for shadow removal
-   shadowmask = 0 #automatic shadow removal
+   shadowmask = 1 #0 = automatic shadow removal
    win = 31
 
    # for texture calcs
-   shift = 10 # pixel shift
+   shift = 50 ##10 # pixel shift
    density =win/2 # win/2 
-   numclasses = 4 # number of discrete classes for contouring and k-means
+   numclasses = 8 #4 # number of discrete classes for contouring and k-means
    maxscale = 20 # Max scale as inverse fraction of data length (for wavelet analysis)
    notes = 4 # Notes per octave (for wavelet analysis)
 
    # for mapping
-   res = 0.25 #99 # grid resolution in metres
+   res = 0.2 #99 # grid resolution in metres
    # if res==99, the program will automatically calc res from the spatial res of the scans
    mode = 1 # gridding mode (simple nearest neighbour)
    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
@@ -301,7 +304,7 @@ which carries out the following operations::
    numclusters = 3 # number of acoustic classes to group observations
 
    ## read data in SON files into PyHum memory mapped format (.dat)
-   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) 
+   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) #cog
 
    ## correct scans and remove water column
    PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
@@ -309,7 +312,7 @@ which carries out the following operations::
    ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
 
-   win = 100 # pixel window
+   win = 200 # pixel window
    
    ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
    PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
@@ -325,6 +328,7 @@ which carries out the following operations::
 
    ## calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
+   
 
 .. _gettingstarted:
 
@@ -347,83 +351,103 @@ The following example script::
 
    if __name__ == '__main__': 
 
-       argv = sys.argv[1:]
-       humfile = ''; sonpath = ''
+import sys, getopt
+
+from Tkinter import Tk
+from tkFileDialog import askopenfilename, askdirectory
+
+import PyHum
+import os
+
+if __name__ == '__main__': 
+
+    argv = sys.argv[1:]
+    humfile = ''; sonpath = ''
     
-       # parse inputs to variables
-       try:
-          opts, args = getopt.getopt(argv,"hi:s:")
-       except getopt.GetoptError:
-            print 'error'
-            sys.exit(2)
-       for opt, arg in opts:
-          if opt == '-h':
-            print 'help'
-            sys.exit()
-          elif opt in ("-i"):
-             humfile = arg
-          elif opt in ("-s"):
-             sonpath = arg
+    # parse inputs to variables
+    try:
+       opts, args = getopt.getopt(argv,"hi:s:")
+    except getopt.GetoptError:
+         print 'error'
+         sys.exit(2)
+    for opt, arg in opts:
+       if opt == '-h':
+         print 'help'
+         sys.exit()
+       elif opt in ("-i"):
+          humfile = arg
+       elif opt in ("-s"):
+          sonpath = arg
 
-       # prompt user to supply file if no input file given
-       if not humfile:
-          print 'An input file is required!!!!!!'
-          Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
-          humfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
+    # prompt user to supply file if no input file given
+    if not humfile:
+       print 'An input file is required!!!!!!'
+       Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
+       humfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
 
-       # prompt user to supply directory if no input sonpath is given
-       if not sonpath:
-          print 'A *.SON directory is required!!!!!!'
-          Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
-          sonpath = askdirectory() 
+    # prompt user to supply directory if no input sonpath is given
+    if not sonpath:
+       print 'A *.SON directory is required!!!!!!'
+       Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
+       sonpath = askdirectory() 
 
-       # print given arguments to screen and convert data type where necessary
-       if humfile:
-          print 'Input file is %s' % (humfile)
+    # print given arguments to screen and convert data type where necessary
+    if humfile:
+       print 'Input file is %s' % (humfile)
 
-       if sonpath:
-          print 'Son files are in %s' % (sonpath)
+    if sonpath:
+       print 'Son files are in %s' % (sonpath)
                  
-       # general settings   
-       doplot = 1 #yes
+    doplot = 1 #yes
 
-       # reading specific settings
-       cs2cs_args = "epsg:32100" #NAD83 / Montana
-       bedpick = 2 # manual bed pick
-       c = 1450 # speed of sound fresh water
-       t = 0.108 # length of transducer
-       draft = 0.3 # draft in metres
-       flip_lr = 1 # flip port and starboard
-       model = 1199 # humminbird model
-       dowrite = 0 #disable writing of point cloud data to file
-       chunk = 'd100' # distance, 100m
-       #chunk = 'p1000' # pings, 1000
-       #chunk = 'h10' # heading deviation, 10 deg
-    
-       # correction specific settings
-       maxW = 1000 # rms output wattage
-       dofilt = 1 # apply a phase preserving filter (WARNING!! takes a very long time for large scans)
-       correct_withwater = 0 # don't retain water column in radiometric correction (1 = retains water column for radiomatric corrections)
+    # reading specific settings
+    cs2cs_args = "epsg:26949" #arizona central state plane
+    bedpick = 1 # auto bed pick
+    c = 1450 # speed of sound fresh water
+    t = 0.108 # length of transducer
+    draft = 0.3 # draft in metres
+    flip_lr = 1 # flip port and starboard
+    model = 998 # humminbird model
+    calc_bearing = 0 #no
+    filt_bearing = 0 #no
+    chunk = 'd100' # distance, 100m
+    #chunk = 'p1000' # pings, 1000
+    #chunk = 'h10' # heading deviation, 10 deg
+     
+    # correction specific settings
+    maxW = 1000 # rms output wattage
+    dofilt = 0 # 1 = apply a phase preserving filter (WARNING!! takes a very long time for large scans)
+    correct_withwater = 0 # don't retain water column in radiometric correction (1 = retains water column for radiomatric corrections)
+    ph = 7.0 # acidity on the pH scale
+    temp = 10.0 # water temperature in degrees Celsius
+    #salinity = 0.0
 
-       # for shadow removal
-       shadowmask = 1 #manual shadow removal
-       win = 100
+    # for shadow removal
+    shadowmask = 1 #manual shadow removal
 
-       # for mapping
-       res = 99 # grid resolution in metres
-       # if res==99, the program will automatically calc res from the spatial res of the scans
-       mode = 1 # gridding mode (simple nearest neighbour)
-       #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
-       #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
-       dowrite = 0 #disable writing of point cloud data to file
+    # for mapping
+    res = 99 # grid resolution in metres
+    # if res==99, the program will automatically calc res from the spatial res of the scans
+    mode = 1 # gridding mode (simple nearest neighbour)
+    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
+    #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
+    dowrite = 0 #disable writing of point cloud data to file
 
-       PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, f, bedpick, flip_lr, chunk_size, model)
+    ## read data in SON files into PyHum memory mapped format (.dat)
+    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) #cog
 
-       PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater)
+    ## correct scans and remove water column
+    PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
 
-       PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
+    ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
+    PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
+   
+    ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
+    win = 10
+    PyHum.texture2(humfile, sonpath, win, doplot, numclasses)
 
-       PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
+    ## grid and map the scans
+    PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
 
 
 could be saved as, for example "proc_mysidescandata.py" and run from the command line using::

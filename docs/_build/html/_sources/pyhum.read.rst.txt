@@ -123,6 +123,13 @@ Returns
         time_s : ndarray, time elapsed (s)
         caltime : ndarray, unix epoch time (s)
 
+References
+-----------
+
+     [1] Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization using recreational-grade sidescan-sonar. 
+         ENVIRONMENTAL MODELLING & SOFTWARE 89, 1-18.
+
+
   .. image:: _static/pyhum_logo_colour_sm.png
 
 
