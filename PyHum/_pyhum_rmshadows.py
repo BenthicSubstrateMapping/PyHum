@@ -561,7 +561,7 @@ def custom_save(figdirec,root):
     plt.savefig(os.path.normpath(os.path.join(figdirec,root)),bbox_inches='tight',dpi=400)
 
 # =========================================================
-def parallel_me(Z, dissim=3, correl=0.2, contrast=6, energy=0.15, mn=4):
+def parallel_me(Z, dissim, correl, contrast, energy, mn):
     try:
        glcm = greycomatrix(Z, [5], [0], 256, symmetric=True, normed=True)
        if (greycoprops(glcm, 'dissimilarity')[0, 0] < dissim) and (greycoprops(glcm, 'correlation')[0, 0] < correl) and (greycoprops(glcm, 'contrast')[0, 0] < contrast) and (greycoprops(glcm, 'energy')[0, 0] > energy) and (np.mean(Z)<mn):
