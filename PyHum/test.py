@@ -99,7 +99,7 @@ def dotest():
    salinity = 0.0
 
    # for shadow removal
-   shadowmask = 1 #0 = automatic shadow removal
+   shadowmask = 0 # 0= automatic shadow removal, 1=manual
    win = 31
 
    # for texture calcs
