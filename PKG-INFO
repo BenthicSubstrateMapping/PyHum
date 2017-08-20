@@ -1,0 +1,16 @@
+Metadata-Version: 1.0
+Name: PyHum
+Version: 1.0
+Summary: a description
+Home-page: https://github.com/dbuscombe-usgs/PyHum
+Author: Daniel Buscombe
+Author-email: dbuscombe@usgs.gov
+License: GPL
+Description: PyHum
+        
+Keywords: meshing
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3.2
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Topic :: Scientific/Engineering :: Mathematics
