@@ -770,7 +770,7 @@ def getXY(e,n,yvec,d,t,extent):
 # =========================================================
 if __name__ == '__main__':
 
-   map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dogrid, influence,dowrite,
+   map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected, scalemax) #dogrid, influence,dowrite,
 
 ## =========================================================
 #def calc_beam_pos(dist, bearing, x, y):
