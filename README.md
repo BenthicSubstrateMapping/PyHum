@@ -448,6 +448,7 @@ if __name__ == '__main__':
     #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
     #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
     dowrite = 0 #disable writing of point cloud data to file
+    scalemax = 60 # max color scale value (60 is a good place to start)
 
     ## read data in SON files into PyHum memory mapped format (.dat)
     PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) #cog
@@ -463,7 +464,7 @@ if __name__ == '__main__':
     PyHum.texture2(humfile, sonpath, win, doplot, numclasses)
 
     ## grid and map the scans
-    PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
+    PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected, scalemax) #dowrite, 
 
 
 ```
