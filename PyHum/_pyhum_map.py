@@ -104,7 +104,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, numstdevs=5, use_uncorrected=0): #dogrid = 1, influence = 1, dowrite = 0, 
+def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, numstdevs=5, use_uncorrected=0, scalemax=60): #dogrid = 1, influence = 1, dowrite = 0, 
 
     '''
     Create plots of the spatially referenced sidescan echograms
@@ -278,17 +278,18 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
     if res==0:
        res=99
 
-    print len(star_fp)
+    print "Number of chunks for mapping: %s" % (len(star_fp))
 
     if len(shape_star)>2:
        for p in range(len(star_fp)):
           try:
-             res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], meta['pix_m'], res, cs2cs_args, sonpath, p, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f'])), use_uncorrected) #dogrid, influence, dowrite,
+             print("progress: " + str(p) + " / " + str(len(star_fp)))
+             res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], meta['pix_m'], res, cs2cs_args, sonpath, p, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f'])), use_uncorrected, scalemax) #dogrid, influence, dowrite,
              print "grid resolution is %s" % (str(res))
           except:
              print "error on chunk "+str(p)             
     else:
-       res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f'])), use_uncorrected) #dogrid, influence,dowrite,
+       res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f'])), use_uncorrected, scalemax) #dogrid, influence,dowrite,
 
     if os.name=='posix': # true if linux/mac
        elapsed = (time.time() - start)
@@ -300,7 +301,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
 
 
 # =========================================================
-def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, mode, nn, numstdevs, c, dx, use_uncorrected): #dogrid, influence,dowrite,
+def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, mode, nn, numstdevs, c, dx, use_uncorrected, scalemax): #dogrid, influence,dowrite,
 
    thres=5
 
@@ -577,7 +578,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
                      urcrnrlon=glon.max(),
                      urcrnrlat=glat.max(),
                      pixels=pixels)
-      cs = ax.pcolormesh(glon, glat, datm, cmap='gray')
+      cs = ax.pcolormesh(glon, glat, datm, vmax=scalemax, cmap='gray')
       ax.set_axis_off()
       fig.savefig(os.path.normpath(os.path.join(sonpath,'map'+str(p)+'.png')), transparent=True, format='png')
       del fig, ax
@@ -632,9 +633,9 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    if 2>1:
       if datm.size > 25000000:
          print "matrix size > 25,000,000 - decimating by factor of 5 for display"
-         map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='gray', vmin=np.nanmin(datm), vmax=np.nanmax(datm))
+         map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='gray', vmin=np.nanmin(datm), vmax=scalemax) #vmax=np.nanmax(datm)
       else:
-         map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(datm), vmax=np.nanmax(datm))
+         map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(datm), vmax=scalemax) #vmax=np.nanmax(datm)
       del datm, dat
    else:
       ## draw point cloud
@@ -769,7 +770,7 @@ def getXY(e,n,yvec,d,t,extent):
 # =========================================================
 if __name__ == '__main__':
 
-   map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dogrid, influence,dowrite,
+   map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected, scalemax) #dogrid, influence,dowrite,
 
 ## =========================================================
 #def calc_beam_pos(dist, bearing, x, y):

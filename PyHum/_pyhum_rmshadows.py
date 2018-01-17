@@ -222,13 +222,13 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
        Zt = []
        if len(np.shape(star_fp))>2:
           for p in xrange(len(star_fp)):
-             raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue...")
+             raw_input("Shore picking "+str(p+1)+" of "+str(len(star_fp))+" (starboard), are you ready? 60 seconds. Press Enter to continue...")
              shoreline_star={}
              fig = plt.figure()
              ax = plt.gca()
              ax.imshow(star_fp[p], cmap = 'gray') #, origin = 'upper') #im = 
              plt.axis('normal'); plt.axis('tight')
-             pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
+             pts1 = plt.ginput(n=300, timeout=75) # it will wait for 200 clicks or 75 seconds
              x1=map(lambda x: x[0],pts1) # map applies the function passed as 
              y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
              shoreline_star = np.interp(np.r_[:np.shape(star_fp[p])[1]],x1,y1)
@@ -248,13 +248,13 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
              
        else:
 
-          raw_input("Shore picking (starboard), are you ready? 30 seconds. Press Enter to continue...")
+          raw_input("Shore picking "+str(len(star_fp))+" of "+str(len(star_fp))+" (starboard), are you ready? 60 seconds. Press Enter to continue...")
           shoreline_star={}
           fig = plt.figure()
           ax = plt.gca()
           ax.imshow(star_fp, cmap = 'gray') #, origin = 'upper') #im = 
           plt.axis('normal'); plt.axis('tight')
-          pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
+          pts1 = plt.ginput(n=300, timeout=75) # it will wait for 200 clicks or 75 seconds
           x1=map(lambda x: x[0],pts1) # map applies the function passed as 
           y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
           shoreline_star = np.interp(np.r_[:np.shape(star_fp)[1]],x1,y1)
@@ -294,13 +294,13 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
        if len(np.shape(star_fp))>2:
           for p in xrange(len(port_fp)):
 
-             raw_input("Shore picking (port), are you ready? 30 seconds. Press Enter to continue...")
+             raw_input("Shore picking "+str(p+1)+" of "+str(len(port_fp))+" (port), are you ready? 60 seconds. Press Enter to continue...")
              shoreline_port={}
              fig = plt.figure()
              ax = plt.gca()
              ax.imshow(port_fp[p], cmap = 'gray') #, origin = 'upper') #im = 
              plt.axis('normal'); plt.axis('tight')
-             pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
+             pts1 = plt.ginput(n=300, timeout=75) # it will wait for 200 clicks or 75 seconds
              x1=map(lambda x: x[0],pts1) # map applies the function passed as 
              y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
              shoreline_port = np.interp(np.r_[:np.shape(port_fp[p])[1]],x1,y1)
@@ -320,13 +320,13 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
           
        else:
 
-          raw_input("Shore picking (port), are you ready? 30 seconds. Press Enter to continue...")
+          raw_input("Shore picking "+str(len(port_fp))+" of "+str(len(port_fp))+" (port), are you ready? 60 seconds. Press Enter to continue...")
           shoreline_port={}
           fig = plt.figure()
           ax = plt.gca()
           ax.imshow(port_fp, cmap = 'gray') #, origin = 'upper') #im = 
           plt.axis('normal'); plt.axis('tight')
-          pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 30 seconds
+          pts1 = plt.ginput(n=300, timeout=75) # it will wait for 200 clicks or 75 seconds
           x1=map(lambda x: x[0],pts1) # map applies the function passed as 
           y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
           shoreline_port = np.interp(np.r_[:np.shape(port_fp)[1]],x1,y1)
@@ -576,5 +576,4 @@ def parallel_me(Z, dissim, correl, contrast, energy, mn):
 if __name__ == '__main__':
 
    rmshadows(humfile, sonpath, win, shadowmask, doplot, dissim, correl, contrast, energy, mn)
-
 
