@@ -48,20 +48,27 @@
 #=======================
 # python -c "import PyHum; PyHum.gui()"
 from __future__ import print_function
-import Tkinter
-from Tix import *
 
-import ttk
-from tkFileDialog import askopenfilename
+import sys
+if sys.version[0]=='3':
+   import tkinter as Tkinter
+   from tkinter.tix import *
+   from tkinter import ttk
+   from tkinter.scrolledtext import ScrolledText
+   from tkinter.filedialog import askopenfilename
+   from tkinter import messagebox as tkMessageBox
+else:
+   import Tkinter
+   from Tix import *
+   import ttk
+   from ScrolledText import ScrolledText
+   from tkFileDialog import askopenfilename
+   import tkMessageBox
+
 import os
 import PyHum
 from PIL import Image, ImageTk
 
-#import webbrowser
-import tkMessageBox
-from ScrolledText import ScrolledText
-
-import os
 
 #################################################
 def gui():
