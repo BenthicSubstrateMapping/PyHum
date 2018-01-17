@@ -219,7 +219,7 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
 
        Zt = []
        if len(np.shape(star_fp))>2:
-          for p in xrange(len(star_fp)):
+          for p in range(len(star_fp)):
              raw_input("Shore picking "+str(p+1)+" of "+str(len(star_fp))+" (starboard), are you ready? 60 seconds. Press Enter to continue...")
              shoreline_star={}
              fig = plt.figure()
@@ -237,7 +237,7 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
              
              shoreline_star = np.asarray(shoreline_star,'int')
              # shift proportionally depending on where the bed is
-             for k in xrange(np.shape(star_mg)[1]):
+             for k in range(np.shape(star_mg)[1]):
                 star_mg[shoreline_star[k]:,k] = np.nan
 
              del shoreline_star
@@ -263,7 +263,7 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
 
           shoreline_star = np.asarray(shoreline_star,'int')
           # shift proportionally depending on where the bed is
-          for k in xrange(np.shape(star_mg)[1]):
+          for k in range(np.shape(star_mg)[1]):
              star_mg[shoreline_star[k]:,k] = np.nan
 
           del shoreline_star
@@ -290,7 +290,7 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
 
        Zt = []
        if len(np.shape(star_fp))>2:
-          for p in xrange(len(port_fp)):
+          for p in range(len(port_fp)):
 
              raw_input("Shore picking "+str(p+1)+" of "+str(len(port_fp))+" (port), are you ready? 60 seconds. Press Enter to continue...")
              shoreline_port={}
@@ -309,7 +309,7 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
 
              shoreline_port = np.asarray(shoreline_port,'int')
              # shift proportionally depending on where the bed is
-             for k in xrange(np.shape(port_mg)[1]):
+             for k in range(np.shape(port_mg)[1]):
                 port_mg[shoreline_port[k]:,k] = np.nan
 
              del shoreline_port
@@ -335,7 +335,7 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
 
           shoreline_port = np.asarray(shoreline_port,'int')
           # shift proportionally depending on where the bed is
-          for k in xrange(np.shape(port_mg)[1]):
+          for k in range(np.shape(port_mg)[1]):
              port_mg[shoreline_port[k]:,k] = np.nan
 
           del shoreline_port
@@ -362,7 +362,7 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
 
        Zs = []; Zp = []
        if len(np.shape(star_fp))>2:
-          for p in xrange(len(star_fp)):
+          for p in range(len(star_fp)):
              merge = np.vstack((np.flipud(port_fp[p]),star_fp[p]))
              merge = np.asarray(merge, 'float64')
 
@@ -383,9 +383,9 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
              #zmean[np.isnan(zmean)] = 0
           
              try: #parallel processing with all available cores     
-                w = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], dissim, correl, contrast, energy, mn) for k in xrange(len(Z)))
+                w = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], dissim, correl, contrast, energy, mn) for k in range(len(Z)))
              except: #fall back to serial
-                w = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], dissim, correl, contrast, energy, mn) for k in xrange(len(Z)))          
+                w = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], dissim, correl, contrast, energy, mn) for k in range(len(Z)))          
           
              zmean = np.reshape(w , ( ind[0], ind[1] ) )
              del w
@@ -455,9 +455,9 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
           #zmean[np.isnan(zmean)] = 0
           
           try: #parallel processing with all available cores     
-             w = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], dissim, correl, contrast, energy, mn) for k in xrange(len(Z)))
+             w = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], dissim, correl, contrast, energy, mn) for k in range(len(Z)))
           except: #fall back to serial
-             w = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], dissim, correl, contrast, energy, mn) for k in xrange(len(Z)))          
+             w = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], dissim, correl, contrast, energy, mn) for k in range(len(Z)))          
           
           zmean = np.reshape(w , ( ind[0], ind[1] ) )
           del w

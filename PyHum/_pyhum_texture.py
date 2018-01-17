@@ -257,7 +257,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
 
       if len(shape_star)>2:
          #SRT = []
-         for p in xrange(len(port_fp)):
+         for p in range(len(port_fp)):
             
             Z,ind = humutils.sliding_window_sliced(np.vstack((np.flipud(port_fp[p]), star_fp[p])), density, (win,win),(shift,shift))
             
@@ -357,13 +357,13 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       if doplot==1:
 
          if len(shape_star)>2:
-            for p in xrange(len(star_fp)):
+            for p in range(len(star_fp)):
                plot_class(dist_m, shape_port, port_fp[p], star_fp[p], class_fp[p], ft, humfile, sonpath, base, p)
          else:
             plot_class(dist_m, shape_port, port_fp, star_fp, class_fp, ft, humfile, sonpath, base, 0)
 
          if len(shape_star)>2:
-            for p in xrange(len(star_fp)):
+            for p in range(len(star_fp)):
                plot_contours(dist_m, shape_port, class_fp[p], ft, humfile, sonpath, base, numclasses, p)
          else:
             plot_contours(dist_m, shape_port, class_fp, ft, humfile, sonpath, base, numclasses, 0)
@@ -376,7 +376,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
          with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'w+') as ff:
             fp = np.memmap(ff, dtype='float32', mode='w+', shape=tuple(shape))
 
-         for p in xrange(len(port_fp)):
+         for p in range(len(port_fp)):
             wc = get_kclass(class_fp[p].copy(), numclasses)
             fp[p] = wc.astype('float32')
             del wc
@@ -400,7 +400,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       if doplot==1:
 
          if len(shape_star)>2:
-            for p in xrange(len(star_fp)):
+            for p in range(len(star_fp)):
                plot_kmeans(dist_m, shape_port, port_fp[p], star_fp[p], kclass_fp[p], ft, humfile, sonpath, base, p)
          else:
             plot_kmeans(dist_m, shape_port, port_fp, star_fp, kclass_fp, ft, humfile, sonpath, base, 0)         
@@ -420,10 +420,10 @@ def get_srt(Z,ind,maxscale, notes, win): #, density):
        #print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
        print("%s windows to process" % (str(len(Z))))                         
        # do the wavelet clacs and get the stats
-       d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win) for k in xrange(len(Z))) #density
+       d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win) for k in range(len(Z))) #density
     except:
        print("memory error: trying serial")
-       d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win) for k in xrange(len(Z))) #density
+       d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win) for k in range(len(Z))) #density
 
     srt = np.reshape(d , ( ind[0], ind[1] ) )
     del d
@@ -609,10 +609,10 @@ if __name__ == '__main__':
 #            try:
 #               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
 #            # do the wavelet clacs and get the stats
-#               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+#               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in range(len(Z)))
 #            except:
 #               print "memory error: trying serial"
-#               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+#               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in range(len(Z)))
 
 #            srt = np.reshape(d , ( ind[0], ind[1] ) )
 #            del d
@@ -620,10 +620,10 @@ if __name__ == '__main__':
 #            try:
 #               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
 #            # do the wavelet clacs and get the stats
-#               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+#               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in range(len(Z)))
 #            except:
 #               print "memory error: trying serial"
-#               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+#               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in range(len(Z)))
 
 #            srt2 = np.reshape(d , ( ind[0], ind[1] ) )
 #            del d
@@ -638,10 +638,10 @@ if __name__ == '__main__':
 #            try:
 #               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
 #            # do the wavelet clacs and get the stats
-#               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+#               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in range(len(Z)))
 #            except:
 #               print "memory error: trying serial"
-#               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in xrange(len(Z)))
+#               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k], maxscale, notes, win, density) for k in range(len(Z)))
 
 #            srt = np.reshape(d , ( ind[0], ind[1] ) )
 #            del d
@@ -649,10 +649,10 @@ if __name__ == '__main__':
 #            try:
 #               print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
 #            # do the wavelet clacs and get the stats
-#               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+#               d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in range(len(Z)))
 #            except:
 #               print "memory error: trying serial"
-#               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in xrange(len(Z)))
+#               d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win, density) for k in range(len(Z)))
 
 #            srt2 = np.reshape(d , ( ind[0], ind[1] ) )
 #            del d
@@ -674,10 +674,10 @@ if __name__ == '__main__':
             #   #print "%s windows to process with a density of %s" % (str(len(Z)), str(density)) #% (str(len(Z)), str(density))
             #   print "%s windows to process" % (str(len(Z)))               
             ## do the wavelet clacs and get the stats
-            #   d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in xrange(len(Z))) #density
+            #   d = Parallel(n_jobs = -1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in range(len(Z))) #density
             #except:
             #   print "memory error: trying serial"
-            #   d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in xrange(len(Z))) #density
+            #   d = Parallel(n_jobs = 1, verbose=0)(delayed(parallel_me)(Z[k].T, maxscale, notes, win) for k in range(len(Z))) #density
 
             #srt2 = np.reshape(d , ( ind[0], ind[1] ) )
             #del d

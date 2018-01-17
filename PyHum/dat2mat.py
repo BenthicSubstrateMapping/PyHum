@@ -17,7 +17,7 @@ def get_mmap_data(filename, dtype, shape):
     return fp  
 
 def do_savemat(fp, datfile):
-   for k in xrange(len(fp)):
+   for k in range(len(fp)):
       savemat(datfile.split('.dat')[0]+'_'+str(k)+'.mat', mdict = {os.path.basename(datfile).split('.dat')[0]:np.squeeze(fp[k])})
 
 

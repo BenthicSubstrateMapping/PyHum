@@ -725,10 +725,10 @@ def xyfunc(e,n,yvec,d,t,extent):
 def getXY(e,n,yvec,d,t,extent):
    print("getting point cloud ...")
 
-   #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
+   #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in range(len(n)))
 
    if os.name=='posix':
-      o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
+      o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in range(len(n)))
 
       #eating, northing, distance to sonar, depth, heading
       X, Y, D, H, T = zip(*o)
@@ -736,7 +736,7 @@ def getXY(e,n,yvec,d,t,extent):
    else:
       X = []; Y = [];
       D = []; H = []; T = []
-      for k in xrange(len(n)):
+      for k in range(len(n)):
          out1,out2,out3,out4,out5 = xyfunc(e[k], n[k], yvec, d[k], t[k], extent)
          X.append(out1); Y.append(out2)
          D.append(out3); H.append(out4); T.append(out5)

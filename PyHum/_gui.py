@@ -448,7 +448,7 @@ def gui():
 	def _get_SON(master, v):
 	    self.SONfiles = askopenfilename(filetypes=[("SON files","*.SON")], multiple=True)
 
-	    for k in xrange(len(self.SONfiles)):
+	    for k in range(len(self.SONfiles)):
 	       print('You chose: %s' % (self.SONfiles[k]))
 	    self.folder = os.path.dirname(self.SONfiles[0])
 	    

@@ -351,10 +351,10 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     #reading each sonfile in parallel should be faster ...
     try:
-       o = Parallel(n_jobs = np.min([len(sonfiles), cpu_count()]), verbose=0)(delayed(getscans)(sonfiles[k], humfile, c, model, cs2cs_args) for k in xrange(len(sonfiles)))
+       o = Parallel(n_jobs = np.min([len(sonfiles), cpu_count()]), verbose=0)(delayed(getscans)(sonfiles[k], humfile, c, model, cs2cs_args) for k in range(len(sonfiles)))
        X, Y, A, B = zip(*o)
 
-       for k in xrange(len(Y)):
+       for k in range(len(Y)):
           if Y[k] == 'sidescan_port':
              dat = A[k] #data.gethumdat()
              metadat = B[k] #data.getmetadata()
@@ -501,7 +501,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           if np.shape(port_fp[0])[1] > np.shape(star_fp[0])[1]:
              tmp = port_fp.copy()
              tmp2 = np.empty_like(star_fp)
-             for k in xrange(len(tmp)):
+             for k in range(len(tmp)):
                  tmp2[k] = tmp[k][:,:np.shape(star_fp[k])[1]]
              del tmp
 
@@ -520,7 +520,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           elif np.shape(port_fp[0])[1] < np.shape(star_fp[0])[1]:
              tmp = star_fp.copy()
              tmp2 = np.empty_like(port_fp)
-             for k in xrange(len(tmp)):
+             for k in range(len(tmp)):
                  tmp2[k] = tmp[k][:,:np.shape(port_fp[k])[1]]
              del tmp
 
@@ -581,7 +581,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           if np.shape(dwnhi_fp[0])[1] > np.shape(dwnlow_fp[0])[1]:
              tmp = dwnhi_fp.copy()
              tmp2 = np.empty_like(dwnlow_fp)
-             for k in xrange(len(tmp)):
+             for k in range(len(tmp)):
                  tmp2[k] = tmp[k][:,:np.shape(dwnlow_fp[k])[1]]
              del tmp
 
@@ -600,7 +600,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           elif np.shape(dwnhi_fp[0])[1] < np.shape(dwnlow_fp[0])[1]:
              tmp = dwnlow_fp.copy()
              tmp2 = np.empty_like(dwnhi_fp)
-             for k in xrange(len(tmp)):
+             for k in range(len(tmp)):
                  tmp2[k] = tmp[k][:,:np.shape(dwnhi_fp[k])[1]]
              del tmp
 
@@ -669,7 +669,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
              if doplot==1:
                 if chunkmode!=4:
-                   for k in xrange(len(star_fp)):
+                   for k in range(len(star_fp)):
                       plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k, chunkmode)
                 else:
                    plot_2bedpicks(port_fp, star_fp, bed, dist_m, x, ft, shape_port, sonpath, 0, chunkmode)
@@ -719,7 +719,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
              if doplot==1:
                 if chunkmode!=4:
-                   for k in xrange(len(star_fp)):
+                   for k in range(len(star_fp)):
                       plot_2bedpicks(port_fp[k], star_fp[k], bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], x[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k, chunkmode)
                 else:
                    plot_2bedpicks(port_fp, star_fp, bed, dist_m, x, ft, shape_port, sonpath, 0, chunkmode)
@@ -729,7 +729,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              beds=[]
 
              if chunkmode!=4:
-                for k in xrange(len(port_fp)):
+                for k in range(len(port_fp)):
                    raw_input("Bed picking "+str(k+1)+" of "+str(len(port_fp))+", are you ready? 30 seconds. Press Enter to continue...")
                    bed={}
                    fig = plt.figure()
@@ -765,7 +765,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
           if doplot==1:
              if chunkmode!=4:
-                for k in xrange(len(star_fp)):
+                for k in range(len(star_fp)):
                    plot_bedpick(port_fp[k], star_fp[k], (1/ft)*bed[ind_port[-1]*k:ind_port[-1]*(k+1)], dist_m[ind_port[-1]*k:ind_port[-1]*(k+1)], ft, shape_port, sonpath, k, chunkmode)
              else:
                 plot_bedpick(port_fp, star_fp, (1/ft)*bed, dist_m, ft, shape_port, sonpath, 0, chunkmode)
@@ -846,7 +846,7 @@ def getscans(sonfile, humfile, c, model, cs2cs_args):
 def plot_dwnhi(dwnhi_fp, chunkmode, sonpath):
 
     if chunkmode!=4:
-       for k in xrange(len(dwnhi_fp)):
+       for k in range(len(dwnhi_fp)):
           fig = plt.figure()
           plt.imshow(dwnhi_fp[k],cmap='gray')
           plt.axis('normal'); plt.axis('tight')
@@ -870,7 +870,7 @@ def plot_dwnhi(dwnhi_fp, chunkmode, sonpath):
 def plot_dwnlow(dwnlow_fp, chunkmode, sonpath):
 
     if chunkmode!=4:
-       for k in xrange(len(dwnlow_fp)):
+       for k in range(len(dwnlow_fp)):
           fig = plt.figure()
           plt.imshow(dwnlow_fp[k],cmap='gray')
           plt.axis('normal'); plt.axis('tight')
@@ -1115,9 +1115,9 @@ def sliding_window(a,ws,ss = None,flatten = True):
       print("memory error, windowing using slower method")
       # For each dimension, create a list of all valid slices
       slices = [[] for i in range(len(ws))]
-      for i in xrange(len(ws)):
+      for i in range(len(ws)):
          nslices = ((shap[i] - ws[i]) // ss[i]) + 1
-         for j in xrange(0,nslices):
+         for j in range(0,nslices):
             start = j * ss[i]
             stop = start + ws[i]
             slices[i].append(slice(start,stop))

@@ -323,7 +323,7 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
        absorption = water_atten(np.asarray(depi), transfreq, c, ph, temp, salinity)
 
        if len(shape_hi)>2:    
-          for p in xrange(len(dwnhi_fp)):
+          for p in range(len(dwnhi_fp)):
              #make an index of every other record
              ind = range(0,np.shape(dwnhi_fp[p])[1])
 

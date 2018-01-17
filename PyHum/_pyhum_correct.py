@@ -376,7 +376,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     Zt2 = Zt2 + np.abs(np.nanmin(Zt2))
 
     ##Zt2 = np.empty(np.shape(Zt)) 
-    ##for kk in xrange(np.shape(Zt)[1]):
+    ##for kk in range(np.shape(Zt)[1]):
     ##   Zt2[:,kk] = (Zt[:,kk] - avg) + np.nanmean(avg)
     ##Zt2[Zt<=0] = np.nan
     ##Zt2[Zt2<=0] = np.nan    
@@ -417,7 +417,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     Zt2 = Zt2 + np.abs(np.nanmin(Zt2))
 
     ##Zt2 = np.empty(np.shape(Zt))
-    ##for kk in xrange(np.shape(Zt)[1]):
+    ##for kk in range(np.shape(Zt)[1]):
     ##   Zt2[:,kk] = (Zt[:,kk] - avg) + np.nanmean(avg)
     ##Zt2[Zt<=0] = np.nan
     ##Zt2[Zt2<=0] = np.nan    
@@ -439,7 +439,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
           star_fpw = io.get_mmap_data(sonpath, base, '_data_star_lw.dat', 'float32', shape_star) 
           
           if len(np.shape(star_fpw))>2:
-             for p in xrange(len(star_fpw)):
+             for p in range(len(star_fpw)):
                 plot_merged_scans(port_fpw[p], star_fpw[p], dist_m, shape_port, ft, sonpath, p)
           else:
              plot_merged_scans(port_fpw, star_fpw, dist_m, shape_port, ft, sonpath, 0)
@@ -447,7 +447,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
        else:
 
           if len(np.shape(star_fp))>2:
-             for p in xrange(len(star_fp)):
+             for p in range(len(star_fp)):
                 plot_merged_scans(port_fp[p], star_fp[p], dist_m, shape_port, ft, sonpath, p)
           else:
              plot_merged_scans(port_fp, star_fp, dist_m, shape_port, ft, sonpath, 0)
@@ -528,7 +528,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
        
        if doplot==1:
           if len(np.shape(low_fp))>2:
-             for p in xrange(len(low_fp)):
+             for p in range(len(low_fp)):
                 plot_dwnlow_scans(low_fp[p], dist_m, shape_low, ft, sonpath, p)
           else:
              plot_dwnlow_scans(low_fp, dist_m, shape_low, ft, sonpath, 0)
@@ -556,7 +556,7 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
        
        if doplot==1:
           if len(np.shape(hi_fp))>2:
-             for p in xrange(len(hi_fp)):
+             for p in range(len(hi_fp)):
                 plot_dwnhi_scans(hi_fp[p], dist_m, shape_hi, ft, sonpath, p)
           else:
              plot_dwnhi_scans(hi_fp, dist_m, shape_hi, ft, sonpath, 0)
@@ -635,13 +635,13 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
        A = []
 
     if  len(np.shape(fp))>2:
-       for p in xrange(len(fp)):
+       for p in range(len(fp)):
           data_dB = fp[p]*(10*np.log10(maxW)/255)
 
           Zbed = np.squeeze(bed[shape[-1]*p:shape[-1]*(p+1)])
 
           # shift proportionally depending on where the bed is
-          for k in xrange(np.shape(data_dB)[1]):
+          for k in range(np.shape(data_dB)[1]):
              try:
                 data_dB[:,k] = np.r_[data_dB[Zbed[k]:,k], np.zeros( (np.shape(data_dB)[0] -  np.shape(data_dB[Zbed[k]:,k])[0] ,) )]
              except:
@@ -663,7 +663,7 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
                 r[:,k] = np.sqrt(yvec**2 - d[k]**2)
 
              # shift proportionally depending on where the bed is
-             for k in xrange(np.shape(r)[1]):
+             for k in range(np.shape(r)[1]):
                 try:
                    r[:,k] = np.r_[r[Zbed[k]:,k], np.zeros( (np.shape(r)[0] -  np.shape(r[Zbed[k]:,k])[0] ,) )]
                    a[:,k] = np.r_[a[Zbed[k]:,k], np.zeros( (np.shape(a)[0] -  np.shape(a[Zbed[k]:,k])[0] ,) )]
@@ -681,7 +681,7 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
        Zbed = np.squeeze(bed)
 
        # shift proportionally depending on where the bed is
-       for k in xrange(np.shape(data_dB)[1]):
+       for k in range(np.shape(data_dB)[1]):
           try:
             data_dB[:,k] = np.r_[data_dB[Zbed[k]:,k], np.zeros( (np.shape(data_dB)[0] -  np.shape(data_dB[Zbed[k]:,k])[0] ,) )]
           except:
@@ -703,7 +703,7 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
              r[:,k] = np.sqrt(yvec**2 - d[k]**2)
 
           # shift proportionally depending on where the bed is
-          for k in xrange(np.shape(r)[1]):
+          for k in range(np.shape(r)[1]):
              try:
                 r[:,k] = np.r_[r[Zbed[k]:,k], np.zeros( (np.shape(r)[0] -  np.shape(r[Zbed[k]:,k])[0] ,) )]
                 a[:,k] = np.r_[a[Zbed[k]:,k], np.zeros( (np.shape(a)[0] -  np.shape(a[Zbed[k]:,k])[0] ,) )]
@@ -724,7 +724,7 @@ def correct_scans(fp, a_fp, TL, dofilt):
     if np.ndim(fp)==2:
        return c_scans(fp, a_fp, TL, dofilt)
     else:
-       return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans)(fp[p], a_fp[p], TL[p], dofilt) for p in xrange(len(fp)))
+       return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans)(fp[p], a_fp[p], TL[p], dofilt) for p in range(len(fp)))
 
 # =========================================================
 def c_scans(fp, a_fp, TL, dofilt):
@@ -744,7 +744,7 @@ def correct_scans_lambertian(fp, a_fp, TL, R, c, f, theta, alpha):
     if np.ndim(fp)==2:
        return c_scans_lambertian(fp, a_fp, TL, R, c, f, theta, alpha)
     else:
-       return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans_lambertian)(fp[p], a_fp[p], TL[p], R[p], c, f, theta, alpha) for p in xrange(len(fp)))
+       return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans_lambertian)(fp[p], a_fp[p], TL[p], R[p], c, f, theta, alpha) for p in range(len(fp)))
        
 # =========================================================
 def c_scans_lambertian(fp, a_fp, TL, R, c, f, theta, alpha):
@@ -792,7 +792,7 @@ def correct_scans2(fp, TL):
     if np.ndim(fp)==2:
        return c_scans2(fp, TL)
     else:
-       return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans2)(fp[p], TL[p]) for p in xrange(len(fp)))
+       return Parallel(n_jobs = cpu_count(), verbose=0)(delayed(c_scans2)(fp[p], TL[p]) for p in range(len(fp)))
 
 # =========================================================
 def c_scans2(fp, TL):

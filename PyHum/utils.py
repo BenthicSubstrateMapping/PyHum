@@ -73,7 +73,7 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
     imu = []
 
     if chunkmode!=4:
-      for k in xrange(len(port_fp)):
+      for k in range(len(port_fp)):
          #imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
          imu.append(port_fp[k][np.max([0,int(np.min(bed)-buff)]):int(np.max(bed)+buff),:])
       imu = np.hstack(imu)
@@ -153,7 +153,7 @@ def get_depth(dep_m):
 def get_dist(lat, lon):
 
     dist = np.zeros(len(lat))
-    for k in xrange(len(lat)-1):
+    for k in range(len(lat)-1):
        dist[k] = distBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
 
     return np.cumsum(dist)
@@ -168,7 +168,7 @@ def get_bearing(calc_bearing, filt_bearing, lat, lon, heading): #cog
 
        #point-to-point bearing
        bearing = np.zeros(len(lat))
-       for k in xrange(len(lat)-1):
+       for k in range(len(lat)-1):
           bearing[k] = bearingBetweenPoints(lat[k], lat[k+1], lon[k], lon[k+1])
        #del lat, lon
 
@@ -471,9 +471,9 @@ def sliding_window(a,ws,ss = None,flatten = True):
       print("memory error, windowing using slower method")
       # For each dimension, create a list of all valid slices
       slices = [[] for i in range(len(ws))]
-      for i in xrange(len(ws)):
+      for i in range(len(ws)):
          nslices = ((shap[i] - ws[i]) // ss[i]) + 1
-         for j in xrange(0,nslices):
+         for j in range(0,nslices):
             start = j * ss[i]
             stop = start + ws[i]
             slices[i].append(slice(start,stop))
@@ -567,7 +567,7 @@ def dpboundary(imu):
    p = np.zeros((m,n))
    c[0,:] = imu[0,:]
 
-   for i in xrange(1,m):
+   for i in range(1,m):
       c0 = c[i-1,:]
       tmp1 = np.squeeze(ascol(np.hstack((c0[1:],c0[-1]))))
       tmp2 = np.squeeze(ascol(np.hstack((c0[0], c0[0:len(c0)-1]))))

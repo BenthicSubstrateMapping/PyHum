@@ -259,7 +259,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
     dist_tvg = ((np.tan(np.radians(25)))*dep_m)-(tvg)
 
     if len(shape_star)>2:    
-       for p in xrange(len(class_fp)):
+       for p in range(len(class_fp)):
 
           e = esi[shape_port[-1]*p:shape_port[-1]*(p+1)]
           n = nsi[shape_port[-1]*p:shape_port[-1]*(p+1)]
@@ -428,7 +428,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
          vmin=np.nanmin(datm)
          vmax=np.nanmax(datm)
        
-       Parallel(n_jobs = 2, verbose=0)(delayed(doplots)(k, humlon, humlat, cs2cs_args, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax) for k in xrange(2)) 
+       Parallel(n_jobs = 2, verbose=0)(delayed(doplots)(k, humlon, humlat, cs2cs_args, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax) for k in range(2)) 
        
        #print_map(cs2cs_args, glon, glat, datm, sonpath, 0, vmin=vmin, vmax=vmax)
 
@@ -717,12 +717,12 @@ def getmesh(minX, maxX, minY, maxY, res):
 def getXY(e,n,yvec,d,t,extent):
    print("getting point cloud ...")
 
-   #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
+   #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in range(len(n)))
 
    try:
-      o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
+      o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in range(len(n)))  
    except:
-      o = Parallel(n_jobs = 1, verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
+      o = Parallel(n_jobs = 1, verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in range(len(n)))  
       
    X, Y = zip(*o)
 
@@ -852,12 +852,12 @@ if __name__ == '__main__':
       
 #       ## draw concatenated
 #       try:
-#          o = Parallel(n_jobs = 3, verbose=0)(delayed(getclass_asc)(sonpath, p) for p in xrange(len(class_fp)))
+#          o = Parallel(n_jobs = 3, verbose=0)(delayed(getclass_asc)(sonpath, p) for p in range(len(class_fp)))
 #          X, Y, S = zip(*o)
 #       except:
 #          print "parallel read ascii failed"
 #          X = []; Y = []; S = [];
-#          for p in xrange(len(class_fp)):
+#          for p in range(len(class_fp)):
 #             dat = np.genfromtxt(os.path.normpath(os.path.join(sonpath,'x_y_class'+str(p)+'.asc')), delimiter=' ')
 #             X.append(dat[:,0])
 #             Y.append(dat[:,1])

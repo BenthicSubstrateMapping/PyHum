@@ -235,7 +235,7 @@ def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4):
 
       if len(shape_star)>2:
 
-         for p in xrange(len(port_fp)):
+         for p in range(len(port_fp)):
             
             Snn = std_convoluted(np.vstack((np.flipud(port_fp[p]), star_fp[p])), win)[1]
  
@@ -307,13 +307,13 @@ def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4):
       if doplot==1:
 
          if len(shape_star)>2:
-            for p in xrange(len(star_fp)):
+            for p in range(len(star_fp)):
                plot_class(dist_m, shape_port, port_fp[p], star_fp[p], class_fp[p], ft, humfile, sonpath, base, p)
          else:
             plot_class(dist_m, shape_port, port_fp, star_fp, class_fp, ft, humfile, sonpath, base, 0)
 
          if len(shape_star)>2:
-            for p in xrange(len(star_fp)):
+            for p in range(len(star_fp)):
                plot_contours(dist_m, shape_port, class_fp[p], ft, humfile, sonpath, base, numclasses, p)
          else:
             plot_contours(dist_m, shape_port, class_fp, ft, humfile, sonpath, base, numclasses, 0)
@@ -326,7 +326,7 @@ def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4):
          with open(os.path.normpath(os.path.join(sonpath,base+'_data_kclass.dat')), 'w+') as ff:
             fp = np.memmap(ff, dtype='float32', mode='w+', shape=tuple(shape))
 
-         for p in xrange(len(port_fp)):
+         for p in range(len(port_fp)):
             wc = get_kclass(class_fp[p].copy(), numclasses)
             fp[p] = wc.astype('float32')
             del wc
@@ -350,7 +350,7 @@ def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4):
       if doplot==1:
 
          if len(shape_star)>2:
-            for p in xrange(len(star_fp)):
+            for p in range(len(star_fp)):
                plot_kmeans(dist_m, shape_port, port_fp[p], star_fp[p], kclass_fp[p], ft, humfile, sonpath, base, p)
          else:
             plot_kmeans(dist_m, shape_port, port_fp, star_fp, kclass_fp, ft, humfile, sonpath, base, 0)         

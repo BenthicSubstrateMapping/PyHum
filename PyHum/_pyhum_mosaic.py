@@ -242,7 +242,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     #if 2 > 1:
        inputfiles = []
        if len(shape_star)>2:    
-          for p in xrange(len(star_fp)):
+          for p in range(len(star_fp)):
              e = esi[shape_port[-1]*p:shape_port[-1]*(p+1)]
              n = nsi[shape_port[-1]*p:shape_port[-1]*(p+1)]
              t = theta[shape_port[-1]*p:shape_port[-1]*(p+1)]
@@ -472,7 +472,7 @@ def getdat(inputfile, filenum):
       
 # =========================================================
 def getxys(inputfiles):
-   o = Parallel(n_jobs = -1, verbose=0)(delayed(getdat)(inputfiles[k], k) for k in xrange(len(inputfiles)))
+   o = Parallel(n_jobs = -1, verbose=0)(delayed(getdat)(inputfiles[k], k) for k in range(len(inputfiles)))
    #return zip(*o)
    tmp = np.vstack(o)
    return tmp[:,0], tmp[:,1], tmp[:,2], tmp[:,3], tmp[:,4], tmp[:,5], tmp[:,6], tmp[:,7] 
@@ -607,9 +607,9 @@ def xyfunc(e,n,yvec,d,t,extent):
 def getXY(e,n,yvec,d,t,extent):
    print("getting point cloud ...")
 
-   #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
+   #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in range(len(n)))
 
-   o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))  
+   o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(xyfunc)(e[k], n[k], yvec, d[k], t[k], extent) for k in range(len(n)))  
    
    #eating, northing, distance to sonar, depth, heading
    X, Y, D, h, t = zip(*o)
