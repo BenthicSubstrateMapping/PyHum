@@ -96,85 +96,59 @@ These are all command-line programs which take a number of input (some required,
 
 ## Setup
 
-### Troubleshooting / testing before installation
+### PyHum only works in python 2.X. Python 3 is not yet supported. 
 
-In a conda python 2 environment: 
+### Installing in a conda virtual env (recommended)
+
+In a conda (miniconda/anaconda) python 2 environment: 
+
+Linux:
 
 ```
 conda create --name pyhum python=2
-source activate pyhum #(or 'activate pyhum' on Windows)
+source activate pyhum
 conda install -c conda-forge basemap-data-hires -y
-conda install simplekml
-conda install scipy
-conda install numpy
-pip install sklearn pandas dask
+conda install scipy numpy scikit-image
+pip install simplekml sklearn pandas dask
 pip install joblib toolz cython
-conda install scikit-image
 pip install pyresample
-pip install PyHum --no-deps
-python -c"import PyHum;PyHum.dotest()" #(or pip install git+https://github.com/dbuscombe-usgs/PyHum.git --no-deps)
+pip install PyHum --no-deps #(or pip install git+https://github.com/dbuscombe-usgs/PyHum.git --no-deps)
+python -c"import PyHum;PyHum.dotest()" 
+```
+
+Windows:
+
+```
+conda create --name pyhum python=2
+activate pyhum
+conda install -c conda-forge basemap-data-hires -y
+conda install scipy numpy scikit-image
+pip install simplekml sklearn pandas dask
+pip install joblib toolz cython
+pip install pyresample==1.1.4
+pip install PyHum --no-deps #(or pip install git+https://github.com/dbuscombe-usgs/PyHum.git --no-deps)
+python -c"import PyHum;PyHum.dotest()" 
 ```
 
 
+### Installing as a library accessible outside of virtual env
 
-### Notes for Windows/Anaconda users
-
-PyHum currently has only been tested with Python 2.7, so you'll need that version of Anaconda
-
-Step 1. Before installing PyHum, install Basemap using:
+1. From PyPI::
 
 ```
-conda install basemap
-```
-
-Step 2. Install pyproj. pip seems to have a bug with pyproj depending on what c-compiler your python distribution uses. Therefore, you may have to install pyproj (and other dependencies) from `here <http://www.lfd.uci.edu/~gohlke/pythonlibs/#pyproj>`_
-
-a) download the .whl file. Choose the file associated with python 2.7 ("cp27") and the architecture you are using, i.e. 32-bit (win32) or 64-bit (amd64)
-b) then move that file to your root Anaconda directory. This is probably C:\Users\yourusername\AppData\Local\Continuum\Anaconda (when you open an Anaconda command prompt it's the directory that's listed before the prompt '>')
-c) then use pip to install it, e.g.:
-
-
-```
-pip install pyproj-1.9.4-cp27-none-win_amd64.whl
-```
-
-Step 4. Install simplekml, using:
-
-```
-pip install simplekml
-```
-
-Step 3. Assuming a Anaconda distribution which comes with almost all required program dependencies:
-
-```
-pip uninstall PyHum (removes any previous installation)
 pip install PyHum
 ```
 
-If you get C++ compiler errors (such as "Unable to find vcvarsall.bat"), you will need to install the Microsoft Visual C++ compiler from `here <http://aka.ms/vcpython27>`_
-
-
-(Advanced) If you have git installed (from `here <https://git-scm.com/download/win>`_), you can install the latest 'bleeding edge' (pre-release) version directly from github:
+2. the latest 'bleeding edge' (pre-release) version directly from github::
 
 ```
 pip install git+https://github.com/dbuscombe-usgs/PyHum.git
 ```
 
+(Windows users) install git from `here <https://git-scm.com/download/win>`_
 
-### Notes for Linux users
 
-```
-pip uninstall PyHum (removes previous installation)
-pip install PyHum
-```
-
-or:
-
-```
-pip install git+https://github.com/dbuscombe-usgs/PyHum.git
-```
-
-Automatic Installation from github:
+3. from github repo clone::
 
 ```
 git clone git@github.com:dbuscombe-usgs/PyHum.git
@@ -188,14 +162,8 @@ or a local installation:
 python setup.py install --user
 ```
 
-or with admin privileges, e.g.:
 
-```
-sudo python setup.py install
-```
-
-
-You could try before you install, using a virtual environment:
+4. linux users, using a virtual environment:
 
 ```
 virtualenv venv
@@ -218,161 +186,22 @@ python -c "import PyHum; PyHum.test.dotest()"
 deactivate (or source venv/bin/deactivate)
 ```
 
-The results will live in "venv/lib/python2.7/site-packages/PyHum"
-
-Note for Fedora linux users: you need the geos-devel package for basemap, and the blas and libpack libraries for scipy
+The results will live in "venv/lib/python2.7/site-packages/PyHum". Note for Fedora linux users: you need the geos-devel package for basemap, and the blas and libpack libraries for scipy
 
 
-###Manual Installation
-
-PYTHON LIBRARIES YOU MAY NEED TO INSTALL TO USE PyHum:
-
-1. Pyproj (http://code.google.com/p/pyproj/)
-2. SciPy (http://www.scipy.org/scipylib/download.html)
-3. Numpy (http://www.scipy.org/scipylib/download.html)
-4. Matplotlib (http://matplotlib.org/downloads.html)
-5. Scikit-learn (http://scikit-learn.org/stable/)
-6. Python Image LIbrary (PIL) (http://www.pythonware.com/products/pil/)
-7. simplekml (http://simplekml.readthedocs.org/en/latest/index.html)
-8. pyproj (https://pypi.python.org/pypi/pyproj)
-9. basemap (http://matplotlib.org/basemap/)
-10. pyresample (http://pyresample.readthedocs.org/en/latest/index.html#)
-11. toolz (https://toolz.readthedocs.org/en/latest/)
-12. dask (http://dask.pydata.org/en/latest/)
-13. pandas (http://pandas.pydata.org/)
-14. joblib (https://pythonhosted.org/joblib/index.html)
-
-All of the above are available through pip (https://pypi.python.org/pypi/pip) and easy_install (https://pythonhosted.org/setuptools/easy_install.html)
-
-### Test
-
-A test can be carried out by running the supplied script:
+###Running the test
+A test can be carried out by running the supplied script. From the command line (terminal)::
 
 ```
-python -c "import PyHum; PyHum.test.dotest()"
-```
+python -c"import PyHum;PyHum.dotest()" 
+``
 
-which carries out the following operations:
-
-```
-   # copy files over to somewhere read/writeable
-   dircopy(PyHum.__path__[0], os.path.expanduser("~")+os.sep+'pyhum_test')
-   shutil.copy(PyHum.__path__[0]+os.sep+'test.DAT', os.path.expanduser("~")+os.sep+'pyhum_test'+os.sep+'test.DAT')
-
-   # general settings   
-   humfile = os.path.normpath(os.path.join(os.path.expanduser("~"),'pyhum_test','test.DAT'))
-   sonpath = os.path.normpath(os.path.join(os.path.expanduser("~"),'pyhum_test'))
-
-   doplot = 1 #yes
-
-   # reading specific settings
-   cs2cs_args = "epsg:26949" #arizona central state plane
-   bedpick = 1 # auto bed pick
-   c = 1450 # speed of sound fresh water
-   t = 0.108 # length of transducer
-   draft = 0.3 # draft in metres
-   flip_lr = 1 # flip port and starboard
-   model = 998 # humminbird model
-   calc_bearing = 1 #1=yes
-   filt_bearing = 1 #1=yes
-   chunk = '1' ##'d100' # distance, 100m
-   #chunk = 'p1000' # pings, 1000
-   #chunk = 'h10' # heading deviation, 10 deg
-          
-   # correction specific settings
-   maxW = 1000 # rms output wattage
-   dofilt = 0 # 1 = apply a phase preserving filter (WARNING!! takes a very long time for large scans)
-   correct_withwater = 0 # don't retain water column in radiometric correction (1 = retains water column for radiomatric corrections)
-   ph = 7.0 # acidity on the pH scale
-   temp = 10.0 # water temperature in degrees Celsius
-   salinity = 0.0
-
-   # for shadow removal
-   shadowmask = 1 #0 = automatic shadow removal
-   win = 31
-
-   # for texture calcs
-   shift = 50 ##10 # pixel shift
-   density =win/2 # win/2 
-   numclasses = 8 #4 # number of discrete classes for contouring and k-means
-   maxscale = 20 # Max scale as inverse fraction of data length (for wavelet analysis)
-   notes = 4 # Notes per octave (for wavelet analysis)
-
-   # for mapping
-   res = 0.2 #99 # grid resolution in metres
-   # if res==99, the program will automatically calc res from the spatial res of the scans
-   mode = 1 # gridding mode (simple nearest neighbour)
-   #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
-   #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
-   use_uncorrected = 0
-
-   nn = 64 #number of nearest neighbours for gridding (used if mode > 1)
-   ##influence = 1 #Radius of influence used in gridding. Cut off distance in meters 
-   numstdevs = 5 #Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept 
-
-   # for downward-looking echosounder echogram (e1-e2) analysis
-   beam = 20.0
-   transfreq = 200.0 # frequency (kHz) of downward looking echosounder
-   integ = 5
-   numclusters = 3 # number of acoustic classes to group observations
-
-   ## read data in SON files into PyHum memory mapped format (.dat)
-   PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) #cog
-
-   ## correct scans and remove water column
-   PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
-
-   ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
-   PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
-
-   win = 200 # pixel window
-   
-   ## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
-   PyHum.texture(humfile, sonpath, win, shift, doplot, density, numclasses, maxscale, notes)
-
-   ## grid and map the scans
-   PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
-
-   res = 1 # grid resolution in metres
-   numstdevs = 5
-   
-   ## grid and map the texture lengthscale maps
-   PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs)
-
-   ## calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
-   PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
-   
+### Using the GUI
+From the command line (terminal)::
 
 ```
-
-on the following files:
-
-1. test.DAT
-2. B003.SON
-3. B002.SON
-4. B001.SON
-5. B000.SON
-
-<!--and results in a set of outputs such as csv, mat and kml files, and including some rudimentary figures such as:-->
-
-<!--![alt tag](http://dbuscombe-usgs.github.io/figs/bed_pick.png)-->
-<!--*port and starboard scans showing automated bed picks*-->
-
-<!--![alt tag](http://dbuscombe-usgs.github.io/figs/merge_corrected_scan_ppdrc.png)-->
-<!--*a merged port/starboard scan*-->
-
-<!--![alt tag](http://dbuscombe-usgs.github.io/figs/raw_dwnhi.png)-->
-<!--*a raw 200 kHz downward sonar scan*-->
-
-<!--![alt tag](http://dbuscombe-usgs.github.io/figs/raw_dwnlow.png)-->
-<!--*a raw 83 kHz downward sonar scan*-->
-
-<!--![alt tag](http://dbuscombe-usgs.github.io/figs/testclass1.png)-->
-<!--*radiometrically corrected scan (top) and wavelet lengthscale classification (bottom)*-->
-
-<!--![alt tag](http://dbuscombe-usgs.github.io/figs/testclass_kmeans1.png)-->
-<!--*k=4 means lengthscale classification*-->
-
+python -c "import PyHum; PyHum.gui()"
+```
 
 ### Getting Started
 
@@ -497,14 +326,6 @@ or from within ipython (with a GUI prompt to navigate to the files):
 ```
 
 
-### Using the GUI
-From the command line (terminal)::
-
-```
-python -c "import PyHum; PyHum.gui()"
-```
-
-
 ### Trouble Shooting
 
 1. Problem: pyhum read hangs for a long time (several minutes) on the test script. 
@@ -529,16 +350,21 @@ or using os, e.g.::
    os.path.abspath(os.path.join('C:\Users','me','mydata','R0089'))
 ```
 
+If you get C++ compiler errors (such as "Unable to find vcvarsall.bat"), you will need to install the Microsoft Visual C++ compiler from `here <http://aka.ms/vcpython27>`_
+
+
 
 ### Support
 
-This is a new project written and maintained by Daniel Buscombe. Bugs are expected - please report them, I will fix them quickly. Feedback and suggestions for improvements are *very* welcome
-
-Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please use the 'Issues' tab in github
+This is a new project written and maintained by Daniel Buscombe. Bugs are expected - please report them. Please use the 'Issues' tab in github
 
 https://github.com/dbuscombe-usgs/PyHum
 
-for all bug reports, suggestions, comments and queries. Thanks for stopping by! 
+Feedback and suggestions for improvements are *very* welcome
+
+Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. 
+
+Thanks for stopping by! 
 
 
 
