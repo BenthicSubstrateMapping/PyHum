@@ -7,13 +7,10 @@ Part of PyHum software
 
 INFO:
 
-
 Author:    Daniel Buscombe
-           Grand Canyon Monitoring and Research Center
-           United States Geological Survey
-           Flagstaff, AZ 86001
-           dbuscombe@usgs.gov
-Version: 1.2.3      Revision: Apr, 2015
+           Northern Arizona University
+           Flagstaff, AZ 86011
+           daniel.buscombe@nau.edu
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs

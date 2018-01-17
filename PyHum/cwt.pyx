@@ -1,5 +1,10 @@
 # cython module for wavelet computations
-# Daniel Buscombe, June-Aug 2014
+
+#Author:    Daniel Buscombe
+#           Northern Arizona University
+#           Flagstaff, AZ 86011
+#           daniel.buscombe@nau.edu
+
 from __future__ import division
 import numpy as np
 cimport numpy as np

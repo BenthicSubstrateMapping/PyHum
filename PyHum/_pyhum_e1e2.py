@@ -41,11 +41,8 @@
 #|b|y| |D|a|n|i|e|l| |B|u|s|c|o|m|b|e|
 #+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#|d|b|u|s|c|o|m|b|e|@|u|s|g|s|.|g|o|v|
+#|d|a|n|i|e|l|.|b|u|s|c|o|m|b|e|@|n|a|u|.|e|d|u|
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
-#|U|.|S|.| |G|e|o|l|o|g|i|c|a|l| |S|u|r|v|e|y|
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
 
 #"""
 
@@ -54,6 +51,7 @@
 # =========================================================
 
 # operational
+from __future__ import print_function
 from __future__ import division
 from scipy.io import loadmat
 import os #, time, sys, getopt
@@ -83,7 +81,7 @@ import matplotlib.pyplot as plt
 try:
    from mpl_toolkits.basemap import Basemap
 except:
-   print "Error: Basemap could not be imported"
+   print("Error: Basemap could not be imported")
    pass
 import simplekml
 
@@ -189,58 +187,58 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
 
     # prompt user to supply file if no input file given
     if not humfile:
-       print 'An input file is required!!!!!!'
+       print('An input file is required!!!!!!')
        Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
        inputfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
 
     # prompt user to supply directory if no input sonpath is given
     if not sonpath:
-       print 'A *.SON directory is required!!!!!!'
+       print('A *.SON directory is required!!!!!!')
        Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
        sonpath = askdirectory() 
 
     # print given arguments to screen and convert data type where necessary
     if humfile:
-       print 'Input file is %s' % (humfile)
+       print('Input file is %s' % (humfile))
 
     if sonpath:
-       print 'Sonar file path is %s' % (sonpath)
+       print('Sonar file path is %s' % (sonpath))
 
     if cs2cs_args:
-       print 'cs2cs arguments are %s' % (cs2cs_args)
+       print('cs2cs arguments are %s' % (cs2cs_args))
 
     if beam:
        beam = np.asarray(beam,float)
-       print 'Beam is %s deg' % (str(beam))
+       print('Beam is %s deg' % (str(beam)))
 
     if salinity:
        salinity = np.asarray(salinity,float)
-       print 'Salinity is %s ppt' % (str(salinity))
+       print('Salinity is %s ppt' % (str(salinity)))
 
     if ph:
        ph = np.asarray(ph,float)
-       print 'pH is %s' % (str(ph))
+       print('pH is %s' % (str(ph)))
 
     if temp:
        temp = np.asarray(temp,float)
-       print 'Temperature is %s' % (str(temp))
+       print('Temperature is %s' % (str(temp)))
 
     if transfreq:
        transfreq = np.asarray(transfreq,float)
-       print 'Dwnward sonar freq. is %s' % (str(transfreq))
+       print('Dwnward sonar freq. is %s' % (str(transfreq)))
 
     if integ:
        integ = np.asarray(integ,int)
-       print 'number of records for integration is %s' % (str(integ))
+       print('number of records for integration is %s' % (str(integ)))
 
     if numclusters:
        numclusters = np.asarray(numclusters,int)
-       print 'number of returned acoustic clusters is %s' % (str(numclusters))
+       print('number of returned acoustic clusters is %s' % (str(numclusters)))
 
     if doplot:
       doplot = int(doplot)
       if doplot==0:
-         print "Plots will not be made"
+         print("Plots will not be made")
 
 
     # if son path name supplied has no separator at end, put one on
@@ -412,7 +410,7 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    del fig
 
                 except:
-                   print "plot could not be produced"
+                   print("plot could not be produced")
 
              if doplot==1:
                 try:
@@ -437,7 +435,7 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    del fig
 
                 except:
-                   print "plot could not be produced"
+                   print("plot could not be produced")
 
              if doplot==1:
                 try:
@@ -450,12 +448,12 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    del fig
 
                 except:
-                   print "plot could not be produced"
+                   print("plot could not be produced")
 
              if doplot==1:
                 try:
 
-                   print "drawing and printing map ..."
+                   print("drawing and printing map ...")
                    fig = plt.figure(frameon=False)
                    #fig.subplots_adjust(wspace = 0.4, hspace=0.4)
                    map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #epsg=26949,
@@ -481,7 +479,7 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    del fig 
 
                 except:
-                   print "plot could not be produced"
+                   print("plot could not be produced")
 
              if doplot==1:
                 try:
@@ -510,11 +508,11 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    del fig 
 
                 except:
-                   print "plot could not be produced"
+                   print("plot could not be produced")
 
              if doplot==1:
                 try:
-                   print "drawing and printing map ..."
+                   print("drawing and printing map ...")
                    fig = plt.figure(frameon=False)
                    map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
                     resolution = 'i', #h #f
@@ -545,11 +543,11 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    kml.save(os.path.normpath(os.path.join(sonpath,'Rough'+str(p)+'.kml')))
 
                 except:
-                   print "plot could not be produced"
+                   print("plot could not be produced")
 
              if doplot==1:
                 try:
-                   print "drawing and printing map ..."
+                   print("drawing and printing map ...")
                    fig = plt.figure(frameon=False)
                    map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
                     resolution = 'i', #h #f
@@ -580,7 +578,7 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    kml.save(os.path.normpath(os.path.join(sonpath,'Hard'+str(p)+'.kml')))
 
                 except:
-                   print "plot could not be produced"
+                   print("plot could not be produced")
 
        else:
           if 2 > 1: # need to tiday all this up later!!
@@ -670,7 +668,7 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    del fig
 
                 except:
-                   print "plot could not be produced"
+                   print("plot could not be produced")
 
              if doplot==1:
                 try:
@@ -695,7 +693,7 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    del fig
 
                 except:
-                   print "plot could not be produced"
+                   print("plot could not be produced")
 
              if doplot==1:
                 try:
@@ -708,12 +706,12 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    del fig
 
                 except:
-                   print "plot could not be produced"
+                   print("plot could not be produced")
 
              if doplot==1:
                 try:
 
-                   print "drawing and printing map ..."
+                   print("drawing and printing map ...")
                    fig = plt.figure(frameon=False)
                    #fig.subplots_adjust(wspace = 0.4, hspace=0.4)
                    map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #epsg=26949,
@@ -739,7 +737,7 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    del fig 
 
                 except:
-                   print "plot could not be produced"
+                   print("plot could not be produced")
 
              if doplot==1:
                 try:
@@ -768,11 +766,11 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    del fig 
 
                 except:
-                   print "plot could not be produced"
+                   print("plot could not be produced")
 
              if doplot==1:
                 try:
-                   print "drawing and printing map ..."
+                   print("drawing and printing map ...")
                    fig = plt.figure(frameon=False)
                    map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
                     resolution = 'i', #h #f
@@ -803,11 +801,11 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    kml.save(os.path.normpath(os.path.join(sonpath,'Rough'+str(0)+'.kml')))
 
                 except:
-                   print "plot could not be produced"
+                   print("plot could not be produced")
 
              if doplot==1:
                 try:
-                   print "drawing and printing map ..."
+                   print("drawing and printing map ...")
                    fig = plt.figure(frameon=False)
                    map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], #26949,
                     resolution = 'i', #h #f
@@ -838,10 +836,10 @@ def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=
                    kml.save(os.path.normpath(os.path.join(sonpath,'Hard'+str(0)+'.kml')))
 
                 except:
-                   print "plot could not be produced"         
+                   print("plot could not be produced")     
 
     else:
-       print "high-frequency downward echosounder data not available"
+       print("high-frequency downward echosounder data not available")
 
 
 # =========================================================
