@@ -398,7 +398,7 @@ def gui():
 	    # function to invoke PyHum.read
 	    
 	    # build error checking into here
-	    print('Processing ...'
+	    print('Processing ...')
 	    print("filt_head: " + str(self.filtheadvar.get()))
 	    print("calc_head: " + str(self.calcheadvar.get()))    
 	    print("humfile: " + self.DATfilename.get())

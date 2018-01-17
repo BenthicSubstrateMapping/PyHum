@@ -150,16 +150,16 @@ def dotest():
    ##PyHum.texture_slic(humfile, sonpath, doplot, numclasses, maxscale, notes)
 
    ## grid and map the scans
-   PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
+   #PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
 
    res = 1 # grid resolution in metres
    numstdevs = 5
    
    ## grid and map the texture lengthscale maps
-   PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs)
+   #PyHum.map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs)
 
    ## calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
-   PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
+   #PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)
    
    #res = 0
    #nn = 5 # noise threshold in dB W

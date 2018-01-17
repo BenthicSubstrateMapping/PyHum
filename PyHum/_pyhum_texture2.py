@@ -229,8 +229,9 @@ def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4):
          shape[1] = shape_port[0] + shape_star[0]
 
       # create memory mapped file for Sp
-      with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'w+') as ff:
-         fp = np.memmap(ff, dtype='float32', mode='w+', shape=tuple(shape))
+      #with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'w+') as ff:
+      #   fp = np.memmap(ff, dtype='float32', mode='w+', shape=tuple(shape))
+      fp = np.zeros(tuple(shape), dtype='float32')
 
       if len(shape_star)>2:
 
@@ -261,8 +262,9 @@ def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4):
             fp[p] = Sp.astype('float32')
             del Sp
 
-         del fp # flush data to file
-
+         #del fp # flush data to file
+         shape = io.set_mmap_data(sonpath, base, '_data_class.dat', 'float32', np.squeeze(fp))
+         del fp
          class_fp = io.get_mmap_data(sonpath, base, '_data_class.dat', 'float32', tuple(shape))
 
       else: 
@@ -288,13 +290,16 @@ def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4):
 
             Sp = (Snn**2) * np.cos(np.deg2rad(R)) / win ##**2
 
-            with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'w+') as ff:
-               np.save(ff, np.squeeze(Sp).astype('float32'))
+            shape = io.set_mmap_data(sonpath, base, '_data_class.dat', 'float32', np.squeeze(Sp))
 
-            with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'r') as ff:
-               class_fp = np.load(ff)
+            #with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'w+') as ff:
+            #   np.save(ff, np.squeeze(Sp).astype('float32'))
 
-            del Sp
+            #with open(os.path.normpath(os.path.join(sonpath,base+'_data_class.dat')), 'r') as ff:
+            #   class_fp = np.load(ff)
+
+            #del Sp
+            class_fp = io.get_mmap_data(sonpath, base, '_data_class.dat', 'float32', tuple(shape))
 
       dist_m = np.squeeze(loadmat(sonpath+base+'meta.mat')['dist_m'])
 
@@ -388,7 +393,8 @@ def plot_class(dist_m, shape_port, dat_port, dat_star, dat_class, ft, humfile, s
    fig.subplots_adjust(wspace = 0, hspace=0.075)
    plt.subplot(2,1,1)
    ax = plt.gca()
-   im = ax.imshow(np.vstack((np.flipud(dat_port),dat_star)) ,cmap='gray',extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
+   im = ax.imshow(np.vstack((np.flipud(dat_port),dat_star)),cmap='gray',
+                  extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
    plt.ylabel('Horizontal distance (m)'); 
    plt.axis('tight')
 
@@ -407,8 +413,10 @@ def plot_class(dist_m, shape_port, dat_port, dat_star, dat_class, ft, humfile, s
 
    plt.subplot(2,1,2)
    ax = plt.gca()
-   plt.imshow(np.vstack((np.flipud(dat_port), dat_star)),cmap='gray',extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
-   im = ax.imshow(dat_class, alpha=0.5,extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper', cmap='YlOrRd')#, vmin=0.5, vmax=3)
+   plt.imshow(np.vstack((np.flipud(dat_port), dat_star)),cmap='gray',
+              extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
+   im = ax.imshow(dat_class, alpha=0.5,extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],
+                  origin='upper', cmap='YlOrRd', vmin=0.5, vmax=np.mean(dat_class))
    plt.ylabel('Horizontal distance (m)'); 
    plt.xlabel('Distance along track (m)')
    plt.axis('tight')
@@ -441,7 +449,8 @@ def plot_contours(dist_m, shape_port, dat_class, ft, humfile, sonpath, base, num
    fig = plt.figure()
    plt.subplot(2,1,1)
    ax = plt.gca()
-   CS = plt.contourf(dat_class.astype('float64'), levels, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)], cmap='YlOrRd',origin='upper')#vmin=0.5, vmax=3)
+   CS = plt.contourf(dat_class.astype('float64'), levels, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)], 
+                     cmap='YlOrRd',origin='upper', vmin=0.5, vmax=np.mean(dat_class))
    plt.ylabel('Horizontal distance (m)'); plt.xlabel('Distance along track (m)')
    plt.axis('tight')
 
@@ -473,7 +482,8 @@ def plot_kmeans(dist_m, shape_port, dat_port, dat_star, dat_kclass, ft, humfile,
    ax = plt.gca()
    plt.imshow(np.vstack((np.flipud(dat_port), dat_star)), cmap='gray',extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
    
-   CS = plt.contourf(np.flipud(dat_kclass), alpha=0.4, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper', cmap='YlOrRd')#, levels, vmin=0.5, vmax=3)   
+   CS = plt.contourf(np.flipud(dat_kclass), alpha=0.4, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],
+                     origin='upper', cmap='YlOrRd', vmin=0.5, vmax=np.mean(dat_kclass))   
    plt.ylabel('Horizontal distance (m)')
    plt.xlabel('Distance along track (m)')
    plt.axis('tight')
