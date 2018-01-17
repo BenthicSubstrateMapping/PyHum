@@ -444,7 +444,7 @@ def plot_contours(dist_m, shape_port, dat_class, ft, humfile, sonpath, base, num
       Zdist = dist_m
       extent = shape_port[0]
 
-   levels = np.linspace(np.nanmin(dat_class),np.nanmax(dat_class),numclasses+1)
+   levels = np.linspace(np.percentile(dat_class, 10), np.percentile(dat_class, 90), numclasses+1) ##np.nanmin(dat_class), np.nanmax(dat_class),numclasses+1)
 
    fig = plt.figure()
    plt.subplot(2,1,1)
