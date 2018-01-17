@@ -180,7 +180,7 @@ def get_bearing(calc_bearing, filt_bearing, lat, lon, heading): #cog
 
     # if stdev in heading is large, there's probably noise that needs to be filtered out
     if np.std(bearing)>180:
-       print "WARNING: large heading stdev - attempting filtering"
+       print("WARNING: large heading stdev - attempting filtering")
        from sklearn.cluster import MiniBatchKMeans
        # can have two modes
        data = np.column_stack([bearing, bearing])
@@ -468,7 +468,7 @@ def sliding_window(a,ws,ss = None,flatten = True):
    except:
 
       from itertools import product
-      print "memory error, windowing using slower method"
+      print("memory error, windowing using slower method")
       # For each dimension, create a list of all valid slices
       slices = [[] for i in range(len(ws))]
       for i in xrange(len(ws)):
