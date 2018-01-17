@@ -182,7 +182,7 @@ install_requires = [
 def setupPackage():
    setup(name='PyHum',
          version=__version__,
-         description='Python/Cython scripts to read Humminbird DAT and associated SON files, export data, carry out rudimentary radiometric corrections to data, and classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019 and Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization using recreational-grade sidescan-sonar. ENVIRONMENTAL MODELLING & SOFTWARE 89, 1-18.',
+         description='Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization using recreational-grade sidescan-sonar. ENVIRONMENTAL MODELLING & SOFTWARE 89, 1-18.',
          #long_description=long_description,
          classifiers=[
              'Intended Audience :: Science/Research',
