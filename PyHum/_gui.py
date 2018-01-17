@@ -47,7 +47,7 @@
 #"""
 #=======================
 # python -c "import PyHum; PyHum.gui()"
-
+from __future__ import print_function
 import Tkinter
 from Tix import *
 

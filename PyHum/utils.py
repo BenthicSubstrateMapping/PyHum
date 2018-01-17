@@ -17,7 +17,7 @@ This software is in the public domain because it contains materials that origina
 For more information, see the official USGS copyright policy at
 http://www.usgs.gov/visual-id/credit_usgs.html#copyright
 '''
-
+from __future__ import print_function
 from numpy.lib.stride_tricks import as_strided as ast
 import os
 import numpy as np
@@ -123,7 +123,7 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
 
     # if standard deviation of auto bed pick is too small, then use acoustic bed pick
     if np.std(x)<5:
-       print "stdev of auto bed pick is low, using acoustic pick"
+       print("stdev of auto bed pick is low, using acoustic pick")
        x = bed.copy()
 
     return x, bed
