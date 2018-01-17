@@ -688,7 +688,7 @@ def gui():
 
 	    #dofilt = 0 # 1 = apply a phase preserving filter (WARNING!! takes a very long time for large scans)    
 	    # build error checking into here
-	    print('Processing ...'   
+	    print('Processing ...')   
 	    print("humfile: " + self.DATfilename.get())
 	    print("sonpath: " + os.path.dirname(self.SONfiles[0]))
 	    print("max wattage: " + str(self.Wvar.get()))        
