@@ -41,11 +41,8 @@
 #|b|y| |D|a|n|i|e|l| |B|u|s|c|o|m|b|e|
 #+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#|d|b|u|s|c|o|m|b|e|@|u|s|g|s|.|g|o|v|
+#|d|a|n|i|e|l|.|b|u|s|c|o|m|b|e|@|n|a|u|.|e|d|u|
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
-#|U|.|S|.| |G|e|o|l|o|g|i|c|a|l| |S|u|r|v|e|y|
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
 
 #"""
 #=======================
@@ -392,7 +389,7 @@ def gui():
 	    self.epsg1.set( self.epsg1.get() )
 	    self.epsg1_entry.focus_set()
 	    self.epsg1_entry.selection_range(0, Tkinter.END)
-	    print 'epsg code set to %s ' % (str(self.epsg1.get()))
+	    print('epsg code set to %s ' % (str(self.epsg1.get())))
 	#    if int(self.c.get())>1500:
 	#       tkMessageBox.showinfo("High value", "Consider 1450 for freshwater and 1500 for salt water")
 
@@ -401,20 +398,20 @@ def gui():
 	    # function to invoke PyHum.read
 	    
 	    # build error checking into here
-	    print 'Processing ...'
-	    print "filt_head: " + str(self.filtheadvar.get())
-	    print "calc_head: " + str(self.calcheadvar.get())    
-	    print "humfile: " + self.DATfilename.get()
-	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	    print "model: " + str(self.model)
-	    print "bedpick: " + str(self.bedpick)
-	    print "flip_lr: " + str(self.flipvar.get())
-	    print "c: " + str(self.cvar.get())    
+	    print('Processing ...'
+	    print("filt_head: " + str(self.filtheadvar.get()))
+	    print("calc_head: " + str(self.calcheadvar.get()))    
+	    print("humfile: " + self.DATfilename.get())
+	    print("sonpath: " + os.path.dirname(self.SONfiles[0]))
+	    print("model: " + str(self.model))
+	    print("bedpick: " + str(self.bedpick))
+	    print("flip_lr: " + str(self.flipvar.get()))
+	    print("c: " + str(self.cvar.get()))    
 	    #print "f: " + str(self.fvar.get())    
-	    print "t: " + str(self.tvar.get())    
-	    print "draft: " + str(self.dvar.get())                
-	    print "cs2cs arguments: " + str(self.epsg1.get())                
-	    print "chunk argument: " + str(self.chunk)     
+	    print("t: " + str(self.tvar.get()))    
+	    print("draft: " + str(self.dvar.get()))                
+	    print("cs2cs arguments: " + str(self.epsg1.get()))                
+	    print("chunk argument: " + str(self.chunk))     
            
 	    # do stuff here
 	    PyHum.read(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), str(self.epsg1.get()), self.cvar.get(), self.dvar.get(), self.doplot, self.tvar.get(), self.bedpick, self.flipvar.get(), self.model, self.calcheadvar.get(), self.filtheadvar.get(), self.chunk)
@@ -428,7 +425,7 @@ def gui():
 
 	    self.DATfilename.set(self.DATfile)
 
-	    print 'You chose: %s' % (self.DATfilename.get())
+	    print('You chose: %s' % (self.DATfilename.get()))
 	    
 	    self.read_dat_btn.configure(fg='thistle3', background="black")
 	    self.correct_dat_btn.configure(fg='lightgoldenrod', background="black")     
@@ -445,7 +442,7 @@ def gui():
 	    self.SONfiles = askopenfilename(filetypes=[("SON files","*.SON")], multiple=True)
 
 	    for k in xrange(len(self.SONfiles)):
-	       print 'You chose: %s' % (self.SONfiles[k])
+	       print('You chose: %s' % (self.SONfiles[k]))
 	    self.folder = os.path.dirname(self.SONfiles[0])
 	    
 	    #self.son_btn.configure(fg='thistle3', background="black")
@@ -464,16 +461,16 @@ def gui():
 	def _SetModel(master, v):
 	   if v==1:
 	      self.model=997
-	      print "model is 997"
+	      print("model is 997")
 	   elif v==2:
 	      self.model=998
-	      print "model is 998"
+	      print("model is 998")
 	   elif v==3:
 	      self.model=1198
-	      print "model is 1198"
+	      print("model is 1198")
 	   elif v==4:
 	      self.model=1199
-	      print "model is 1199"
+	      print("model is 1199")
 	      
 	   self.mb.configure(fg='thistle3', background="black")
 	      
@@ -483,13 +480,13 @@ def gui():
 	def _SetBedPick(master, v):
 	   if v==1:
 	      self.bedpick=1
-	      print "bed picking is auto"
+	      print("bed picking is auto")
 	   elif v==0:
 	      self.bedpick=0
-	      print "bed picking is manual"
+	      print("bed picking is manual")
 	   elif v==2:
 	      self.bedpick=2
-	      print "bed picking is hybrid"
+	      print("bed picking is hybrid")
 	      
 	   self.bb.configure(fg='thistle3', background="black")
 		 
@@ -498,29 +495,29 @@ def gui():
 	#=======================   
 	def _SetChunk(master, v):
 	   if v==1:
-	      self.chunk='d50'; print "chunk is 50 m"
+	      self.chunk='d50'; print("chunk is 50 m")
 	   elif v==2:
-	      self.chunk='d100'; print "chunk is 100 m"
+	      self.chunk='d100'; print("chunk is 100 m")
 	   elif v==3:
-	      self.chunk='d200'; print "chunk is 200 m"
+	      self.chunk='d200'; print("chunk is 200 m")
 	   elif v==4:
-	      self.chunk='d400'; print "chunk is 400 m"
+	      self.chunk='d400'; print("chunk is 400 m")
 	   elif v==5:
-	      self.chunk='p1000'; print "chunk is 1000 pings"
+	      self.chunk='p1000'; print("chunk is 1000 pings")
 	   elif v==6:
-	      self.chunk='p5000'; print "chunk is 5000 pings"
+	      self.chunk='p5000'; print("chunk is 5000 pings")
 	   elif v==7:
-	      self.chunk='p10000'; print "chunk is 10,000 pings"
+	      self.chunk='p10000'; print("chunk is 10,000 pings")
 	   elif v==8:
-	      self.chunk='p20000'; print "chunk is 20,000 pings"            
+	      self.chunk='p20000'; print("chunk is 20,000 pings")           
 	   elif v==9:
-	      self.chunk='h5'; print "chunk is a 5 degree heading change" 
+	      self.chunk='h5'; print("chunk is a 5 degree heading change") 
 	   elif v==10:
-	      self.chunk='h10'; print "chunk is a 10 degree heading change" 
+	      self.chunk='h10'; print("chunk is a 10 degree heading change") 
 	   elif v==11:
-	      self.chunk='h20'; print "chunk is a 20 degree heading change" 
+	      self.chunk='h20'; print("chunk is a 20 degree heading change")
 	   elif v==12:
-	      self.chunk='h40'; print "chunk is a 40 degree heading change"
+	      self.chunk='h40'; print("chunk is a 40 degree heading change")
 	      
 	   self.cb.configure(fg='thistle3', background="black")
 	       
@@ -691,15 +688,15 @@ def gui():
 
 	    #dofilt = 0 # 1 = apply a phase preserving filter (WARNING!! takes a very long time for large scans)    
 	    # build error checking into here
-	    print 'Processing ...'   
-	    print "humfile: " + self.DATfilename.get()
-	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	    print "max wattage: " + str(self.Wvar.get())        
-	    print "pH: " + str(self.Pvar.get())    
-	    print "temperature: " + str(self.Tvar.get())    
-	    print "salinity: " + str(self.Svar.get())    
-	    print "dofilt: " + str(self.dofiltvar.get())
-	    print "correct_withwater: " + str(self.watervar.get())   
+	    print('Processing ...'   
+	    print("humfile: " + self.DATfilename.get())
+	    print("sonpath: " + os.path.dirname(self.SONfiles[0]))
+	    print("max wattage: " + str(self.Wvar.get()))        
+	    print("pH: " + str(self.Pvar.get()))    
+	    print("temperature: " + str(self.Tvar.get()))    
+	    print("salinity: " + str(self.Svar.get()))    
+	    print("dofilt: " + str(self.dofiltvar.get()))
+	    print("correct_withwater: " + str(self.watervar.get()))
               
 	    # do stuff here
 	    PyHum.correct(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Wvar.get(), self.doplot, self.dofiltvar.get(), self.watervar.get(), self.Pvar.get(), self.Tvar.get(), self.Svar.get(), self.sedfilename.get())    
@@ -713,7 +710,7 @@ def gui():
 
 	    self.sedfilename.set(self.sedfile)
 
-	    print 'You chose: %s' % (self.sedfilename.get())
+	    print('You chose: %s' % (self.sedfilename.get()))
 	    
 	    self.correct_sed_btn.configure(fg='lightgoldenrod', background="black")     
 		    
@@ -831,11 +828,11 @@ def gui():
 	    # function to invoke PyHum.rmshadows
 
 	    # build error checking into here
-	    print 'Processing ...'   
-	    print "humfile: " + self.DATfilename.get()
-	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	    print "window size: " + str(self.Winvar.get())        
-	    print "manually mask: " + str(self.manmaskvar.get())   
+	    print('Processing ...')   
+	    print("humfile: " + self.DATfilename.get())
+	    print("sonpath: " + os.path.dirname(self.SONfiles[0]))
+	    print("window size: " + str(self.Winvar.get()))        
+	    print("manually mask: " + str(self.manmaskvar.get()))
                  
 	    # do stuff here
 	    PyHum.rmshadows(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Winvar.get(), self.manmaskvar.get(), self.doplot)  
@@ -1001,7 +998,7 @@ def gui():
 	    self.epsg2.set( self.epsg2.get() )
 	    self.epsg2_entry.focus_set()
 	    self.epsg2_entry.selection_range(0, Tkinter.END)
-	    print 'epsg code set to %s ' % (str(self.epsg2.get()))
+	    print('epsg code set to %s ' % (str(self.epsg2.get())))
 	#    if int(self.c.get())>1500:
 	#       tkMessageBox.showinfo("High value", "Consider 1450 for freshwater and 1500 for salt water")
 
@@ -1010,15 +1007,15 @@ def gui():
 	def _proc4(self):
 	    # function to invoke PyHum.map
 	    # build error checking into here
-	    print 'Processing ...'   
-	    print "humfile: " + self.DATfilename.get()
-	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	    print "mode: " + str(self.mode)        
-	    print "cs2cs arguments: " + str(self.epsg2.get())   
-	    print "resolution: " + str(self.resvar.get())
-	    print "max. number of nearest neighbours: " + str(self.nnvar.get()) 
+	    print('Processing ...')   
+	    print("humfile: " + self.DATfilename.get())
+	    print("sonpath: " + os.path.dirname(self.SONfiles[0]))
+	    print("mode: " + str(self.mode))        
+	    print("cs2cs arguments: " + str(self.epsg2.get()))   
+	    print("resolution: " + str(self.resvar.get()))
+	    print("max. number of nearest neighbours: " + str(self.nnvar.get()))
 	    #print "gridding influence [m]: " + str(self.infvar.get()) 
-	    print "number std. dev. to accept: " + str(self.nstdvar.get())             
+	    print("number std. dev. to accept: " + str(self.nstdvar.get()))             
 	    #print "Write point cloud to file: " + str(self.dowritevar.get())             
 		   
 	    if self.resvar.get()==0:
@@ -1032,13 +1029,13 @@ def gui():
 	def _SetMode(master, v):
 	   if v==1:
 	      self.mode=1
-	      print "grid mode is nearest neighbour"
+	      print("grid mode is nearest neighbour")
 	   elif v==2:
 	      self.mode=2
-	      print "grid mode is inverse weight distance nearest neighbour"
+	      print("grid mode is inverse weight distance nearest neighbour")
 	   elif v==3:
 	      self.mode=3
-	      print "grid mode is gaussian"
+	      print("grid mode is gaussian")
 	      
 	   self.Mb.configure(fg='IndianRed1', background="black")
 	   self.Mbt.configure(fg='gold2', background="black")
@@ -1193,15 +1190,15 @@ def gui():
 	def _proc5(self):
 	    # function to invoke PyHum.texture
 	    # build error checking into here
-	    print 'Processing ...'   
-	    print "humfile: " + self.DATfilename.get()
-	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	    print "window size [pixels]: " + str(self.Winvar2.get())        
-	    print "shift size [pixels]: " + str(self.shiftvar.get())        
-	    print "density [pixels]: " + str(self.densvar.get())
-	    print "maxscale: " + str(self.maxscalevar.get())
-	    print "notes: " + str(self.notesvar.get())
-	    print "number of texture classes: " + str(self.ncvar.get())
+	    print('Processing ...')   
+	    print("humfile: " + self.DATfilename.get())
+	    print("sonpath: " + os.path.dirname(self.SONfiles[0]))
+	    print("window size [pixels]: " + str(self.Winvar2.get()))       
+	    print("shift size [pixels]: " + str(self.shiftvar.get()))        
+	    print("density [pixels]: " + str(self.densvar.get()))
+	    print("maxscale: " + str(self.maxscalevar.get()))
+	    print("notes: " + str(self.notesvar.get()))
+	    print("number of texture classes: " + str(self.ncvar.get()))
 		             
 	    # do stuff here
 	    PyHum.texture(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Winvar2.get(), self.shiftvar.get(), self.doplot, self.densvar.get(), self.ncvar.get(), self.maxscalevar.get(), self.notesvar.get())
@@ -1360,21 +1357,21 @@ def gui():
 	    self.epsg3.set( self.epsg3.get() )
 	    self.epsg3_entry.focus_set()
 	    self.epsg3_entry.selection_range(0, Tkinter.END)
-	    print 'epsg code set to %s ' % (str(self.epsg3.get()))
+	    print('epsg code set to %s ' % (str(self.epsg3.get())))
 
 	#=======================
 	def _proc6(self):
 	    # function to invoke PyHum.map_texture
 	    # build error checking into here
-	    print 'Processing ...'   
-	    print "humfile: " + self.DATfilename.get()
-	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	    print "mode: " + str(self.mode)        
-	    print "cs2cs arguments: " + str(self.epsg3.get())   
-	    print "resolution: " + str(self.resvar2.get())
-	    print "max. number of nearest neighbours: " + str(self.nnvar.get()) 
+	    print('Processing ...')   
+	    print("humfile: " + self.DATfilename.get())
+	    print("sonpath: " + os.path.dirname(self.SONfiles[0]))
+	    print("mode: " + str(self.mode))        
+	    print("cs2cs arguments: " + str(self.epsg3.get()))   
+	    print("resolution: " + str(self.resvar2.get()))
+	    print("max. number of nearest neighbours: " + str(self.nnvar.get())) 
 	    #print "gridding influence [m]: " + str(self.infvar.get()) 
-	    print "number std. dev. to accept: " + str(self.nstdvar.get())             
+	    print("number std. dev. to accept: " + str(self.nstdvar.get()))             
 		             
 	    # do stuff here
 	    PyHum.map_texture(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.epsg3.get(),self.resvar2.get(), self.mode, self.nnvar.get(), self.nstdvar.get())  #self.infvar.get(),  
@@ -1536,21 +1533,21 @@ def gui():
 	    self.epsg4.set( self.epsg4.get() )
 	    self.epsg4_entry.focus_set()
 	    self.epsg4_entry.selection_range(0, Tkinter.END)
-	    print 'epsg code set to %s ' % (str(self.epsg4.get()))
+	    print('epsg code set to %s ' % (str(self.epsg4.get())))
 
 	#=======================
 	def _proc7(self):
 	    # function to invoke PyHum.e1e2
 	    # build error checking into here
-	    print 'Processing ...'   
-	    print "humfile: " + self.DATfilename.get()
-	    print "sonpath: " + os.path.dirname(self.SONfiles[0])
-	    print "pH: " + str(self.Pvar.get())    
-	    print "temperature: " + str(self.Tvar.get())    
-	    print "salinity: " + str(self.Svar.get())  
-	    print "beam frequency: " + str(self.BFvar.get())  
-	    print "beam angle: " + str(self.BAvar.get())            
-	    print "number of acoustic classes: " + str(self.Nvar.get())            
+	    print('Processing ...')   
+	    print("humfile: " + self.DATfilename.get())
+	    print("sonpath: " + os.path.dirname(self.SONfiles[0]))
+	    print("pH: " + str(self.Pvar.get()))    
+	    print("temperature: " + str(self.Tvar.get()))    
+	    print("salinity: " + str(self.Svar.get()))  
+	    print("beam frequency: " + str(self.BFvar.get()))  
+	    print("beam angle: " + str(self.BAvar.get()))            
+	    print("number of acoustic classes: " + str(self.Nvar.get()))            
 	    # do stuff here
 	    PyHum.e1e2(self.DATfilename.get(), os.path.dirname(self.SONfiles[0]), self.epsg4.get(), self.Pvar.get(), self.Tvar.get(), self.Svar.get(), self.BAvar.get(), self.BFvar.get(), self.integ, self.Nvar.get(), self.doplot)    
 

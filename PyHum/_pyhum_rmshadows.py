@@ -42,11 +42,8 @@
 #|b|y| |D|a|n|i|e|l| |B|u|s|c|o|m|b|e|
 #+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#|d|b|u|s|c|o|m|b|e|@|u|s|g|s|.|g|o|v|
+#|d|a|n|i|e|l|.|b|u|s|c|o|m|b|e|@|n|a|u|.|e|d|u|
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
-#|U|.|S|.| |G|e|o|l|o|g|i|c|a|l| |S|u|r|v|e|y|
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
 
 #"""
 
@@ -130,58 +127,58 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
 
     # prompt user to supply file if no input file given
     if not humfile:
-      print 'An input file is required!!!!!!'
+      print('An input file is required!!!!!!')
       Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
       humfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
 
     # prompt user to supply directory if no input sonpath is given
     if not sonpath:
-      print 'A *.SON directory is required!!!!!!'
+      print('A *.SON directory is required!!!!!!')
       Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
       sonpath = askdirectory() 
 
     # print given arguments to screen and convert data type where necessary
     if humfile:
-      print 'Input file is %s' % (humfile)
+      print('Input file is %s' % (humfile))
       
     if sonpath:
-      print 'Sonar file path is %s' % (sonpath)
+      print('Sonar file path is %s' % (sonpath))
 
     if win:
        win = np.asarray(win,int)
-       print 'Window is %s square pixels' % (str(win))
+       print('Window is %s square pixels' % (str(win)))
        
     if shadowmask:
        shadowmask = np.asarray(shadowmask,int)
        if shadowmask==1:
-          print 'Shadow masking is manual'
+          print('Shadow masking is manual')
        else: 
-          print 'Shadow masking is auto'
+          print('Shadow masking is auto')
           
     if doplot:
        doplot = int(doplot)
        if doplot==0:
-          print "Plots will not be made"
+          print("Plots will not be made")
 
     if dissim:
        dissim = np.asarray(dissim,int)
-       print 'Threshold dissimilarity (shadow is <) is %s' % (str(dissim))
+       print('Threshold dissimilarity (shadow is <) is %s' % (str(dissim)))
 
     if correl:
        correl = np.asarray(correl,int)
-       print 'Threshold correlation (shadow is <) is %s' % (str(correl))
+       print('Threshold correlation (shadow is <) is %s' % (str(correl)))
 
     if contrast:
        contrast = np.asarray(contrast,int)
-       print 'Threshold contrast (shadow is <) is %s' % (str(contrast))
+       print('Threshold contrast (shadow is <) is %s' % (str(contrast)))
 
     if energy:
        energy = np.asarray(energy,int)
-       print 'Threshold energy (shadow is >) is %s' % (str(energy))
+       print('Threshold energy (shadow is >) is %s' % (str(energy)))
 
     if mn:
        mn = np.asarray(mn,int)
-       print 'Threshold mean intensity (shadow is <) is %s' % (str(mn))
+       print('Threshold mean intensity (shadow is <) is %s' % (str(mn)))
 
     # start timer
     if os.name=='posix': # true if linux/mac or cygwin on windows
@@ -548,9 +545,9 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
        elapsed = (time.time() - start)
     else: # windows
        elapsed = (time.clock() - start)
-    print "Processing took ", elapsed , "seconds to analyse"
+    print("Processing took "+str(elapsed)+ "seconds to analyse")
 
-    print "Done!"
+    print("Done!")
 
 # =========================================================
 def custom_save(figdirec,root):

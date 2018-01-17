@@ -42,11 +42,8 @@
 #|b|y| |D|a|n|i|e|l| |B|u|s|c|o|m|b|e|
 #+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#|d|b|u|s|c|o|m|b|e|@|u|s|g|s|.|g|o|v|
+#|d|a|n|i|e|l|.|b|u|s|c|o|m|b|e|@|n|a|u|.|e|d|u|
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
-#|U|.|S|.| |G|e|o|l|o|g|i|c|a|l| |S|u|r|v|e|y|
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
 
 #"""
 
@@ -136,42 +133,42 @@ def texture_slic(humfile, sonpath, doplot=1, numclasses=4, maxscale=20, notes=4)
 
       # prompt user to supply file if no input file given
       if not humfile:
-         print 'An input file is required!!!!!!'
+         print('An input file is required!!!!!!')
          Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
          humfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
 
       # prompt user to supply directory if no input sonpath is given
       if not sonpath:
-         print 'A *.SON directory is required!!!!!!'
+         print('A *.SON directory is required!!!!!!')
          Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
          sonpath = askdirectory() 
 
       # print given arguments to screen and convert data type where necessary
       if humfile:
-         print 'Input file is %s' % (humfile)
+         print('Input file is %s' % (humfile))
          
       if sonpath:
-         print 'Sonar file path is %s' % (sonpath)
+         print('Sonar file path is %s' % (sonpath))
 
       if numclasses:
          numclasses = np.asarray(numclasses,int)
-         print 'Number of sediment classes: %s' % (str(numclasses))
+         print('Number of sediment classes: %s' % (str(numclasses)))
          
       if maxscale:
          maxscale = np.asarray(maxscale,int)
-         print 'Max scale as inverse fraction of data length: %s' % (str(maxscale))
+         print('Max scale as inverse fraction of data length: %s' % (str(maxscale)))
          
       if notes:
          notes = np.asarray(notes,int)
-         print 'Notes per octave: %s' % (str(notes))
+         print('Notes per octave: %s' % (str(notes)))
          
       if doplot:
          doplot = int(doplot)
          if doplot==0:
-            print "Plots will not be made"    
+            print("Plots will not be made")   
       
       
-      print '[Default] Number of processors is %s' % (str(cpu_count()))
+      print('[Default] Number of processors is %s' % (str(cpu_count())))
                         
       ########################################################
       ########################################################
@@ -200,7 +197,7 @@ def texture_slic(humfile, sonpath, doplot=1, numclasses=4, maxscale=20, notes=4)
       dist_m = np.squeeze(meta['dist_m'])
 
       ### port
-      print "processing port side ..."
+      print("processing port side ...")
       # load memory mapped scan ... port
       shape_port = np.squeeze(meta['shape_port'])
       if shape_port!='':
@@ -213,7 +210,7 @@ def texture_slic(humfile, sonpath, doplot=1, numclasses=4, maxscale=20, notes=4)
          #port_fp2 = io.get_mmap_data(sonpath, base, '_data_port_l.dat', 'float32', tuple(shape_port))
 
       ### star
-      print "processing starboard side ..."
+      print("processing starboard side ...")
       # load memory mapped scan ... port
       shape_star = np.squeeze(loadmat(sonpath+base+'meta.mat')['shape_star'])
       if shape_star!='':
@@ -347,9 +344,9 @@ def texture_slic(humfile, sonpath, doplot=1, numclasses=4, maxscale=20, notes=4)
          elapsed = (time.time() - start)
       else: # windows
          elapsed = (time.clock() - start)
-      print "Processing took ", elapsed , "seconds to analyse"
+      print("Processing took "+str(elapsed)+"seconds to analyse")
 
-      print "Done!"
+      print("Done!")
     
 
 # =========================================================
@@ -390,7 +387,7 @@ def plot_class(dist_m, shape_port, dat_port, dat_star, dat_class, ft, humfile, s
       Zdist = dist_m
       extent = shape_port[0]
 
-   print "Plotting ... "
+   print("Plotting ... ")
    # create fig 1
    fig = plt.figure()
    fig.subplots_adjust(wspace = 0, hspace=0.075)

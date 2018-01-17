@@ -42,11 +42,8 @@
 #|b|y| |D|a|n|i|e|l| |B|u|s|c|o|m|b|e|
 #+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#|d|b|u|s|c|o|m|b|e|@|u|s|g|s|.|g|o|v|
+#|d|a|n|i|e|l|.|b|u|s|c|o|m|b|e|@|n|a|u|.|e|d|u|
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
-#|U|.|S|.| |G|e|o|l|o|g|i|c|a|l| |S|u|r|v|e|y|
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
 
 #"""
 
@@ -186,59 +183,59 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
 
     # prompt user to supply file if no input file given
     if not humfile:
-      print 'An input file is required!!!!!!'
+      print('An input file is required!!!!!!')
       Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
       inputfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
 
     # prompt user to supply directory if no input sonpath is given
     if not sonpath:
-      print 'A *.SON directory is required!!!!!!'
+      print('A *.SON directory is required!!!!!!')
       Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
       sonpath = askdirectory() 
 
     # print given arguments to screen and convert data type where necessary
     if humfile:
-      print 'Input file is %s' % (humfile)
+      print('Input file is %s' % (humfile))
 
     if sonpath:
-      print 'Sonar file path is %s' % (sonpath)
+      print('Sonar file path is %s' % (sonpath))
 
     if maxW:
       maxW = np.asarray(maxW,float)
-      print 'Max. transducer power is %s W' % (str(maxW))
+      print('Max. transducer power is %s W' % (str(maxW)))
 
     if doplot:
       doplot = int(doplot)
       if doplot==0:
-         print "Plots will not be made"
+         print("Plots will not be made")
 
     if dofilt:
       dofilt = int(dofilt)
       if dofilt==0:
-         print "Phase preserving filter will not be applied"
+         print("Phase preserving filter will not be applied")
       else:
-         print "Phase preserving filter will be applied"
+         print("Phase preserving filter will be applied")
 
     if correct_withwater:
       correct_withwater = int(correct_withwater)
       if correct_withwater==1:
-         print "Correction will be applied without removing water column"
+         print("Correction will be applied without removing water column")
 
     if salinity:
        salinity = np.asarray(salinity,float)
-       print 'Salinity is %s ppt' % (str(salinity))
+       print('Salinity is %s ppt' % (str(salinity)))
 
     if ph:
        ph = np.asarray(ph,float)
-       print 'pH is %s' % (str(ph))
+       print('pH is %s' % (str(ph)))
 
     if temp:
        temp = np.asarray(temp,float)
-       print 'Temperature is %s' % (str(temp))
+       print('Temperature is %s' % (str(temp)))
 
     if dconcfile is not None:
        try:
-          print 'Suspended sediment size/conc. file is %s' % (dconcfile)
+          print('Suspended sediment size/conc. file is %s' % (dconcfile))
           dconc = np.genfromtxt(dconcfile).T
           conc = dconc[1]
           dens = dconc[2]
@@ -567,9 +564,9 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
        elapsed = (time.time() - start)
     else: # windows
        elapsed = (time.clock() - start)
-    print "Processing took ", elapsed , "seconds to analyse"
+    print("Processing took "+ str(elapsed) + "seconds to analyse")
 
-    print "Done!"
+    print("Done!")
 
 
 # =========================================================

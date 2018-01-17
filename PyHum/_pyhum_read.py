@@ -42,11 +42,8 @@
 #|b|y| |D|a|n|i|e|l| |B|u|s|c|o|m|b|e|
 #+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#|d|b|u|s|c|o|m|b|e|@|u|s|g|s|.|g|o|v|
+#|d|a|n|i|e|l|.|b|u|s|c|o|m|b|e|@|n|a|u|.|e|d|u|
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
-#|U|.|S|.| |G|e|o|l|o|g|i|c|a|l| |S|u|r|v|e|y|
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
 
 #"""
 
@@ -212,84 +209,84 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
     # prompt user to supply file if no input file given
     if not humfile:
-      print 'An input file is required!!!!!!'
+      print('An input file is required!!!!!!')
       Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
       humfile = askopenfilename(filetypes=[("DAT files","*.DAT")])
 
     # prompt user to supply directory if no input sonpath is given
     if not sonpath:
-      print 'A *.SON directory is required!!!!!!'
+      print('A *.SON directory is required!!!!!!')
       Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
       sonpath = askdirectory()
 
     # print given arguments to screen and convert data type where necessary
     if humfile:
-      print 'Input file is %s' % (humfile)
+      print('Input file is %s' % (humfile))
 
     if sonpath:
-      print 'Son files are in %s' % (sonpath)
+      print('Son files are in %s' % (sonpath))
 
     if cs2cs_args:
-      print 'cs2cs arguments are %s' % (cs2cs_args)
+      print('cs2cs arguments are %s' % (cs2cs_args))
 
     if draft:
       draft = float(draft)
-      print 'Draft: %s' % (str(draft))
+      print('Draft: %s' % (str(draft)))
 
     if c:
       c = float(c)
-      print 'Celerity of sound: %s m/s' % (str(c))
+      print('Celerity of sound: %s m/s' % (str(c)))
 
     if doplot:
       doplot = int(doplot)
       if doplot==0:
-         print "Plots will not be made"
+         print("Plots will not be made")
 
     if flip_lr:
       flip_lr = int(flip_lr)
       if flip_lr==1:
-         print "Port and starboard will be flipped"
+         print("Port and starboard will be flipped")
 
     if t:
       t = np.asarray(t,float)
-      print 'Transducer length is %s m' % (str(t))
+      print('Transducer length is %s m' % (str(t)))
 
     if bedpick:
       bedpick = np.asarray(bedpick,int)
       if bedpick==1:
-         print 'Bed picking is auto'
+         print('Bed picking is auto')
       elif bedpick==0:
-         print 'Bed picking is manual'
+         print('Bed picking is manual')
       else:
-         print 'User will be prompted per chunk about bed picking method'
+         print('User will be prompted per chunk about bed picking method')
 
     if chunk:
        chunk = str(chunk)
        if chunk[0]=='d':
           chunkmode=1
           chunkval = int(chunk[1:])
-          print 'Chunks based on distance of %s m' % (str(chunkval))
+          print('Chunks based on distance of %s m' % (str(chunkval)))
        elif chunk[0]=='p':
           chunkmode=2
           chunkval = int(chunk[1:])
-          print 'Chunks based on %s pings' % (str(chunkval))
+          print('Chunks based on %s pings' % (str(chunkval)))
        elif chunk[0]=='h':
           chunkmode=3
           chunkval = int(chunk[1:])
-          print 'Chunks based on heading devation of %s degrees' % (str(chunkval))
+          print('Chunks based on heading devation of %s degrees' % (str(chunkval)))
        elif chunk[0]=='1':
           chunkmode=4
           chunkval = 1
-          print 'Only 1 chunk will be produced'
+          print('Only 1 chunk will be produced')
        else:
-          print "Chunk mode not understood - should be 'd', 'p', or 'h' - using defaults"
+          print("Chunk mode not understood - should be 'd', 'p', or 'h' - using defaults")
           chunkmode=1
           chunkval = 100
-          print 'Chunks based on distance of %s m' % (str(chunkval))
+          print('Chunks based on distance of %s m' % (str(chunkval)))
 
     if model:
        model = int(model)
-       print "Data is from the %s series"  % (str(model))
+       print("Data is from the %s series"  % (str(model)))
 
 #    if cog:
 #       cog = int(cog)
@@ -299,12 +296,12 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     if calc_bearing:
        calc_bearing = int(calc_bearing)
        if calc_bearing==1:
-          print "Bearing will be calculated from coordinates"
+          print("Bearing will be calculated from coordinates")
 
     if filt_bearing:
        filt_bearing = int(filt_bearing)
        if filt_bearing==1:
-          print "Bearing will be filtered"
+          print("Bearing will be filtered")
 
     ## for debugging
     #humfile = r"test.DAT"; sonpath = "test_data"
@@ -315,16 +312,16 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     f = 455
 
     try:
-       print "Checking the epsg code you have chosen for compatibility with Basemap ... "
+       print("Checking the epsg code you have chosen for compatibility with Basemap ... ")
        from mpl_toolkits.basemap import Basemap
        m = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1],
           resolution = 'i', llcrnrlon=10, llcrnrlat=10, urcrnrlon=30, urcrnrlat=30)
        del m
-       print "... epsg code compatible"
+       print("... epsg code compatible")
     except:
-       print "Error: the epsg code you have chosen is not compatible with Basemap"
-       print "please choose a different epsg code (http://spatialreference.org/)"
-       print "program will now close"
+       print("Error: the epsg code you have chosen is not compatible with Basemap")
+       print("please choose a different epsg code (http://spatialreference.org/)")
+       print("program will now close")
        sys.exit()
 
     # start timer
@@ -348,8 +345,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     # remove underscores, negatives and spaces from basename
     base = humutils.strip_base(base)
 
-    print "WARNING: Because files have to be read in byte by byte,"
-    print "this could take a very long time ..."
+    print("WARNING: Because files have to be read in byte by byte,")
+    print("this could take a very long time ...")
 
     #reading each sonfile in parallel should be faster ...
     try:
@@ -382,23 +379,23 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
        if 'data_port' not in locals():
           data_port = ''
-          print "portside scan not available"
+          print("portside scan not available")
 
        if 'data_star' not in locals():
           data_star = ''
-          print "starboardside scan not available"
+          print("starboardside scan not available")
 
        if 'data_dwnhi' not in locals():
           data_dwnlow = ''
-          print "high-frq. downward scan not available"
+          print("high-frq. downward scan not available")
 
        if 'data_dwnlow' not in locals():
           data_dwnlow = ''
-          print "low-frq. downward scan not available"
+          print("low-frq. downward scan not available")
 
     except: # revert back to older version if paralleleised version fails
 
-       print "something went wrong with the parallelised version of pyread ..."
+       print("something went wrong with the parallelised version of pyread ...")
 
        import pyread
        data = pyread.pyread(sonfiles, humfile, c, model, cs2cs_args)
@@ -461,7 +458,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              data_port = data.getstarscans().astype('int16')
        except:
           data_port = ''
-          print "portside scan not available"
+          print("portside scan not available")
 
     if data_port!='':
 
@@ -483,7 +480,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
              data_star = data.getportscans().astype('int16')
        except:
           data_star = ''
-          print "starboardside scan not available"
+          print("starboardside scan not available")
 
     if data_star!='':
 
@@ -499,7 +496,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        # check that port and starboard are same size
        # and trim if not
        if np.shape(star_fp)!=np.shape(port_fp):
-          print "port and starboard scans are different sizes ... rectifying"
+          print("port and starboard scans are different sizes ... rectifying")
           if np.shape(port_fp[0])[1] > np.shape(star_fp[0])[1]:
              tmp = port_fp.copy()
              tmp2 = np.empty_like(star_fp)
@@ -544,7 +541,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           data_dwnlow = data.getlowscans().astype('int16')
        except:
           data_dwnlow = ''
-          print "low-freq. scan not available"
+          print("low-freq. scan not available")
 
     if data_dwnlow!='':
 
@@ -563,7 +560,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           data_dwnhi = data.gethiscans().astype('int16')
        except:
           data_dwnhi = ''
-          print "high-freq. scan not available"
+          print("high-freq. scan not available")
 
     if data_dwnhi!='':
 
@@ -579,7 +576,7 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        # check that low and high are same size
        # and trim if not
        if (np.shape(dwnhi_fp)!=np.shape(dwnlow_fp)) and (chunkmode!=4):
-          print "dwnhi and dwnlow are different sizes ... rectifying"
+          print("dwnhi and dwnlow are different sizes ... rectifying")
           if np.shape(dwnhi_fp[0])[1] > np.shape(dwnlow_fp[0])[1]:
              tmp = dwnhi_fp.copy()
              tmp2 = np.empty_like(dwnlow_fp)
@@ -823,9 +820,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
        elapsed = (time.time() - start)
     else: # windows
        elapsed = (time.clock() - start)
-    print "Processing took ", elapsed , "seconds to analyse"
+    print("Processing took "+ str(elapsed) + "seconds to analyse")
 
-    print "Done!"
+    print("Done!")
 
 
 # =========================================================
@@ -924,13 +921,13 @@ def makechunks_scan(chunkmode, chunkval, metadat, data, flag):
           nchunks = np.floor(tmp.max())
           del tmp
        if flag==0:
-          print "port sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          print("port sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)))
        elif flag==1:
-          print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          print("starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)))
        elif flag==2:
-          print "low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          print("low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)))
        elif flag==3:
-          print "high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          print("high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)))
        chunkval = chunkval+1
        Zt, ind = makechunks_simple(data, nchunks)
 
@@ -942,13 +939,13 @@ def makechunks_scan(chunkmode, chunkval, metadat, data, flag):
           nchunks = np.floor(tmp)
           del tmp
        if flag==0:
-          print "port sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval))
+          print("port sonar data will be parsed into %s, %s ping chunks" % (str(nchunks), str(chunkval)))
        elif flag==1:
-          print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          print("starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)))
        elif flag==2:
-          print "low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          print("low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)))
        elif flag==3:
-          print "high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          print("high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)))
        chunkval = chunkval+1
        Zt, ind = makechunks_simple(data, nchunks)
 
@@ -960,13 +957,13 @@ def makechunks_scan(chunkmode, chunkval, metadat, data, flag):
           nchunks = np.floor(tmp.max())
           del tmp
        if flag==0:
-          print "port sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval))
+          print("port sonar data will be parsed into %s, %s degree deviation chunks" % (str(nchunks), str(chunkval)))
        elif flag==1:
-          print "starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          print("starboard sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)))
        elif flag==2:
-          print "low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          print("low-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)))
        elif flag==3:
-          print "high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval))
+          print("high-freq. sonar data will be parsed into %s, %s m chunks" % (str(nchunks), str(chunkval)))
        chunkval = chunkval+1
        Zt, ind = makechunks_simple(data, nchunks)
 
@@ -987,7 +984,7 @@ def makechunks_simple(dat, numchunks):
    try:
       return sliding_window(dat,(Ny,Nx/int(numchunks)))    #humutils.
    except:
-      print "memory-mapping failed in sliding window - trying memory intensive version"
+      print("memory-mapping failed in sliding window - trying memory intensive version")
       return humutils.sliding_window_nomm(dat,(Ny,Nx/int(numchunks)))
 
 # =========================================================
@@ -1114,7 +1111,7 @@ def sliding_window(a,ws,ss = None,flatten = True):
    except:
 
       from itertools import product
-      print "memory error, windowing using slower method"
+      print("memory error, windowing using slower method")
       # For each dimension, create a list of all valid slices
       slices = [[] for i in range(len(ws))]
       for i in xrange(len(ws)):

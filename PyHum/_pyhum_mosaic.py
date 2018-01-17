@@ -41,11 +41,8 @@
 #|b|y| |D|a|n|i|e|l| |B|u|s|c|o|m|b|e|
 #+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#|d|b|u|s|c|o|m|b|e|@|u|s|g|s|.|g|o|v|
+#|d|a|n|i|e|l|.|b|u|s|c|o|m|b|e|@|n|a|u|.|e|d|u|
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
-#|U|.|S|.| |G|e|o|l|o|g|i|c|a|l| |S|u|r|v|e|y|
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
 
 #"""
 
@@ -88,7 +85,7 @@ import matplotlib.pyplot as plt
 try:
    from mpl_toolkits.basemap import Basemap
 except:
-   print "Error: Basemap could not be imported"
+   print("Error: Basemap could not be imported")
    pass
 #import simplekml
 
@@ -147,41 +144,41 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
 
     # prompt user to supply file if no input file given
     if not humfile:
-       print 'An input file is required!!!!!!'
+       print('An input file is required!!!!!!')
        Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
        humfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
 
     # prompt user to supply directory if no input sonpath is given
     if not sonpath:
-       print 'A *.SON directory is required!!!!!!'
+       print('A *.SON directory is required!!!!!!')
        Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
        sonpath = askdirectory() 
 
     # print given arguments to screen and convert data type where necessary
     if humfile:
-       print 'Input file is %s' % (humfile)
+       print('Input file is %s' % (humfile))
 
     if sonpath:
-       print 'Sonar file path is %s' % (sonpath)
+       print('Sonar file path is %s' % (sonpath))
 
     if cs2cs_args:
-       print 'cs2cs arguments are %s' % (cs2cs_args)    
+       print('cs2cs arguments are %s' % (cs2cs_args))
 
     if res:
        res = np.asarray(res,float)
-       print 'Gridding resolution: %s' % (str(res))      
+       print('Gridding resolution: %s' % (str(res))) 
        
     if nn:
        nn = int(nn)
-       print 'Number of nearest neighbours for gridding: %s' % (str(nn))
+       print('Number of nearest neighbours for gridding: %s' % (str(nn)))
                     
     if noisefloor:
        noisefloor = np.asarray(noisefloor,float)
-       print 'Noise floor: %s dBW' % (str(noisefloor))      
+       print('Noise floor: %s dBW' % (str(noisefloor)))      
 
     if weight:
        weight = int(weight)
-       print 'Weighting for gridding: %s' % (str(weight))                   
+       print('Weighting for gridding: %s' % (str(weight)))                  
 
 
     ##nn = 5 #number of nearest neighbours in gridding
@@ -252,22 +249,22 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
              dat_port = port_fp[p]
              dat_star = star_fp[p]
              data_R = R_fp[p]
-             print "writing chunk %s " % (str(p))
+             print("writing chunk %s " % (str(p)))
              write_points(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, sonpath, p, c, dx)
              inputfiles.append(os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc')))
        else:
           p=0
-          print "writing chunk %s " % (str(p))
+          print("writing chunk %s " % (str(p)))
           write_points(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, c, dx)
           inputfiles.append(os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc')))         
           
        #trans =  pyproj.Proj(init=cs2cs_args)
 
        # D, R, h, t
-       print "reading points from %s files" % (str(len(inputfiles)))
+       print("reading points from %s files" % (str(len(inputfiles))))
        X,Y,S,D,R,h,t,i = getxys(inputfiles)
 
-       print "%s points read from %s files" % (str(len(S)), str(len(inputfiles)))
+       print("%s points read from %s files" % (str(len(S)), str(len(inputfiles))))
 
        # remove values where sidescan intensity is zero
        ind = np.where(np.logical_not(S==0))[0]
@@ -293,7 +290,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
        g = np.arctan(R.flatten(),h.flatten())
        pickle.dump( g, open( os.path.normpath(os.path.join(sonpath,base+"g.p")), "wb" ) ); del g, R, h
    
-    print "creating grids ..."   
+    print("creating grids ...")
 
     if res==0:
        res=99
@@ -324,7 +321,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     tree = KDTree(zip(X.flatten(), Y.flatten()))
     del X, Y
 
-    print "mosaicking ..."   
+    print("mosaicking ...")   
     #k nearest neighbour
     try:
        dist, inds = tree.query(zip(grid_x.flatten(), grid_y.flatten()), k = nn, n_jobs=-1)
@@ -399,7 +396,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     del grid_x, grid_y
     
     # =========================================================
-    print "creating kmz file ..."
+    print("creating kmz file ...")
     ## new way to create kml file  
     pixels = 1024 * 10
  
@@ -429,7 +426,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
 
 
     # =========================================================
-    print "drawing and printing map ..."
+    print("drawing and printing map ...")
     fig = plt.figure(frameon=False)
     map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1], 
      resolution = 'i', #h #f
@@ -450,7 +447,7 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
     fig.add_axes(ax)
 
     if Sdat_gm.size > 25000000:
-       print "matrix size > 25,000,000 - decimating by factor of 5 for display"
+       print("matrix size > 25,000,000 - decimating by factor of 5 for display")
        map.pcolormesh(gx[::5,::5], gy[::5,::5], Sdat_gm[::5,::5], cmap='gray', vmin=np.nanmin(Sdat_gm), vmax=np.nanmax(Sdat_gm))
     else:
        map.pcolormesh(gx, gy, Sdat_gm, cmap='gray', vmin=np.nanmin(Sdat_gm), vmax=np.nanmax(Sdat_gm))
@@ -463,9 +460,9 @@ def mosaic(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, nn = 5, noisef
        elapsed = (time.time() - start)
     else: # windows
        elapsed = (time.clock() - start)
-    print "Processing took ", elapsed , "seconds to analyse"
+    print("Processing took "+str(elapsed)+ "seconds to analyse")
 
-    print "Done!"
+    print("Done!")
           
 # =========================================================
 def getdat(inputfile, filenum):
@@ -584,7 +581,7 @@ def getmesh(minX, maxX, minY, maxY, res):
          if 'grid_x' in locals(): 
             complete=1 
       except:
-         print "memory error: trying grid resolution of %s" % (str(res*2))
+         print("memory error: trying grid resolution of %s" % (str(res*2)))
          res = res*2
          
    return grid_x, grid_y, res
@@ -607,7 +604,7 @@ def xyfunc(e,n,yvec,d,t,extent):
  
 # =========================================================
 def getXY(e,n,yvec,d,t,extent):
-   print "getting point cloud ..." 
+   print("getting point cloud ...")
 
    #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
 

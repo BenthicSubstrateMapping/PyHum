@@ -29,7 +29,7 @@ Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization
  Primary Developer |    Daniel Buscombe 
  ------ | ---------------
          |  Northern Arizona University
-          | Flagstaff, AZ 86001
+          | Flagstaff, AZ 86011
           | daniel.buscombe@nau.edu
 
  Co-Developer |    Daniel Hamill
@@ -37,9 +37,9 @@ Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization
          |  Department of Watershed Sciences
           | Utah State University
           | Logan, UT 84322
-          | dhamill@usgs.gov
+          | hamill.daniel@gmail.com
 
-Version: 1.4.0    |  Revision: Aug, 2017
+Version: 1.4.2    |  Revision: Jan, 2018
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -95,6 +95,25 @@ These are all command-line programs which take a number of input (some required,
 <!--*Automated bed sediment measurement, Colorado River in Glen Canyon*-->
 
 ## Setup
+
+### Troubleshooting / testing before installation
+
+```
+conda create --name pyhum python=2
+source activate pyhum #(or activate pyhum on Windows)
+conda install -c conda-forge basemap-data-hires -y
+conda install simplekml
+conda install scipy
+conda install numpy
+pip install sklearn pandas dask
+pip install joblib toolz cython
+conda install scikit-image
+pip install pyresample
+pip install PyHum --no-deps
+python -c"import PyHum;PyHum.dotest()"
+```
+
+
 
 ### Notes for Windows/Anaconda users
 

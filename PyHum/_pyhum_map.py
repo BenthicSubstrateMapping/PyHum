@@ -42,11 +42,8 @@
 #|b|y| |D|a|n|i|e|l| |B|u|s|c|o|m|b|e|
 #+-+-+ +-+-+-+-+-+-+ +-+-+-+-+-+-+-+-+
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#|d|b|u|s|c|o|m|b|e|@|u|s|g|s|.|g|o|v|
+#|d|a|n|i|e|l|.|b|u|s|c|o|m|b|e|@|n|a|u|.|e|d|u|
 #+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
-#|U|.|S|.| |G|e|o|l|o|g|i|c|a|l| |S|u|r|v|e|y|
-#+-+-+-+-+ +-+-+-+-+-+-+-+-+-+-+ +-+-+-+-+-+-+
 
 #"""
 
@@ -92,7 +89,7 @@ import matplotlib.pyplot as plt
 try:
    from mpl_toolkits.basemap import Basemap
 except:
-   print "Error: Basemap could not be imported"
+   print("Error: Basemap could not be imported")
    pass
 #import simplekml
 
@@ -153,46 +150,46 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
 
     # prompt user to supply file if no input file given
     if not humfile:
-       print 'An input file is required!!!!!!'
+       print('An input file is required!!!!!!')
        Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
        humfile = askopenfilename(filetypes=[("DAT files","*.DAT")])
 
     # prompt user to supply directory if no input sonpath is given
     if not sonpath:
-       print 'A *.SON directory is required!!!!!!'
+       print('A *.SON directory is required!!!!!!')
        Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
        sonpath = askdirectory()
 
     # print given arguments to screen and convert data type where necessary
     if humfile:
-       print 'Input file is %s' % (humfile)
+       print('Input file is %s' % (humfile))
 
     if sonpath:
-       print 'Sonar file path is %s' % (sonpath)
+       print('Sonar file path is %s' % (sonpath))
 
     if cs2cs_args:
-       print 'cs2cs arguments are %s' % (cs2cs_args)
+       print('cs2cs arguments are %s' % (cs2cs_args))
 
     if res:
        res = np.asarray(res,float)
-       print 'Gridding resolution: %s' % (str(res))
+       print('Gridding resolution: %s' % (str(res)))
 
     if mode:
        mode = int(mode)
-       print 'Mode for gridding: %s' % (str(mode))
+       print('Mode for gridding: %s' % (str(mode)))
 
     if nn:
        nn = int(nn)
-       print 'Number of nearest neighbours for gridding: %s' % (str(nn))
+       print('Number of nearest neighbours for gridding: %s' % (str(nn)))
 
     if numstdevs:
        numstdevs = int(numstdevs)
-       print 'Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept: %s' % (str(numstdevs))
+       print('Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept: %s' % (str(numstdevs)))
 
     if use_uncorrected:
        use_uncorrected = int(use_uncorrected)
        if use_uncorrected==1:
-          print "Radiometrically uncorrected scans will be used"
+          print("Radiometrically uncorrected scans will be used")
 
 
     # start timer
@@ -225,7 +222,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
     shape_star = np.squeeze(meta['shape_star'])
 
     if use_uncorrected == 1:
-       print "using uncorrected scans"
+       print("using uncorrected scans")
        if shape_port!='':
           port_fp = io.get_mmap_data(sonpath, base, '_data_port_l.dat', 'float32', tuple(shape_port))
        if shape_port!='':
@@ -278,16 +275,16 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
     if res==0:
        res=99
 
-    print "Number of chunks for mapping: %s" % (len(star_fp))
+    print("Number of chunks for mapping: %s" % (len(star_fp)))
 
     if len(shape_star)>2:
        for p in range(len(star_fp)):
           try:
              print("progress: " + str(p) + " / " + str(len(star_fp)))
              res = make_map(esi[shape_port[-1]*p:shape_port[-1]*(p+1)], nsi[shape_port[-1]*p:shape_port[-1]*(p+1)], theta[shape_port[-1]*p:shape_port[-1]*(p+1)], dist_tvg[shape_port[-1]*p:shape_port[-1]*(p+1)], port_fp[p], star_fp[p], R_fp[p], meta['pix_m'], res, cs2cs_args, sonpath, p, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f'])), use_uncorrected, scalemax) #dogrid, influence, dowrite,
-             print "grid resolution is %s" % (str(res))
+             print("grid resolution is %s" % (str(res)))
           except:
-             print "error on chunk "+str(p)             
+             print("error on chunk "+str(p))             
     else:
        res = make_map(esi, nsi, theta, dist_tvg, port_fp, star_fp, R_fp, meta['pix_m'], res, cs2cs_args, sonpath, 0, mode, nn, numstdevs, meta['c'], np.arcsin(meta['c']/(1000*meta['t']*meta['f'])), use_uncorrected, scalemax) #dogrid, influence,dowrite,
 
@@ -295,9 +292,9 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
        elapsed = (time.time() - start)
     else: # windows
        elapsed = (time.clock() - start)
-    print "Processing took ", elapsed , "seconds to analyse"
+    print("Processing took "+str(elapsed)+"seconds to analyse")
 
-    print "Done!"
+    print("Done!")
 
 
 # =========================================================
@@ -387,7 +384,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    h = h[np.where(np.logical_not(np.isinf(merge)))]
    t = t[np.where(np.logical_not(np.isinf(merge)))]
 
-   print "writing point cloud"
+   print("writing point cloud")
    #if dowrite==1:
    ## write raw bs to file
    outfile = os.path.normpath(os.path.join(sonpath,'x_y_ss_raw'+str(p)+'.asc'))
@@ -438,7 +435,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
             if 'orig_def' in locals():
                complete=1
          except:
-            print "memory error: trying grid resolution of %s" % (str(resg*2))
+            print("memory error: trying grid resolution of %s" % (str(resg*2)))
             resg = resg*2
 
       if mode==1:
@@ -569,7 +566,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    try:
 
       # =========================================================
-      print "creating kmz file ..."
+      print("creating kmz file ...")
       ## new way to create kml file
       pixels = 1024 * 10
 
@@ -600,7 +597,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
          name='Sidescan Intensity')
 
    except:
-      print "error: map could not be created..."
+      print("error: map could not be created...")
 
 
    #y1 = np.min(glat)-0.001
@@ -608,7 +605,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    #y2 = np.max(glat)+0.001
    #x2 = np.max(glon)+0.001
 
-   print "drawing and printing map ..."
+   print("drawing and printing map ...")
    fig = plt.figure(frameon=False)
    map = Basemap(projection='merc', epsg=cs2cs_args.split(':')[1],
     resolution = 'i', #h #f
@@ -632,7 +629,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    #if dogrid==1:
    if 2>1:
       if datm.size > 25000000:
-         print "matrix size > 25,000,000 - decimating by factor of 5 for display"
+         print("matrix size > 25,000,000 - decimating by factor of 5 for display")
          map.pcolormesh(gx[::5,::5], gy[::5,::5], datm[::5,::5], cmap='gray', vmin=np.nanmin(datm), vmax=scalemax) #vmax=np.nanmax(datm)
       else:
          map.pcolormesh(gx, gy, datm, cmap='gray', vmin=np.nanmin(datm), vmax=scalemax) #vmax=np.nanmax(datm)
@@ -672,7 +669,7 @@ def getmesh(minX, maxX, minY, maxY, res):
          if 'grid_x' in locals():
             complete=1
       except:
-         print "memory error: trying grid resolution of %s" % (str(res*2))
+         print("memory error: trying grid resolution of %s" % (str(res*2)))
          res = res*2
 
    return grid_x.astype('float32'), grid_y.astype('float32'), res
@@ -714,7 +711,7 @@ def getgrid_lm(humlon, humlat, merge, influence, minX, maxX, minY, maxY, res, mo
          if 'dat' in locals():
             complete=1
       except:
-         print "memory error: trying grid resolution of %s" % (str(res*2))
+         print("memory error: trying grid resolution of %s" % (str(res*2)))
          res = res*2
 
    return dat, stdev, counts, res, complete, shape
@@ -725,7 +722,7 @@ def xyfunc(e,n,yvec,d,t,extent):
 
 # =========================================================
 def getXY(e,n,yvec,d,t,extent):
-   print "getting point cloud ..."
+   print("getting point cloud ...")
 
    #o = Parallel(n_jobs = cpu_count(), verbose=0)(delayed(getxy)(e[k], n[k], yvec, d[k], t[k], extent) for k in xrange(len(n)))
 

@@ -5,10 +5,9 @@ INFO:
 
 
 Author:    Daniel Buscombe
-           Grand Canyon Monitoring and Research Center
-           United States Geological Survey
-           Flagstaff, AZ 86001
-           dbuscombe@usgs.gov
+           Northern Arizona University
+           Flagstaff, AZ 86011
+           daniel.buscombe@nau.edu
 
 For latest code version please visit:
 https://github.com/dbuscombe-usgs
@@ -76,10 +75,10 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
     if chunkmode!=4:
       for k in xrange(len(port_fp)):
          #imu.append(port_fp[k][int(np.min(bed)):int(np.max(bed)),:])
-         imu.append(port_fp[k][np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+         imu.append(port_fp[k][np.max([0,int(np.min(bed)-buff)]):int(np.max(bed)+buff),:])
       imu = np.hstack(imu)
     else:
-      imu.append(port_fp[np.max([0,int(np.min(bed))-buff]):int(np.max(bed))+buff,:])
+      imu.append(port_fp[np.max([0,int(np.min(bed)-buff)]):int(np.max(bed)+buff),:])
 
     imu = np.squeeze(np.asarray(imu, 'float64'))-buff
 
