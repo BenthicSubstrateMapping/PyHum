@@ -83,7 +83,7 @@ def dotest():
    model = 998 # humminbird model
    calc_bearing = 1 #1=yes
    filt_bearing = 1 #1=yes
-   chunk = 'd100' #'1' ##'d100' # distance, 100m
+   chunk = '1' ##'d100' # distance, 100m
    #chunk = 'p1000' # pings, 1000
    #chunk = 'h10' # heading deviation, 10 deg
           
@@ -112,7 +112,7 @@ def dotest():
    notes = 4 # Notes per octave (for wavelet analysis)
 
    # for mapping
-   res = 0.05 #99 # grid resolution in metres
+   res = 0.1 #99 # grid resolution in metres
    # if res==99, the program will automatically calc res from the spatial res of the scans
    mode = 1 # gridding mode (simple nearest neighbour)
    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
@@ -150,7 +150,7 @@ def dotest():
    ##PyHum.texture_slic(humfile, sonpath, doplot, numclasses, maxscale, notes)
 
    ## grid and map the scans
-   #PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
+   PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
 
    res = 1 # grid resolution in metres
    numstdevs = 5
