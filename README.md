@@ -98,9 +98,11 @@ These are all command-line programs which take a number of input (some required,
 
 ### Troubleshooting / testing before installation
 
+In a conda python 2 environment: 
+
 ```
 conda create --name pyhum python=2
-source activate pyhum #(or activate pyhum on Windows)
+source activate pyhum #(or 'activate pyhum' on Windows)
 conda install -c conda-forge basemap-data-hires -y
 conda install simplekml
 conda install scipy
@@ -110,7 +112,7 @@ pip install joblib toolz cython
 conda install scikit-image
 pip install pyresample
 pip install PyHum --no-deps
-python -c"import PyHum;PyHum.dotest()"
+python -c"import PyHum;PyHum.dotest()" #(or pip install git+https://github.com/dbuscombe-usgs/PyHum.git --no-deps)
 ```
 
 

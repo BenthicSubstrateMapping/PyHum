@@ -416,7 +416,7 @@ def plot_class(dist_m, shape_port, dat_port, dat_star, dat_class, ft, humfile, s
    plt.imshow(np.vstack((np.flipud(dat_port), dat_star)),cmap='gray',
               extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
    im = ax.imshow(dat_class, alpha=0.5,extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],
-                  origin='upper', cmap='YlOrRd', vmin=0.5, vmax=np.mean(dat_class))
+                  origin='upper', cmap='YlOrRd', vmin=0.25, vmax=5)
    plt.ylabel('Horizontal distance (m)'); 
    plt.xlabel('Distance along track (m)')
    plt.axis('tight')
@@ -450,7 +450,7 @@ def plot_contours(dist_m, shape_port, dat_class, ft, humfile, sonpath, base, num
    plt.subplot(2,1,1)
    ax = plt.gca()
    CS = plt.contourf(dat_class.astype('float64'), levels, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)], 
-                     cmap='YlOrRd',origin='upper', vmin=0.5, vmax=np.mean(dat_class))
+                     cmap='YlOrRd',origin='upper')#, vmin=0.5, vmax=np.mean(dat_class))
    plt.ylabel('Horizontal distance (m)'); plt.xlabel('Distance along track (m)')
    plt.axis('tight')
 
@@ -483,7 +483,7 @@ def plot_kmeans(dist_m, shape_port, dat_port, dat_star, dat_kclass, ft, humfile,
    plt.imshow(np.vstack((np.flipud(dat_port), dat_star)), cmap='gray',extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
    
    CS = plt.contourf(np.flipud(dat_kclass), alpha=0.4, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],
-                     origin='upper', cmap='YlOrRd', vmin=0.5, vmax=np.mean(dat_kclass))   
+                     origin='upper', cmap='YlOrRd', vmin=0.25, vmax=5)   
    plt.ylabel('Horizontal distance (m)')
    plt.xlabel('Distance along track (m)')
    plt.axis('tight')
