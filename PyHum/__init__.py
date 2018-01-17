@@ -69,7 +69,7 @@ from PyHum.test import *
 from PyHum.io import *
 from PyHum._pyhum_mosaic import mosaic
 from PyHum._pyhum_mosaic_texture import mosaic_texture
-from PyHum._gui import gui
+#from PyHum._gui import gui
 
 from PyHum._pyhum_texture import texture
 from PyHum._pyhum_texture_slic import texture_slic
