@@ -98,7 +98,7 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
     dx,dy = np.gradient(imu)
     lap = np.sqrt(dx**2 + dy**2)
     del dx, dy
-    autobed = dpboundary(-lap[buff:,:].T)+buff
+    autobed = dpboundary(-lap[int(buff):,:].T)+int(buff)
     del lap
 
     autobed = np.squeeze(autobed)
