@@ -398,7 +398,11 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
 
        print("something went wrong with the parallelised version of pyread ...")
 
-       import pyread
+       try:
+          import pyread
+       except:
+          from . import pyread
+
        data = pyread.pyread(sonfiles, humfile, c, model, cs2cs_args)
 
        dat = data.gethumdat()
