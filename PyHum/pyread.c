@@ -1890,7 +1890,7 @@ static const char __pyx_k_trans[] = "trans";
 static const char __pyx_k_utm_x[] = "utm_x";
 static const char __pyx_k_utm_y[] = "utm_y";
 static const char __pyx_k_zeros[] = "zeros";
-static const char __pyx_k_encode[] = "encode";
+static const char __pyx_k_decode[] = "decode";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_infile[] = "infile";
 static const char __pyx_k_interp[] = "interp";
@@ -2011,6 +2011,7 @@ static PyObject *__pyx_n_s_caltime;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_close;
 static PyObject *__pyx_n_s_cs2cs_args1;
+static PyObject *__pyx_n_s_decode;
 static PyObject *__pyx_n_s_decode_humdat;
 static PyObject *__pyx_kp_s_deep_salt;
 static PyObject *__pyx_n_s_dep_m;
@@ -2020,7 +2021,6 @@ static PyObject *__pyx_n_s_dist;
 static PyObject *__pyx_n_s_down_highfreq;
 static PyObject *__pyx_n_s_down_lowfreq;
 static PyObject *__pyx_n_s_e;
-static PyObject *__pyx_n_s_encode;
 static PyObject *__pyx_kp_s_epsg_26949;
 static PyObject *__pyx_n_s_fid;
 static PyObject *__pyx_n_s_fid2;
@@ -5067,7 +5067,7 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
  *     cpdef list _fread(self, object infile, int num, str typ):
  *     #def _fread(self, object infile, int num, str typ):
  *        if typ == 'c':             # <<<<<<<<<<<<<<
- *           dat = arr('B').encode()
+ *           dat = arr('B').decode()
  *        else:
  */
   __pyx_t_8 = (__Pyx_PyString_Equals(__pyx_v_typ, __pyx_n_s_c, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 189, __pyx_L1_error)
@@ -5077,7 +5077,7 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
     /* "PyHum/pyread.pyx":190
  *     #def _fread(self, object infile, int num, str typ):
  *        if typ == 'c':
- *           dat = arr('B').encode()             # <<<<<<<<<<<<<<
+ *           dat = arr('B').decode()             # <<<<<<<<<<<<<<
  *        else:
  *           dat = arr(typ)
  */
@@ -5086,7 +5086,7 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
     __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 190, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_encode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 190, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_decode); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 190, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_4 = NULL;
@@ -5114,14 +5114,14 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
  *     cpdef list _fread(self, object infile, int num, str typ):
  *     #def _fread(self, object infile, int num, str typ):
  *        if typ == 'c':             # <<<<<<<<<<<<<<
- *           dat = arr('B').encode()
+ *           dat = arr('B').decode()
  *        else:
  */
     goto __pyx_L3;
   }
 
   /* "PyHum/pyread.pyx":192
- *           dat = arr('B').encode()
+ *           dat = arr('B').decode()
  *        else:
  *           dat = arr(typ)             # <<<<<<<<<<<<<<
  *        dat.fromfile(infile, num)
@@ -17176,6 +17176,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_close, __pyx_k_close, sizeof(__pyx_k_close), 0, 0, 1, 1},
   {&__pyx_n_s_cs2cs_args1, __pyx_k_cs2cs_args1, sizeof(__pyx_k_cs2cs_args1), 0, 0, 1, 1},
+  {&__pyx_n_s_decode, __pyx_k_decode, sizeof(__pyx_k_decode), 0, 0, 1, 1},
   {&__pyx_n_s_decode_humdat, __pyx_k_decode_humdat, sizeof(__pyx_k_decode_humdat), 0, 0, 1, 1},
   {&__pyx_kp_s_deep_salt, __pyx_k_deep_salt, sizeof(__pyx_k_deep_salt), 0, 0, 1, 0},
   {&__pyx_n_s_dep_m, __pyx_k_dep_m, sizeof(__pyx_k_dep_m), 0, 0, 1, 1},
@@ -17185,7 +17186,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_down_highfreq, __pyx_k_down_highfreq, sizeof(__pyx_k_down_highfreq), 0, 0, 1, 1},
   {&__pyx_n_s_down_lowfreq, __pyx_k_down_lowfreq, sizeof(__pyx_k_down_lowfreq), 0, 0, 1, 1},
   {&__pyx_n_s_e, __pyx_k_e, sizeof(__pyx_k_e), 0, 0, 1, 1},
-  {&__pyx_n_s_encode, __pyx_k_encode, sizeof(__pyx_k_encode), 0, 0, 1, 1},
   {&__pyx_kp_s_epsg_26949, __pyx_k_epsg_26949, sizeof(__pyx_k_epsg_26949), 0, 0, 1, 0},
   {&__pyx_n_s_fid, __pyx_k_fid, sizeof(__pyx_k_fid), 0, 0, 1, 1},
   {&__pyx_n_s_fid2, __pyx_k_fid2, sizeof(__pyx_k_fid2), 0, 0, 1, 1},
@@ -17325,7 +17325,7 @@ static int __Pyx_InitCachedConstants(void) {
   /* "PyHum/pyread.pyx":190
  *     #def _fread(self, object infile, int num, str typ):
  *        if typ == 'c':
- *           dat = arr('B').encode()             # <<<<<<<<<<<<<<
+ *           dat = arr('B').decode()             # <<<<<<<<<<<<<<
  *        else:
  *           dat = arr(typ)
  */
