@@ -190,7 +190,7 @@ cdef class pyread:
        #dat = arr(typ)
        dat.fromfile(infile, num)
        if typ == 'c': #character
-          return(list(dat)) #''.join(dat.tolist())))
+          return(list(str(dat))) #''.join(dat.tolist())))
        elif num == 1: # only 1 byte
           return(list(dat))
        else: 

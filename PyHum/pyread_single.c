@@ -5137,7 +5137,7 @@ static PyObject *__pyx_f_5PyHum_13pyread_single_6pyread__fread(CYTHON_UNUSED str
  *        #dat = arr(typ)
  *        dat.fromfile(infile, num)             # <<<<<<<<<<<<<<
  *        if typ == 'c': #character
- *           return(list(dat)) #''.join(dat.tolist())))
+ *           return(list(str(dat))) #''.join(dat.tolist())))
  */
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dat, __pyx_n_s_fromfile); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 196, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -5196,7 +5196,7 @@ static PyObject *__pyx_f_5PyHum_13pyread_single_6pyread__fread(CYTHON_UNUSED str
  *        #dat = arr(typ)
  *        dat.fromfile(infile, num)
  *        if typ == 'c': #character             # <<<<<<<<<<<<<<
- *           return(list(dat)) #''.join(dat.tolist())))
+ *           return(list(str(dat))) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte
  */
   __pyx_t_8 = (__Pyx_PyString_Equals(__pyx_v_typ, __pyx_n_s_c, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 197, __pyx_L1_error)
@@ -5206,13 +5206,22 @@ static PyObject *__pyx_f_5PyHum_13pyread_single_6pyread__fread(CYTHON_UNUSED str
     /* "PyHum/pyread_single.pyx":198
  *        dat.fromfile(infile, num)
  *        if typ == 'c': #character
- *           return(list(dat)) #''.join(dat.tolist())))             # <<<<<<<<<<<<<<
+ *           return(list(str(dat))) #''.join(dat.tolist())))             # <<<<<<<<<<<<<<
  *        elif num == 1: # only 1 byte
  *           return(list(dat))
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = PySequence_List(__pyx_v_dat); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 198, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 198, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_INCREF(__pyx_v_dat);
+    __Pyx_GIVEREF(__pyx_v_dat);
+    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_v_dat);
+    __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 198, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_2 = PySequence_List(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 198, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_r = ((PyObject*)__pyx_t_2);
     __pyx_t_2 = 0;
     goto __pyx_L0;
@@ -5221,14 +5230,14 @@ static PyObject *__pyx_f_5PyHum_13pyread_single_6pyread__fread(CYTHON_UNUSED str
  *        #dat = arr(typ)
  *        dat.fromfile(infile, num)
  *        if typ == 'c': #character             # <<<<<<<<<<<<<<
- *           return(list(dat)) #''.join(dat.tolist())))
+ *           return(list(str(dat))) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte
  */
   }
 
   /* "PyHum/pyread_single.pyx":199
  *        if typ == 'c': #character
- *           return(list(dat)) #''.join(dat.tolist())))
+ *           return(list(str(dat))) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte             # <<<<<<<<<<<<<<
  *           return(list(dat))
  *        else:
@@ -5237,7 +5246,7 @@ static PyObject *__pyx_f_5PyHum_13pyread_single_6pyread__fread(CYTHON_UNUSED str
   if (__pyx_t_9) {
 
     /* "PyHum/pyread_single.pyx":200
- *           return(list(dat)) #''.join(dat.tolist())))
+ *           return(list(str(dat))) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte
  *           return(list(dat))             # <<<<<<<<<<<<<<
  *        else:
@@ -5252,7 +5261,7 @@ static PyObject *__pyx_f_5PyHum_13pyread_single_6pyread__fread(CYTHON_UNUSED str
 
     /* "PyHum/pyread_single.pyx":199
  *        if typ == 'c': #character
- *           return(list(dat)) #''.join(dat.tolist())))
+ *           return(list(str(dat))) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte             # <<<<<<<<<<<<<<
  *           return(list(dat))
  *        else:
