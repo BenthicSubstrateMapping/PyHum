@@ -186,7 +186,8 @@ cdef class pyread:
     # =========================================================
     cpdef list _fread(self, object infile, int num, str typ):
     #def _fread(self, object infile, int num, str typ):
-       dat = arr(typ)#.tobytes()
+       if typ == 'c':
+          dat = arr('B')
        dat.fromfile(infile, num)
        if typ == 'c': #character
           return(list(dat)) #''.join(dat.tolist())))
