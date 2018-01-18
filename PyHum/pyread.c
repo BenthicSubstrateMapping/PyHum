@@ -1914,7 +1914,6 @@ static const char __pyx_k_humfile[] = "humfile";
 static const char __pyx_k_inverse[] = "inverse";
 static const char __pyx_k_pattern[] = "pattern";
 static const char __pyx_k_squeeze[] = "squeeze";
-static const char __pyx_k_tobytes[] = "tobytes";
 static const char __pyx_k_unknown[] = "unknown";
 static const char __pyx_k_filename[] = "filename";
 static const char __pyx_k_fromfile[] = "fromfile";
@@ -1925,6 +1924,7 @@ static const char __pyx_k_linesize[] = "linesize";
 static const char __pyx_k_pyx_type[] = "__pyx_type";
 static const char __pyx_k_setstate[] = "__setstate__";
 static const char __pyx_k_sonfiles[] = "sonfiles";
+static const char __pyx_k_tostring[] = "tostring";
 static const char __pyx_k_deep_salt[] = "deep salt";
 static const char __pyx_k_get_scans[] = "_get_scans";
 static const char __pyx_k_gethumdat[] = "gethumdat";
@@ -2113,8 +2113,8 @@ static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_text;
 static PyObject *__pyx_n_s_throw;
 static PyObject *__pyx_n_s_time_s;
-static PyObject *__pyx_n_s_tobytes;
 static PyObject *__pyx_n_s_tolist;
+static PyObject *__pyx_n_s_tostring;
 static PyObject *__pyx_n_s_trans;
 static PyObject *__pyx_n_s_typ;
 static PyObject *__pyx_n_s_unix_time;
@@ -5083,7 +5083,7 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
  *        #dat = arr(typ)
  *        dat.fromfile(infile, num)             # <<<<<<<<<<<<<<
  *        if typ == 'c': #character
- *           return(list(dat.tobytes())) #''.join(dat.tolist())))
+ *           return(list(dat.tostring())) #''.join(dat.tolist())))
  */
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dat, __pyx_n_s_fromfile); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 191, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -5142,7 +5142,7 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
  *        #dat = arr(typ)
  *        dat.fromfile(infile, num)
  *        if typ == 'c': #character             # <<<<<<<<<<<<<<
- *           return(list(dat.tobytes())) #''.join(dat.tolist())))
+ *           return(list(dat.tostring())) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte
  */
   __pyx_t_8 = (__Pyx_PyString_Equals(__pyx_v_typ, __pyx_n_s_c, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 192, __pyx_L1_error)
@@ -5152,12 +5152,12 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
     /* "PyHum/pyread.pyx":193
  *        dat.fromfile(infile, num)
  *        if typ == 'c': #character
- *           return(list(dat.tobytes())) #''.join(dat.tolist())))             # <<<<<<<<<<<<<<
+ *           return(list(dat.tostring())) #''.join(dat.tolist())))             # <<<<<<<<<<<<<<
  *        elif num == 1: # only 1 byte
  *           return(list(dat))
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dat, __pyx_n_s_tobytes); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 193, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dat, __pyx_n_s_tostring); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 193, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_t_3 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
@@ -5188,14 +5188,14 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
  *        #dat = arr(typ)
  *        dat.fromfile(infile, num)
  *        if typ == 'c': #character             # <<<<<<<<<<<<<<
- *           return(list(dat.tobytes())) #''.join(dat.tolist())))
+ *           return(list(dat.tostring())) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte
  */
   }
 
   /* "PyHum/pyread.pyx":194
  *        if typ == 'c': #character
- *           return(list(dat.tobytes())) #''.join(dat.tolist())))
+ *           return(list(dat.tostring())) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte             # <<<<<<<<<<<<<<
  *           return(list(dat))
  *        else:
@@ -5204,7 +5204,7 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
   if (__pyx_t_9) {
 
     /* "PyHum/pyread.pyx":195
- *           return(list(dat.tobytes())) #''.join(dat.tolist())))
+ *           return(list(dat.tostring())) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte
  *           return(list(dat))             # <<<<<<<<<<<<<<
  *        else:
@@ -5219,7 +5219,7 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
 
     /* "PyHum/pyread.pyx":194
  *        if typ == 'c': #character
- *           return(list(dat.tobytes())) #''.join(dat.tolist())))
+ *           return(list(dat.tostring())) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte             # <<<<<<<<<<<<<<
  *           return(list(dat))
  *        else:
@@ -17199,8 +17199,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_text, __pyx_k_text, sizeof(__pyx_k_text), 0, 0, 1, 1},
   {&__pyx_n_s_throw, __pyx_k_throw, sizeof(__pyx_k_throw), 0, 0, 1, 1},
   {&__pyx_n_s_time_s, __pyx_k_time_s, sizeof(__pyx_k_time_s), 0, 0, 1, 1},
-  {&__pyx_n_s_tobytes, __pyx_k_tobytes, sizeof(__pyx_k_tobytes), 0, 0, 1, 1},
   {&__pyx_n_s_tolist, __pyx_k_tolist, sizeof(__pyx_k_tolist), 0, 0, 1, 1},
+  {&__pyx_n_s_tostring, __pyx_k_tostring, sizeof(__pyx_k_tostring), 0, 0, 1, 1},
   {&__pyx_n_s_trans, __pyx_k_trans, sizeof(__pyx_k_trans), 0, 0, 1, 1},
   {&__pyx_n_s_typ, __pyx_k_typ, sizeof(__pyx_k_typ), 0, 0, 1, 1},
   {&__pyx_n_s_unix_time, __pyx_k_unix_time, sizeof(__pyx_k_unix_time), 0, 0, 1, 1},
