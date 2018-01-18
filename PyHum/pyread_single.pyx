@@ -193,7 +193,8 @@ cdef class pyread:
     #def _fread(self, object infile, int num, str typ):
        if typ == 'c':
           dat = arr('B')
-	   
+       else:
+          dat = arr(typ)	   
        dat.fromfile(infile, num)
        if typ == 'c': #character
           return(list(dat)) #''.join(dat.tolist())))
