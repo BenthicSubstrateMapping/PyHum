@@ -1,12 +1,10 @@
-### PyHum
-
+## PyHum
 
 PyHum - a Python framework for reading and processing data from a Humminbird low-cost sidescan sonar
 
 PyHum is an open-source project dedicated to provide a generic Python framework 
 for reading and exporting data from Humminbird(R) instruments, carrying out rudimentary radiometric corrections to the data,
 classify bed texture, and produce some maps on aerial photos and kml files for google-earth
-
 
 1. read Humminbird DAT and associated SON files
 2. export data
@@ -16,12 +14,13 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
 
 The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) and works on both sidescan and downward-looking echosounder data, where available.
 
-Some aspects of the program are detailed in:
-Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
+### Please cite! 
 
-Full documentation of the procedures behind the program is in the following publication:
+If you use PyHum in your published work, please cite the following papers:
 
-Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization using recreational-grade sidescan-sonar. ENVIRONMENTAL MODELLING & SOFTWARE 89, 1-18.
+1. Buscombe, D., Grams, P.E., and Smith, S. (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
+
+2. Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization using recreational-grade sidescan-sonar. ENVIRONMENTAL MODELLING & SOFTWARE 89, 1-18.
 
 
 ### Contributing & Credits
@@ -41,25 +40,14 @@ Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization
 
 Version: 1.4.2    |  Revision: Jan, 2018
 
-For latest code version please visit:
-https://github.com/dbuscombe-usgs
 
-This function is part of PyHum software
-This software is in the public domain because it contains materials that originally came 
-from the United States Geological Survey, an agency of the United States Department of Interior. 
-For more information, see the official USGS copyright policy at 
+### Please Read
 
-```
-http://www.usgs.gov/visual-id/credit_usgs.html#copyright
-```
+1. This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12 -- 17, Windows 7. Python 3 is not yet supported
 
-Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government. 
+2. This software has (so far) been used only with Humminbird 798, 898, 998, 1198 and 1199 series instruments. 
 
-Thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info, Dan Hamill (Utah State University), Paul Anderson (Quest Geophysical Asia) and various others for debugging and suggestions for improvements
-
-This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12.4 & 13.4 & 14.4, Windows 7.
-
-This software has (so far) been used only with Humminbird 798, 898, 998, 1198 and 1199 series instruments. 
+3. PyHum is not yet compatable with newer ONIX/MEGA systems
 
 ### Contents
 
@@ -194,7 +182,7 @@ A test can be carried out by running the supplied script. From the command line 
 
 ```
 python -c"import PyHum;PyHum.dotest()" 
-``
+```
 
 ### Using the GUI
 From the command line (terminal)::
@@ -353,7 +341,6 @@ or using os, e.g.::
 If you get C++ compiler errors (such as "Unable to find vcvarsall.bat"), you will need to install the Microsoft Visual C++ compiler from `here <http://aka.ms/vcpython27>`_
 
 
-
 ### Support
 
 This is a new project written and maintained by Daniel Buscombe. Bugs are expected - please report them. Please use the 'Issues' tab in github
@@ -366,5 +353,19 @@ Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate.
 
 Thanks for stopping by! 
 
+### Acknowledgements
+
+This function is part of PyHum software
+This software is in the public domain because it contains materials that originally came 
+from the United States Geological Survey, an agency of the United States Department of Interior. 
+For more information, see the official USGS copyright policy at 
+
+```
+http://www.usgs.gov/visual-id/credit_usgs.html#copyright
+```
+
+Any use of trade, product, or firm names is for descriptive purposes only and does not imply endorsement by the U.S. government. 
+
+Thanks to Barb Fagetter (blueseas@oceanecology.ca) for some format info, Dan Hamill (Utah State University), Paul Anderson (Quest Geophysical Asia) and various others for debugging and suggestions for improvements
 
 
