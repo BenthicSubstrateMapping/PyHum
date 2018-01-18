@@ -1890,6 +1890,7 @@ static const char __pyx_k_trans[] = "trans";
 static const char __pyx_k_utm_x[] = "utm_x";
 static const char __pyx_k_utm_y[] = "utm_y";
 static const char __pyx_k_zeros[] = "zeros";
+static const char __pyx_k_decode[] = "decode";
 static const char __pyx_k_import[] = "__import__";
 static const char __pyx_k_infile[] = "infile";
 static const char __pyx_k_interp[] = "interp";
@@ -2010,6 +2011,7 @@ static PyObject *__pyx_n_s_caltime;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_close;
 static PyObject *__pyx_n_s_cs2cs_args1;
+static PyObject *__pyx_n_s_decode;
 static PyObject *__pyx_n_s_decode_humdat;
 static PyObject *__pyx_kp_s_deep_salt;
 static PyObject *__pyx_n_s_dep_m;
@@ -5081,7 +5083,7 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
  *        #dat = arr(typ)
  *        dat.fromfile(infile, num)             # <<<<<<<<<<<<<<
  *        if typ == 'c': #character
- *           return(list(str(dat))) #''.join(dat.tolist())))
+ *           return(list(dat.decode())) #''.join(dat.tolist())))
  */
   __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dat, __pyx_n_s_fromfile); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 191, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
@@ -5140,7 +5142,7 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
  *        #dat = arr(typ)
  *        dat.fromfile(infile, num)
  *        if typ == 'c': #character             # <<<<<<<<<<<<<<
- *           return(list(str(dat))) #''.join(dat.tolist())))
+ *           return(list(dat.decode())) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte
  */
   __pyx_t_8 = (__Pyx_PyString_Equals(__pyx_v_typ, __pyx_n_s_c, Py_EQ)); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 192, __pyx_L1_error)
@@ -5150,38 +5152,50 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
     /* "PyHum/pyread.pyx":193
  *        dat.fromfile(infile, num)
  *        if typ == 'c': #character
- *           return(list(str(dat))) #''.join(dat.tolist())))             # <<<<<<<<<<<<<<
+ *           return(list(dat.decode())) #''.join(dat.tolist())))             # <<<<<<<<<<<<<<
  *        elif num == 1: # only 1 byte
  *           return(list(dat))
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 193, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_INCREF(__pyx_v_dat);
-    __Pyx_GIVEREF(__pyx_v_dat);
-    PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_v_dat);
-    __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 193, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dat, __pyx_n_s_decode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 193, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PySequence_List(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 193, __pyx_L1_error)
+    __pyx_t_3 = NULL;
+    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
+      __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_1);
+      if (likely(__pyx_t_3)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_1);
+        __Pyx_INCREF(__pyx_t_3);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_1, function);
+      }
+    }
+    if (__pyx_t_3) {
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 193, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    } else {
+      __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 193, __pyx_L1_error)
+    }
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_r = ((PyObject*)__pyx_t_2);
-    __pyx_t_2 = 0;
+    __pyx_t_1 = PySequence_List(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 193, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_r = ((PyObject*)__pyx_t_1);
+    __pyx_t_1 = 0;
     goto __pyx_L0;
 
     /* "PyHum/pyread.pyx":192
  *        #dat = arr(typ)
  *        dat.fromfile(infile, num)
  *        if typ == 'c': #character             # <<<<<<<<<<<<<<
- *           return(list(str(dat))) #''.join(dat.tolist())))
+ *           return(list(dat.decode())) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte
  */
   }
 
   /* "PyHum/pyread.pyx":194
  *        if typ == 'c': #character
- *           return(list(str(dat))) #''.join(dat.tolist())))
+ *           return(list(dat.decode())) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte             # <<<<<<<<<<<<<<
  *           return(list(dat))
  *        else:
@@ -5190,22 +5204,22 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
   if (__pyx_t_9) {
 
     /* "PyHum/pyread.pyx":195
- *           return(list(str(dat))) #''.join(dat.tolist())))
+ *           return(list(dat.decode())) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte
  *           return(list(dat))             # <<<<<<<<<<<<<<
  *        else:
  *           return(list(dat))
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = PySequence_List(__pyx_v_dat); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 195, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_r = ((PyObject*)__pyx_t_2);
-    __pyx_t_2 = 0;
+    __pyx_t_1 = PySequence_List(__pyx_v_dat); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 195, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_r = ((PyObject*)__pyx_t_1);
+    __pyx_t_1 = 0;
     goto __pyx_L0;
 
     /* "PyHum/pyread.pyx":194
  *        if typ == 'c': #character
- *           return(list(str(dat))) #''.join(dat.tolist())))
+ *           return(list(dat.decode())) #''.join(dat.tolist())))
  *        elif num == 1: # only 1 byte             # <<<<<<<<<<<<<<
  *           return(list(dat))
  *        else:
@@ -5221,10 +5235,10 @@ static PyObject *__pyx_f_5PyHum_6pyread_6pyread__fread(CYTHON_UNUSED struct __py
  */
   /*else*/ {
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = PySequence_List(__pyx_v_dat); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 197, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_2);
-    __pyx_r = ((PyObject*)__pyx_t_2);
-    __pyx_t_2 = 0;
+    __pyx_t_1 = PySequence_List(__pyx_v_dat); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 197, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_1);
+    __pyx_r = ((PyObject*)__pyx_t_1);
+    __pyx_t_1 = 0;
     goto __pyx_L0;
   }
 
@@ -17083,6 +17097,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_close, __pyx_k_close, sizeof(__pyx_k_close), 0, 0, 1, 1},
   {&__pyx_n_s_cs2cs_args1, __pyx_k_cs2cs_args1, sizeof(__pyx_k_cs2cs_args1), 0, 0, 1, 1},
+  {&__pyx_n_s_decode, __pyx_k_decode, sizeof(__pyx_k_decode), 0, 0, 1, 1},
   {&__pyx_n_s_decode_humdat, __pyx_k_decode_humdat, sizeof(__pyx_k_decode_humdat), 0, 0, 1, 1},
   {&__pyx_kp_s_deep_salt, __pyx_k_deep_salt, sizeof(__pyx_k_deep_salt), 0, 0, 1, 0},
   {&__pyx_n_s_dep_m, __pyx_k_dep_m, sizeof(__pyx_k_dep_m), 0, 0, 1, 1},
