@@ -268,7 +268,7 @@ cdef class pyread:
           spacer = self._fread(fid, 1, 'B')  # 92
           head.append(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0]/1000) # freq_khz
           spacer = self._fread(fid, 1, 'B')   # 53
-          spacer = self._fread(fid, 12,'B') #'c')
+          spacer = self._fread(fid, 12,'c')
           spacer = self._fread(fid, 1, 'B')    # A0
           head.append(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0]) #sentlen
           spacer = self._fread(fid, 1, 'B')   # 21      then data  
@@ -287,7 +287,7 @@ cdef class pyread:
           spacer = self._fread(fid, 1, 'B')
           head.append(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0]/1000) # freq_khz
           spacer = self._fread(fid, 5, 'B')
-          spacer = self._fread(fid,4,'B') #'c')
+          spacer = self._fread(fid,4,'c')
           spacer = self._fread(fid, 5, 'B')
           head.append(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0]) #sentlen
           spacer = self._fread(fid, 1, 'B')          
