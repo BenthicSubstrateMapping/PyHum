@@ -192,7 +192,7 @@ cdef class pyread:
     cpdef list _fread(self, object infile, int num, str typ):
     #def _fread(self, object infile, int num, str typ):
        if typ == 'c':
-          dat = arr('B')
+          dat = arr('B').encode()
        else:
           dat = arr(typ)	   
        dat.fromfile(infile, num)
