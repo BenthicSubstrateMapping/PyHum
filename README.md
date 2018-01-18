@@ -133,7 +133,7 @@ pip install PyHum
 pip install git+https://github.com/dbuscombe-usgs/PyHum.git
 ```
 
-(Windows users) install git from `here <https://git-scm.com/download/win>`_
+(Windows users) install git from here: https://git-scm.com/download/win
 
 
 3. from github repo clone::
@@ -177,7 +177,7 @@ deactivate (or source venv/bin/deactivate)
 The results will live in "venv/lib/python2.7/site-packages/PyHum". Note for Fedora linux users: you need the geos-devel package for basemap, and the blas and libpack libraries for scipy
 
 
-###Running the test
+### Running the test
 A test can be carried out by running the supplied script. From the command line (terminal)::
 
 ```
@@ -191,7 +191,7 @@ From the command line (terminal)::
 python -c "import PyHum; PyHum.gui()"
 ```
 
-### Getting Started
+## Using PyHum
 
 Inputs to the program are a .DAT file (e.g. R0089.DAT) and a folder of .SON and .IDX files (e.g. /my/folder/R0089). The program will read the .SON files with or without the accompanying .IDX files, but will be faster if the .IDX files are present. 
 
@@ -338,7 +338,7 @@ or using os, e.g.::
    os.path.abspath(os.path.join('C:\Users','me','mydata','R0089'))
 ```
 
-If you get C++ compiler errors (such as "Unable to find vcvarsall.bat"), you will need to install the Microsoft Visual C++ compiler from `here <http://aka.ms/vcpython27>`_
+If you get C++ compiler errors (such as "Unable to find vcvarsall.bat"), you will need to install the Microsoft Visual C++ compiler from here: http://aka.ms/vcpython27
 
 
 ### Support
