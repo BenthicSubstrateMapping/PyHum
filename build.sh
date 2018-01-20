@@ -1,3 +1,5 @@
 bundle exec jekyll clean
 rm -rf _site
-bundle exec jekyll build --watch
+bundle clean
+bundle install
+bundle exec jekyll build
