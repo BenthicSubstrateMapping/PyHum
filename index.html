@@ -182,13 +182,13 @@
 
   <div class="author__avatar">
     
-    	<img src="http://dbuscombe-usgs.github.io/PyHum//images/pyhum_logo_colour_sm.png" class="author__avatar" alt="Developed by Daniel Buscombe">
+    	<img src="http://dbuscombe-usgs.github.io/PyHum//images/pyhum_logo_colour_sm.png" class="author__avatar" alt="Developed by: Daniel Buscombe">
     
   </div>
 
   <div class="author__content">
-    <h3 class="author__name">Developed by Daniel Buscombe</h3>
-    <p class="author__bio">Your biography for the left-hand sidebar</p>
+    <h3 class="author__name">Developed by: Daniel Buscombe</h3>
+    <p class="author__bio">Assistant Research Professor</p>
   </div>
 
   <div class="author__urls-wrapper">
@@ -227,7 +227,7 @@
       
       
       
-        <li><a href="www.danielbuscombe.com"><i class="ai ai-google-scholar-square ai-fw"></i> Google Scholar</a></li>
+        <li><a href="https://scholar.google.com/citations?user=bwVl0NwAAAAJ&hl=en"><i class="ai ai-google-scholar-square ai-fw"></i> Google Scholar</a></li>
       
       
       
@@ -262,7 +262,7 @@
       
 
       <section class="page__content" itemprop="text">
-        <p>PyHum - a Python framework for reading and processing data from a Humminbird low-cost sidescan sonar</p>
+        <p>A Python framework for reading and processing data from a Humminbird low-cost sidescan sonar.</p>
 
 <p>PyHum is an open-source project dedicated to provide a generic Python framework 
 for reading and exporting data from Humminbird(R) instruments, carrying out rudimentary radiometric corrections to the data,
@@ -270,14 +270,78 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
 
 <p>The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) and works on both sidescan and downward-looking echosounder data, where available.</p>
 
-<p>The following Humminbird units are currently supported:
-1. 700, 800, 900 and 1100 series
-2. ONIX series</p>
+<h1 id="notes">Notes</h1>
+
+<ol>
+  <li>
+    <p>This software has been tested with Python 2.7 on various Linux and Windows operating systems. Python 3 is not yet supported</p>
+  </li>
+  <li>
+    <p>This software has (so far) been used only with Humminbird 798, 898, 998, 1198, 1199 and ONIX series instruments.</p>
+  </li>
+  <li>
+    <p>PyHum is not yet compatable with newer HELIX/MEGA systems</p>
+  </li>
+</ol>
 
 <h1 id="technical-info">Technical Info</h1>
 <p>Full documentation of the procedures behind the program is in the following publication:</p>
 
 <p>Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization using recreational-grade sidescan-sonar. ENVIRONMENTAL MODELLING &amp; SOFTWARE 89, 1-18.</p>
+
+<h1 id="credits">Credits</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Primary Developer</th>
+      <th>Daniel Buscombe</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td> </td>
+      <td>Northern Arizona University</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Flagstaff, AZ 86001</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>daniel.buscombe@nau.edu</td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <thead>
+    <tr>
+      <th>Co-Developer</th>
+      <th>Daniel Hamill</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td> </td>
+      <td>Department of Watershed Sciences</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Utah State University</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>Logan, UT 84322</td>
+    </tr>
+    <tr>
+      <td> </td>
+      <td>dhamill@usgs.gov</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Current version: 1.4.3 (Jan. 2018)</p>
 
 <h1 id="please-cite">Please Cite!</h1>
 
@@ -294,34 +358,263 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
 
 <p>For the source code visit <a href="https://github.com/dbuscombe-usgs/PyHum/">the project github site</a></p>
 
-<h1 id="getting-started">Getting started</h1>
+<h1 id="installation">Installation</h1>
+
+<p>Installing in a conda virtual env (recommended)</p>
+
+<p>In a conda (miniconda/anaconda) python 2 environment:</p>
+
+<p>Linux::</p>
+
+<p>conda create –name pyhum python=2
+  source activate pyhum
+  conda install -c conda-forge basemap-data-hires -y
+  conda install scipy numpy scikit-image
+  pip install simplekml sklearn pandas dask
+  pip install joblib toolz cython
+  pip install pyresample
+  pip install PyHum –no-deps #(or pip install git+https://github.com/dbuscombe-usgs/PyHum.git –no-deps)
+  python -c”import PyHum;PyHum.dotest()”</p>
+
+<p>Windows::</p>
+
+<p>conda create –name pyhum python=2
+  activate pyhum
+  conda install -c conda-forge basemap-data-hires -y
+  conda install scipy numpy scikit-image
+  pip install simplekml sklearn pandas dask
+  pip install joblib toolz cython
+  pip install pyresample==1.1.4
+  pip install PyHum –no-deps #(or pip install git+https://github.com/dbuscombe-usgs/PyHum.git –no-deps)
+  python -c”import PyHum;PyHum.dotest()”</p>
+
+<p>Installing as a library accessible outside of virtual env</p>
+
+<p>From PyPI::</p>
+
+<p>pip install PyHum</p>
+
+<p>The latest ‘bleeding edge’ (pre-release) version directly from github::</p>
+
+<p>pip install git+https://github.com/dbuscombe-usgs/PyHum.git</p>
+
+<p>(Windows users) install git from here: https://git-scm.com/download/win</p>
+
+<p>From github repo clone::</p>
+
+<p>git clone git@github.com:dbuscombe-usgs/PyHum.git
+  cd PyHum
+  python setup.py install</p>
+
+<p>A local installation::</p>
+
+<p>python setup.py install –user</p>
+
+<p>If you get C++ compiler errors (such as “Unable to find vcvarsall.bat”), you will need to install the Microsoft Visual C++ compiler from <a href="http://aka.ms/vcpython27">here</a></p>
+
+<h1 id="installation-on-amazon-linux-ec-2-instance">Installation on Amazon Linux EC-2 instance</h1>
+
+<p>It’s best to install numpy, scipy, cython and matplotlib through the OS package manager::</p>
+
+<p>sudo yum install gcc gcc-c++
+  sudo yum install python27-numpy python27-Cython python27-scipy python27-matplotlib</p>
+
+<p>Then install geos libraries using yum and Basemap using pip::</p>
+
+<p>sudo yum install geos geos-devel geos-python27
+  sudo pip install basemap –allow-external basemap –allow-unverified basemap</p>
+
+<p>Then PyHum using pip (which will install Pillow, pyproj, simplekml, joblib and scikit-learn)::</p>
+
+<p>sudo pip install PyHum</p>
+
+<h1 id="test">Test</h1>
+
+<p>A test can be carried out by running the supplied script::</p>
+
+<p>python -c “import PyHum; PyHum.test.dotest()”</p>
+
+<h1 id="using-the-gui">Using the GUI</h1>
+
+<p>From the command line (terminal)::</p>
+
+<p>python -c “import PyHum; PyHum.gui()”</p>
+
+<h1 id="getting-started">Getting Started</h1>
+
+<p>Inputs to the program are a .DAT file (e.g. R0089.DAT) and a folder of .SON and .IDX files (e.g. /my/folder/R0089). The program will read the .SON files with or without the accompanying .IDX files, but will be faster if the .IDX files are present.</p>
+
+<p>PyHum is modular so can be called from within a python or ipython console, from an IDE (such as IDLE or Spyder), or by running a script.</p>
+
+<p>The following example script::</p>
+
+<p>import sys, getopt</p>
+
+<p>from Tkinter import Tk
+   from tkFileDialog import askopenfilename, askdirectory</p>
+
+<p>import PyHum
+   import os</p>
+
+<p>if <strong>name</strong> == ‘<strong>main</strong>’:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>argv = sys.argv[1:]
+humfile = ''; sonpath = ''
+
+# parse inputs to variables
+try:
+   opts, args = getopt.getopt(argv,"hi:s:")
+except getopt.GetoptError:
+     print 'error'
+     sys.exit(2)
+for opt, arg in opts:
+   if opt == '-h':
+     print 'help'
+     sys.exit()
+   elif opt in ("-i"):
+      humfile = arg
+   elif opt in ("-s"):
+      sonpath = arg
+
+# prompt user to supply file if no input file given
+if not humfile:
+   print 'An input file is required!!!!!!'
+   Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
+   humfile = askopenfilename(filetypes=[("DAT files","*.DAT")]) 
+
+# prompt user to supply directory if no input sonpath is given
+if not sonpath:
+   print 'A *.SON directory is required!!!!!!'
+   Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
+   sonpath = askdirectory() 
+
+# print given arguments to screen and convert data type where necessary
+if humfile:
+   print 'Input file is %s' % (humfile)
+
+if sonpath:
+   print 'Son files are in %s' % (sonpath)
+             
+doplot = 1 #yes
+
+# reading specific settings
+cs2cs_args = "epsg:26949" #arizona central state plane
+bedpick = 1 # auto bed pick
+c = 1450 # speed of sound fresh water
+t = 0.108 # length of transducer
+draft = 0.3 # draft in metres
+flip_lr = 1 # flip port and starboard
+model = 998 # humminbird model
+calc_bearing = 0 #no
+filt_bearing = 0 #no
+chunk = 'd100' # distance, 100m
+#chunk = 'p1000' # pings, 1000
+#chunk = 'h10' # heading deviation, 10 deg
+ 
+# correction specific settings
+maxW = 1000 # rms output wattage
+dofilt = 0 # 1 = apply a phase preserving filter (WARNING!! takes a very long time for large scans)
+correct_withwater = 0 # don't retain water column in radiometric correction (1 = retains water column for radiomatric corrections)
+ph = 7.0 # acidity on the pH scale
+temp = 10.0 # water temperature in degrees Celsius
+#salinity = 0.0
+
+# for shadow removal
+shadowmask = 1 #manual shadow removal
+
+# for mapping
+res = 99 # grid resolution in metres
+# if res==99, the program will automatically calc res from the spatial res of the scans
+mode = 1 # gridding mode (simple nearest neighbour)
+#mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
+#mode = 3 # gridding mode (gaussian weighted nearest neighbour)
+dowrite = 0 #disable writing of point cloud data to file
+
+## read data in SON files into PyHum memory mapped format (.dat)
+PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) #cog
+
+## correct scans and remove water column
+PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
+
+## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
+PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
+   
+## Calculate texture lengthscale maps using the method of Buscombe et al. (2015)
+win = 10
+PyHum.texture2(humfile, sonpath, win, doplot, numclasses)
+
+## grid and map the scans
+PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
+</code></pre>
+</div>
+
+<p>could be saved as, for example “proc_mysidescandata.py” and run from the command line using::</p>
+
+<p>python proc_mysidescandata.py -i C:\MyData\R0087.DAT -s C:\MyData\R0087</p>
+
+<p>or from within ipython (with a GUI prompt to navigate to the files)::</p>
+
+<p>%run proc_mysidescandata.py</p>
+
+<p>If you are in bash (or git bash) you might want to automate through a folder of subfolders like this::</p>
+
+<p>for k in $(find $PWD -type d -maxdepth 1 -mindepth 1); do python proc_mysidescandata.py -i “$k/${k##*/}.DAT” -s $k; done</p>
+
+<p>which assumes the .DAT file is in the folder with the same root (such as a folder called R00123 which contains SON and IDX files as well as a file called R00123.DAT)</p>
+
+<h1 id="support">Support</h1>
+
+<p>This is a new project written and maintained by Daniel Buscombe. Bugs are expected - please report them, I will fix them quickly. Feedback and suggestions for improvements are <em>very</em> welcome</p>
+
+<p>Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. Please use the ‘Issues’ tab in github <a href="https://github.com/dbuscombe-usgs/PyHum">here</a></p>
+
+<p>Thanks for stopping by!</p>
+
+<h1 id="trouble-shooting">Trouble Shooting</h1>
+
 <ol>
-  <li>Register a GitHub account if you don’t have one and confirm your e-mail (required!)</li>
-  <li>Fork <a href="https://github.com/academicpages/academicpages.github.io">this repository</a> by clicking the “fork” button in the top right.</li>
-  <li>Go to the repository’s settings (rightmost item in the tabs that start with “Code”, should be below “Unwatch”). Rename the repository “[your GitHub username].github.io”, which will also be your website’s URL.</li>
-  <li>Set site-wide configuration and create content &amp; metadata (see below – also see <a href="http://archive.is/3TPas">this set of diffs</a> showing what files were changed to set up <a href="https://getorg-testacct.github.io">an example site</a> for a user with the username “getorg-testacct”)</li>
-  <li>Upload any files (like PDFs, .zip files, etc.) to the files/ directory. They will appear at https://[your GitHub username].github.io/files/example.pdf.</li>
-  <li>Check status by going to the repository settings, in the “GitHub pages” section</li>
+  <li>
+    <p>Problem: pyhum read hangs for a long time (several minutes) on the test script. 
+Try this: uninstall joblib and install an older version::</p>
+
+    <p>pip uninstall joblib
+pip install joblib==0.7.1</p>
+  </li>
+  <li>
+    <p>Problem: you get an “invalid mode or file name” error.
+Try this: construct file paths using raw strings e.g.::</p>
+
+    <p>r’C:\Users\me\mydata\R0089’</p>
+  </li>
 </ol>
 
-<h2 id="site-wide-configuration">Site-wide configuration</h2>
-<p>The main configuration file for the site is in the base directory in <a href="https://github.com/academicpages/academicpages.github.io/blob/master/_config.yml">_config.yml</a>, which defines the content in the sidebars and other site-wide features. You will need to replace the default variables with ones about yourself and your site’s github repository. The configuration file for the top menu is in <a href="https://github.com/academicpages/academicpages.github.io/blob/master/_data/navigation.yml">_data/navigation.yml</a>. For example, if you don’t have a portfolio or blog posts, you can remove those items from that navigation.yml file to remove them from the header.</p>
+<p>or using os, e.g.::</p>
 
-<h2 id="create-content--metadata">Create content &amp; metadata</h2>
-<p>For site content, there is one markdown file for each type of content, which are stored in directories like _publications, _talks, _posts, _teaching, or _pages. For example, each talk is a markdown file in the <a href="https://github.com/academicpages/academicpages.github.io/tree/master/_talks">_talks directory</a>. At the top of each markdown file is structured data in YAML about the talk, which the theme will parse to do lots of cool stuff. The same structured data about a talk is used to generate the list of talks on the <a href="https://academicpages.github.io/talks">Talks page</a>, each <a href="https://academicpages.github.io/talks/2012-03-01-talk-1">individual page</a> for specific talks, the talks section for the <a href="https://academicpages.github.io/cv">CV page</a>, and the <a href="https://academicpages.github.io/talkmap.html">map of places you’ve given a talk</a> (if you run this <a href="https://github.com/academicpages/academicpages.github.io/blob/master/talkmap.py">python file</a> or <a href="https://github.com/academicpages/academicpages.github.io/blob/master/talkmap.ipynb">Jupyter notebook</a>, which creates the HTML for the map based on the contents of the _talks directory).</p>
+<p>import os
+   os.path.abspath(os.path.join(‘C:\Users’,’me’,’mydata’,’R0089’))</p>
 
-<p><strong>Markdown generator</strong></p>
+<ol>
+  <li>
+    <p>Problem: on Linux, PyHum is using an older version of scipy than 0.16, as revealed by::</p>
 
-<p>I have also created <a href="https://github.com/academicpages/academicpages.github.io/tree/master/markdown_generator">a set of Jupyter notebooks</a> that converts a CSV containing structured data about talks or presentations into individual markdown files that will be properly formatted for the academicpages template. The sample CSVs in that directory are the ones I used to create my own personal website at stuartgeiger.com. My usual workflow is that I keep a spreadsheet of my publications and talks, then run the code in these notebooks to generate the markdown files, then commit and push them to the GitHub repository.</p>
+    <p>python -c ‘import scipy;print(scipy.<strong>version</strong>)’</p>
+  </li>
+</ol>
 
-<h2 id="how-to-edit-your-sites-github-repository">How to edit your site’s GitHub repository</h2>
-<p>Many people use a git client to create files on their local computer and then push them to GitHub’s servers. If you are not familiar with git, you can directly edit these configuration and markdown files directly in the github.com interface. Navigate to a file (like <a href="https://github.com/academicpages/academicpages.github.io/blob/master/_talks/2012-03-01-talk-1.md">this one</a> and click the pencil icon in the top right of the content preview (to the right of the “Raw | Blame | History” buttons). You can delete a file by clicking the trashcan icon to the right of the pencil icon. You can also create new files or upload files by navigating to a directory and clicking the “Create new file” or “Upload files” buttons.</p>
+<p>Try this: remove a system installed file e.g.::</p>
 
-<p>Example: editing a markdown file for a talk
-<img src="/images/editing-talk.png" alt="Editing a markdown file for a talk" /></p>
+<p>sudo apt-get remove python-scipy ##(Debian based)
+   yum remove scipy ##(Fedora based)</p>
 
-<h2 id="for-more-info">For more info</h2>
-<p>More info about configuring academicpages can be found in <a href="https://academicpages.github.io/markdown/">the guide</a>. The <a href="https://mmistakes.github.io/minimal-mistakes/docs/configuration/">guides for the Minimal Mistakes theme</a> (which this theme was forked from) might also be helpful.</p>
+<ol>
+  <li>
+    <p>Problem: do I have the latest version of PyHum installed? Check your version using this::</p>
+
+    <p>python -c ‘import PyHum;print(PyHum.<strong>version</strong>)’</p>
+  </li>
+</ol>
+
+<p>Check this against the latest `bleeding-edge’ version <a href="https://github.com/dbuscombe-usgs/PyHum/blob/master/PyHum/__init__.py">here</a> (line 47)</p>
 
         
       </section>
