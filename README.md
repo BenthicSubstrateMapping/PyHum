@@ -45,9 +45,9 @@ Version: 1.4.2    |  Revision: Jan, 2018
 
 1. This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12 -- 17, Windows 7. Python 3 is not yet supported
 
-2. This software has (so far) been used only with Humminbird 798, 898, 998, 1198 and 1199 series instruments. 
+2. This software has (so far) been used only with Humminbird 798, 898, 998, 1198, 1199 and ONIX series instruments. 
 
-3. PyHum is not yet compatable with newer ONIX/MEGA systems
+3. PyHum is not yet compatable with newer HELIX/MEGA systems
 
 ### Contents
 

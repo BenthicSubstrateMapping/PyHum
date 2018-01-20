@@ -65,8 +65,8 @@ cdef class pyread:
           humdat = self._decode_humdat(fid2, trans) #, transWGS84)
        self.humdat = humdat
 
-       if int(humdat['sonar_name'])==301:
-          model = 1199
+       #if int(humdat['sonar_name'])==301:
+       #   model = 1199
 
        if model==798:
           headbytes=72

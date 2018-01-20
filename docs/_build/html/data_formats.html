@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Binary Sonar Data Formats &#8212; PyHum 1.4.1 documentation</title>
+    <title>Binary Sonar Data Formats &#8212; PyHum 1.4.3 documentation</title>
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.4.1',
+        VERSION:     '1.4.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -39,7 +39,7 @@
         <li class="right" >
           <a href="modules.html" title="Modules"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.4.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.4.3 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -115,6 +115,7 @@
 </div>
 <div class="section" id="decoding-the-dat-file">
 <h2>Decoding the .DAT file<a class="headerlink" href="#decoding-the-dat-file" title="Permalink to this headline">¶</a></h2>
+<p>700 to 1100 series:</p>
 <p>All data are big-endian.</p>
 <ol class="arabic simple">
 <li>byte 1 = spacer</li>
@@ -132,6 +133,8 @@
 <li>bytes 56-59 = character, line size</li>
 <li>bytes 60-65 = spacer</li>
 </ol>
+<p>ONIX series:</p>
+<p>small hex header with a ascii strings containing info. on sonar frequencies</p>
 </div>
 <div class="section" id="a-note-on-humminbird-positions">
 <h2>A note on Humminbird positions<a class="headerlink" href="#a-note-on-humminbird-positions" title="Permalink to this headline">¶</a></h2>
@@ -161,7 +164,7 @@
 <p>Records are composed of ‘header’ data (containing positions, etc) followed by ‘ping’ data (composed of time-series of echo levels as 8-bit integers). In order to correctly parse out the two, you need to know how many bytes the header contains. Unfortunately, this length varies with instrument. So far, we have encountered data files with between 67 and 72 bytes per header packet. In the pyhum program, you pass it a variable saying what model of humminbird unit the data comes from. It uses this information in the following way:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">model</span><span class="o">==</span><span class="mi">798</span><span class="p">:</span>
   <span class="n">headbytes</span><span class="o">=</span><span class="mi">72</span>
-<span class="k">elif</span> <span class="n">model</span><span class="o">==</span><span class="mi">1199</span><span class="p">:</span>
+<span class="k">elif</span> <span class="n">model</span><span class="o">==</span><span class="mi">1199</span> <span class="ow">or</span> <span class="n">onix</span><span class="p">:</span>
   <span class="n">headbytes</span><span class="o">=</span><span class="mi">68</span>
 <span class="k">else</span><span class="p">:</span> <span class="c1">#tested so far 998, 1198</span>
   <span class="n">headbytes</span><span class="o">=</span><span class="mi">67</span>
@@ -197,7 +200,7 @@
 <li>bytes 46-49 = character, frequency in Hz</li>
 </ol>
 <p>Then, the data structure is different for different models.</p>
-<p>1199 model</p>
+<p>1199 and ONIX models</p>
 <ol class="arabic simple" start="23">
 <li>bytes 50-64 = spacer</li>
 <li>bytes 45-68 = character, sentence length</li>
@@ -300,11 +303,11 @@
         <li class="right" >
           <a href="modules.html" title="Modules"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.4.1 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">PyHum 1.4.3 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2015 -- 3027, Daniel Buscombe.
+        &#169; Copyright 2015 -- 2018, Daniel Buscombe.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>

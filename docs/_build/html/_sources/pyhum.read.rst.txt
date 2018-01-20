@@ -5,6 +5,10 @@ pyhum.read module
 
     Read a .DAT and associated set of .SON files recorded by a Humminbird(R)
     instrument. 
+
+    The following Humminbird units are supported:
+    1) 700, 800, 900 and 1100 series
+    2) ONIX series
     
     Parse the data into a set of memory mapped files that will
     subsequently be used by the other functions of the PyHum module. 

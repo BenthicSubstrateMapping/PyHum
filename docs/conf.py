@@ -49,7 +49,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyHum'
-copyright = u'2015 -- 3027, Daniel Buscombe'
+copyright = u'2015 -- 2018, Daniel Buscombe'
 author = u'Daniel Buscombe'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -57,7 +57,7 @@ author = u'Daniel Buscombe'
 # built documents.
 #
 # The short X.Y version.
-version = '1.4.1'
+version = '1.4.3'
 #version = PyHum.__version__
 # The full version, including alpha/beta/rc tags.
 release = version

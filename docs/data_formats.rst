@@ -81,6 +81,8 @@ data.getmetadata() returns a list of metadata compiled per ping. This is a pytho
 Decoding the .DAT file
 =========================
 
+700 to 1100 series:
+
 All data are big-endian.
 
 1. byte 1 = spacer
@@ -97,6 +99,10 @@ All data are big-endian.
 12. bytes 52-55 = character, record length, milliseconds
 13. bytes 56-59 = character, line size
 14. bytes 60-65 = spacer
+
+ONIX series:
+
+small hex header with a ascii strings containing info. on sonar frequencies
 
 
 A note on Humminbird positions
@@ -134,7 +140,7 @@ Records are composed of 'header' data (containing positions, etc) followed by 'p
 
   if model==798:
     headbytes=72
-  elif model==1199:
+  elif model==1199 or onix:
     headbytes=68
   else: #tested so far 998, 1198
     headbytes=67
@@ -171,7 +177,7 @@ Common to all units
 
 Then, the data structure is different for different models.
 
-1199 model
+1199 and ONIX models
 
 23. bytes 50-64 = spacer
 24. bytes 45-68 = character, sentence length
