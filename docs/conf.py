@@ -231,7 +231,7 @@ html_static_path = ['_static']
 htmlhelp_basename = 'PyHumdoc'
 
 # A logo displayed in the html sidebar.
-html_logo = 'pyhum_logo_white.png'
+html_logo = '_static/pyhum_logo_white.png'
 
 # -- Options for LaTeX output ---------------------------------------------
 
