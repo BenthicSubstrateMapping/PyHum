@@ -4,7 +4,7 @@
 <loc>http://dbuscombe-usgs.github.io/PyHum//</loc>
 </url>
 <url>
-<loc>http://dbuscombe-usgs.github.io/PyHum//api/</loc>
+<loc>http://dbuscombe-usgs.github.io/PyHum//apis/</loc>
 </url>
 <url>
 <loc>http://dbuscombe-usgs.github.io/PyHum//archive-layout-with-content/</loc>
@@ -28,10 +28,7 @@
 <loc>http://dbuscombe-usgs.github.io/PyHum//publication/2009-10-01-paper-title-number-1</loc>
 </url>
 <url>
-<loc>http://dbuscombe-usgs.github.io/PyHum//publication/2010-10-01-paper-title-number-2</loc>
-</url>
-<url>
-<loc>http://dbuscombe-usgs.github.io/PyHum//publication/2015-10-01-paper-title-number-3</loc>
+<loc>http://dbuscombe-usgs.github.io/PyHum//publication/2017_EMS</loc>
 </url>
 <url>
 <loc>http://dbuscombe-usgs.github.io/PyHum//talkmap/map.html</loc>
