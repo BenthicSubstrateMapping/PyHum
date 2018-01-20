@@ -62,7 +62,7 @@
     {
       "@context" : "http://schema.org",
       "@type" : "Person",
-      "name" : "Your Name",
+      "name" : "PyHum",
       "url" : "http://dbuscombe-usgs.github.io/PyHum/",
       "sameAs" : null
     }
@@ -182,7 +182,7 @@
 
   <div class="author__avatar">
     
-    	<img src="http://dbuscombe-usgs.github.io/PyHum//images/pyhum_logo_colour.png" class="author__avatar" alt="Developed by Daniel Buscombe">
+    	<img src="http://dbuscombe-usgs.github.io/PyHum//images/pyhum_logo_colour_sm.png" class="author__avatar" alt="Developed by Daniel Buscombe">
     
   </div>
 
@@ -204,7 +204,6 @@
       
       
       
-        <li><a href="https://twitter.com/replacethistwitterhandle"><i class="fa fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
       
       
       
@@ -213,8 +212,7 @@
       
       
       
-      
-        <li><a href="https://github.com/academicpages"><i class="fa fa-fw fa-github" aria-hidden="true"></i> Github</a></li>
+        <li><a href="https://github.com/dbuscombe-usgs"><i class="fa fa-fw fa-github" aria-hidden="true"></i> Github</a></li>
       
       
       
@@ -231,8 +229,6 @@
       
         <li><a href="www.danielbuscombe.com"><i class="ai ai-google-scholar-square ai-fw"></i> Google Scholar</a></li>
       
-      
-        <li><a href="http://orcid.org/yourorcidurl"><i class="ai ai-orcid-square ai-fw"></i> ORCID</a></li>
       
       
     </ul>
@@ -266,12 +262,37 @@
       
 
       <section class="page__content" itemprop="text">
-        <p>This is the front page of a website that is powered by the <a href="https://github.com/academicpages/academicpages.github.io">academicpages template</a> and hosted on GitHub pages. <a href="https://pages.github.com">GitHub pages</a> is a free service in which websites are built and hosted from code and data stored in a GitHub repository, automatically updating when a new commit is made to the respository. This template was forked from the <a href="https://mmistakes.github.io/minimal-mistakes/">Minimal Mistakes Jekyll Theme</a> created by Michael Rose, and then extended to support the kinds of content that academics have: publications, talks, teaching, a portfolio, blog posts, and a dynamically-generated CV. You can fork <a href="https://github.com/academicpages/academicpages.github.io">this repository</a> right now, modify the configuration and markdown files, add your own PDFs and other content, and have your own site for free, with no ads! An older version of this template powers my own personal website at <a href="http://stuartgeiger.com">stuartgeiger.com</a>, which uses <a href="https://github.com/staeiou/staeiou.github.io">this Github repository</a>.</p>
+        <p>PyHum - a Python framework for reading and processing data from a Humminbird low-cost sidescan sonar</p>
 
-<h1 id="a-data-driven-personal-website">A data-driven personal website</h1>
-<p>Like many other Jekyll-based GitHub Pages templates, academicpages makes you separate the website’s content from its form. The content &amp; metadata of your website are in structured markdown files, while various other files constitute the theme, specifying how to transform that content &amp; metadata into HTML pages. You keep these various markdown (.md), YAML (.yml), HTML, and CSS files in a public GitHub repository. Each time you commit and push an update to the repository, the <a href="https://pages.github.com/">GitHub pages</a> service creates static HTML pages based on these files, which are hosted on GitHub’s servers free of charge.</p>
+<p>PyHum is an open-source project dedicated to provide a generic Python framework 
+for reading and exporting data from Humminbird(R) instruments, carrying out rudimentary radiometric corrections to the data,
+classify bed texture, and produce some maps on aerial photos and kml files for google-earth</p>
 
-<p>Many of the features of dynamic content management systems (like Wordpress) can be achieved in this fashion, using a fraction of the computational resources and with far less vulnerability to hacking and DDoSing. You can also modify the theme to your heart’s content without touching the content of your site. If you get to a point where you’ve broken something in Jekyll/HTML/CSS beyond repair, your markdown files describing your talks, publications, etc. are safe. You can rollback the changes or even delete the repository and start over – just be sure to save the markdown files! Finally, you can also write scripts that process the structured data on the site, such as <a href="https://github.com/academicpages/academicpages.github.io/blob/master/talkmap.ipynb">this one</a> that analyzes metadata in pages about talks to display <a href="https://academicpages.github.io/talkmap.html">a map of every location you’ve given a talk</a>.</p>
+<p>The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) and works on both sidescan and downward-looking echosounder data, where available.</p>
+
+<p>The following Humminbird units are currently supported:
+1. 700, 800, 900 and 1100 series
+2. ONIX series</p>
+
+<h1 id="technical-info">Technical Info</h1>
+<p>Full documentation of the procedures behind the program is in the following publication:</p>
+
+<p>Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization using recreational-grade sidescan-sonar. ENVIRONMENTAL MODELLING &amp; SOFTWARE 89, 1-18.</p>
+
+<h1 id="please-cite">Please Cite!</h1>
+
+<p>If you use PyHum in your published work, please cite the following papers:</p>
+
+<ol>
+  <li>
+    <p>Buscombe, D., Grams, P.E., and Smith, S. (2015) “Automated riverbed sediment classification using low-cost sidescan sonar”, Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.</p>
+  </li>
+  <li>
+    <p>Buscombe, D., 2017, Shallow water benthic imaging and substrate characterization using recreational-grade sidescan-sonar. ENVIRONMENTAL MODELLING &amp; SOFTWARE 89, 1-18.</p>
+  </li>
+</ol>
+
+<p>For the source code visit <a href="https://github.com/dbuscombe-usgs/PyHum/">the project github site</a></p>
 
 <h1 id="getting-started">Getting started</h1>
 <ol>
@@ -347,14 +368,14 @@
     
     
     
-      <li><a href="http://github.com/academicpages"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+      <li><a href="http://github.com/dbuscombe-usgs"><i class="fa fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
     
     
     <li><a href="http://dbuscombe-usgs.github.io/PyHum//feed.xml"><i class="fa fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
   </ul>
 </div>
 
-<div class="page__footer-copyright">&copy; 2018 Your Name. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://github.com/academicpages/academicpages.github.io">AcademicPages</a>, a fork of <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">&copy; 2018 PyHum. Powered by <a href="http://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://github.com/academicpages/academicpages.github.io">AcademicPages</a>, a fork of <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>
