@@ -1,6 +1,8 @@
 ## PyHum
 
-PyHum - a Python framework for reading and processing data from a Humminbird low-cost sidescan sonar
+![pyhum_logo_colour_sm](https://user-images.githubusercontent.com/3596509/35187745-ed45a05a-fde5-11e7-8f7e-5142b59dc772.png)
+
+A Python framework for reading and processing data from a Humminbird low-cost sidescan sonar
 
 PyHum is an open-source project dedicated to provide a generic Python framework 
 for reading and exporting data from Humminbird(R) instruments, carrying out rudimentary radiometric corrections to the data,
