@@ -801,7 +801,10 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     metadat['n'] = metadat['n'][:nrec]
     metadat['es'] = metadat['es'][:nrec]
     metadat['ns'] = metadat['ns'][:nrec]
-    metadat['caltime'] = metadat['caltime'][:nrec]
+    try:
+       metadat['caltime'] = metadat['caltime'][:nrec]
+    except:
+       metadat['caltime'] = metadat['caltime']
 
     savemat(os.path.normpath(os.path.join(sonpath,base+'meta.mat')), metadat ,oned_as='row')
 
