@@ -286,8 +286,11 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           print('Chunks based on distance of %s m' % (str(chunkval)))
 
     if model:
-       model = int(model)
-       print("Data is from the %s series"  % (str(model)))
+       try:
+          model = int(model)
+          print("Data is from the %s series"  % (str(model)))
+       except:
+          print("Data is from the %s series"  % (str(model)))
 
 #    if cog:
 #       cog = int(cog)
