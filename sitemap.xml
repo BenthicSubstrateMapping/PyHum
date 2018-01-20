@@ -4,6 +4,9 @@
 <loc>http://dbuscombe-usgs.github.io/PyHum//</loc>
 </url>
 <url>
+<loc>http://dbuscombe-usgs.github.io/PyHum//api/</loc>
+</url>
+<url>
 <loc>http://dbuscombe-usgs.github.io/PyHum//apis/</loc>
 </url>
 <url>
@@ -11,9 +14,6 @@
 </url>
 <url>
 <loc>http://dbuscombe-usgs.github.io/PyHum//formats/</loc>
-</url>
-<url>
-<loc>http://dbuscombe-usgs.github.io/PyHum//non-menu-page/</loc>
 </url>
 <url>
 <loc>http://dbuscombe-usgs.github.io/PyHum//publications/</loc>
