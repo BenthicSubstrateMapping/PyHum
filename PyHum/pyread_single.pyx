@@ -59,7 +59,7 @@ cdef class pyread:
           trans =  pyproj.Proj(cs2cs_args1.lstrip(), inverse=True)       
 
        fid2 = open(humfile,'rb')
-       if model=='onix':
+       if model==0: #'onix':
           humdat = self._decode_onix(fid2)
        else:
           humdat = self._decode_humdat(fid2, trans) #, transWGS84)
@@ -72,7 +72,7 @@ cdef class pyread:
           headbytes=72
        elif model==1199:
           headbytes=68
-       elif model=='onix':
+       elif model=='0': ##onix
           headbytes=68
        else: #tested so far 998, 1198, 898
           headbytes=67
@@ -242,7 +242,7 @@ cdef class pyread:
        head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps1
        head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # heading_deg    
 
-       if model==1199 or model=='onix':  
+       if model==1199 or model==0: ##'onix':  
           spacer = self._fread(fid, 1, 'B')
           head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps2
           head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # speed_ms

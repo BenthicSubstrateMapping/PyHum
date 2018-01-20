@@ -290,6 +290,8 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           model = int(model)
           print("Data is from the %s series"  % (str(model)))
        except:
+          if model=='onix':
+             model=0
           print("Data is from the %s series"  % (str(model)))
 
 #    if cog:
