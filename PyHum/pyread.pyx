@@ -57,6 +57,8 @@ cdef class pyread:
           headbytes=72
        elif model==1199:
           headbytes=68
+       elif model=='onix':
+          headbytes=68
        else: #tested so far 998, 1198
           headbytes=67
 
@@ -66,7 +68,10 @@ cdef class pyread:
           trans =  pyproj.Proj(cs2cs_args1.lstrip(), inverse=True)       
 
        fid2 = open(humfile,'rb')
-       humdat = self._decode_humdat(fid2, trans) #, transWGS84)
+       if model=='onix':
+          humdat = self._decode_onix(fid2)
+       else:
+          humdat = self._decode_humdat(fid2, trans) #, transWGS84)
        self.humdat = humdat
 
        cdef list dat = []       
@@ -232,7 +237,7 @@ cdef class pyread:
        head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps1
        head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # heading_deg    
 
-       if model==1199:  
+       if model==1199 or model=='onix':  
           spacer = self._fread(fid, 1, 'B')
           head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps2
           head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # speed_ms
@@ -341,6 +346,33 @@ cdef class pyread:
        
        return head
 
+    # =========================================================
+    cpdef dict _decode_onix(self, object fid2):
+       """
+       returns data from .DAT file
+       """
+
+       dumpstr = fid2.read()
+       fid2.close()
+
+       humdat = {}
+       hd = dumpstr.split('<')[0]
+       tmp = ''.join(dumpstr.split('<')[1:])
+       humdat['NumberOfPings'] = int(tmp.split('NumberOfPings=')[1].split('>')[0])
+       humdat['TotalTimeMs'] = int(tmp.split('TotalTimeMs=')[1].split('>')[0])
+       humdat['linesize'] = int(tmp.split('PingSizeBytes=')[1].split('>')[0])
+       humdat['FirstPingPeriodMs'] = int(tmp.split('FirstPingPeriodMs=')[1].split('>')[0])
+       humdat['BeamMask'] = int(tmp.split('BeamMask=')[1].split('>')[0])
+       humdat['Chirp1StartFrequency'] = int(tmp.split('Chirp1StartFrequency=')[1].split('>')[0])
+       humdat['Chirp1EndFrequency'] = int(tmp.split('Chirp1EndFrequency=')[1].split('>')[0])
+       humdat['Chirp2StartFrequency'] = int(tmp.split('Chirp2StartFrequency=')[1].split('>')[0])
+       humdat['Chirp2EndFrequency'] = int(tmp.split('Chirp2EndFrequency=')[1].split('>')[0])
+       humdat['Chirp3StartFrequency'] = int(tmp.split('Chirp3StartFrequency=')[1].split('>')[0])
+       humdat['Chirp3EndFrequency'] = int(tmp.split('Chirp3EndFrequency=')[1].split('>')[0])
+       humdat['SourceDeviceModelId2D'] = int(tmp.split('SourceDeviceModelId2D=')[1].split('>')[0])
+       humdat['SourceDeviceModelIdSI'] = int(tmp.split('SourceDeviceModelIdSI=')[1].split('>')[0])
+       humdat['SourceDeviceModelIdDI'] = int(tmp.split('SourceDeviceModelIdDI=')[1].split('>')[0])
+       return humdat
 
     # =========================================================
     cpdef dict _decode_humdat(self, object fid2, object trans): #, transWGS84): 
@@ -537,8 +569,12 @@ cdef class pyread:
         except:
            pass
 
-        cdef np.ndarray starttime = np.asarray(self.humdat['unix_time'], 'float')
-        cdef np.ndarray caltime = np.asarray(starttime + time_s, 'float')
+        try:
+           starttime = np.asarray(self.humdat['unix_time'], 'float') #cdef np.ndarray 
+           caltime = np.asarray(starttime + time_s, 'float') #cdef np.ndarray 
+        except:
+           starttime = 0
+           caltime = 0
 
         cdef dict metadict={'lat': np.asarray(lat), 'lon': np.asarray(lon), 'spd': np.asarray(spd), 'time_s': np.asarray(time_s), 'e': np.asarray(e), 'n': np.asarray(n), 'dep_m': np.asarray(dep_m), 'caltime': np.asarray(caltime), 'heading': hdg2 }
         return metadict
