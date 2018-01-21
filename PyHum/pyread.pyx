@@ -59,6 +59,8 @@ cdef class pyread:
           headbytes=68
        elif model==0: ##0 = onix
           headbytes=68
+       elif model=='1': ##helix
+          headbytes=68
        else: #tested so far 998, 1198
           headbytes=67
 
@@ -237,7 +239,7 @@ cdef class pyread:
        head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps1
        head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # heading_deg    
 
-       if model==1199 or model==0:  
+       if model==1199 or model==0 or model==1: #onix, helix  
           spacer = self._fread(fid, 1, 'B')
           head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps2
           head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # speed_ms
