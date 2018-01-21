@@ -71,6 +71,7 @@ import numpy as np
 import PyHum.utils as humutils
 from scipy.signal import convolve2d, medfilt2d
 import PyHum.replace_nans as replace_nans
+from skimage.restoration import denoise_tv_chambolle
 
 # plotting
 import matplotlib.pyplot as plt
@@ -237,7 +238,10 @@ def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4):
 
          for p in range(len(port_fp)):
             
-            Snn = std_convoluted(np.vstack((np.flipud(port_fp[p]), star_fp[p])), win)[1]
+            merge = np.vstack((np.flipud(port_fp[p]), star_fp[p]))
+            merge = denoise_tv_chambolle(merge.copy(), weight=2, multichannel=False).astype('float32')
+            Snn = std_convoluted(merge, win)[1]
+            del merge
  
             try:
                Snn = medfilt2d(Snn, (win+1,win+1))
@@ -269,7 +273,10 @@ def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4):
 
       else: 
 
-            Snn = std_convoluted(np.vstack((np.flipud(port_fp), star_fp)), win)[1]
+            merge = np.vstack((np.flipud(port_fp), star_fp))
+            merge = denoise_tv_chambolle(merge.copy(), weight=2, multichannel=False).astype('float32')
+            Snn = std_convoluted(merge, win)[1]
+            del merge
 
             try:
                Snn = medfilt2d(Snn, (win+1,win+1))

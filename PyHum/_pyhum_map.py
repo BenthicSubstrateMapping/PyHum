@@ -401,6 +401,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    sigmas = 0.1 #m
    eps = 2
 
+   print("gridding ...")
    #if dogrid==1:
    if 2>1:
 
