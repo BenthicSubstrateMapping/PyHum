@@ -76,6 +76,7 @@ import numpy as np
 import PyHum.utils as humutils
 import pyresample
 #from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
+from skimage.restoration import denoise_tv_chambolle
 
 try:
    from pykdtree.kdtree import KDTree
@@ -261,13 +262,13 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
 #    dat_star = star_fp[p]
 #    data_R = R_fp[p]
 
-#    e = esi; del esi
-#    n = nsi; del nsi
-#    t = theta; del theta
-#    d = dist_tvg; del dist_tvg
-#    dat_port = port_fp; del port_fp
-#    dat_star = star_fp; del star_fp
-#    data_R = R_fp; del R_fp
+#    e = esi;# del esi
+#    n = nsi; #del nsi
+#    t = theta;# del theta
+#    d = dist_tvg;# del dist_tvg
+#    dat_port = port_fp;# del port_fp
+#    dat_star = star_fp; #del star_fp
+#    data_R = R_fp; #del R_fp
 
     dx = np.arcsin(meta['c']/(1000*meta['t']*meta['f']))
     pix_m = meta['pix_m']*1.1
@@ -296,6 +297,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
     print("Processing took "+str(elapsed)+"seconds to analyse")
 
     print("Done!")
+    print("===================================================")
 
 
 # =========================================================
@@ -326,6 +328,8 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    merge[merge<0] = 0
 
    merge = merge.astype('float32')
+
+   merge = denoise_tv_chambolle(merge.copy(), weight=2, multichannel=False).astype('float32')
 
    R = np.vstack((np.flipud(data_R),data_R))
    del data_R

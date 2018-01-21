@@ -112,13 +112,14 @@ def dotest():
    notes = 4 # Notes per octave (for wavelet analysis)
 
    # for mapping
-   res = 0.1 #99 # grid resolution in metres
+   res = 0.05 #99 # grid resolution in metres
    # if res==99, the program will automatically calc res from the spatial res of the scans
    mode = 1 # gridding mode (simple nearest neighbour)
    #mode = 2 # gridding mode (inverse distance weighted nearest neighbour)
    #mode = 3 # gridding mode (gaussian weighted nearest neighbour)
    use_uncorrected = 0
 
+   scalemax=40
    nn = 64 #number of nearest neighbours for gridding (used if mode > 1)
    ##influence = 1 #Radius of influence used in gridding. Cut off distance in meters 
    numstdevs = 5 #Threshold number of standard deviations in sidescan intensity per grid cell up to which to accept 
@@ -142,7 +143,7 @@ def dotest():
    PyHum.texture2(humfile, sonpath, win, doplot, numclasses)
 
    ## grid and map the scans
-   PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected) #dowrite, 
+   PyHum.map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected, scalemax) 
 
    ## calculate and map the e1 and e2 acoustic coefficients from the downward-looking sonar
    PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)

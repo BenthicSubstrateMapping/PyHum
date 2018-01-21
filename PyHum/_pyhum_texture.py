@@ -412,7 +412,7 @@ def texture(humfile, sonpath, win=100, shift=10, doplot=1, density=50, numclasse
       print("Processing took "+ str(elapsed)+ "seconds to analyse")
 
       print("Done!")
-    
+      print("===================================================")    
     
 # =========================================================
 def get_srt(Z,ind,maxscale, notes, win): #, density):    

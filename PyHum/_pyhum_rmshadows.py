@@ -549,6 +549,7 @@ def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl
     print("Processing took "+str(elapsed)+ "seconds to analyse")
 
     print("Done!")
+    print("===================================================")
 
 # =========================================================
 def custom_save(figdirec,root):

@@ -695,7 +695,7 @@ def make_kml(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat,
         ground.draworder = draworder
         ground.visibility = kw.pop('visibility', 1)
         ground.name = kw.pop('name', 'overlay')
-        ground.color = kw.pop('color', '9effffff') ##kw.pop('color', '9effffff')
+        #ground.color = kw.pop('color', '9effffff') ##kw.pop('color', '9effffff')
         
         ground.atomauthor = kw.pop('author', 'PyHum')
         ground.latlonbox.rotation = kw.pop('rotation', 0)

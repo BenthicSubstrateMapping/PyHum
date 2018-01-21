@@ -441,6 +441,7 @@ def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, 
     print("Processing took "+str(elapsed)+"seconds to analyse")
 
     print("Done!")
+    print("===================================================")
 
 # =========================================================
 def getclass_asc(sonpath, p):

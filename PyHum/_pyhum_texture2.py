@@ -362,6 +362,7 @@ def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4):
       print("Processing took " +str(elapsed)+ "seconds to analyse")
 
       print("Done!")
+      print("===================================================")
             
 # =========================================================
 def get_kclass(Sk, numclasses):   
