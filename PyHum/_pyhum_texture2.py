@@ -416,7 +416,7 @@ def plot_class(dist_m, shape_port, dat_port, dat_star, dat_class, ft, humfile, s
    plt.imshow(np.vstack((np.flipud(dat_port), dat_star)),cmap='gray',
               extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
    im = ax.imshow(dat_class, alpha=0.5,extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],
-                  origin='upper', cmap='YlOrRd', vmin=0.25, vmax=5)
+                  origin='upper', cmap='YlOrRd', vmin=0, vmax=3)
    plt.ylabel('Horizontal distance (m)'); 
    plt.xlabel('Distance along track (m)')
    plt.axis('tight')
@@ -483,7 +483,7 @@ def plot_kmeans(dist_m, shape_port, dat_port, dat_star, dat_kclass, ft, humfile,
    plt.imshow(np.vstack((np.flipud(dat_port), dat_star)), cmap='gray',extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
    
    CS = plt.contourf(np.flipud(dat_kclass), alpha=0.4, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],
-                     origin='upper', cmap='YlOrRd', vmin=0.25, vmax=5)   
+                     origin='upper', cmap='YlOrRd', vmin=0, vmax=3)   
    plt.ylabel('Horizontal distance (m)')
    plt.xlabel('Distance along track (m)')
    plt.axis('tight')

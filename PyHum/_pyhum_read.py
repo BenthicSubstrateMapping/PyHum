@@ -320,7 +320,10 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
     #c=1450; bedpick=1; fliplr=1; chunk = 'd100'
     #model=998; cog=1; calc_bearing=0; filt_bearing=0
 
-    f = 455
+    if model==2:
+       f = 1000
+    else:
+       f = 455
 
     try:
        print("Checking the epsg code you have chosen for compatibility with Basemap ... ")

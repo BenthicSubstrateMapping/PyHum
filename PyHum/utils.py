@@ -663,7 +663,7 @@ def gearth_fig(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat, pixels=1024):
         plt.ioff()  # Make `True` to prevent the KML components from poping-up.
     fig = plt.figure(figsize=figsize,
                      frameon=False,
-                     dpi=pixels//10)
+                     dpi=pixels//5) #10)
     # KML friendly image.  If using basemap try: `fix_aspect=False`.
     ax = fig.add_axes([0, 0, 1, 1])
     ax.set_xlim(llcrnrlon, urcrnrlon)
@@ -678,7 +678,7 @@ def make_kml(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat,
     and several simplekml kw..."""
 
     kml = Kml()
-    altitude = kw.pop('altitude', 2e7)
+    altitude = kw.pop('altitude', 0e7) #2e7)
     roll = kw.pop('roll', 0)
     tilt = kw.pop('tilt', 0)
     altitudemode = kw.pop('altitudemode', AltitudeMode.relativetoground)
@@ -695,7 +695,8 @@ def make_kml(llcrnrlon, llcrnrlat, urcrnrlon, urcrnrlat,
         ground.draworder = draworder
         ground.visibility = kw.pop('visibility', 1)
         ground.name = kw.pop('name', 'overlay')
-        ground.color = kw.pop('color', '9effffff')
+        ground.color = kw.pop('color', 'ff0000ff') #'9effffff') ##kw.pop('color', '9effffff')
+        
         ground.atomauthor = kw.pop('author', 'ocefpaf')
         ground.latlonbox.rotation = kw.pop('rotation', 0)
         ground.description = kw.pop('description', 'Matplotlib figure')
