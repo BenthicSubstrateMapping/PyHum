@@ -786,7 +786,7 @@ def c_scans_lambertian(fp, a_fp, TL, R, c, f, theta, alpha):
    mg[fp==0] = np.nan
    mg[mg<0] = np.nan
 
-   mg = denoise_tv_chambolle(mg.copy(), weight=2, multichannel=False).astype('float32')
+   mg = denoise_tv_chambolle(mg.copy(), weight=.2, multichannel=False).astype('float32')
    
    return mg   
 
