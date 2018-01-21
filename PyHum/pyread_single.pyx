@@ -246,7 +246,7 @@ cdef class pyread:
        head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps1
        head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # heading_deg    
 
-       if model==1199 or model==0 or model==2: #onix, helix, mega  
+       if model==1199 or model==0 or model==2: #onix, mega  
           spacer = self._fread(fid, 1, 'B')
           head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps2
           head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # speed_ms
@@ -328,6 +328,8 @@ cdef class pyread:
           head.append('sidescan_port')
        elif head[9]==3:
           head.append('sidescan_starboard')
+       elif head[9]==4:
+          head.append('down_vhighfreq')
        else:
           head.append('unknown')
 
@@ -504,6 +506,9 @@ cdef class pyread:
         if not scan:
            scan = self._getsonar('down_highfreq')           
            sonarstring = 'down_highfreq'                     
+        if not scan:
+           scan = self._getsonar('down_vhighfreq')           
+           sonarstring = 'down_vhighfreq' 
         
         cdef int packet = scan[0][12]
         cdef list ind = range(0,len(scan))

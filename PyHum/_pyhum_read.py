@@ -385,6 +385,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           elif Y[k] == 'down_highfreq':
              data_dwnhi = X[k].astype('int16')
 
+          elif Y[k] == 'down_vhighfreq': #hopefully this only applies to mega systems
+             data_dwnhi = X[k].astype('int16')
+
        del X, Y, A, B, o
        old_pyread = 0
 
