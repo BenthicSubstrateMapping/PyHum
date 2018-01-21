@@ -256,6 +256,23 @@ cdef class pyread:
           spacer = self._fread(fid, 15, 'B')
           head.append(linesize) #struct.unpack('>i', ''.join(fread(fid,4,'c')) )[0]) #sentlen 2438
        
+       elif model==1: #helix
+          spacer = self._fread(fid, 1, 'B')
+          head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps2
+          head.append(float(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0])/10) # speed_ms
+          spacer = self._fread(fid, 1, 'B')
+
+          head.append(float(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0])/10) # depth_m
+          spacer = self._fread(fid, 1, 'B')
+           #%0 (50 or 83 kHz), 1 (200 kHz), 2 (SI Poort), 3 (SI Starboard)
+          head.append(self._fread(fid, 1, 'B')[0]) #beam
+          spacer = self._fread(fid, 1, 'B')
+          head.append(self._fread(fid, 1, 'B')[0]) #voltscale
+          spacer = self._fread(fid, 1, 'B')
+          head.append(struct.unpack('>i', ''.join(self._fread(fid,4,'c')) )[0]/1000) # freq_khz
+          spacer = self._fread(fid, 15, 'B')
+          head.append(linesize) #struct.unpack('>i', ''.join(fread(fid,4,'c')) )[0]) #sentlen 2438
+       
        elif model==798:  
           spacer = self._fread(fid, 1, 'B')
           head.append(struct.unpack('>h', ''.join(self._fread(fid,2,'c')) )[0]) # gps2

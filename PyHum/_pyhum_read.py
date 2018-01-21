@@ -293,7 +293,9 @@ def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=
           if model=='onix':
              model=0
              print("Data is from the ONIX series")
-
+          elif model=='helix':
+             model=1
+             print("Data is from the HELIX series")
 #    if cog:
 #       cog = int(cog)
 #       if cog==1:
