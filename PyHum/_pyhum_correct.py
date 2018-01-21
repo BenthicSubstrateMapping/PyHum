@@ -71,6 +71,7 @@ import PyHum.ppdrc as ppdrc
 
 from scipy.special import jv
 from scipy.ndimage.filters import median_filter
+from skimage.restoration import denoise_tv_chambolle
 
 #plotting
 import matplotlib.pyplot as plt
@@ -784,6 +785,8 @@ def c_scans_lambertian(fp, a_fp, TL, R, c, f, theta, alpha):
    mg = 10**np.log10(mg + TL)
    mg[fp==0] = np.nan
    mg[mg<0] = np.nan
+
+   mg = denoise_tv_chambolle(mg.copy(), weight=2, multichannel=False).astype('float32')
    
    return mg   
 
