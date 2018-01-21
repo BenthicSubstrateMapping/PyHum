@@ -2523,7 +2523,7 @@ static int __pyx_pf_5PyHum_6pyread_6pyread___init__(struct __pyx_obj_5PyHum_6pyr
  *           headbytes=68
  *        elif model==0: ##0 = onix             # <<<<<<<<<<<<<<
  *           headbytes=68
- *        elif model=='1': ##helix
+ *        elif model==1: ##helix
  */
     case 0:
 
@@ -2531,7 +2531,7 @@ static int __pyx_pf_5PyHum_6pyread_6pyread___init__(struct __pyx_obj_5PyHum_6pyr
  *           headbytes=68
  *        elif model==0: ##0 = onix
  *           headbytes=68             # <<<<<<<<<<<<<<
- *        elif model=='1': ##helix
+ *        elif model==1: ##helix
  *           headbytes=68
  */
     __Pyx_INCREF(__pyx_int_68);
@@ -2542,24 +2542,24 @@ static int __pyx_pf_5PyHum_6pyread_6pyread___init__(struct __pyx_obj_5PyHum_6pyr
  *           headbytes=68
  *        elif model==0: ##0 = onix             # <<<<<<<<<<<<<<
  *           headbytes=68
- *        elif model=='1': ##helix
+ *        elif model==1: ##helix
  */
     break;
 
     /* "PyHum/pyread.pyx":62
  *        elif model==0: ##0 = onix
  *           headbytes=68
- *        elif model=='1': ##helix             # <<<<<<<<<<<<<<
+ *        elif model==1: ##helix             # <<<<<<<<<<<<<<
  *           headbytes=68
- *        elif model=='2': ##mega
+ *        elif model==2: ##mega
  */
-    case '1':
+    case 1:
 
     /* "PyHum/pyread.pyx":63
  *           headbytes=68
- *        elif model=='1': ##helix
+ *        elif model==1: ##helix
  *           headbytes=68             # <<<<<<<<<<<<<<
- *        elif model=='2': ##mega
+ *        elif model==2: ##mega
  *           headbytes=68
  */
     __Pyx_INCREF(__pyx_int_68);
@@ -2568,24 +2568,24 @@ static int __pyx_pf_5PyHum_6pyread_6pyread___init__(struct __pyx_obj_5PyHum_6pyr
     /* "PyHum/pyread.pyx":62
  *        elif model==0: ##0 = onix
  *           headbytes=68
- *        elif model=='1': ##helix             # <<<<<<<<<<<<<<
+ *        elif model==1: ##helix             # <<<<<<<<<<<<<<
  *           headbytes=68
- *        elif model=='2': ##mega
+ *        elif model==2: ##mega
  */
     break;
 
     /* "PyHum/pyread.pyx":64
- *        elif model=='1': ##helix
+ *        elif model==1: ##helix
  *           headbytes=68
- *        elif model=='2': ##mega             # <<<<<<<<<<<<<<
+ *        elif model==2: ##mega             # <<<<<<<<<<<<<<
  *           headbytes=68
  *        else: #tested so far 998, 1198
  */
-    case '2':
+    case 2:
 
     /* "PyHum/pyread.pyx":65
  *           headbytes=68
- *        elif model=='2': ##mega
+ *        elif model==2: ##mega
  *           headbytes=68             # <<<<<<<<<<<<<<
  *        else: #tested so far 998, 1198
  *           headbytes=67
@@ -2594,9 +2594,9 @@ static int __pyx_pf_5PyHum_6pyread_6pyread___init__(struct __pyx_obj_5PyHum_6pyr
     __pyx_v_headbytes = __pyx_int_68;
 
     /* "PyHum/pyread.pyx":64
- *        elif model=='1': ##helix
+ *        elif model==1: ##helix
  *           headbytes=68
- *        elif model=='2': ##mega             # <<<<<<<<<<<<<<
+ *        elif model==2: ##mega             # <<<<<<<<<<<<<<
  *           headbytes=68
  *        else: #tested so far 998, 1198
  */

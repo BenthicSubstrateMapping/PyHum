@@ -2710,7 +2710,7 @@ static int __pyx_pf_5PyHum_13pyread_single_6pyread___init__(struct __pyx_obj_5Py
  *           headbytes=72
  *        elif model==1199:             # <<<<<<<<<<<<<<
  *           headbytes=68
- *        elif model=='0': ##onix
+ *        elif model==0: ##onix
  */
     case 0x4AF:
 
@@ -2718,7 +2718,7 @@ static int __pyx_pf_5PyHum_13pyread_single_6pyread___init__(struct __pyx_obj_5Py
  *           headbytes=72
  *        elif model==1199:
  *           headbytes=68             # <<<<<<<<<<<<<<
- *        elif model=='0': ##onix
+ *        elif model==0: ##onix
  *           headbytes=68
  */
     __Pyx_INCREF(__pyx_int_68);
@@ -2729,24 +2729,24 @@ static int __pyx_pf_5PyHum_13pyread_single_6pyread___init__(struct __pyx_obj_5Py
  *           headbytes=72
  *        elif model==1199:             # <<<<<<<<<<<<<<
  *           headbytes=68
- *        elif model=='0': ##onix
+ *        elif model==0: ##onix
  */
     break;
 
     /* "PyHum/pyread_single.pyx":75
  *        elif model==1199:
  *           headbytes=68
- *        elif model=='0': ##onix             # <<<<<<<<<<<<<<
+ *        elif model==0: ##onix             # <<<<<<<<<<<<<<
  *           headbytes=68
- *        elif model=='1': ##helix
+ *        elif model==1: ##helix
  */
-    case '0':
+    case 0:
 
     /* "PyHum/pyread_single.pyx":76
  *           headbytes=68
- *        elif model=='0': ##onix
+ *        elif model==0: ##onix
  *           headbytes=68             # <<<<<<<<<<<<<<
- *        elif model=='1': ##helix
+ *        elif model==1: ##helix
  *           headbytes=68
  */
     __Pyx_INCREF(__pyx_int_68);
@@ -2755,52 +2755,52 @@ static int __pyx_pf_5PyHum_13pyread_single_6pyread___init__(struct __pyx_obj_5Py
     /* "PyHum/pyread_single.pyx":75
  *        elif model==1199:
  *           headbytes=68
- *        elif model=='0': ##onix             # <<<<<<<<<<<<<<
+ *        elif model==0: ##onix             # <<<<<<<<<<<<<<
  *           headbytes=68
- *        elif model=='1': ##helix
+ *        elif model==1: ##helix
  */
     break;
 
     /* "PyHum/pyread_single.pyx":77
- *        elif model=='0': ##onix
+ *        elif model==0: ##onix
  *           headbytes=68
- *        elif model=='1': ##helix             # <<<<<<<<<<<<<<
+ *        elif model==1: ##helix             # <<<<<<<<<<<<<<
  *           headbytes=68
- *        elif model=='2': ##mega
+ *        elif model==2: ##mega
  */
-    case '1':
+    case 1:
 
     /* "PyHum/pyread_single.pyx":78
  *           headbytes=68
- *        elif model=='1': ##helix
+ *        elif model==1: ##helix
  *           headbytes=68             # <<<<<<<<<<<<<<
- *        elif model=='2': ##mega
+ *        elif model==2: ##mega
  *           headbytes=68
  */
     __Pyx_INCREF(__pyx_int_68);
     __pyx_v_headbytes = __pyx_int_68;
 
     /* "PyHum/pyread_single.pyx":77
- *        elif model=='0': ##onix
+ *        elif model==0: ##onix
  *           headbytes=68
- *        elif model=='1': ##helix             # <<<<<<<<<<<<<<
+ *        elif model==1: ##helix             # <<<<<<<<<<<<<<
  *           headbytes=68
- *        elif model=='2': ##mega
+ *        elif model==2: ##mega
  */
     break;
 
     /* "PyHum/pyread_single.pyx":79
- *        elif model=='1': ##helix
+ *        elif model==1: ##helix
  *           headbytes=68
- *        elif model=='2': ##mega             # <<<<<<<<<<<<<<
+ *        elif model==2: ##mega             # <<<<<<<<<<<<<<
  *           headbytes=68
  *        else: #tested so far 998, 1198, 898
  */
-    case '2':
+    case 2:
 
     /* "PyHum/pyread_single.pyx":80
  *           headbytes=68
- *        elif model=='2': ##mega
+ *        elif model==2: ##mega
  *           headbytes=68             # <<<<<<<<<<<<<<
  *        else: #tested so far 998, 1198, 898
  *           headbytes=67
@@ -2809,9 +2809,9 @@ static int __pyx_pf_5PyHum_13pyread_single_6pyread___init__(struct __pyx_obj_5Py
     __pyx_v_headbytes = __pyx_int_68;
 
     /* "PyHum/pyread_single.pyx":79
- *        elif model=='1': ##helix
+ *        elif model==1: ##helix
  *           headbytes=68
- *        elif model=='2': ##mega             # <<<<<<<<<<<<<<
+ *        elif model==2: ##mega             # <<<<<<<<<<<<<<
  *           headbytes=68
  *        else: #tested so far 998, 1198, 898
  */

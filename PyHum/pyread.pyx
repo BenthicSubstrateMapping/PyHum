@@ -59,9 +59,9 @@ cdef class pyread:
           headbytes=68
        elif model==0: ##0 = onix
           headbytes=68
-       elif model=='1': ##helix
+       elif model==1: ##helix
           headbytes=68
-       elif model=='2': ##mega
+       elif model==2: ##mega
           headbytes=68
        else: #tested so far 998, 1198
           headbytes=67
