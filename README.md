@@ -4,6 +4,8 @@
 
 A Python framework for reading and processing data from a Humminbird low-cost sidescan sonar
 
+Project website [here](http://dbuscombe-usgs.github.io/PyHum/) for more details
+
 PyHum is an open-source project dedicated to provide a generic Python framework 
 for reading and exporting data from Humminbird(R) instruments, carrying out rudimentary radiometric corrections to the data,
 classify bed texture, and produce some maps on aerial photos and kml files for google-earth
@@ -47,9 +49,9 @@ Version: 1.4.2    |  Revision: Jan, 2018
 
 1. This software has been tested with Python 2.7 on Linux Fedora 16 & 20, Ubuntu 12 -- 17, Windows 7. Python 3 is not yet supported
 
-2. This software has (so far) been used only with Humminbird 798, 898, 998, 1198, 1199 and ONIX series instruments. 
+2. This software has (so far) been used only with Humminbird 700, 800, 900, 1100, HELIX, MEGA and ONIX series instruments. 
 
-3. PyHum is not yet compatable with newer HELIX/MEGA systems
+3. PyHum is not yet tested with SOLIX, ICE, ION, PMAX systems. Please make example data available and we'll see what we can do!
 
 ### Contents
 
@@ -184,6 +186,12 @@ A test can be carried out by running the supplied script. From the command line 
 
 ```
 python -c"import PyHum;PyHum.dotest()" 
+```
+
+or (if python3 is your default python)::
+
+```
+python2 -c"import PyHum;PyHum.dotest()" 
 ```
 
 ### Using the GUI
@@ -352,6 +360,8 @@ https://github.com/dbuscombe-usgs/PyHum
 Feedback and suggestions for improvements are *very* welcome
 
 Please download, try, report bugs, fork, modify, evaluate, discuss, collaborate. 
+
+Project website [here](http://dbuscombe-usgs.github.io/PyHum/) for more details
 
 Thanks for stopping by! 
 
