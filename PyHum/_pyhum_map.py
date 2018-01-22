@@ -76,7 +76,7 @@ import numpy as np
 import PyHum.utils as humutils
 import pyresample
 #from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
-#from skimage.restoration import denoise_tv_chambolle
+from skimage.restoration import denoise_tv_chambolle
 
 try:
    from pykdtree.kdtree import KDTree
@@ -261,6 +261,7 @@ def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, 
 #    dat_port = port_fp[p]
 #    dat_star = star_fp[p]
 #    data_R = R_fp[p]
+#    dx=np.arcsin(meta['c']/(1000*meta['t']*meta['f']))
 
 #    e = esi;# del esi
 #    n = nsi; #del nsi
@@ -307,7 +308,12 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
    trans =  pyproj.Proj(init=cs2cs_args)
 
-   merge = np.vstack((dat_port,dat_star))
+   mp = np.nanmean(dat_port)
+   ms = np.nanmean(dat_star)
+   if mp>ms:
+      merge = np.vstack((dat_port,dat_star*(mp/ms)))      
+   else:
+      merge = np.vstack((dat_port*(ms/mp),dat_star))
    del dat_port, dat_star
 
    merge[np.isnan(merge)] = 0
@@ -329,7 +335,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
    merge = merge.astype('float32')
 
-   ##merge = denoise_tv_chambolle(merge.copy(), weight=2, multichannel=False).astype('float32')
+   merge = denoise_tv_chambolle(merge.copy(), weight=.2, multichannel=False).astype('float32')
 
    R = np.vstack((np.flipud(data_R),data_R))
    del data_R
@@ -531,7 +537,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
       dat = dat.reshape(shape)
 
-      dat[dist>res*10] = np.nan
+      dat[dist>res*30] = np.nan
       del dist
 
       r_dat = r_dat.reshape(shape)
@@ -568,6 +574,21 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
    glon, glat = trans(grid_x, grid_y, inverse=True)
    del grid_x, grid_y
+
+
+   #try:
+   #   import rasterio
+   #   from rasterio.transform import from_origin
+   #   r = (humlon[-1]-humlon[0]) / np.nanmax(humlon) #240.0
+   #   transform = from_origin(humlon[0] - r / 2, humlon[-1] + r / 2, r, r)
+   #   datw = np.ma.filled(dat).astype('float64')
+   #   datw[np.isnan(datw)] = 0
+   #   ew_dataset = rasterio.open(os.path.normpath(os.path.join(sonpath,'geotiff_map'+str(p)+'.tif')), mode='w', driver='GTiff', height=datw.shape[0], width=datw.shape[1], count=1, crs=rasterio.crs.CRS({'init': cs2cs_args}), transform=transform, dtype=rasterio.float64)
+   #   ew_dataset.write(datw, 1)
+   #   ew_dataset.close()
+   #except:
+   #   print("error: geotiff could not be created... check your rasterio install")
+
 
    try:
 

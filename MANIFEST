@@ -32,7 +32,6 @@ PyHum/dat2mat.py
 PyHum/getxy.pyx
 PyHum/io.py
 PyHum/ppdrc.pyx
-PyHum/pyhum_logo_white_sm.png
 PyHum/pyread.pyx
 PyHum/pyread_single.pyx
 PyHum/replace_nans.pyx
