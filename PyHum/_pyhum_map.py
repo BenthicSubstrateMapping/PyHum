@@ -76,7 +76,7 @@ import numpy as np
 import PyHum.utils as humutils
 import pyresample
 #from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
-from skimage.restoration import denoise_tv_chambolle
+#from skimage.restoration import denoise_tv_chambolle
 
 try:
    from pykdtree.kdtree import KDTree
@@ -329,7 +329,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
    merge = merge.astype('float32')
 
-   merge = denoise_tv_chambolle(merge.copy(), weight=2, multichannel=False).astype('float32')
+   ##merge = denoise_tv_chambolle(merge.copy(), weight=2, multichannel=False).astype('float32')
 
    R = np.vstack((np.flipud(data_R),data_R))
    del data_R
