@@ -137,7 +137,7 @@
             <li class="masthead__menu-item"><a href="http://dbuscombe-usgs.github.io/PyHum//publications/">Publications</a></li>
           
             
-            <li class="masthead__menu-item"><a href="http://dbuscombe-usgs.github.io/PyHum//portfolio/">Portfolio</a></li>
+            <li class="masthead__menu-item"><a href="http://dbuscombe-usgs.github.io/PyHum//teaching/">Gallery</a></li>
           
         </ul>
         <ul class="hidden-links hidden"></ul>
@@ -245,7 +245,7 @@
       
 
       <section class="page__content" itemprop="text">
-        <h2 id="read-module">Read module</h2>
+        <h1 id="read-module">Read module</h1>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>Read a .DAT and associated set of .SON files recorded by a Humminbird(R)
 instrument. 
@@ -382,7 +382,7 @@ accounting for directivity and attenuation with range
 </code></pre>
 </div>
 
-<h1 id="syntax-1">Syntax</h1>
+<h3 id="syntax-1">Syntax</h3>
 
 <p>You call the function like this::</p>
 
@@ -390,7 +390,7 @@ accounting for directivity and attenuation with range
 </code></pre>
 </div>
 
-<h1 id="parameters-1">Parameters</h1>
+<h3 id="parameters-1">Parameters</h3>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>humfile : str
    path to the .DAT file
@@ -429,7 +429,7 @@ dconcfile : str, *optional* [Default=None]
 </code></pre>
 </div>
 
-<h1 id="returns-1">Returns</h1>
+<h3 id="returns-1">Returns</h3>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>sonpath+base+'_data_star_l.dat': memory-mapped file
     contains the starboard scan with water column removed
@@ -475,7 +475,7 @@ if correct_withwater == 1:
 </code></pre>
 </div>
 
-<h1 id="rmshadows-module">rmshadows module</h1>
+<h1 id="rmshadows-module">Rmshadows module</h1>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>Remove dark shadows in scans caused by shallows, shorelines, and attenuation of acoustics with distance
 Manual or automated processing options available
@@ -483,7 +483,7 @@ Works on the radiometrically corrected outputs of the correct module
 </code></pre>
 </div>
 
-<h1 id="syntax-2">Syntax</h1>
+<h3 id="syntax-2">Syntax</h3>
 
 <p>You call the function like this::</p>
 
@@ -491,7 +491,7 @@ Works on the radiometrically corrected outputs of the correct module
 </code></pre>
 </div>
 
-<h1 id="parameters-2">Parameters</h1>
+<h3 id="parameters-2">Parameters</h3>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>humfile : str
    path to the .DAT file
@@ -509,7 +509,7 @@ doplot : int, *optional* [Default=1]
 </code></pre>
 </div>
 
-<h1 id="returns-2">Returns</h1>
+<h3 id="returns-2">Returns</h3>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>sonpath+base+'_data_star_la.dat': memory-mapped file
     contains the starboard scan with water column removed and 
@@ -521,7 +521,7 @@ sonpath+base+'_data_port_la.dat': memory-mapped file
 </code></pre>
 </div>
 
-<h1 id="texture-module">texture module</h1>
+<h1 id="texture-module">Texture module</h1>
 
 <div class="highlighter-rouge"><pre class="highlight"><code> Create a texture lengthscale map using the algorithm detailed by Buscombe et al. (2015) Journal of Hydraulic Engineering
 
@@ -535,13 +535,13 @@ sonpath+base+'_data_port_la.dat': memory-mapped file
 </code></pre>
 </div>
 
-<h1 id="syntax-3">Syntax</h1>
+<h3 id="syntax-3">Syntax</h3>
 
 <p>You call the function like this::</p>
 
 <p>[] = PyHum.texture2(humfile, sonpath, win, doplot, numclasses)</p>
 
-<h1 id="parameters-3">Parameters</h1>
+<h3 id="parameters-3">Parameters</h3>
 
 <div class="highlighter-rouge"><pre class="highlight"><code> humfile : str
    path to the .DAT file
@@ -558,7 +558,7 @@ sonpath+base+'_data_port_la.dat': memory-mapped file
 </code></pre>
 </div>
 
-<h1 id="returns-3">Returns</h1>
+<h3 id="returns-3">Returns</h3>
 
 <div class="highlighter-rouge"><pre class="highlight"><code> sonpath+base+'_data_class.dat': memory-mapped file
     contains the texture lengthscale map
@@ -574,14 +574,16 @@ sonpath+base+'_data_port_la.dat': memory-mapped file
 </code></pre>
 </div>
 
-<h2 id="syntax-4">Syntax</h2>
+<h3 id="syntax-4">Syntax</h3>
+
 <p>You call the function like this::</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>[] = PyHum.map(humfile, sonpath, cs2cs_args, res, dowrite, mode, nn, numstdevs)
 </code></pre>
 </div>
 
-<h2 id="parameters-4">Parameters</h2>
+<h3 id="parameters-4">Parameters</h3>
+
 <div class="highlighter-rouge"><pre class="highlight"><code>humfile : str
    path to the .DAT file
 sonpath : str
@@ -607,7 +609,8 @@ numstdevs: int, *optional* [Default = 4]
 </code></pre>
 </div>
 
-<h2 id="returns-4">Returns</h2>
+<h3 id="returns-4">Returns</h3>
+
 <div class="highlighter-rouge"><pre class="highlight"><code>sonpath+'x_y_ss_raw'+str(p)+'.asc'  : text file
     contains the point cloud of easting, northing, and sidescan intensity
     of the pth chunk
@@ -635,13 +638,13 @@ sonpath+'map'+str(p)+'.png' :
 </code></pre>
 </div>
 
-<h2 id="syntax-5">Syntax</h2>
+<h3 id="syntax-5">Syntax</h3>
 
 <p>You call the function like this::</p>
 
 <p>[] = PyHum.texture2(humfile, sonpath, win, doplot, numclasses)</p>
 
-<h2 id="parameters-5">Parameters</h2>
+<h3 id="parameters-5">Parameters</h3>
 
 <div class="highlighter-rouge"><pre class="highlight"><code> humfile : str
    path to the .DAT file
@@ -658,7 +661,7 @@ sonpath+'map'+str(p)+'.png' :
 </code></pre>
 </div>
 
-<h2 id="returns-5">Returns</h2>
+<h3 id="returns-5">Returns</h3>
 
 <div class="highlighter-rouge"><pre class="highlight"><code> sonpath+base+'_data_class.dat': memory-mapped file
     contains the texture lengthscale map
@@ -680,12 +683,14 @@ sonpath+'map'+str(p)+'.png' :
 
 <p>Based on code by Barb Fagetter (blueseas@oceanecology.ca)</p>
 
-<h2 id="syntax-6">Syntax</h2>
+<h3 id="syntax-6">Syntax</h3>
+
 <p>You call the function like this::</p>
 
 <p>[] = PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)</p>
 
-<h2 id="parameters-6">Parameters</h2>
+<h3 id="parameters-6">Parameters</h3>
+
 <div class="highlighter-rouge"><pre class="highlight"><code>humfile : str
    path to the .DAT file
 
@@ -723,102 +728,8 @@ doplot : int, *optional* [Default=1]
 </code></pre>
 </div>
 
-<h2 id="returns-6">Returns</h2>
-<div class="highlighter-rouge"><pre class="highlight"><code>sonpath+base+'rough_and_hard'+str(p)+'.csv'  : csv file
-    contains the following fields: 'longitude', 'latitude', 'easting', 'northing', 'depth', 
-    'roughness', 'hardness', 'average roughness', 'average hardness','k-mean label'
-    of the pth chunk
-    'average' implies average over 'integ' successive pings
+<h3 id="returns-6">Returns</h3>
 
-The following are returned if doplot==1:
-
-sonpath+'e1e2_scan'+str(p).png : png image file
-   png image file showing the downward echosounder echogram overlain with the locations of the start and 
-   end of the first and second echo region envelope 
-
-sonpath+'e1e2_kmeans'+str(p).png: png image file
-    png image file showing 1) (left) volume scattering coefficient 1 versus volume scattering coefficient 2, colour-coded
-    by k-means acoustic class, and
-    2) (right) e1 versus e2, colour-coded
-    by k-means acoustic class
-
-sonpath+'rgh_hard_kmeans'+str(p).png : png image file
-    png image file showing scatter plot of easting versus northing colour-coded by k-means acoustic class 
-
-sonpath+'map_rgh'+str(p).png : png image file
-    png image file showing scatter plot of 'roughness' (e1) overlying an aerial image pulled from an ESRI image server 
-
-sonpath+'map_hard'+str(p).png : png image file
-    png image file showing scatter plot of 'hardness' (e2) overlying an aerial image pulled from an ESRI image server 
-
-sonpath,'Rough'+str(p).png : png image file 
-    png image overlay associated with the kml file, sonpath,'Hard'+str(p).kml
-
-sonpath,'Rough'+str(p).kml : kml file
-    kml overlay for showing roughness scatter plot (sonpath,'Rough'+str(p).png)
-
-sonpath,'Hard'+str(p).png : png image file
-    png image overlay associated with the kml file, sonpath,'Hard'+str(p).kml
-
-sonpath,'Hard'+str(p).kml : kml file
-    kml overlay for showing harness scatter plot (sonpath,'Hard'+str(p).png) e1e2 module =========================
-</code></pre>
-</div>
-
-<p>Analysis of first (e1, ‘roughness’) and second (e2, ‘hardness’) echo returns from the high-frequency downward looking echosounder</p>
-
-<p>Generates generalised acoustic parameters for the purposes of point classification of submerged substrates/vegetation</p>
-
-<p>Accounts for the absorption of sound in water</p>
-
-<p>Does a basic k-means cluster of e1 and e2 coefficients into specified number of ‘acoustic classes’</p>
-
-<p>Based on code by Barb Fagetter (blueseas@oceanecology.ca)</p>
-
-<h2 id="syntax-7">Syntax</h2>
-<p>You call the function like this::</p>
-
-<p>[] = PyHum.e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot)</p>
-
-<h2 id="parameters-7">Parameters</h2>
-<div class="highlighter-rouge"><pre class="highlight"><code>humfile : str
-   path to the .DAT file
-
-sonpath : str
-   path where the *.SON files are
-
-cs2cs_args : int, *optional* [Default="epsg:26949"]
-   arguments to create coordinates in a projected coordinate system
-   this argument gets given to pyproj to turn wgs84 (lat/lon) coordinates
-   into any projection supported by the proj.4 libraries
-
-ph : float, *optional* [Default=7.0]
-   water acidity in pH
-
-temp : float, *optional* [Default=10.0]
-   water temperature in degrees Celsius
-
-salinity : float, *optional* [Default=0.0]
-   salinity of water in parts per thousand
-
-beam : float, *optional* [Default=20.0]
-   beam width in degrees
-
-transfreq : float, *optional* [Default=200.0]
-   transducer frequency in kHz
-
-integ : int, *optional* [Default=5]
-   number of pings over which to integrate
-
-numclusters : int, *optional* [Default=3]
-   transducer frequency in kHz
-
-doplot : int, *optional* [Default=1]
-   1 = make plots, otherwise do not
-</code></pre>
-</div>
-
-<h2 id="returns-7">Returns</h2>
 <div class="highlighter-rouge"><pre class="highlight"><code>sonpath+base+'rough_and_hard'+str(p)+'.csv'  : csv file
     contains the following fields: 'longitude', 'latitude', 'easting', 'northing', 'depth', 
     'roughness', 'hardness', 'average roughness', 'average hardness','k-mean label'
@@ -867,7 +778,7 @@ sonpath,'Hard'+str(p).kml : kml file
 </code></pre>
 </div>
 
-<h2 id="syntax-8">Syntax</h2>
+<h3 id="syntax-7">Syntax</h3>
 
 <p>You call the function like this::</p>
 
@@ -876,13 +787,13 @@ sonpath,'Hard'+str(p).kml : kml file
 </code></pre>
 </div>
 
-<h2 id="parameters-8">Parameters</h2>
+<h3 id="parameters-7">Parameters</h3>
 
 <div class="highlighter-rouge"><pre class="highlight"><code> None
 </code></pre>
 </div>
 
-<h2 id="returns-8">Returns</h2>
+<h3 id="returns-7">Returns</h3>
 
 <div class="highlighter-rouge"><pre class="highlight"><code> None
 </code></pre>
