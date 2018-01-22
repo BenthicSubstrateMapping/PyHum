@@ -253,7 +253,17 @@
 
 <p>PyHum is an open-source project dedicated to provide a generic Python framework 
 for reading and exporting data from Humminbird(R) instruments, carrying out rudimentary radiometric corrections to the data,
-classify bed texture, and produce some maps on aerial photos and kml files for google-earth</p>
+classify bed texture, and produce some maps</p>
+
+<p>A typical PyHum workflow would be::</p>
+
+<ol>
+  <li>read Humminbird DAT and associated SON files</li>
+  <li>export data</li>
+  <li>carry out rudimentary radiometric corrections to data, and</li>
+  <li>classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, (2015) “Automated riverbed sediment classification using low-cost sidescan sonar”, Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.</li>
+  <li>produce some maps on GeoTIFF and kml files</li>
+</ol>
 
 <p>The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) and works on both sidescan and downward-looking echosounder data, where available.</p>
 
@@ -267,7 +277,7 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
     <p>This software has (so far) been used only with Humminbird 700, 800, 900, 1100, ONIX, HELIX and MEGA series instruments.</p>
   </li>
   <li>
-    <p>PyHum is not yet compatable with SOLIX systems</p>
+    <p>PyHum is not yet compatable with SOLIXICE, ION, or PMAX systems. Please make example data available and we’ll see what we can do!</p>
   </li>
 </ul>
 
@@ -331,12 +341,12 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
     </tr>
     <tr>
       <td> </td>
-      <td>dhamill@usgs.gov</td>
+      <td>hamill.daniel@gmail.com</td>
     </tr>
   </tbody>
 </table>
 
-<p>Current version: 1.4.3 (Jan. 2018)</p>
+<p>Current version: 1.4.5 (Jan. 2018)</p>
 
 <h1 id="please-cite">Please Cite!</h1>
 
@@ -355,7 +365,7 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
 
 <h1 id="installation">Installation</h1>
 
-<p>Installing in a conda virtual env (recommended)</p>
+<h3 id="installing-in-a-conda-virtual-env-recommended">Installing in a conda virtual env (recommended)</h3>
 
 <p>In a conda (miniconda/anaconda) python 2 environment:</p>
 
@@ -363,6 +373,7 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
 
 <div class="highlighter-rouge"><pre class="highlight"><code>  conda create --name pyhum python=2
   source activate pyhum
+  conda install gdal
   conda install -c conda-forge basemap-data-hires -y
   conda install scipy numpy scikit-image
   pip install simplekml sklearn pandas dask
@@ -370,6 +381,7 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
   pip install pyresample
   pip install PyHum --no-deps #(or pip install git+https://github.com/dbuscombe-usgs/PyHum.git --no-deps)
   python -c"import PyHum;PyHum.dotest()" 
+  source deactivate pyhum 
 </code></pre>
 </div>
 
@@ -377,17 +389,38 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
 
 <div class="highlighter-rouge"><pre class="highlight"><code>  conda create --name pyhum python=2
   activate pyhum
+  conda install gdal
   conda install -c conda-forge basemap-data-hires -y
   conda install scipy numpy scikit-image
   pip install simplekml sklearn pandas dask
   pip install joblib toolz cython
   pip install pyresample==1.1.4
   pip install PyHum --no-deps #(or pip install git+https://github.com/dbuscombe-usgs/PyHum.git --no-deps)
-  python -c"import PyHum;PyHum.dotest()" 
 </code></pre>
 </div>
 
-<p>Installing as a library accessible outside of virtual env</p>
+<p>Then run the test, and finally deactivate the venv ::</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>  python -c"import PyHum;PyHum.dotest()" 
+  deactivate pyhum
+</code></pre>
+</div>
+
+<p>If you get gdal/osgeo/ogr/os errors, install GDAL (Windows only)::
+1. Go to: https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal
+2. Download GDAL‑2.2.3‑cp27‑cp27m‑win_amd64.whl
+3. install using pip:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>  pip install GDAL‑2.2.3‑cp27‑cp27m‑win_amd64.whl
+</code></pre>
+</div>
+
+<h3 id="installing-as-a-library-accessible-outside-of-virtual-env">Installing as a library accessible outside of virtual env</h3>
+
+<p>Prerequisite
+<code class="highlighter-rouge">
+  pip install Cython
+</code></p>
 
 <p>From PyPI::
 <code class="highlighter-rouge">
