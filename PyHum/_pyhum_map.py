@@ -573,21 +573,37 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    datm = np.ma.masked_invalid(dat)
 
    glon, glat = trans(grid_x, grid_y, inverse=True)
-   del grid_x, grid_y
-
+   #del grid_x, grid_y
 
    try:
-      import rasterio
-      from rasterio.transform import from_origin
-      r = (humlon[-1]-humlon[0]) / np.nanmax(humlon) #240.0
-      transform = from_origin(humlon[0] - r / 2, humlon[-1] + r / 2, r, r)
-      datw = np.ma.filled(dat).astype('float64')
-      datw[np.isnan(datw)] = 0
-      ew_dataset = rasterio.open(os.path.normpath(os.path.join(sonpath,'geotiff_map'+str(p)+'.tif')), mode='w', driver='GTiff', height=datw.shape[0], width=datw.shape[1], count=1, crs=rasterio.crs.CRS({'init': cs2cs_args}), transform=transform, dtype=rasterio.float64)
-      ew_dataset.write(datw, 1)
-      ew_dataset.close()
+      proj = osr.SpatialReference()
+      proj.ImportFromEPSG(int(cs2cs_args.split(':')[-1])) #26949)
+      datout = np.squeeze(np.ma.filled(dat))
+      datout[np.isnan(datout)] = -99
+      driver = gdal.GetDriverByName('GTiff')
+      #rows,cols = np.shape(datout)
+      cols,rows = np.shape(datout)    
+      outFile = os.path.normpath(os.path.join(sonpath,'geotiff_map'+str(p)+'.tif'))
+      ds = driver.Create( outFile, rows, cols, 1, gdal.GDT_Float32)  ##cols, rows, 1, gdal.GDT_Float32)      
+      if proj is not None:  
+        ds.SetProjection(proj.ExportToWkt()) 
+
+      xmin, ymin, xmax, ymax = [grid_x.min(), grid_y.min(), grid_x.max(), grid_y.max()]
+
+      xres = (xmax - xmin) / float(rows)
+      yres = (ymax - ymin) / float(cols)
+      geotransform = (xmin, xres, 0, ymax, 0, -yres)
+
+      ds.SetGeoTransform(geotransform)
+      ss_band = ds.GetRasterBand(1)
+      ss_band.WriteArray(np.flipud(datout)) #datout)
+      ss_band.SetNoDataValue(-99)
+      ss_band.FlushCache()
+      ss_band.ComputeStatistics(False)
+      del ds   
+   
    except:
-      print("error: geotiff could not be created... check your rasterio install")
+      print("error: geotiff could not be created... check your gdal/ogr install")
 
 
    try:
