@@ -456,14 +456,14 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
          while complete==0:
             try:
                try:
-                  dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=res*10, fill_value=None, nprocs = cpu_count())
+                  dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=res*20, fill_value=None, nprocs = cpu_count(), reduce_data=1)
                except:
-                  dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=res*10, fill_value=None, nprocs = 1)
+                  dat = pyresample.kd_tree.resample_nearest(orig_def, merge.flatten(), targ_def, radius_of_influence=res*20, fill_value=None, nprocs = 1, reduce_data=1)
 
                try:
-                  r_dat = pyresample.kd_tree.resample_nearest(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*10, fill_value=None, nprocs = cpu_count())
+                  r_dat = pyresample.kd_tree.resample_nearest(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*20, fill_value=None, nprocs = cpu_count(), reduce_data=1)
                except:
-                  r_dat = pyresample.kd_tree.resample_nearest(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*10, fill_value=None, nprocs = 1)
+                  r_dat = pyresample.kd_tree.resample_nearest(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*20, fill_value=None, nprocs = 1, reduce_data=1)
 
                stdev = None
                counts = None
@@ -487,14 +487,14 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
          while complete==0:
             try:
                try:
-                  dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=res*10, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count())
+                  dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=res*20, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = cpu_count(), reduce_data=1)
                except:
-                  dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=res*10, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = 1)
+                  dat, stdev, counts = pyresample.kd_tree.resample_custom(orig_def, merge.flatten(),targ_def, radius_of_influence=res*20, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = True, nprocs = 1, reduce_data=1)
 
                try:
-                  r_dat = pyresample.kd_tree.resample_custom(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = False, nprocs = cpu_count())
+                  r_dat = pyresample.kd_tree.resample_custom(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*20, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = False, nprocs = cpu_count(), reduce_data=1)
                except:
-                  r_dat = pyresample.kd_tree.resample_custom(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = False, nprocs = 1)
+                  r_dat = pyresample.kd_tree.resample_custom(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*20, neighbours=nn, weight_funcs=wf, fill_value=None, with_uncert = False, nprocs = 1, reduce_data=1)
 
                if 'dat' in locals():
                   complete=1
@@ -513,14 +513,14 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
          while complete==0:
             try:
                try:
-                  dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = True, nprocs = cpu_count(), epsilon = eps)
+                  dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=res*20, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = True, nprocs = cpu_count(), epsilon = eps, reduce_data=1)
                except:
-                  dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = True, nprocs = 1, epsilon = eps)
+                  dat, stdev, counts = pyresample.kd_tree.resample_gauss(orig_def, merge.flatten(), targ_def, radius_of_influence=res*20, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = True, nprocs = 1, epsilon = eps, reduce_data=1)
 
                try:
-                  r_dat = pyresample.kd_tree.resample_gauss(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = False, nprocs = cpu_count(), epsilon = eps)
+                  r_dat = pyresample.kd_tree.resample_gauss(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*20, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = False, nprocs = cpu_count(), epsilon = eps, reduce_data=1)
                except:
-                  r_dat = pyresample.kd_tree.resample_gauss(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*10, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = False, nprocs = 1, epsilon = eps)
+                  r_dat = pyresample.kd_tree.resample_gauss(orig_def, res_grid.flatten(), targ_def, radius_of_influence=res*20, neighbours=nn, sigmas=sigmas, fill_value=None, with_uncert = False, nprocs = 1, epsilon = eps, reduce_data=1)
 
                if 'dat' in locals():
                   complete=1
@@ -576,18 +576,18 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    del grid_x, grid_y
 
 
-   #try:
-   #   import rasterio
-   #   from rasterio.transform import from_origin
-   #   r = (humlon[-1]-humlon[0]) / np.nanmax(humlon) #240.0
-   #   transform = from_origin(humlon[0] - r / 2, humlon[-1] + r / 2, r, r)
-   #   datw = np.ma.filled(dat).astype('float64')
-   #   datw[np.isnan(datw)] = 0
-   #   ew_dataset = rasterio.open(os.path.normpath(os.path.join(sonpath,'geotiff_map'+str(p)+'.tif')), mode='w', driver='GTiff', height=datw.shape[0], width=datw.shape[1], count=1, crs=rasterio.crs.CRS({'init': cs2cs_args}), transform=transform, dtype=rasterio.float64)
-   #   ew_dataset.write(datw, 1)
-   #   ew_dataset.close()
-   #except:
-   #   print("error: geotiff could not be created... check your rasterio install")
+   try:
+      import rasterio
+      from rasterio.transform import from_origin
+      r = (humlon[-1]-humlon[0]) / np.nanmax(humlon) #240.0
+      transform = from_origin(humlon[0] - r / 2, humlon[-1] + r / 2, r, r)
+      datw = np.ma.filled(dat).astype('float64')
+      datw[np.isnan(datw)] = 0
+      ew_dataset = rasterio.open(os.path.normpath(os.path.join(sonpath,'geotiff_map'+str(p)+'.tif')), mode='w', driver='GTiff', height=datw.shape[0], width=datw.shape[1], count=1, crs=rasterio.crs.CRS({'init': cs2cs_args}), transform=transform, dtype=rasterio.float64)
+      ew_dataset.write(datw, 1)
+      ew_dataset.close()
+   except:
+      print("error: geotiff could not be created... check your rasterio install")
 
 
    try:
