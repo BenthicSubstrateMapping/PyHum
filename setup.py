@@ -196,7 +196,7 @@ def setupPackage():
          ],
          keywords='sidescan sonar humminbird sediment substrate classification',
          author='Daniel Buscombe',
-         author_email='dbuscombe@usgs.gov',
+         author_email='daniel.buscombe@nau.edu',
          url='https://github.com/dbuscombe-usgs/PyHum',
          download_url ='https://github.com/dbuscombe-usgs/PyHum/archive/master.zip',
          install_requires=install_requires,

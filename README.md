@@ -14,7 +14,7 @@ classify bed texture, and produce some maps on aerial photos and kml files for g
 2. export data
 3. carry out rudimentary radiometric corrections to data, and 
 4. classify bed texture using the algorithm detailed in Buscombe, Grams, Smith, (2015) "Automated riverbed sediment classification using low-cost sidescan sonar", Journal of Hydraulic Engineering, 10.1061/(ASCE)HY.1943-7900.0001079, 06015019.
-5. produce some maps on aerial photos and kml files for google-earth
+5. produce some maps on GeoTIFF and kml files 
 
 The software is designed to read Humminbird data (.SON, .IDX, and .DAT files) and works on both sidescan and downward-looking echosounder data, where available.
 
@@ -42,7 +42,7 @@ If you use PyHum in your published work, please cite the following papers:
           | Logan, UT 84322
           | hamill.daniel@gmail.com
 
-Version: 1.4.2    |  Revision: Jan, 2018
+Version: 1.4.5    |  Revision: Jan, 2018
 
 
 ### Please Read
@@ -99,6 +99,7 @@ Linux:
 ```
 conda create --name pyhum python=2
 source activate pyhum
+conda install gdal
 conda install -c conda-forge basemap-data-hires -y
 conda install scipy numpy scikit-image
 pip install simplekml sklearn pandas dask
@@ -106,6 +107,7 @@ pip install joblib toolz cython
 pip install pyresample
 pip install PyHum --no-deps #(or pip install git+https://github.com/dbuscombe-usgs/PyHum.git --no-deps)
 python -c"import PyHum;PyHum.dotest()" 
+source deactivate pyhum 
 ```
 
 Windows:
@@ -113,17 +115,38 @@ Windows:
 ```
 conda create --name pyhum python=2
 activate pyhum
+conda install gdal
 conda install -c conda-forge basemap-data-hires -y
 conda install scipy numpy scikit-image
 pip install simplekml sklearn pandas dask
 pip install joblib toolz cython
 pip install pyresample==1.1.4
 pip install PyHum --no-deps #(or pip install git+https://github.com/dbuscombe-usgs/PyHum.git --no-deps)
+```
+
+Then run the test, and finally deactivate the venv ::
+
+```
 python -c"import PyHum;PyHum.dotest()" 
+deactivate pyhum
+```
+
+If you get gdal/osgeo/ogr/os errors, install GDAL (Windows only)::
+1. Go to: https://www.lfd.uci.edu/~gohlke/pythonlibs/#gdal
+2. Download GDAL‑2.2.3‑cp27‑cp27m‑win_amd64.whl
+3. install using pip:
+
+```
+pip install GDAL‑2.2.3‑cp27‑cp27m‑win_amd64.whl
 ```
 
 
 ### Installing as a library accessible outside of virtual env
+
+Prerequisite
+```
+pip install Cython
+```
 
 1. From PyPI::
 

@@ -576,6 +576,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    #del grid_x, grid_y
 
    try:
+      from osgeo import gdal,ogr,osr
       proj = osr.SpatialReference()
       proj.ImportFromEPSG(int(cs2cs_args.split(':')[-1])) #26949)
       datout = np.squeeze(np.ma.filled(dat))
