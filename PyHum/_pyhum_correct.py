@@ -376,6 +376,8 @@ def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0
     Zt2 = Zt-avg + np.nanmean(avg)
     Zt2 = Zt2 + np.abs(np.nanmin(Zt2))
 
+    Zt2 = median_filter(Zt2, (3,3))
+
     ##Zt2 = np.empty(np.shape(Zt)) 
     ##for kk in range(np.shape(Zt)[1]):
     ##   Zt2[:,kk] = (Zt[:,kk] - avg) + np.nanmean(avg)
