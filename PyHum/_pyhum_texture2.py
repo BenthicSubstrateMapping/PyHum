@@ -323,7 +323,7 @@ def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4):
             for p in range(len(star_fp)):
                plot_contours(dist_m, shape_port, class_fp[p], ft, humfile, sonpath, base, numclasses, p)
          else:
-            plot_contours(dist_m, shape_port, class_fp, ft, humfile, sonpath, base, numclasses, 0)
+            plot_contours(dist_m, shape_port, port_fp, star_fp,class_fp, ft, humfile, sonpath, base, numclasses, 0)
         
 
       #######################################################
@@ -443,7 +443,7 @@ def plot_class(dist_m, shape_port, dat_port, dat_star, dat_class, ft, humfile, s
    del fig
 
 # =========================================================
-def plot_contours(dist_m, shape_port, dat_class, ft, humfile, sonpath, base, numclasses, p):
+def plot_contours(dist_m, shape_port, dat_port, dat_star, dat_class, ft, humfile, sonpath, base, numclasses, p):
 
    if len(shape_port)>2:
       Zdist = dist_m[shape_port[-1]*p:shape_port[-1]*(p+1)]
@@ -452,13 +452,15 @@ def plot_contours(dist_m, shape_port, dat_class, ft, humfile, sonpath, base, num
       Zdist = dist_m
       extent = shape_port[0]
 
-   levels = np.linspace(np.nanmin(dat_class)+0.5, np.nanmax(dat_class)-0.5,numclasses+1)
+   levels = np.linspace(np.nanmin(dat_class)+.25, np.nanmax(dat_class)-0.5,numclasses+1)
 
    fig = plt.figure()
    plt.subplot(2,1,1)
    ax = plt.gca()
-   CS = plt.contourf(dat_class.astype('float64'), levels, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)], 
-                     cmap='YlOrRd',origin='upper')#, vmin=0.5, vmax=np.mean(dat_class))
+   plt.imshow(np.vstack((np.flipud(dat_port), dat_star)),cmap='gray',
+              extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)],origin='upper')
+   CS = plt.contourf(np.flipud(dat_class).astype('float64'), levels, extent=[min(Zdist), max(Zdist), -extent*(1/ft), extent*(1/ft)], 
+                     cmap='YlOrRd',origin='upper', alpha=0.5)#, vmin=0.5, vmax=np.mean(dat_class))
    plt.ylabel('Horizontal distance (m)'); plt.xlabel('Distance along track (m)')
    plt.axis('tight')
 

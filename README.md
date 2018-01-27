@@ -44,6 +44,25 @@ If you use PyHum in your published work, please cite the following papers:
 
 Version: 1.4.5    |  Revision: Jan, 2018
 
+Thanks to the following individuals for debugging, supplying data and thoughtful suggestions:
+
+```
+Adam Kaeser
+Cam Bodine
+Amberle Jones
+Phil Whittle
+Jacob Berninger
+Doug Newcomb
+Jereme Gaeta
+Ian Nesbit
+Allen Aven
+Liam Zarri
+Daphne Tuzlak
+Rick Debbout
+Vikram Umnithan
+Matt Marineau
+Kathryn Ford
+```
 
 ### Please Read
 

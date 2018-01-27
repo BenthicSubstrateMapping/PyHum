@@ -413,6 +413,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
 
       if res==99:
          resg = np.min(res_grid[res_grid>0])/2
+         print('Gridding at resolution of %s' % str(resg))
       else:
          resg = res
 
@@ -579,13 +580,13 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       from osgeo import gdal,ogr,osr
       proj = osr.SpatialReference()
       proj.ImportFromEPSG(int(cs2cs_args.split(':')[-1])) #26949)
-      datout = np.squeeze(np.ma.filled(dat))
+      datout = np.squeeze(np.ma.filled(dat))#.astype('int16')
       datout[np.isnan(datout)] = -99
       driver = gdal.GetDriverByName('GTiff')
       #rows,cols = np.shape(datout)
       cols,rows = np.shape(datout)    
       outFile = os.path.normpath(os.path.join(sonpath,'geotiff_map'+str(p)+'.tif'))
-      ds = driver.Create( outFile, rows, cols, 1, gdal.GDT_Float32)  ##cols, rows, 1, gdal.GDT_Float32)      
+      ds = driver.Create( outFile, rows, cols, 1, gdal.GDT_Int32, [ 'COMPRESS=LZW' ] )        
       if proj is not None:  
         ds.SetProjection(proj.ExportToWkt()) 
 

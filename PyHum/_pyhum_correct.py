@@ -788,8 +788,10 @@ def c_scans_lambertian(fp, a_fp, TL, R, c, f, theta, alpha):
    mg[fp==0] = np.nan
    mg[mg<0] = np.nan
 
+   mask = np.isnan(mg)
+   mg[np.isnan(mg)] = 0
    mg = denoise_tv_chambolle(mg.copy(), weight=.2, multichannel=False).astype('float32')
-   
+   mg[mask==True] = np.nan
    return mg   
 
 # =========================================================
@@ -879,8 +881,6 @@ def plot_dwnhi_scans(dat_dwnhi, dist_m, shape_hi, ft, sonpath, p):
        #plt.axis('tight')
        custom_save(sonpath,'dwnhi_corrected_scan'+str(p))
        del fig
-
-
 
 
 # =========================================================
