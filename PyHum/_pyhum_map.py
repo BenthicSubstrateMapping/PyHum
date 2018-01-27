@@ -395,6 +395,8 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
    h = h[np.where(np.logical_not(np.isinf(merge)))]
    t = t[np.where(np.logical_not(np.isinf(merge)))]
 
+
+
    print("writing point cloud")
    #if dowrite==1:
    ## write raw bs to file

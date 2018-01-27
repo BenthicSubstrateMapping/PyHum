@@ -376,7 +376,10 @@ def correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp,
     Zt2 = Zt-avg + np.nanmean(avg)
     Zt2 = Zt2 + np.abs(np.nanmin(Zt2))
 
-    Zt2 = median_filter(Zt2, (3,3))
+    try:
+       Zt2 = median_filter(Zt2, (3,3))
+    except:
+       pass
 
     ##Zt2 = np.empty(np.shape(Zt)) 
     ##for kk in range(np.shape(Zt)[1]):
