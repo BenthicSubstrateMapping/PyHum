@@ -145,7 +145,7 @@ def gui():
 	    "Automated riverbed sediment classification using low-cost sidescan sonar. ",
 	    "JOURNAL OF HYDRAULIC ENGINEERING, 06015019\n",
 	    "\n",
-	    "2. Buscombe, D., (2016, in review) ",
+	    "2. Buscombe, D., (2017) ",
 	    "Shallow water benthic imaging and substrate characterization using recreational-grade sidescan sonar",
 	    "ENVIRONMENTAL MODELLING & SOFTWARE\n",
 	    "\n",
@@ -268,7 +268,10 @@ def gui():
 	self.mb.menu.add_command(label="997", command = lambda v=1: _SetModel(master, v))
 	self.mb.menu.add_command(label="998", command = lambda v=2: _SetModel(master, v))
 	self.mb.menu.add_command(label="1198", command = lambda v=3: _SetModel(master, v))
-	self.mb.menu.add_command(label="1199", command = lambda v=4: _SetModel(master, v))                
+	self.mb.menu.add_command(label="1199", command = lambda v=4: _SetModel(master, v)) 
+	self.mb.menu.add_command(label="onix", command = lambda v=5: _SetModel(master, v)) 
+	self.mb.menu.add_command(label="helix", command = lambda v=6: _SetModel(master, v)) 
+	self.mb.menu.add_command(label="mega", command = lambda v=7: _SetModel(master, v))                
 	self.mb["menu"]  =  self.mb.menu
 	self.mb.configure(background='thistle3', fg="black")
 
@@ -478,6 +481,15 @@ def gui():
 	   elif v==4:
 	      self.model=1199
 	      print("model is 1199")
+	   elif v==5:
+	      self.model='onix'
+	      print("model is ONIX")
+	   elif v==6:
+	      self.model='helix'
+	      print("model is HELIX")
+	   elif v==7:
+	      self.model='mega'
+	      print("model is MEGA")
 	      
 	   self.mb.configure(fg='thistle3', background="black")
 	      
@@ -841,8 +853,14 @@ def gui():
 	    print("window size: " + str(self.Winvar.get()))        
 	    print("manually mask: " + str(self.manmaskvar.get()))
                  
+            dissim=3
+            correl=0.2
+            contrast=6
+            energy=0.15
+            mn=4
+
 	    # do stuff here
-	    PyHum.rmshadows(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Winvar.get(), self.manmaskvar.get(), self.doplot)  
+	    PyHum.rmshadows(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Winvar.get(), self.manmaskvar.get(), self.doplot, dissim, correl, contrast, energy, mn)  
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Shadow removal module finished")     
 
@@ -1025,13 +1043,16 @@ def gui():
 	    print("number std. dev. to accept: " + str(self.nstdvar.get()))             
 	    #print "Write point cloud to file: " + str(self.dowritevar.get())             
 		   
+            scalemax = 60
+            use_uncorrected = 0
+
 	    if self.resvar.get()==0:
 	       self.resvar=99                 
 	    # do stuff here
-	    PyHum.map(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.epsg2.get(), self.resvar.get(), self.mode, self.nnvar.get(), self.nstdvar.get()) #self.infvar.get(), self.dowritevar.get(), 
+	    PyHum.map(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.epsg2.get(), self.resvar.get(), self.mode, self.nnvar.get(), self.nstdvar.get(), use_uncorrected, scalemax)  
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Map module finished") 
-	    
+
 	#=======================   
 	def _SetMode(master, v):
 	   if v==1:
@@ -1138,42 +1159,42 @@ def gui():
 	#=======================
 	# window size
 	self.Winvar2 = Tkinter.DoubleVar()
-	Winscale2 = Tkinter.Scale( texture_frame, variable = self.Winvar2, from_=5, to=500, resolution=1, tickinterval=50, label = 'Window Size [pixels]' )
-	Winscale2.set(100)
+	Winscale2 = Tkinter.Scale( texture_frame, variable = self.Winvar2, from_=5, to=100, resolution=1, tickinterval=5, label = 'Window Size [pixels]' )
+	Winscale2.set(10) #100)
 	Winscale2.grid(row=2, column=0,  pady=(2,4))
 	Winscale2.configure(background='SeaGreen1', fg="black")
 
 	#=======================
-	# shift size
-	self.shiftvar = Tkinter.DoubleVar()
-	shiftscale = Tkinter.Scale( texture_frame, variable = self.shiftvar, from_=2, to=50, resolution=1, tickinterval=10, label = 'Shift Size [pixels]' )
-	shiftscale.set(10)
-	shiftscale.grid(row=2, column=1,  pady=(2,4))
-	shiftscale.configure(background='SeaGreen1', fg="black")
+	## shift size
+	#self.shiftvar = Tkinter.DoubleVar()
+	#shiftscale = Tkinter.Scale( texture_frame, variable = self.shiftvar, from_=2, to=50, resolution=1, tickinterval=10, label = 'Shift Size [pi#xels]' )
+	#shiftscale.set(10)
+	#shiftscale.grid(row=2, column=1,  pady=(2,4))
+	#shiftscale.configure(background='SeaGreen1', fg="black")
 
 	#=======================
-	# density
-	self.densvar = Tkinter.DoubleVar()
-	densscale = Tkinter.Scale( texture_frame, variable = self.densvar, from_=1, to=100, resolution=1, tickinterval=10, label = 'Density' )
-	densscale.set(10)
-	densscale.grid(row=3, column=0,  pady=(2,4))
-	densscale.configure(background='SeaGreen1', fg="black")
+	## density
+	#self.densvar = Tkinter.DoubleVar()
+	#densscale = Tkinter.Scale( texture_frame, variable = self.densvar, from_=1, to=100, resolution=1, tickinterval=10, label = 'Density' )
+	#densscale.set(10)
+	#densscale.grid(row=3, column=0,  pady=(2,4))
+	#densscale.configure(background='SeaGreen1', fg="black")
 
 	#=======================
-	# maxscale
-	self.maxscalevar = Tkinter.DoubleVar()
-	maxscalescale = Tkinter.Scale( texture_frame, variable = self.maxscalevar, from_=2, to=50, resolution=1, tickinterval=10, label = 'Max scale' )
-	maxscalescale.set(20)
-	maxscalescale.grid(row=3, column=1,  pady=(2,4))
-	maxscalescale.configure(background='SeaGreen1', fg="black")
+	## maxscale
+	#self.maxscalevar = Tkinter.DoubleVar()
+	#maxscalescale = Tkinter.Scale( texture_frame, variable = self.maxscalevar, from_=2, to=50, resolution=1, tickinterval=10, label = 'Max scale' )
+	#maxscalescale.set(20)
+	#maxscalescale.grid(row=3, column=1,  pady=(2,4))
+	#maxscalescale.configure(background='SeaGreen1', fg="black")
 
 	#=======================
-	# notes
-	self.notesvar = Tkinter.DoubleVar()
-	notesscale = Tkinter.Scale( texture_frame, variable = self.notesvar, from_=2, to=20, resolution=1, tickinterval=5, label = 'Notes' )
-	notesscale.set(4)
-	notesscale.grid(row=4, column=0,  pady=(2,4))
-	notesscale.configure(background='SeaGreen1', fg="black")
+	## notes
+	#self.notesvar = Tkinter.DoubleVar()
+	#notesscale = Tkinter.Scale( texture_frame, variable = self.notesvar, from_=2, to=20, resolution=1, tickinterval=5, label = 'Notes' )
+	#notesscale.set(4)
+	#notesscale.grid(row=4, column=0,  pady=(2,4))
+	#notesscale.configure(background='SeaGreen1', fg="black")
 
 	#=======================
 	# numclasses
@@ -1201,14 +1222,15 @@ def gui():
 	    print("humfile: " + self.DATfilename.get())
 	    print("sonpath: " + os.path.dirname(self.SONfiles[0]))
 	    print("window size [pixels]: " + str(self.Winvar2.get()))       
-	    print("shift size [pixels]: " + str(self.shiftvar.get()))        
-	    print("density [pixels]: " + str(self.densvar.get()))
-	    print("maxscale: " + str(self.maxscalevar.get()))
-	    print("notes: " + str(self.notesvar.get()))
+	    #print("shift size [pixels]: " + str(self.shiftvar.get()))        
+	    #print("density [pixels]: " + str(self.densvar.get()))
+	    #print("maxscale: " + str(self.maxscalevar.get()))
+	    #print("notes: " + str(self.notesvar.get()))
 	    print("number of texture classes: " + str(self.ncvar.get()))
 		             
 	    # do stuff here
-	    PyHum.texture(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Winvar2.get(), self.shiftvar.get(), self.doplot, self.densvar.get(), self.ncvar.get(), self.maxscalevar.get(), self.notesvar.get())
+	    #PyHum.texture(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Winvar2.get(), self.shiftvar.get(), self.doplot, self.densvar.get(), self.ncvar.get(), self.maxscalevar.get(), self.notesvar.get())
+            PyHum.texture2(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Winvar2.get(), self.doplot, self.ncvar.get())
 
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Texture module finished") 
@@ -1380,8 +1402,11 @@ def gui():
 	    #print "gridding influence [m]: " + str(self.infvar.get()) 
 	    print("number std. dev. to accept: " + str(self.nstdvar.get()))             
 		             
+            scalemax = 60
+            use_uncorrected = 0
+
 	    # do stuff here
-	    PyHum.map_texture(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.epsg3.get(),self.resvar2.get(), self.mode, self.nnvar.get(), self.nstdvar.get())  #self.infvar.get(),  
+	    PyHum.map_texture(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.epsg3.get(),self.resvar2.get(), self.mode, self.nnvar.get(), self.nstdvar.get(), use_uncorrected, scalemax )  
 
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Map texture module finished") 

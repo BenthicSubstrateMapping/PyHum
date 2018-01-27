@@ -103,7 +103,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def map(humfile, sonpath, cs2cs_args = "epsg:26949", res = 99, mode=3, nn = 64, numstdevs=5, use_uncorrected=0, scalemax=60): #dogrid = 1, influence = 1, dowrite = 0, 
+def map(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs, use_uncorrected, scalemax): #dogrid = 1, influence = 1, dowrite = 0, 
 
     '''
     Create plots of the spatially referenced sidescan echograms
@@ -586,7 +586,7 @@ def make_map(e, n, t, d, dat_port, dat_star, data_R, pix_m, res, cs2cs_args, son
       #rows,cols = np.shape(datout)
       cols,rows = np.shape(datout)    
       outFile = os.path.normpath(os.path.join(sonpath,'geotiff_map'+str(p)+'.tif'))
-      ds = driver.Create( outFile, rows, cols, 1, gdal.GDT_Int32, [ 'COMPRESS=LZW' ] )        
+      ds = driver.Create( outFile, rows, cols, 1, gdal.GDT_Float32, [ 'COMPRESS=LZW' ] )        
       if proj is not None:  
         ds.SetProjection(proj.ExportToWkt()) 
 

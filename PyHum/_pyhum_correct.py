@@ -90,7 +90,7 @@ warnings.filterwarnings("ignore")
 # ========================================================
 
 #################################################
-def correct(humfile, sonpath, maxW=1000, doplot=1, dofilt=0, correct_withwater=0, ph = 7, temp = 10, salinity = 0, dconcfile = None):
+def correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity, dconcfile):
 
     '''
     Remove water column and carry out some rudimentary radiometric corrections, 

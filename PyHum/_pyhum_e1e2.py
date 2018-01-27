@@ -91,7 +91,7 @@ np.seterr(invalid='ignore')
 
 
 #################################################
-def e1e2(humfile, sonpath, cs2cs_args="epsg:26949", ph=7.0, temp=10.0, salinity=0.0, beam=20.0, transfreq=200.0, integ=5, numclusters=3, doplot=1):
+def e1e2(humfile, sonpath, cs2cs_args, ph, temp, salinity, beam, transfreq, integ, numclusters, doplot):
          
     '''
     Analysis of first (e1, 'roughness') and second (e2, 'hardness') echo returns from the high-frequency downward looking echosounder

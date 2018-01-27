@@ -99,7 +99,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def map_texture(humfile, sonpath, cs2cs_args = "epsg:26949", res = 0.5, mode=3, nn = 64, numstdevs=5): #influence = 10, 
+def map_texture(humfile, sonpath, cs2cs_args, res, mode, nn, numstdevs): #influence = 10, 
          
     '''
     Create plots of the texture lengthscale maps made in PyHum.texture module 

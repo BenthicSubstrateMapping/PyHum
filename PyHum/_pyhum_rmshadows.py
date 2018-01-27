@@ -91,7 +91,7 @@ warnings.filterwarnings("ignore")
 # ========================================================
 
 #################################################
-def rmshadows(humfile, sonpath, win=31, shadowmask=0, doplot=1, dissim=3, correl=0.2, contrast=6, energy=0.15, mn=4):
+def rmshadows(humfile, sonpath, win, shadowmask, doplot, dissim, correl, contrast, energy, mn):
     '''
     Remove dark shadows in scans caused by shallows, shorelines, and attenuation of acoustics with distance
     Manual or automated processing options available

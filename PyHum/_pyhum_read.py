@@ -94,7 +94,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #################################################
-def read(humfile, sonpath, cs2cs_args="epsg:26949", c=1450.0, draft=0.3, doplot=1, t=0.108, bedpick=1, flip_lr=0, model=998, calc_bearing = 0, filt_bearing = 0, chunk='d100'): #cog = 1,
+def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk): #cog = 1,
 
     '''
     Read a .DAT and associated set of .SON files recorded by a Humminbird(R)

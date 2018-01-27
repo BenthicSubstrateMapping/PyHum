@@ -93,7 +93,7 @@ warnings.filterwarnings("ignore")
 
 
 #################################################
-def texture2(humfile, sonpath, win=10, doplot=1,  numclasses=4): 
+def texture2(humfile, sonpath, win, doplot,  numclasses): 
           
       '''
       Create a texture lengthscale map using the algorithm detailed by Buscombe et al. (2015)

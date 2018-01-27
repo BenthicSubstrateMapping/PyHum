@@ -365,6 +365,20 @@ or from within ipython (with a GUI prompt to navigate to the files):
    run proc_mysidescandata.py
 ```
 
+### Models
+
+The following model flags are supported:
+
+```
+'mega'
+'helix'
+'onix'
+998
+1198
+898
+1199
+798
+```
 
 ### Trouble Shooting
 
