@@ -1230,7 +1230,7 @@ def gui():
 		             
 	    # do stuff here
 	    #PyHum.texture(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Winvar2.get(), self.shiftvar.get(), self.doplot, self.densvar.get(), self.ncvar.get(), self.maxscalevar.get(), self.notesvar.get())
-            PyHum.texture2(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Winvar2.get(), self.doplot, self.ncvar.get())
+            PyHum.texture2(str(self.DATfilename.get()), os.path.dirname(self.SONfiles[0]), self.Winvar2.get(), self.doplot, self.ncvar.get() )
 
 	    self.update() 
 	    tkMessageBox.showinfo("Done!", "Texture module finished") 
