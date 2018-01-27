@@ -94,6 +94,7 @@ def dotest():
    ph = 7.0 # acidity on the pH scale
    temp = 10.0 # water temperature in degrees Celsius
    salinity = 0.0
+   dconcfile = None
 
    # for shadow removal
    shadowmask = 0 # 0= automatic shadow removal, 1=manual

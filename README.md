@@ -204,18 +204,8 @@ virtualenv venv
 source venv/bin/activate
 pip install numpy
 pip install Cython
-pip install scipy
-pip install simplekml
-pip install pyproj
-pip install scikit-learn
-pip install Pillow
-pip install matplotlib
 pip install basemap --allow-external basemap --allow-unverified basemap
-pip install pyresample
-pip install toolz
-pip install dask
-pip install pandas
-pip install PyHum
+pip install PyHum --no-deps
 python -c "import PyHum; PyHum.test.dotest()"
 deactivate (or source venv/bin/deactivate)
 ```
@@ -326,7 +316,8 @@ if __name__ == '__main__':
     correct_withwater = 0 # don't retain water column in radiometric correction (1 = retains water column for radiomatric corrections)
     ph = 7.0 # acidity on the pH scale
     temp = 10.0 # water temperature in degrees Celsius
-    #salinity = 0.0
+    salinity = 0.0
+    dconcfile = None
 
     # for shadow removal
     shadowmask = 1 #manual shadow removal
@@ -341,10 +332,10 @@ if __name__ == '__main__':
     scalemax = 60 # max color scale value (60 is a good place to start)
 
     ## read data in SON files into PyHum memory mapped format (.dat)
-    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk) #cog
+    PyHum.read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, model, calc_bearing, filt_bearing, chunk)
 
     ## correct scans and remove water column
-    PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity)
+    PyHum.correct(humfile, sonpath, maxW, doplot, dofilt, correct_withwater, ph, temp, salinity, dconcfile)
 
     ## remove acoustic shadows (caused by distal acoustic attenuation or sound hitting shallows or shoreline)
     PyHum.rmshadows(humfile, sonpath, win, shadowmask, doplot)
