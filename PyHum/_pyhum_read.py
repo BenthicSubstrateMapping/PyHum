@@ -332,7 +332,7 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, mo
           resolution = 'i', llcrnrlon=10, llcrnrlat=10, urcrnrlon=30, urcrnrlat=30)
        del m
        print("... epsg code compatible")
-    except:
+    except (ValueError):
        print("Error: the epsg code you have chosen is not compatible with Basemap")
        print("please choose a different epsg code (http://spatialreference.org/)")
        print("program will now close")
