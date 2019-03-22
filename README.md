@@ -185,7 +185,7 @@ pip install git+https://github.com/dbuscombe-usgs/PyHum.git
 3. from github repo clone::
 
 ```
-git clone git@github.com:dbuscombe-usgs/PyHum.git
+git clone --depth 1 git@github.com:dbuscombe-usgs/PyHum.git
 cd PyHum
 python setup.py install
 ```
