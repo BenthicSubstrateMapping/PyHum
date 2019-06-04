@@ -702,11 +702,11 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
 
           a = np.ones(np.shape(fp))
           for k in range(len(d)): 
-             a[:,k] = d[k]/yvec
+             a[:,[k]] = d[k]/yvec
 
           r = np.ones(np.shape(fp))
           for k in range(len(d)): 
-             r[:,k] = np.sqrt(yvec**2 - d[k]**2)
+             r[:,[k]] = np.sqrt(yvec**2 - d[k]**2)
 
           # shift proportionally depending on where the bed is
           for k in range(np.shape(r)[1]):
