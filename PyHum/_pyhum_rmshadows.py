@@ -66,7 +66,7 @@ except:
 
 #numerical
 import numpy as np
-import PyHum.utils as humutils
+import utils as humutils #PyHum.utils as humutils
 #from pyhum_utils import sliding_window, im_resize, cut_kmeans
 from joblib import Parallel, delayed #, cpu_count
 from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes, grey_erosion

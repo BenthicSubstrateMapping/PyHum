@@ -74,7 +74,7 @@ from math import pi as pi
 from math import log10 as log10
 from sklearn.cluster import MiniBatchKMeans
 
-import PyHum.utils as humutils #runningMeanFast, nan_helper
+import utils as humutils #PyHum.utils as humutils #runningMeanFast, nan_helper
 
 # plotting
 import matplotlib.pyplot as plt

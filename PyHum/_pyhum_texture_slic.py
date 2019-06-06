@@ -63,13 +63,13 @@ except:
    pass
 import warnings
 warnings.simplefilter('ignore', RuntimeWarning)
-import PyHum.io as io
+import io #PyHum.io as io
 
 # numerical
 import numpy as np
-import PyHum.utils as humutils
+import utils as humutils #PyHum.utils as humutils
 
-import PyHum.cwt as cwt
+import cwt #PyHum.cwt as cwt
 
 from skimage.segmentation import slic
 

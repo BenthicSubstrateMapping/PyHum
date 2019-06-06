@@ -65,14 +65,14 @@ try:
 except:
    pass
 import csv
-import PyHum.io as io
+import io #PyHum.io as io
 
 #numerical
 #import pyread
-import PyHum.pyread_single as pyread_single
+import pyread_single #PyHum.pyread_single as pyread_single
 from joblib import Parallel, delayed, cpu_count
 
-import PyHum.utils as humutils
+import utils as humutils #PyHum.utils as humutils
 import numpy as np
 import pyproj
 from numpy.lib.stride_tricks import as_strided as ast

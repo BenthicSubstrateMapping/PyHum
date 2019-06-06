@@ -62,12 +62,12 @@ try:
 except:
    pass
 from joblib import Parallel, delayed, cpu_count
-import PyHum.io as io
+import io #PyHum.io as io
 
 #numerical
 import numpy as np
-import PyHum.utils as humutils
-import PyHum.ppdrc as ppdrc
+import utils as humutils #PyHum.utils as humutils
+import ppdrc #PyHum.ppdrc as ppdrc
 
 from scipy.special import jv
 from scipy.ndimage.filters import median_filter
@@ -701,12 +701,13 @@ def remove_water(fp,bed,shape, dep_m, pix_m, calcR,  maxW):
           d = dep_m
 
           a = np.ones(np.shape(fp))
+		  
           for k in range(len(d)): 
-             a[:,[k]] = d[k]/yvec
+             a[:,[k]] = np.expand_dims(d[k]/yvec, axis=1)
 
           r = np.ones(np.shape(fp))
           for k in range(len(d)): 
-             r[:,[k]] = np.sqrt(yvec**2 - d[k]**2)
+             r[:,[k]] = np.expand_dims(np.sqrt(yvec**2 - d[k]**2), axis=1)
 
           # shift proportionally depending on where the bed is
           for k in range(np.shape(r)[1]):

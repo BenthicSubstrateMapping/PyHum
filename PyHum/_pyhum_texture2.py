@@ -67,11 +67,12 @@ warnings.simplefilter('ignore', RuntimeWarning)
 import PyHum.io as io
 
 # numerical
+import utils as humutils #PyHum.utils as humutils
+import replace_nans #PyHum.replace_nans as replace_nans
+
 import numpy as np
-import PyHum.utils as humutils
-from scipy.signal import convolve2d, medfilt2d
-import PyHum.replace_nans as replace_nans
 from skimage.restoration import denoise_tv_chambolle
+from scipy.signal import convolve2d, medfilt2d
 
 # plotting
 import matplotlib.pyplot as plt
@@ -312,7 +313,6 @@ def texture2(humfile, sonpath, win, doplot,  numclasses):
 
       ########################################################
       if doplot==1:
-
          if len(shape_star)>2:
             for p in range(len(star_fp)):
                plot_class(dist_m, shape_port, port_fp[p], star_fp[p], class_fp[p], ft, humfile, sonpath, base, p)
@@ -321,7 +321,7 @@ def texture2(humfile, sonpath, win, doplot,  numclasses):
 
          if len(shape_star)>2:
             for p in range(len(star_fp)):
-               plot_contours(dist_m, shape_port, class_fp[p], ft, humfile, sonpath, base, numclasses, p)
+               plot_contours(dist_m, shape_port, port_fp[p], star_fp[p], class_fp[p], ft, humfile, sonpath, base, numclasses, p)
          else:
             plot_contours(dist_m, shape_port, port_fp, star_fp,class_fp, ft, humfile, sonpath, base, numclasses, 0)
         

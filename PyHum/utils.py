@@ -33,7 +33,7 @@ from scipy.interpolate import RectBivariateSpline
 import string, random
 from scipy.ndimage.filters import median_filter
 
-import dask.array as da
+#import dask.array as da
 
 # suppress divide and invalid warnings
 np.seterr(all='ignore')
@@ -82,10 +82,10 @@ def auto_bedpick(ft, dep_m, chunkmode, port_fp, c):
 
     imu = np.squeeze(np.asarray(imu, 'float64'))-buff
 
-    try:
-       imu = da.from_array(imu, chunks=1000)   #dask implementation
-    except:
-       pass
+    #try:
+    #   imu = da.from_array(imu, chunks=1000)   #dask implementation
+    #except:
+    #   pass
 
     #imu = median_filter(imu,(20,20))
     try:
@@ -185,10 +185,10 @@ def get_bearing(calc_bearing, filt_bearing, lat, lon, heading): #cog
        # can have two modes
        data = np.column_stack([bearing, bearing])
 
-       try:
-          data = da.from_array(data, chunks=1000)   #dask implementation
-       except:
-          pass
+       #try:
+       #   data = da.from_array(data, chunks=1000)   #dask implementation
+       #except:
+       #   pass
 
        k_means = MiniBatchKMeans(2)
        # fit the model
@@ -598,10 +598,10 @@ def cut_kmeans(w,numclusters):
    '''
    wc = w.reshape((-1, 1)) # We need an (n_sample, n_feature) array
 
-   try:
-      wc = da.from_array(wc, chunks=1000)   #dask implementation
-   except:
-      pass
+   #try:
+   #   wc = da.from_array(wc, chunks=1000)   #dask implementation
+   #except:
+   #   pass
 
    k_means = MiniBatchKMeans(numclusters)
    # fit the model
@@ -623,10 +623,10 @@ def im_resize(im,Nx,Ny):
    xx = np.linspace(0,nx,Nx)
    yy = np.linspace(0,ny,Ny)
 
-   try:
-      im = da.from_array(im, chunks=1000)   #dask implementation
-   except:
-      pass
+   #try:
+   #   im = da.from_array(im, chunks=1000)   #dask implementation
+   #except:
+   #   pass
 
    newKernel = RectBivariateSpline(np.r_[:ny],np.r_[:nx],im)
    return newKernel(yy,xx)

@@ -62,12 +62,12 @@ try:
 except:
    pass
 from joblib import Parallel, delayed, cpu_count
-import PyHum.io as io
+import io #PyHum.io as io
 
 # numerical
 import numpy as np
 import pyproj
-import PyHum.utils as humutils
+import utils as humutils #PyHum.utils as humutils
 import pyresample
 from scipy.ndimage import binary_dilation, binary_erosion #, binary_fill_holes
 
@@ -79,9 +79,9 @@ except:
    from scipy.spatial import cKDTree as KDTree
    pykdtree=0   
    
-import PyHum.replace_nans as replace_nans
+import replace_nans #PyHum.replace_nans as replace_nans
 
-import PyHum.getxy as getxy
+import getxy #PyHum.getxy as getxy
 
 # plotting
 import matplotlib.pyplot as plt

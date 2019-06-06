@@ -63,11 +63,11 @@ except:
 from joblib import Parallel, delayed, cpu_count
 import pyproj
 
-import PyHum.replace_nans as replace_nans
-import PyHum.write as write
-import PyHum.getxy as getxy
+import replace_nans #PyHum.replace_nans as replace_nans
+import write #PyHum.write as write
+import getxy #PyHum.getxy as getxy
 
-import PyHum.io as io
+import io #PyHum.io as io
 
 try:
    import cPickle as pickle
@@ -78,7 +78,7 @@ from pandas import read_csv
 
 # numerical
 import numpy as np
-import PyHum.utils as humutils
+import utils as humutils #PyHum.utils as humutils
 from scipy.spatial import cKDTree as KDTree
 
 # plotting

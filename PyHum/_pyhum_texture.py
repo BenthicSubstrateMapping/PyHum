@@ -63,15 +63,15 @@ except:
    pass
 import warnings
 warnings.simplefilter('ignore', RuntimeWarning)
-import PyHum.io as io
+import io #PyHum.io as io
 
 # numerical
 import numpy as np
-import PyHum.utils as humutils
+import utils as humutils #PyHum.utils as humutils
 from scipy.ndimage.filters import median_filter
 
-import PyHum.cwt as cwt
-import PyHum.replace_nans as replace_nans
+import cwt #PyHum.cwt as cwt
+import replace_nans #PyHum.replace_nans as replace_nans
 
 # plotting
 import matplotlib.pyplot as plt

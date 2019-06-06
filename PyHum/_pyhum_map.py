@@ -67,13 +67,12 @@ import pyproj
 #import replace_nans
 #import PyHum.write as write
 
-import PyHum.io as io
-
-import PyHum.getxy as getxy
+import io #PyHum.io as io
+import getxy #PyHum.getxy as getxy
 
 # numerical
 import numpy as np
-import PyHum.utils as humutils
+import utils as humutils #PyHum.utils as humutils
 import pyresample
 #from scipy.ndimage import binary_dilation, binary_erosion, binary_fill_holes
 from skimage.restoration import denoise_tv_chambolle
