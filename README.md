@@ -142,6 +142,7 @@ pip install joblib toolz cython
 conda install -c conda-forge pyresample -y ### or if that fails: pip install pyresample==1.1.4
 conda install numpy==1.12.0
 pip install git+https://github.com/dbuscombe-usgs/PyHum.git --no-deps
+pip install matplotlib --upgrade
 ```
 
 Then run the test, and finally deactivate the venv ::
