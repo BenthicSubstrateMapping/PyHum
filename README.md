@@ -123,8 +123,8 @@ conda install -c conda-forge basemap-data-hires -y
 conda install scipy numpy scikit-image
 pip install simplekml sklearn pandas dask
 pip install joblib toolz cython
-pip install pyresample
-pip install PyHum --no-deps #(or pip install git+https://github.com/dbuscombe-usgs/PyHum.git --no-deps)
+conda install -c conda-forge pyresample -y ### or if that fails: pip install pyresample
+pip install git+https://github.com/dbuscombe-usgs/PyHum.git --no-deps
 python -c"import PyHum;PyHum.dotest()" 
 source deactivate pyhum 
 ```
@@ -139,8 +139,8 @@ conda install -c conda-forge basemap-data-hires -y
 conda install scipy numpy scikit-image
 pip install simplekml sklearn pandas dask
 pip install joblib toolz cython
-pip install pyresample==1.1.4
-pip install PyHum --no-deps #(or pip install git+https://github.com/dbuscombe-usgs/PyHum.git --no-deps)
+conda install -c conda-forge pyresample -y ### or if that fails: pip install pyresample==1.1.4
+pip install git+https://github.com/dbuscombe-usgs/PyHum.git --no-deps
 ```
 
 Then run the test, and finally deactivate the venv ::
