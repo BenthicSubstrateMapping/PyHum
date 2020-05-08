@@ -1,3 +1,15 @@
+**************************************************************************
+May 2020
+
+This is now legacy code, written in python 2.7 and not actively worked on or supported. If you improve the code, please submit a pull request and I will incorporate
+
+I will no longer respond to issues or emails concerning this project, but if you find it useful, I am happy about that
+
+**************************************************************************
+
+
+
+
 ## PyHum
 
 ![pyhum_logo_colour_sm](https://user-images.githubusercontent.com/3596509/35187745-ed45a05a-fde5-11e7-8f7e-5142b59dc772.png)
