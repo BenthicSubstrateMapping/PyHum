@@ -726,11 +726,11 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, mo
              del fig
 
              if x1 != []: # if x1 is not empty
-                tree = KDTree(zip(np.arange(1,len(bed)), bed))
+                tree = KDTree(np.asarray(zip(np.arange(1,len(bed)), bed)))
                 try:
-                   dist, inds = tree.query(zip(x1, y1), k = 100, eps=5, n_jobs=-1)
+                   dist, inds = tree.query(np.asarray(zip(x1, y1)), k = 100, eps=5, n_jobs=-1)
                 except:
-                   dist, inds = tree.query(zip(x1, y1), k = 100, eps=5)
+                   dist, inds = tree.query(np.asarray(zip(x1, y1)), k = 100, eps=5)
 
                 b = np.interp(inds,x1,y1)
                 bed2 = bed.copy()
