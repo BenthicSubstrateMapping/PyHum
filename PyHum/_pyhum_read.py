@@ -682,6 +682,7 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, mo
        if 2>1:
           if bedpick == 1: # auto
 
+             print('Auto bed picking...')
              x, bed = humutils.auto_bedpick(ft, dep_m, chunkmode, port_fp, c)
 
              if len(dist_m)<len(bed):
@@ -700,6 +701,7 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, mo
 
           elif bedpick>1: # user prompt
 
+             print('Auto bed picking...')
              x, bed = humutils.auto_bedpick(ft, dep_m, chunkmode, port_fp, c)
 
              if len(dist_m)<len(bed):
@@ -712,6 +714,7 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, mo
              # manually intervene
              fig = plt.figure()
              ax = plt.gca()
+             print('Setting up bed picking figure...')
              if chunkmode !=4:
                 im = ax.imshow(np.hstack(port_fp), cmap = 'gray', origin = 'upper')
              else:
@@ -719,7 +722,10 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, mo
              plt.plot(bed,'r')
              plt.axis('normal'); plt.axis('tight')
 
-             pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 60 seconds
+             raw_input("Bed picking - are you ready? Press Enter to continue...")
+             print('Use the left mouse button to pick, right to delete, and center to end picking.')
+
+             pts1 = plt.ginput(n=300, timeout=-1) # it will wait for 300 clicks or the window to close (center mouse button)
              x1=map(lambda x: x[0],pts1) # map applies the function passed as
              y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
              plt.close()
@@ -750,12 +756,16 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, mo
 
              if chunkmode!=4:
                 for k in range(len(port_fp)):
-                   raw_input("Bed picking "+str(k+1)+" of "+str(len(port_fp))+", are you ready? 30 seconds. Press Enter to continue...")
+
                    bed={}
                    fig = plt.figure()
                    ax = plt.gca()
                    im = ax.imshow(port_fp[k], cmap = 'gray', origin = 'upper')
-                   pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 60 seconds
+
+                   raw_input("Bed picking "+str(k+1)+" of "+str(len(port_fp))+", are you ready? Press Enter to continue...")
+                   print('Use the left mouse button to pick, right to delete, and center to end picking.')
+
+                   pts1 = plt.ginput(n=300, timeout=-1) # it will wait for 300 clicks or the window to close (center mouse button)
                    x1=map(lambda x: x[0],pts1) # map applies the function passed as
                    y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
                    bed = np.interp(np.r_[:ind_port[-1]],x1,y1)
@@ -763,14 +773,20 @@ def read(humfile, sonpath, cs2cs_args, c, draft, doplot, t, bedpick, flip_lr, mo
                    del fig
                    beds.append(bed)
                    extent = np.shape(port_fp[k])[0]
+
                 bed = np.asarray(np.hstack(beds),'float')
+
              else:
-                raw_input("Bed picking - are you ready? 30 seconds. Press Enter to continue...")
+
                 bed={}
                 fig = plt.figure()
                 ax = plt.gca()
                 im = ax.imshow(port_fp, cmap = 'gray', origin = 'upper')
-                pts1 = plt.ginput(n=300, timeout=30) # it will wait for 200 clicks or 60 seconds
+
+                raw_input("Bed picking - are you ready? Press Enter to continue...")
+                print('Use the left mouse button to pick, right to delete, and center to end picking.')
+
+                pts1 = plt.ginput(n=300, timeout=-1) # it will wait for 300 clicks or the window to close (center mouse button)
                 x1=map(lambda x: x[0],pts1) # map applies the function passed as
                 y1=map(lambda x: x[1],pts1) # first parameter to each element of pts
                 bed = np.interp(np.r_[:ind_port[-1]],x1,y1)
